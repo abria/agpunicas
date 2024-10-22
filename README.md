@@ -53,3 +53,9 @@ Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 - parallax and foreground scenes layering
 - example player physics with walking, jumping, dashing and tangent force compensation on slopes
 - example compound object (gear)
+- example dynamic object (box)
+
+- #### Limitations
+- no bullets (can be implemented using Box2D)
+- player not steady on moving platforms (can be fixed with force compensation like for slopes)
+- no joint examples (see Box2D docs)

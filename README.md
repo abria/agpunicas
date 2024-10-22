@@ -32,5 +32,24 @@ Game prototype for simple 2D platformers with SDL and custom physics engine.
 #### Limitations
 - no "onCollisionEnd" events
 - no compound colliders (only one collider per object)
+- no slopes
 - teleports break CCD and must be handled carefully
 - narrow collision detection phase is based on linear search with view box intersection
+
+
+## Proto-ComplexPlatformer
+Game prototype for complex 2D platformers with SDL and Box2D physics engine.
+#### Features
+- Box2D powered physics and collision detection/resolution
+- compound colliders
+- fixed timestep
+- static, dynamic, kinematic object categories
+- all collidable objects are informed when collision starts and ends (with normals and metadatas)
+- sprite system with on-the-fly GPU blitting from spritesheets
+- triggers (sensors) and schedulers
+- basic UI (HUD, menus)
+- basic Audio (sounds and music with stop/resume)
+- Scene/View/Window framework with Scene (world) -> View -> Screen transforms
+- parallax and foreground scenes layering
+- example player physics with walking, jumping, dashing and tangent force compensation on slopes
+- example compound object (gear)

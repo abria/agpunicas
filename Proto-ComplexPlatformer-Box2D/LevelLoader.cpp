@@ -1,0 +1,86 @@
+// ----------------------------------------------------------------
+// From "Algorithms and Game Programming" in C++ by Alessandro Bria
+// Copyright (C) 2024 Alessandro Bria (a.bria@unicas.it). 
+// All rights reserved.
+// 
+// Released under the BSD License
+// See LICENSE in root directory for full details.
+// ----------------------------------------------------------------
+
+#include "LevelLoader.h"
+#include "SpriteFactory.h"
+#include "RenderableObject.h"
+#include "GameScene.h"
+#include "ForegroundScene.h"
+#include "StaticObject.h"
+#include "Terrain.h"
+#include "Player.h"
+#include "mathUtils.h"
+#include "Gear.h"
+#include "Box.h"
+#include <iostream>
+
+using namespace agp;
+
+LevelLoader* LevelLoader::instance()
+{
+	static LevelLoader uniqueInstance;
+	return &uniqueInstance;
+}
+
+LevelLoader::LevelLoader()
+{
+	// e.g. load level maps from disk
+}
+
+std::vector<Scene*> LevelLoader::load(const std::string& name)
+{
+	SpriteFactory* spriteLoader = SpriteFactory::instance();
+
+	std::vector<Scene*> gameScenes;
+
+	if (name == "level0")
+	{
+		GameScene* world = new GameScene(RectF(0, 0, 96, 13, true), 1 / 60.0f);
+
+		// parallax backgrounds and foregrounds
+		ForegroundScene* skyBG = new ForegroundScene(world, spriteLoader->get("bg_sky"));
+		ForegroundScene* housesBG = new ForegroundScene(world, spriteLoader->get("bg_houses"), { 0.2f, 1 }, true);
+		ForegroundScene* grassBG = new ForegroundScene(world, spriteLoader->get("bg_grass"), { 0.4f, 1 }, true);
+		ForegroundScene* fogFG = new ForegroundScene(world, spriteLoader->get("fg_fog"), {1.2f, 1}, true);
+		ForegroundScene* rainFG = new ForegroundScene(world, spriteLoader->get("rain"));
+
+		// game foreground
+		new RenderableObject(world, world->rect(), spriteLoader->get("fg_ground"), 0);
+
+		// terrain
+		Terrain::TerrainSequence(world, { 0, 3.3f },
+			{
+				{9, 0}, {4, 2}, {2, 0}, {4, -2}, {13, 0}, {4, -2},
+				{2, 0}, {10, 5}, {14.5f, 0}, {4, -2}, {3, 0}, {2, 1},
+				{1.5f, 0}, {1.5f, 1}, {2, 0}, {4, -2}, {15.5f, 0}, {20, 0}
+			});
+
+		// dynamic objects
+		//new Box(world, RotatedRectF({ 5, 10 }, { 1,1 }, 0, true));
+
+		// kinematic objects
+		new Gear(world, RotatedRectF({ 90, 2 }, { 15, 15 }, 0, true), spriteLoader->get("gear"), -1);
+		new Gear(world, RotatedRectF({ 103, 2 }, { 15, 15 }, 0, true), spriteLoader->get("gear"), 1);
+
+		Player* player = new Player(world, { 3, 10 });
+		world->setPlayer(player);
+		
+		// scene layering
+		gameScenes.push_back(skyBG);
+		gameScenes.push_back(housesBG);
+		gameScenes.push_back(grassBG);
+		gameScenes.push_back(world);
+		gameScenes.push_back(rainFG);
+		gameScenes.push_back(fogFG);
+	}
+	else
+		std::cerr << "Unrecognized game scene name \"" << name << "\"\n";
+
+	return gameScenes;
+}

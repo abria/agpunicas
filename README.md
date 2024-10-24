@@ -17,8 +17,11 @@ Header-only library for game programming utils, including:
 
 ## Proto-SimplePlatformer
 Game prototype for simple 2D platformers with SDL and custom physics engine.
+For demonstration purposes, a small portion of SuperMarioBros (NES) is implemented.
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_SimplePlatformer.png">
+<img src="https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros.png">
+
+#### Class Diagram
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_SimplePlatformer.png">
 
 #### Features
@@ -48,6 +51,8 @@ Game prototype for simple 2D platformers with SDL and custom physics engine.
 Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_ComplexPlatformer.png">
+
+#### Class Diagram
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_ComplexPlatformer.png">
 
 #### Features

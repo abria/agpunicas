@@ -2,6 +2,9 @@
 
 A framework for programming 2D videogames with C++/SDL.
 
+<img src="https://github.com/abria/agpunicas/blob/main/demo_ComplexPlatformer.png">
+
+
 ## utils
 Header-only library for game programming utils, including:
 - geometry (basic shape primitives and 2D vectors)

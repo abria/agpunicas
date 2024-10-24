@@ -3,9 +3,12 @@
 #include "LevelLoader.h"
 #include "Audio.h"
 #include "Game.h"
+#include "version.h"
 
 int main(int argc, char *argv[])
 {
+    printf("Proto-SimplePlatformer v%s", agp::VERSION().c_str());
+
     agp::Game::instance();
     agp::SpriteFactory::instance();
     agp::LevelLoader::instance();

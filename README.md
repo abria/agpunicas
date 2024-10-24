@@ -45,6 +45,9 @@ Game prototype for simple 2D platformers with SDL and custom physics engine.
 
 ## Proto-ComplexPlatformer
 Game prototype for complex 2D platformers with SDL and Box2D physics engine.
+
+<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_ComplexPlatformer.png">
+
 #### Features
 - Box2D powered physics and collision detection/resolution
 - compound colliders
@@ -58,10 +61,11 @@ Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 - Scene/View/Window framework with Scene (world) -> View -> Screen transforms
 - parallax and foreground scenes layering
 - example player physics with walking, jumping, dashing and tangent force compensation on slopes
-- example compound object (gear)
+- example compound kinematic object (gear)
 - example dynamic object (box)
 
 #### Limitations
 - no bullets (can be implemented using Box2D)
 - player not steady on moving platforms (can be fixed with force compensation like for slopes)
 - no joint examples (see Box2D docs)
+- no enemies

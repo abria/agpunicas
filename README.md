@@ -2,7 +2,7 @@
 
 A framework for programming 2D videogames with C++/SDL.
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_ComplexPlatformer.png">
+<img src="https://github.com/abria/agpunicas/blob/main/cover.png">
 
 
 ## utils
@@ -18,6 +18,7 @@ Header-only library for game programming utils, including:
 ## Proto-SimplePlatformer
 Game prototype for simple 2D platformers with SDL and custom physics engine.
 
+<img src="https://github.com/abria/agpunicas/blob/main/demo_SimplePlatformer.png">
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_SimplePlatformer.png">
 
 #### Features
@@ -46,6 +47,7 @@ Game prototype for simple 2D platformers with SDL and custom physics engine.
 ## Proto-ComplexPlatformer
 Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 
+<img src="https://github.com/abria/agpunicas/blob/main/demo_ComplexPlatformer.png">
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_ComplexPlatformer.png">
 
 #### Features

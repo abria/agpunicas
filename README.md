@@ -17,6 +17,9 @@ Header-only library for game programming utils, including:
 
 ## Proto-SimplePlatformer
 Game prototype for simple 2D platformers with SDL and custom physics engine.
+
+<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_SimplePlatformer.png">
+
 #### Features
 - Swept AABB Continous Collision Detection (CCD)
 - AABB colliders

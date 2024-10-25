@@ -58,7 +58,7 @@ Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 #### Features
 - Box2D powered physics and collision detection/resolution
 - compound colliders
-- fixed timestep
+- semi-fixed timestep
 - static, dynamic, kinematic object categories
 - all collidable objects are informed when collision starts and ends (with normals and metadatas)
 - sprite system with on-the-fly GPU blitting from spritesheets

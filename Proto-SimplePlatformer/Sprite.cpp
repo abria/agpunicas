@@ -25,9 +25,6 @@ void Sprite::render(SDL_Renderer* renderer, const RectF& drawRect, Transform cam
 	SDL_RendererFlip flip)
 {
 	SDL_Rect srcRect = _rect.toSDL();
-	
-	auto vertices = drawRect.vertices();
-	SDL_FRect drawRect_sdl = RectF(camera(vertices[0]), camera(vertices[2])).toSDLf();
-
+	SDL_FRect drawRect_sdl = RectF(camera(drawRect.tl()), camera(drawRect.br())).toSDLf();
 	SDL_RenderCopyExF(renderer, _spritesheet, &srcRect, &drawRect_sdl, -angle, 0, flip);
 }

@@ -66,7 +66,7 @@ Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 - basic UI (HUD, menus)
 - basic Audio (sounds and music with stop/resume)
 - Scene/View/Window framework with Scene (world) -> View -> Screen transforms
-- parallax and foreground scenes layering
+- parallax and overlay scenes layering
 - example player physics with walking, jumping, dashing and tangent force compensation on slopes
 - example compound kinematic object (gear)
 - example dynamic object (box)

@@ -7,7 +7,7 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
-#include "ForegroundScene.h"
+#include "OverlayScene.h"
 #include "RenderableObject.h"
 #include "Sprite.h"
 #include "View.h"
@@ -15,7 +15,7 @@
 
 using namespace agp;
 
-ForegroundScene::ForegroundScene(GameScene* gameScene, Sprite* bgSprite, const Vec2Df& parallaxVel, bool seamless)
+OverlayScene::OverlayScene(GameScene* gameScene, Sprite* bgSprite, const Vec2Df& parallaxVel, bool seamless)
 	: Scene(gameScene->rect())
 {
 	_gameScene = gameScene;
@@ -35,7 +35,7 @@ ForegroundScene::ForegroundScene(GameScene* gameScene, Sprite* bgSprite, const V
 }
 
 // implements parallax logic
-void ForegroundScene::update(float timeToSimulate)
+void OverlayScene::update(float timeToSimulate)
 {
 	Scene::update(timeToSimulate);
 

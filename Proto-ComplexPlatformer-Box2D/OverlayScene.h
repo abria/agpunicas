@@ -12,15 +12,15 @@
 
 namespace agp
 {
-	class ForegroundScene;
+	class OverlayScene;
 	class RenderableObject;
 	class Sprite;
 }
 
-// ForegroundScene class
-// - draws foreground sprite with optional parallax effect
+// OverlayScene class
+// - draws background or foreground scene with optional parallax effect
 // - when constructed, it uses GameScene's view rect size to size its own view rect
-class agp::ForegroundScene : public Scene
+class agp::OverlayScene : public Scene
 {
 	private:
 
@@ -31,12 +31,12 @@ class agp::ForegroundScene : public Scene
 
 	public:
 
-		ForegroundScene(
+		OverlayScene(
 			GameScene* gameScene,
 			Sprite* bgSprite,
 			const Vec2Df& parallaxVel = Vec2Df(),
 			bool seamless = false);		// if true, bgSprite must be a FilledSprite (repeats itself as needed)
-		virtual ~ForegroundScene() {};
+		virtual ~OverlayScene() {};
 
 		// implements parallax logic
 		virtual void update(float timeToSimulate) override;

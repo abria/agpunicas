@@ -16,6 +16,7 @@
 #include "RigidObject.h"
 #include "Player.h"
 #include "Box.h"
+#include "OverlayScene.h"
 
 using namespace agp;
 
@@ -60,6 +61,14 @@ void GameScene::update(float timeToSimulate)
 	if (!_active)
 		return;
 
+
+	// update overlay scenes
+	for (auto& bgScene : _backgroundScenes)
+		bgScene->update(timeToSimulate);
+	for (auto& fgScene : _foregroundScenes)
+		fgScene->update(timeToSimulate);
+
+
 	// controls
 	if (_right_pressed && !_left_pressed)
 	{
@@ -79,55 +88,57 @@ void GameScene::update(float timeToSimulate)
 
 	_player->setRunning(_run_pressed);
 
-	// physics
-	/*_timeToSimulate += timeToSimulate;
+
+	// semi-fixed time step
+	_timeToSimulate += timeToSimulate;
 	while (_timeToSimulate >= _dt)
 	{
+		// Box2D physics
 		b2World_Step(_worldId, _dt, _subStepCount);
 		_timeToSimulate -= _dt;
-	}*/
-	b2World_Step(_worldId, timeToSimulate, _subStepCount);
 
-	// collisions (logic)
-	b2ContactEvents contactEvents = b2World_GetContactEvents(_worldId);
-	for (int i = 0; i < contactEvents.beginCount; ++i)
-	{
-		b2ContactBeginTouchEvent* beginEvent = contactEvents.beginEvents + i;
-	
-		RigidObject* objA = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(beginEvent->shapeIdA)));
-		RigidObject* objB = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(beginEvent->shapeIdB)));
+		// collisions (logic)
+		b2ContactEvents contactEvents = b2World_GetContactEvents(_worldId);
+		for (int i = 0; i < contactEvents.beginCount; ++i)
+		{
+			b2ContactBeginTouchEvent* beginEvent = contactEvents.beginEvents + i;
 
-		Vec2Df normal = { beginEvent->manifold.normal.x, beginEvent->manifold.normal.y };
+			RigidObject* objA = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(beginEvent->shapeIdA)));
+			RigidObject* objB = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(beginEvent->shapeIdB)));
 
-		objA->collision(objB, true, normal, beginEvent->shapeIdA, beginEvent->shapeIdB);
-		objB->collision(objA, true, -normal, beginEvent->shapeIdB, beginEvent->shapeIdA);
+			Vec2Df normal = { beginEvent->manifold.normal.x, beginEvent->manifold.normal.y };
+
+			objA->collision(objB, true, normal, beginEvent->shapeIdA, beginEvent->shapeIdB);
+			objB->collision(objA, true, -normal, beginEvent->shapeIdB, beginEvent->shapeIdA);
+		}
+		for (int i = 0; i < contactEvents.endCount; ++i)
+		{
+			b2ContactEndTouchEvent* endEvent = contactEvents.endEvents + i;
+			RigidObject* objA = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(endEvent->shapeIdA)));
+			RigidObject* objB = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(endEvent->shapeIdB)));
+
+			// once a contact has ended, contact normal is undefined
+			objA->collision(objB, false, Vec2Df(), endEvent->shapeIdA, endEvent->shapeIdB);
+			objB->collision(objA, false, Vec2Df(), endEvent->shapeIdB, endEvent->shapeIdA);
+		}
+
+		// triggers (=sensors in Box2D)
+		b2SensorEvents sensorEvents = b2World_GetSensorEvents(_worldId);
+		for (int i = 0; i < sensorEvents.beginCount; ++i)
+		{
+			b2SensorBeginTouchEvent* beginTouch = sensorEvents.beginEvents + i;
+			RigidObject* objA = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(beginTouch->sensorShapeId)));
+			RigidObject* objB = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(beginTouch->visitorShapeId)));
+			objA->collision(objB, true, Vec2Df(), beginTouch->sensorShapeId, beginTouch->visitorShapeId);
+		}
+
+		// logic and animations
+		auto allObjects = objects();
+		for (auto& obj : allObjects)
+			if (!obj->freezed())
+				obj->update(timeToSimulate);
 	}
-	for (int i = 0; i < contactEvents.endCount; ++i)
-	{
-		b2ContactEndTouchEvent* endEvent = contactEvents.endEvents + i;
-		RigidObject* objA = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(endEvent->shapeIdA)));
-		RigidObject* objB = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(endEvent->shapeIdB)));
 
-		// once a contact has ended, contact normal is undefined
-		objA->collision(objB, false, Vec2Df(), endEvent->shapeIdA, endEvent->shapeIdB);
-		objB->collision(objA, false, Vec2Df(), endEvent->shapeIdB, endEvent->shapeIdA);
-	}
-
-	// triggers (=sensors in Box2D)
-	b2SensorEvents sensorEvents = b2World_GetSensorEvents(_worldId);
-	for (int i = 0; i < sensorEvents.beginCount; ++i)
-	{
-		b2SensorBeginTouchEvent* beginTouch = sensorEvents.beginEvents + i;
-		RigidObject* objA = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(beginTouch->sensorShapeId)));
-		RigidObject* objB = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(beginTouch->visitorShapeId)));
-		objA->collision(objB, true, Vec2Df(), beginTouch->sensorShapeId, beginTouch->visitorShapeId);
-	}
-
-	// logic and animations
-	auto allObjects = objects();
-	for (auto& obj : allObjects)
-		if (!obj->freezed())
-			obj->update(timeToSimulate);
 
 	// camera
 	// center view on player with left margin (12 scene units) with going back
@@ -171,4 +182,18 @@ void GameScene::event(SDL_Event& evt)
 	_right_pressed = state[SDL_SCANCODE_RIGHT];
 	_left_pressed = state[SDL_SCANCODE_LEFT];
 	_run_pressed = state[SDL_SCANCODE_Z];
+}
+
+void GameScene::render()
+{
+	if (_active)
+	{
+		for (auto& bgScene : _backgroundScenes)
+			bgScene->render();
+
+		_view->render();
+
+		for (auto& fgScene : _foregroundScenes)
+			fgScene->render();
+	}
 }

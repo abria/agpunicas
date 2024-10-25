@@ -38,10 +38,7 @@ Game::Game()
 
 void Game::init()
 {
-	auto gameScenes = LevelLoader::instance()->load("level0");
-	for (auto& scene : gameScenes)
-		pushScene(scene);
-
+	pushScene(LevelLoader::instance()->load("level0"));
 	_hud = new HUD();
 	pushScene(_hud);
 	pushScene(Menu::mainMenu());

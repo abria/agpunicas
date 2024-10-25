@@ -11,7 +11,7 @@
 #include "SpriteFactory.h"
 #include "RenderableObject.h"
 #include "GameScene.h"
-#include "ForegroundScene.h"
+#include "OverlayScene.h"
 #include "StaticObject.h"
 #include "Terrain.h"
 #include "Player.h"
@@ -33,22 +33,15 @@ LevelLoader::LevelLoader()
 	// e.g. load level maps from disk
 }
 
-std::vector<Scene*> LevelLoader::load(const std::string& name)
+GameScene* LevelLoader::load(const std::string& name)
 {
 	SpriteFactory* spriteLoader = SpriteFactory::instance();
-
-	std::vector<Scene*> gameScenes;
+	
+	GameScene* world = nullptr;
 
 	if (name == "level0")
 	{
-		GameScene* world = new GameScene(RectF(0, 0, 96, 13, true), 1 / 60.0f);
-
-		// parallax backgrounds and foregrounds
-		ForegroundScene* skyBG = new ForegroundScene(world, spriteLoader->get("bg_sky"));
-		ForegroundScene* housesBG = new ForegroundScene(world, spriteLoader->get("bg_houses"), { 0.2f, 1 }, true);
-		ForegroundScene* grassBG = new ForegroundScene(world, spriteLoader->get("bg_grass"), { 0.4f, 1 }, true);
-		ForegroundScene* fogFG = new ForegroundScene(world, spriteLoader->get("fg_fog"), {1.2f, 1}, true);
-		ForegroundScene* rainFG = new ForegroundScene(world, spriteLoader->get("rain"));
+		world = new GameScene(RectF(0, 0, 96, 13, true), 1 / 100.0f);
 
 		// game foreground
 		new RenderableObject(world, world->rect(), spriteLoader->get("fg_ground"), 0);
@@ -68,19 +61,18 @@ std::vector<Scene*> LevelLoader::load(const std::string& name)
 		new Gear(world, RotatedRectF({ 90, 2 }, { 15, 15 }, 0, true), spriteLoader->get("gear"), -1);
 		new Gear(world, RotatedRectF({ 103, 2 }, { 15, 15 }, 0, true), spriteLoader->get("gear"), 1);
 
-		Player* player = new Player(world, { 3, 10 });
-		world->setPlayer(player);
+		// player
+		world->setPlayer(new Player(world, { 3, 10 }));
 		
-		// scene layering
-		gameScenes.push_back(skyBG);
-		gameScenes.push_back(housesBG);
-		gameScenes.push_back(grassBG);
-		gameScenes.push_back(world);
-		gameScenes.push_back(rainFG);
-		gameScenes.push_back(fogFG);
+		// decorative backgrounds and foregrounds
+		world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_sky")));
+		world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_houses"), { 0.2f, 1 }, true));
+		world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_grass"), { 0.4f, 1 }, true));
+		world->addForegroundScene(new OverlayScene(world, spriteLoader->get("rain")));
+		world->addForegroundScene(new OverlayScene(world, spriteLoader->get("fg_fog"), { 1.2f, 1 }, true));
 	}
 	else
 		std::cerr << "Unrecognized game scene name \"" << name << "\"\n";
 
-	return gameScenes;
+	return world;
 }

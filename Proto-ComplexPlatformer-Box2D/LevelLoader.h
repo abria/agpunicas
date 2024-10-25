@@ -14,7 +14,7 @@
 
 namespace agp
 {
-	class Scene;
+	class GameScene;
 	class LevelLoader;
 }
 
@@ -32,5 +32,5 @@ class agp::LevelLoader
 		// singleton
 		static LevelLoader* instance();
 
-		std::vector<Scene*> load(const std::string& name);
+		GameScene* load(const std::string& name);
 };

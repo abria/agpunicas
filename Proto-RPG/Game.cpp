@@ -166,7 +166,7 @@ void Game::freeze(bool on)
 
 void Game::gameover()
 {
-	UIScene* gameoverScreen = new UIScene(RectF(0, 0, 16, 15));
+	UIScene* gameoverScreen = new UIScene(RectF(0, 0, 16, 15), {16, 16});
 	gameoverScreen->setBackgroundColor(Color(0, 0, 0));
 	new RenderableObject(gameoverScreen, RectF(0, 0, 16, 15), SpriteFactory::instance()->get("gameover"));
 	pushScene(gameoverScreen);

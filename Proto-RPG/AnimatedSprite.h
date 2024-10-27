@@ -28,10 +28,15 @@ class agp::AnimatedSprite : public Sprite
 
 	public:
 
-		AnimatedSprite(SDL_Texture* spritesheet, const std::vector<RectI>& frames, float FPS);
+		AnimatedSprite(SDL_Texture* spritesheet, const std::vector<RectI>& frames, float FPS, Direction keepARdir = Direction::NONE);
 
+		float FPS() const { return _FPS; }
 		void setFPS(float fps) { _FPS = fps; }
+		float duration() { return _frames.size() / _FPS; }
 
 		// extends update method (+animations)
 		virtual void update(float dt) override;
+
+		// extends reset method (+ restart frameIterator )
+		virtual void reset() override;
 };

@@ -15,24 +15,20 @@ MovableObject::MovableObject(Scene* scene, const RectF& rect, Sprite* sprite, in
 	RenderableObject(scene, rect, sprite, layer)
 {
 	// default movement (stand)
-	_x_dir = Direction::NONE;
-	_vel = { 0, 0 };
+	_xDir = Direction::NONE;
+	_yDir = Direction::NONE;
+	_vel = _velPrev = { 0, 0 };
 
 	defaultPhysics();
 }
 
 void MovableObject::defaultPhysics()
 {
-	_y_gravity = 0;
-	_y_vel_jmp = 15;
-	_y_vel_max = 15;
-	_y_vel_min = 0.01f;
+	_velMin = { 0.01f, 0.01f };
+	_velMax = { 4, 4 };
 
-	_x_vel_max = 6;	// 10 in running mode
-	_x_vel_min = 0.3f;
-	_x_acc = 8;		// 13 in running mode
-	_x_dec_rel = 11;
-	_x_dec_skd = 23;
+	_moveForce = { 100, 100 };
+	_frictionForce = { 100, 100 };
 }
 
 void MovableObject::velClip(float vx, float vy)
@@ -43,50 +39,24 @@ void MovableObject::velClip(float vx, float vy)
 	_vel.y = std::min(_vel.y, vy);
 }
 
-void MovableObject::velAdd(Vec2Df amount)
+void MovableObject::velAdd(const Vec2Df& amount)
 {
 	_vel += amount;
 
 	// max velocity clipping
-	velClip(_x_vel_max, _y_vel_max);
+	velClip(_velMax.x, _velMax.y);
 
 	// min velocity clipping
-	if (_x_dir == Direction::NONE && std::abs(_vel.x) < _x_vel_min)
-		_vel.x = 0; // checking _x_dir to allow skidding
-	if (std::abs(_vel.y) < _y_vel_min)
+	if (_xDir == Direction::NONE && std::abs(_vel.x) < _velMin.x)
+		_vel.x = 0;
+	if (_yDir == Direction::NONE && std::abs(_vel.y) < _velMin.y)
 		_vel.y = 0;
 }
 
-void MovableObject::move(Direction dir)
+void MovableObject::move(Direction xDir, Direction yDir)
 {
-	_x_dir = dir;
-}
-
-void MovableObject::jump()
-{
-	if (!midair())
-		velAdd(Vec2Df(0, -_y_vel_jmp));
-}
-
-bool MovableObject::skidding() const
-{
-	return (_x_dir == Direction::RIGHT && _vel.x < 0) ||
-		   (_x_dir == Direction::LEFT  && _vel.x > 0);
-}
-
-bool MovableObject::grounded() const
-{
-	return _vel.y == 0 && _prev_vel.y > 0;
-}
-
-bool MovableObject::falling() const
-{
-	return _vel.y > 0 && _prev_vel.y <= 0;
-}
-
-bool MovableObject::midair() const
-{
-	return _vel.y != 0 || (_vel.y == 0 && _prev_vel.y < 0);
+	_xDir = xDir;
+	_yDir = yDir;
 }
 
 void MovableObject::update(float dt)
@@ -94,20 +64,17 @@ void MovableObject::update(float dt)
 	RenderableObject::update(dt);
 
 	// velocity backup (useful to determine object state)
-	_prev_vel = _vel;
+	_velPrev = _vel;
 
-	// apply gravity acceleration
-	velAdd(Vec2Df(0, _y_gravity * dt));
-
-	// apply horizontal accelerations and decelerations
-	if (_x_dir == Direction::RIGHT && _vel.x >= 0)
-		velAdd(Vec2Df(_x_acc * dt, 0));
-	else if (_x_dir == Direction::LEFT && _vel.x <= 0)
-		velAdd(Vec2Df(-_x_acc * dt, 0));
-	else if (_x_dir == Direction::NONE)
-		velAdd(Vec2Df(-_vel.versX() * _x_dec_rel * dt, 0)); // mimics friction
-	else if (skidding())
-		velAdd(Vec2Df(-_vel.versX() * _x_dec_skd * dt, 0));
+	// apply forces
+	if (_xDir != Direction::NONE)
+		velAdd(dir2vec(_xDir) * _moveForce.x);
+	if (_yDir != Direction::NONE)
+		velAdd(dir2vec(_yDir) * _moveForce.y);
+	if (_xDir == Direction::NONE)
+		velAdd({ -_vel.versX() * _frictionForce.x * dt, 0 });
+	if (_yDir == Direction::NONE)
+		velAdd({ 0, -_vel.versY() * _frictionForce.y * dt });
 
 	// move
 	_rect.pos += _vel * dt;

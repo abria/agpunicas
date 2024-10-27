@@ -12,30 +12,35 @@
 #include "Audio.h"
 #include "AnimatedSprite.h"
 #include "Game.h"
+#include "Scene.h"
 
 using namespace agp;
 
 Link::Link(Scene* scene, const PointF& pos)
-	: DynamicObject(scene, RectF( pos.x + 1 / 16.0f, pos.y, 1, 1 ), nullptr)
+	: DynamicObject(scene, RectF( pos.x, pos.y, 1, 1.5f ), nullptr)
 {
-	_collider.adjust(0.2f, 0, -0.2f, -1/16.0f);
+	_collider.adjust(0.2f, 0.2f, -0.2f, -0.2f);
 
+	_facingDir = Direction::DOWN;
 	_walking = false;
-	_jumping = false;
-	_running = false;
-	_dying = false;
-	_dead = false;
-	_invincible = true;
+	_attacking = false;
+	_layer = 2;
 
-	_x_vel_last_nonzero = 0;
+	// animations
+	for (int i = 0; i < 4; i++)
+	{
+		_sprites[i]["stand"] = SpriteFactory::instance()->get(std::string("link_stand_" + dir2str(Direction(i))));
+		_sprites[i]["walk"] = SpriteFactory::instance()->get(std::string("link_walk_" + dir2str(Direction(i))));
+		_sprites[i]["attack"] = SpriteFactory::instance()->get(std::string("link_attack_" + dir2str(Direction(i))));
+	}
+	setSprite(_sprites[int(_facingDir)]["stand"]);
 
-	_sprites["stand"] = SpriteFactory::instance()->get("mario_stand");
-	_sprites["walk"] = SpriteFactory::instance()->get("mario_walk");
-	_sprites["run"] = SpriteFactory::instance()->get("mario_run");
-	_sprites["skid"] = SpriteFactory::instance()->get("mario_skid");
-	_sprites["jump"] = SpriteFactory::instance()->get("mario_jump");
-	_sprites["die"] = SpriteFactory::instance()->get("mario_die");
-	_sprite = _sprites["stand"];
+	// decorations
+	_shadow = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shadow")), _layer - 1);
+	//_shields[int(Direction::RIGHT)] = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shield_RIGHT")), _layer + 1);
+	//_shields[int(Direction::LEFT)] = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shield_LEFT")), _layer + 1);
+	//_shields[int(Direction::UP)] = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shield_UP")), _layer + 1);
+	//_shields[int(Direction::DOWN)] = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shield_DOWN")), _layer + 1);
 }
 
 void Link::update(float dt)
@@ -44,108 +49,43 @@ void Link::update(float dt)
 	DynamicObject::update(dt);
 
 	// state logic
-	if (_jumping && grounded())
-		_jumping = false;
-	if (_vel.x != 0 && !_jumping)
-		_x_vel_last_nonzero = _vel.x;
-	_walking = _vel.x != 0;
-	_running = std::abs(_vel.x) > 6;
+	_walking = _vel.mag() != 0;
 
 	// animations
-	if(_dying)
-		_sprite = _sprites["die"];
-	else if (_jumping)
-		_sprite = _sprites["jump"];
-	else if (skidding())
-		_sprite = _sprites["skid"];
-	else if (_running)
-		_sprite = _sprites["run"];
+	if(_attacking)
+		setSprite(_sprites[int(_facingDir)]["attack"]);
 	else if(_walking)
-		_sprite = _sprites["walk"];
+		setSprite(_sprites[int(_facingDir)]["walk"]);
 	else
-		_sprite = _sprites["stand"];
+		setSprite(_sprites[int(_facingDir)]["stand"]);
+
+	// decorations
+	_shadow->setPos(_rect.pos +Vec2Df(dir2vec(_facingDir).x * (2.0f / _scene->pixelUnitSize().x), dir2vec(_facingDir).y == 0? 1.0f / _scene->pixelUnitSize().y : 0));
+	//for (int i = 0; i < 4; i++)
+	//	_shields[i]->setPos(_rect.pos);
 
 	// x-mirroring
-	if ((_vel.x < 0 && !_jumping) || _x_vel_last_nonzero < 0)
+	if (_facingDir == Direction::LEFT)
 		_flip = SDL_FLIP_HORIZONTAL;
 	else
 		_flip = SDL_FLIP_NONE;
 }
 
-void Link::move(Direction dir)
+void Link::attack()
 {
-	if (_dying || _dead)
+	if (_attacking)
 		return;
 
-	MovableObject::move(dir);
-}
-
-void Link::jump(bool on)
-{
-	if (_dying || _dead)
-		return;
-
-	if (on && !midair())
-	{
-		velAdd(Vec2Df(0, -_y_vel_jmp));
-
-		if (std::abs(_vel.x) < 9)
-			_y_gravity = 25;
-		else
-			_y_gravity = 21;
-
-		_jumping = true;
-		Audio::instance()->playSound("jump-small");
-	}
-	else if (!on && midair() && !_dying)
-		_y_gravity = 100;
-}
-
-void Link::run(bool on)
-{
-	if (midair())
-		return;
-
-	if (on)
-	{
-		_x_vel_max = 10;
-		_x_acc = 13;
-	}
-	else
-	{
-		_x_vel_max = 6;	
-		_x_acc = 8;
-	}
+	_attacking = true;
+	schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sprites[int(_facingDir)]["attack"])->duration(), [this]() {_attacking = false; });
 }
 
 void Link::die()
 {
-	if (_dying)
-		return;
-
-	_dying = true;
-	_collidable = false;
-	_y_gravity = 0;
-	_vel = { 0,0 };
-	_x_dir = Direction::NONE;
-	Audio::instance()->haltMusic();
-	Audio::instance()->playSound("death");
-	Game::instance()->freeze(true);
-
-	schedule("dying", 0.5f, [this]()
-		{
-			_y_gravity = 25;
-			velAdd(Vec2Df(0, -_y_vel_jmp));
-			schedule("die", 3, [this]()
-				{
-					_dead = true;
-					Game::instance()->gameover();
-				});
-		});
+	// to be implemented
 }
 
 void Link::hurt()
 {
-	// TODO: powerdown (e.g. if Mario is big, becomes small)
-	//die();
+	// to be implemented
 }

@@ -36,12 +36,15 @@ SpriteFactory::SpriteFactory()
 
 	SDL_Renderer* renderer = Game::instance()->window()->renderer();
 	_spriteSheets["overworld"] = loadTexture(renderer, "sprites/scene_overworld.png");
-	_spriteSheets["mario"] = loadTexture(renderer, "sprites/mario.png", { 147, 187, 236 });
-	_spriteSheets["hud"] = loadTexture(renderer, "sprites/hud.png", { 147, 187, 236 });
+	_spriteSheets["welcome"] = loadTexture(renderer, "sprites/welcome.png");
+	_spriteSheets["hud"] = loadTexture(renderer, "sprites/hud_mario.png", { 147, 187, 236 });
+	_spriteSheets["player"] = loadTextureAutoDetect(renderer, "sprites/player_corrected.png", _autoTiles["player"], { 0, 128, 128 }, {0, 64, 64});
 }
 
 // anchors
-static RectI mario_small(1, 9, 16, 16);
+static RectI link_down(1, 1, 16, 24);
+static RectI link_up(1, 101, 16, 24);
+static RectI link_right(1, 51, 16, 24);
 static RectI hud_letter(519, 254, 8, 8);
 static RectI hud_number(519, 263, 8, 8);
 static RectI hud_letter_disabled(519, 366, 8, 8);
@@ -54,35 +57,43 @@ Sprite* SpriteFactory::get(const std::string& id)
 
 	// single-frame sprites
 	if (id == "welcome")
-		return new Sprite(_spriteSheets["hud"], RectI(1, 2 + 16 * 2, 16 * 16, 13 * 16));
+		return new Sprite(_spriteSheets["welcome"]);
 	else if (id == "gameover")
 		return new Sprite(_spriteSheets["hud"], RectI(260, 253, 16 * 16, 15 * 16));
 	else if (id == "overworld")
 		return new Sprite(_spriteSheets["overworld"]);
-	else if (id == "mario_stand")
-		return new Sprite(_spriteSheets["mario"], mario_small);
-	else if (id == "mario_jump")
-		return new Sprite(_spriteSheets["mario"], moveBy(mario_small, 6, 0));
-	else if (id == "mario_skid")
-		return new Sprite(_spriteSheets["mario"], moveBy(mario_small, 5, 0));
-	else if (id == "mario_die")
-		return new Sprite(_spriteSheets["mario"], moveBy(mario_small, 1, 0));
+	else if (id == "link_stand_DOWN")
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][0][0], Direction::DOWN);
+	else if (id == "link_stand_UP")
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][4][0], Direction::UP);
+	else if (id == "link_stand_RIGHT")
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0], Direction::RIGHT);
+	else if (id == "link_stand_LEFT")
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0], Direction::LEFT);
+	else if (id == "link_shadow")
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][6].back(), Direction::UP);
+	else if (id == "link_shield_DOWN")
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][10][1], Direction::UP);
+	else if (id == "link_shield_RIGHT")
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][10][2], Direction::UP);
+	else if (id == "link_shield_LEFT")
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][10][2], Direction::UP);
+	else if (id == "link_shield_UP")
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][10][3], Direction::UP);
 
 	// animated sprites
-	else if (id == "mario_walk")
-	{
-		rects.push_back(moveBy(mario_small, 2, 0));
-		rects.push_back(moveBy(mario_small, 3, 0));
-		rects.push_back(moveBy(mario_small, 4, 0));
-		return new AnimatedSprite(_spriteSheets["mario"], rects, 10);
-	}
-	else if (id == "mario_run")
-	{
-		rects.push_back(moveBy(mario_small, 2, 0));
-		rects.push_back(moveBy(mario_small, 3, 0));
-		rects.push_back(moveBy(mario_small, 4, 0));
-		return new AnimatedSprite(_spriteSheets["mario"], rects, 20);
-	}
+	else if (id == "link_walk_DOWN")
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][0].begin() + 1, _autoTiles["player"][0].begin() + 8 }, 20, Direction::UP);
+	else if (id == "link_attack_DOWN")
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][1].begin(), _autoTiles["player"][1].begin() + 6 }, 6, Direction::UP);
+	else if (id == "link_walk_UP")
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][4].begin() + 1, _autoTiles["player"][4].begin() + 8 }, 20, Direction::UP);
+	else if (id == "link_attack_UP")
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][5].begin(), _autoTiles["player"][5].begin() + 6 }, 6, Direction::UP);
+	else if (id == "link_walk_RIGHT" || id == "link_walk_LEFT")
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][2].begin() + 1, _autoTiles["player"][2].begin() + 8 }, 20, Direction::UP);
+	else if (id == "link_attack_RIGHT" || id == "link_attack_LEFT")
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][3].begin(), _autoTiles["player"][3].begin() + 6 }, 6, id == "link_attack_RIGHT" ? Direction::RIGHT : Direction::LEFT);
 	else if (id == "hud_coin")
 	{
 		rects.push_back(moveBy(hud_coin, 0, 0));

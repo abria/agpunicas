@@ -37,18 +37,20 @@ class agp::Scene
 
 		ObjectsMap _sortedObjects;	// objects sorted by ascending z-level
 		ObjectsList _newObjects;	// new objects that need to be added
-		ObjectsList _deadObjects;	// dead objects that need to be dealloacted
+		ObjectsList _deadObjects;	// dead objects that need to be deallocated
 		RectF _rect;				// the scene (world) rectangle
+		Point _pixelUnitSize;		// unit size in pixels
 		Color _backgroundColor;		// background color
 		View* _view;				// associated view for rendering
 		bool _visible;				// whether has to be rendered
 		bool _active;				// whether has to be updated
 		bool _blocking;				// whether blocks events propagation and logic update
 									// for scenes in lower layers of the stack
+		bool _rectsVisible;
 
 	public:
 
-		Scene(const RectF& r);
+		Scene(const RectF& rect, const Point& pixelUnitSize);
 		virtual ~Scene();
 
 		// getters/setters
@@ -62,6 +64,9 @@ class agp::Scene
 		void setActive(bool on) { _active = on; }
 		bool blocking() { return _blocking; }
 		void setBlocking(bool on) { _blocking = on; }
+		bool rectsVisible() const { return _rectsVisible; }
+		void toggleRects() { _rectsVisible = !_rectsVisible; }
+		Point pixelUnitSize() { return _pixelUnitSize; }
 
 		// add/remove objects
 		void newObject(Object* obj);

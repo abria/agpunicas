@@ -21,7 +21,7 @@ class agp::FilledSprite : public Sprite
 {
 	protected:
 
-		Vec2Df _tileSize;				// tile size in sceen coords
+		Vec2Df _tileSize;				// tile size in scene coords
 
 	public:
 
@@ -32,6 +32,7 @@ class agp::FilledSprite : public Sprite
 			SDL_Renderer* renderer,
 			const RectF& drawRect,
 			Transform camera,
+			const Point& pixelUnitSize,
 			float angle = 0,
 			SDL_RendererFlip flip = SDL_FLIP_NONE) override;
 };

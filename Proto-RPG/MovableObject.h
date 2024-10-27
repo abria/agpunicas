@@ -19,28 +19,23 @@ namespace agp
 
 // MovableObject class.
 // - implements free physics (no collisions)
-// - provides physics state queries (falling, midair, ...)
 // - provides basic physics actions (e.g. move, jump, ...)
 class agp::MovableObject : public RenderableObject
 {
 	protected:
 
 		// physics parameters (expressed in scene units/s)
-		float _y_gravity;		// vertical acceleration due to gravity
-		float _x_acc;			// horizontal acceleration due to movement
-		float _x_dec_rel;		// horizontal deceleration due to movement release
-		float _x_dec_skd;		// horizontal deceleration due to skidding (movement change)
-		float _x_vel_max;		// maximum horizontal velocity
-		float _x_vel_min;		// minimum horizontal velocity
-		float _y_vel_max;		// maximum vertical velocity
-		float _y_vel_min;		// minimum vertical velocity
-		float _y_vel_jmp;		// initial vertical velocity when jumping
+		Vec2Df _moveForce;		// acceleration due to movement
+		Vec2Df _frictionForce;	// deceleration due to movement release (friction)
+		Vec2Df _velMin;
+		Vec2Df _velMax;
 		virtual void defaultPhysics();
 
 		// attributes
-		Direction _x_dir;		// current horizontal movement direction
+		Direction _xDir;		// commanded horizontal direction
+		Direction _yDir;		// commanded horizontal direction
 		Vec2Df _vel;			// current velocity
-		Vec2Df _prev_vel;		// velocity in the previous iteration
+		Vec2Df _velPrev;		// velocity in the previous iteration
 
 	public:
 
@@ -49,20 +44,13 @@ class agp::MovableObject : public RenderableObject
 
 		// getters / setters
 		Vec2Df vel() const { return _vel; }
-		void velAdd(Vec2Df amount);
-		void velClip(float vx, float vy);
-		void setVelY(float vy) { _vel.y = vy; }
-		void moveBy(Vec2Df amount) { _rect.pos += amount; }
-
-		// state queries
-		bool skidding() const;
-		bool grounded() const;
-		bool falling() const;
-		bool midair() const;
+		virtual void velAdd(const Vec2Df& amount);
+		virtual void velClip(float vx, float vy);
+		virtual void moveBy(const Vec2Df& amount) { _rect.pos += amount; }
+		virtual void teleport(const Vec2Df& newpos) { _rect.pos = newpos; }
 
 		// actions
-		virtual void move(Direction dir);
-		virtual void jump();
+		virtual void move(Direction xDir, Direction yDir);
 		
 		// extends game logic (+physics)
 		virtual void update(float dt) override;

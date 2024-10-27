@@ -21,7 +21,7 @@ class agp::UIScene : public Scene
 {
 	public:
 
-		UIScene(const RectF& r);
+		UIScene(const RectF& rect, const Point& pixelUnitSize);
 		virtual ~UIScene() {};
 
 		// implements UI scene update logic (+variable timestep)

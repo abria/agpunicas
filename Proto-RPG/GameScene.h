@@ -29,10 +29,10 @@ class agp::GameScene : public Scene
 		float _timeToSimulate;		// time integration extent
 
 		Link* _player;
-		bool _right_pressed;
-		bool _left_pressed;
-		bool _jump_pressed;
-		bool _run_pressed;
+		bool _rightPressed;
+		bool _leftPressed;
+		bool _upPressed;
+		bool _downPressed;
 
 		bool _collidersVisible;
 	
@@ -40,12 +40,12 @@ class agp::GameScene : public Scene
 
 	public:
 
-		GameScene(const RectF& r, float dt);
+		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
 		virtual ~GameScene() {};
 
 		Link* player() { return _player; }
 		void setPlayer(Link* mario) { _player = mario; }
-		bool collidersVisible() { return _collidersVisible; }
+		bool collidersVisible() const { return _collidersVisible; }
 		void toggleColliders() { _collidersVisible = !_collidersVisible; }
 
 		// overrides scene object selection (+octree, NOT implemented)

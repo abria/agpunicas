@@ -22,8 +22,6 @@ RenderableObject::RenderableObject(Scene* scene, const RectF& rect, const Color&
 	_focused = false;
 	_visible = true;
 	_sprite = nullptr;
-	_focusColor = { 255, 255, 0, 128 };
-	_borderColor = { 0, 0, 0, 0 };
 }
 
 RenderableObject::RenderableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer)
@@ -46,16 +44,16 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 	SDL_FRect drawRect = RectF(camera(_rect.tl()), camera(_rect.br())).toSDLf();
 
 	if (_sprite)
-		_sprite->render(renderer, _rect, camera, _angle, _flip);
+		_sprite->render(renderer, _rect, camera, _scene->pixelUnitSize(), _angle, _flip);
 	else
 	{
 		SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
 		SDL_RenderFillRectF(renderer, &drawRect);
 	}
 
-	if (_borderColor.a)
+	if (_scene->rectsVisible())
 	{
-		SDL_SetRenderDrawColor(renderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
+		SDL_SetRenderDrawColor(renderer, _rectColor.r, _rectColor.g, _rectColor.b, _rectColor.a);
 		SDL_RenderDrawRectF(renderer, &drawRect);
 	}
 
@@ -79,10 +77,15 @@ void RenderableObject::update(float dt)
 		_sprite->update(dt);
 }
 
-void RenderableObject::setSprite(Sprite* sprite) 
+void RenderableObject::setSprite(Sprite* sprite, bool deallocateSprite, bool resetOnChange)
 { 
 	if (_sprite)
-		delete _sprite;
+	{
+		if (resetOnChange && sprite != _sprite)
+			_sprite->reset();
+		if(deallocateSprite)
+			delete _sprite;
+	}
 
 	_sprite = sprite; 
 }

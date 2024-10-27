@@ -15,7 +15,7 @@
 using namespace agp;
 
 HUD::HUD()
-	: UIScene(RectF(0, 0, 16, 15))
+	: UIScene(RectF(0, 0, 16, 15), { 16, 16 })
 {
 	setBackgroundColor(Color(0, 0, 0, 0));
 
@@ -59,11 +59,11 @@ void HUD::update(float timeToSimulate)
 	_time -= timeToSimulate;
 	int timeCurr = int(round(_time));
 	if(timePrev != timeCurr)
-		_timeObj->setSprite(SpriteFactory::instance()->getText(std::to_string(timeCurr), { 0.5f, 0.5f }, 3, '0'));
+		_timeObj->setSprite(SpriteFactory::instance()->getText(std::to_string(timeCurr), { 0.5f, 0.5f }, 3, '0'), true);
 }
 
 void HUD::setFPS(int fps) 
 { 
 	_fps = fps; 
-	_fpsObj->setSprite(SpriteFactory::instance()->getText(std::to_string(_fps), { 0.5f, 0.5f }));
+	_fpsObj->setSprite(SpriteFactory::instance()->getText(std::to_string(_fps), { 0.5f, 0.5f }), true);
 }

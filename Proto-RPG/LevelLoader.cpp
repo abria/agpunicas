@@ -35,11 +35,9 @@ GameScene* LevelLoader::load(const std::string& name)
 
 	if (name == "overworld")
 	{
-		GameScene* world = new GameScene(RectF(0, 0, 224, 15), 1 / 100.0f);
-		world->setBackgroundColor(Color(92, 148, 252));
+		GameScene* world = new GameScene(RectF(0, 0, 256, 256), { 16,16 }, 1 / 100.0f);
 
 		new RenderableObject(world, RectF(0, 0, 256, 256), spriteLoader->get("overworld"));
-
 		
 		// player
 		Link* player = new Link(world, PointF(140, 179));

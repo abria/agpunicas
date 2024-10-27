@@ -224,6 +224,107 @@ namespace agp
         return result;
     }
 
+    // load image from file into texture and detect rects row-wise automatically
+    static inline SDL_Texture* loadTextureAutoDetect(
+        SDL_Renderer* renderer,
+        const std::string& filepath,
+        std::vector< std::vector < RectI > > & rects,
+        const Color& backgroundMask,
+        const Color & spriteMask,
+        int yDistanceThreshold = 5)
+    {
+        SDL_Surface* surf = IMG_Load(filepath.c_str());
+        if (!surf)
+        {
+            SDL_Log("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
+            return nullptr;
+        }
+
+        // corner-based rectangles detection
+        std::vector < RectI > allRects;
+        SDL_LockSurface(surf);
+        Uint8* pixels = (Uint8*)surf->pixels;
+        int width = surf->w;
+        int height = surf->h;
+        int pitch = surf->pitch; // Number of bytes in a row (may include padding)
+        Uint8 bpp = surf->format->BytesPerPixel;
+        for (int y = 0; y < height; y++) 
+        {
+            Uint8* row = pixels + y * pitch;
+            Uint8* rowPrev = pixels + (y - 1) * pitch;
+            for (int x = 0; x < width; x++)
+            {
+                Color pixel  (row + x * bpp);
+                Color pixelN  = y ? Color(rowPrev +  x * bpp) : backgroundMask;
+                Color pixelNW = y ? Color(rowPrev + (x - 1) * bpp) : backgroundMask;
+                Color pixelW  = x ? Color(row     + (x - 1) * bpp) : backgroundMask;
+
+                // up-left corner detection
+                if (pixel != backgroundMask &&
+                    pixelN == backgroundMask &&
+                    pixelNW == backgroundMask &&
+                    pixelW == backgroundMask)
+                {
+                    // up-right corner detection
+                    int right = x;
+                    for (; right < width; right++)
+                        if (Color(row + right * bpp) == backgroundMask)
+                            break;
+
+                    // bottom-right corner detection
+                    int bottom = y;
+                    for (; bottom < height; bottom++)
+                        if (Color(pixels + bottom * pitch + (right - 1) * bpp) == backgroundMask)
+                            break;
+
+                    allRects.push_back(RectI(x, y, right - x, bottom - y));
+                }
+            }
+        }
+
+        // eliminate background to allow rect minor adjustments
+        for (int y = 0; y < height; y++)
+        {
+            Uint8* row = pixels + y * pitch;
+            for (int x = 0; x < width; x++)
+                if(Color(row + x * bpp) == backgroundMask)
+                    for (int c = 0; c < bpp; c++)
+                        row[x * bpp + c] = spriteMask[c];
+        }
+        SDL_UnlockSurface(surf);
+
+        // group rects row-wise
+        std::sort(allRects.begin(), allRects.end(), [yDistanceThreshold](const RectI& a, const RectI& b) 
+        {
+	        return std::abs(a.center().y - b.center().y) > yDistanceThreshold ? a.center().y < b.center().y : a.pos.x < b.pos.x;
+	    });
+        rects.push_back(std::vector <RectI>());
+        for (int k = 0; k < allRects.size(); k++)
+        {
+            if (k && allRects[k].pos.x < allRects[k - 1].pos.x)
+                rects.push_back(std::vector <RectI>());
+            rects[rects.size()-1].push_back(allRects[k]);
+        }
+
+       /* printf("\n");
+        for (int i = 0; i < rects.size(); i++)
+            printf("[%02d]: %d sprites\n", i, rects[i].size());*/
+
+        // set transparent color
+        SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, spriteMask.r, spriteMask.g, spriteMask.b));
+
+        // create texture from surf
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+        SDL_FreeSurface(surf);
+        if (!tex)
+        {
+            SDL_Log("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
+            return nullptr;
+        }
+
+        return tex;
+    }
+
     // move rect within spritesheet
     static inline RectI moveBy(
         RectI srcRect, 

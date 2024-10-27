@@ -18,7 +18,12 @@ FilledSprite::FilledSprite(SDL_Texture* spritesheet, const RectI& rect, Vec2Df t
 	_tileSize = tileSize;
 }
 
-void FilledSprite::render(SDL_Renderer* renderer, const RectF& drawRect, Transform camera, float angle,			// rotation in degrees, clockwise
+void FilledSprite::render(
+	SDL_Renderer* renderer,
+	const RectF& drawRect,
+	Transform camera,
+	const Point& pixelUnitSize,
+	float angle,
 	SDL_RendererFlip flip)
 {
 	SDL_Rect srcRect = _rect.toSDL();

@@ -29,12 +29,11 @@ MenuItem::MenuItem(Menu* container, int index, const std::string& text, std::fun
 	_text = text;
 	_task = task;
 	_selected = false;
-	_focusColor = { 255, 255, 255, 128 };
 }
 
 void MenuItem::refresh()
 {
-	setSprite(SpriteFactory::instance()->getText(' ' + _text, { 0.5f + _selected/30.0f, 0.5f + _selected / 30.0f }, 0, ' ', _selected));
+	setSprite(SpriteFactory::instance()->getText(' ' + _text, { 0.5f + _selected/30.0f, 0.5f + _selected / 30.0f }, 0, ' ', _selected), true);
 }
 
 void MenuItem::update(float dt)
@@ -45,7 +44,7 @@ void MenuItem::update(float dt)
 }
 
 Menu::Menu(const PointF& position, float width, Menu* parent, bool closable)
-	: UIScene(RectF(0, 0, 16, 15))
+	: UIScene(RectF(0, 0, 16, 15), { 16,16 })
 {
 	_parent = parent;
 	_itemSelected = 0;
@@ -54,7 +53,6 @@ Menu::Menu(const PointF& position, float width, Menu* parent, bool closable)
 
 	// menu layer
 	_menuBackground = new RenderableObject(this, _menuRect, Color(200, 76, 12, 255));
-	_menuBackground->setBorderColor({ 0, 0, 0, 255 });
 
 	// default: modal menu (blocks all lower scenes)
 	_blocking = true;

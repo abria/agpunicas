@@ -15,14 +15,16 @@
 
 using namespace agp;
 
-Scene::Scene(const RectF& r)
+Scene::Scene(const RectF& rect, const Point& pixelUnitSize)
 {
-	_rect = r;
+	_rect = rect;
+	_pixelUnitSize = pixelUnitSize;
 	_backgroundColor = Color(0, 0, 0, 0);
 	_active = true;
 	_visible = true;
 	_blocking = false;
 	_view = nullptr;
+	_rectsVisible = false;
 }
 
 Scene::~Scene()

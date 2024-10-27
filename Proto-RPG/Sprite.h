@@ -24,19 +24,25 @@ class agp::Sprite
 
 		SDL_Texture* _spritesheet;		// spritesheet texture
 		RectI _rect;					// in spritesheets coordinates
+		Direction _expandDir;			// how to expand drawRect if its AR differs from _rect 
 
 	public:
 
-		Sprite(SDL_Texture* spritesheet, const RectI& rect = RectI());
+		Sprite(SDL_Texture* spritesheet, const RectI& rect = RectI(), Direction expandDir = Direction::NONE);
+		RectI rect() { return _rect; }
 
 		// render method (for rendering)
 		virtual void render(
 			SDL_Renderer* renderer, 
 			const RectF& drawRect,		// drawable area in scene coords
 			Transform camera,			// scene2view transform
+			const Point& pixelUnitSize,	// scene unit size in pixels
 			float angle = 0,			// rotation in degrees, clockwise
 			SDL_RendererFlip flip = SDL_FLIP_NONE);
 
 		// update method (for logic, animations)
 		virtual void update(float dt) {};
+
+		// reset method (for logic, animations)
+		virtual void reset() {};
 };

@@ -20,7 +20,13 @@ TiledSprite::TiledSprite(SDL_Texture* spritesheet, const std::vector<RectI>& til
 	_tileSize = tileSize;
 }
 
-void TiledSprite::render(SDL_Renderer* renderer, const RectF& drawRect, Transform camera, float angle, SDL_RendererFlip flip)
+void TiledSprite::render(
+	SDL_Renderer* renderer,
+	const RectF& drawRect,
+	Transform camera,
+	const Point& pixelUnitSize,
+	float angle,
+	SDL_RendererFlip flip)
 {
 	int tiles_count = 0;
 

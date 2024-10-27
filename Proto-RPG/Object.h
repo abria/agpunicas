@@ -46,6 +46,7 @@ class agp::Object
 		// getters/setters
 		const RectF& rect() const { return _rect; }
 		void setRect(const RectF& rect) { _rect = rect; }
+		void setPos(const PointF& newPos) { _rect.pos = newPos; }
 		int layer() { return _layer; }
 		bool freezed() { return _freezed; }
 		void setFreezed(bool on) { _freezed = on; }

@@ -11,10 +11,11 @@
 
 using namespace agp;
 
-AnimatedSprite::AnimatedSprite(SDL_Texture* spritesheet, const std::vector<RectI>& frames, float FPS) 
-	: Sprite(spritesheet, frames[0])
+AnimatedSprite::AnimatedSprite(SDL_Texture* spritesheet, const std::vector<RectI>& frames, float FPS, Direction keepARdir)
+	: Sprite(spritesheet, frames[0], keepARdir)
 {
 	_frames = frames;
+
 	_FPS = FPS;
 	_frameIterator = 0;
 }
@@ -32,4 +33,10 @@ void AnimatedSprite::update(float dt)
 
 	// set current spritesheet rect
 	_rect = _frames[static_cast<int>(_frameIterator)];
+}
+
+// extends reset method (+ restart frameIterator )
+void AnimatedSprite::reset()
+{
+	_frameIterator = 0;
 }

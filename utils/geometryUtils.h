@@ -199,6 +199,8 @@ namespace agp
 		Rect  operator -  (const Vec2D<T>& p) const { return Rect(pos.x - p.x, pos.y - p.y, size.x, size.y, yUp); }
 		Rect  operator *  (const T& s) const { return Rect(pos.x, pos.y, size.x * s, size.y * s, yUp); }
 		Rect  operator *  (const Vec2D<T>& s) const { return Rect(pos.x, pos.y, size.x * s.x, size.y * s.y, yUp); }
+		Rect  operator /  (const T& s) const { return Rect(pos.x, pos.y, size.x / s, size.y / s, yUp); }
+		Rect  operator /  (const Vec2D<T>& s) const { return Rect(pos.x, pos.y, size.x / s.x, size.y / s.y, yUp); }
 		Rect& operator += (const T& s) { pos.x += s; pos.y += s; return *this; }
 		Rect& operator -= (const T& s) { pos.x -= s; pos.y -= s; return *this; }
 		Rect& operator *= (const T& s) { size.x *= s; size.y *= s; return *this; }
@@ -248,6 +250,10 @@ namespace agp
 			pos.y += dy1;
 			size.x += dx2 - dx1;
 			size.y += dy2 - dy1;
+		}
+		float aspectRatio() const
+		{
+			return float(size.x) / float(size.y);
 		}
 
 		// conversions

@@ -33,7 +33,8 @@ class agp::TiledSprite : public Sprite
 		virtual void render(
 			SDL_Renderer* renderer, 
 			const RectF& drawRect, 
-			Transform camera, 
+			Transform camera,
+			const Point& pixelUnitSize,
 			float angle = 0,			
 			SDL_RendererFlip flip = SDL_FLIP_NONE) override;
 };

@@ -32,8 +32,8 @@ class agp::RenderableObject : public Object
 		SDL_RendererFlip _flip;	// horizontal/vertical flipping
 		float _angle;			// generic rotation (degrees/s, clockwise)
 		float _angularVelocity;	// generic rotation (degrees/s, clockwise)
-		Color _focusColor;
-		Color _borderColor;
+		const Color _focusColor = { 255, 255, 0, 128 };
+		const Color _rectColor = { 255, 0, 0, 255 };
 
 	public:
 
@@ -43,9 +43,9 @@ class agp::RenderableObject : public Object
 
 		// getters/setters
 		const Color& color() { return _color; }
-		void setBorderColor(const Color& borderColor) { _borderColor = borderColor; }
 		void setVisible(bool visible) { _visible = visible; }
-		void setSprite(Sprite* sprite);
+		Sprite* sprite() { return _sprite; }
+		virtual void setSprite(Sprite* sprite, bool deallocateSprite = false, bool resetOnChange = true);
 
 		// extends game logic (+animation)
 		virtual void update(float dt) override;

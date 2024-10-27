@@ -14,12 +14,11 @@
 
 using namespace agp;
 
-UIScene::UIScene(const RectF& r)
-	: Scene(r)
+UIScene::UIScene(const RectF& rect, const Point& pixelUnitSize)
+	: Scene(rect, pixelUnitSize)
 {
-	// setup view (specific for super mario bros)
+	// setup view (SNES)
 	_view = new View(this, _rect);
-	//_view->setFixedAspectRatio(Game::instance()->aspectRatio());
 	_view->setRect(RectF(0, 0, 16, 15));
 }
 

@@ -22,33 +22,26 @@ class agp::Link : public DynamicObject
 {
 	private:
 
+		// state flags
 		bool _walking;
-		bool _running;
-		bool _jumping;
-		bool _invincible;
-		bool _dying;
-		bool _dead;
-
-		double _x_vel_last_nonzero;	// last nonzero horizontal velocity
+		bool _attacking;
 		
-		std::map<std::string, Sprite*> _sprites;
+		// sprites (1 set for each facing direction)
+		std::map<std::string, Sprite*> _sprites[4];
+
+		// decorations
+		RenderableObject* _shadow;
+		RenderableObject* _shields[4];
 
 	public:
 
 		Link(Scene* scene, const PointF& pos);
 
-		// getters/setters
-		bool invincible() { return _invincible; }
-
 		// extends game logic (+mario logic)
 		virtual void update(float dt) override;
 
-		// player actions
-		virtual void move(Direction dir) override;
-		virtual void jump(bool on = true);
-		virtual void run(bool on = true);
-
 		// scripted actions
+		virtual void attack();
 		virtual void die();
 		virtual void hurt();
 

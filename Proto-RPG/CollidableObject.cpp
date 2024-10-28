@@ -20,12 +20,17 @@ using namespace agp;
 CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer) :
 	MovableObject(scene, rect, sprite, layer)
 {
-	// default collider: object rect
-	_collider = { 0, 0, _rect.size.x, _rect.size.y };
+	defaultCollider();
 
 	// default collision: non compenetration
 	_compenetrable = false;
 	_collidable = true;
+}
+
+// set collider to default (whole rect)
+void CollidableObject::defaultCollider()
+{
+	_collider = { 0, 0, _rect.size.x, _rect.size.y };
 }
 
 void CollidableObject::update(float dt)

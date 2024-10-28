@@ -47,11 +47,13 @@ class agp::Object
 		const RectF& rect() const { return _rect; }
 		void setRect(const RectF& rect) { _rect = rect; }
 		void setPos(const PointF& newPos) { _rect.pos = newPos; }
+		PointF pos() const { return _rect.pos; }
 		int layer() { return _layer; }
 		bool freezed() { return _freezed; }
 		void setFreezed(bool on) { _freezed = on; }
 		void toggleFreezed() { _freezed = !_freezed; }
 		bool contains(const Vec2Df& p) { return _rect.contains(p); }
+		Scene* scene() const { return _scene; }
 
 		// core game logic (physics, ...)
 		virtual void update(float dt);

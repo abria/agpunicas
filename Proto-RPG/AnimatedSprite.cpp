@@ -11,10 +11,19 @@
 
 using namespace agp;
 
-AnimatedSprite::AnimatedSprite(SDL_Texture* spritesheet, const std::vector<RectI>& frames, float FPS, Direction keepARdir)
+AnimatedSprite::AnimatedSprite(
+	SDL_Texture* spritesheet,
+	const std::vector<RectI>& frames,
+	float FPS,
+	Direction keepARdir,
+	const std::vector <int> resampling)
 	: Sprite(spritesheet, frames[0], keepARdir)
 {
-	_frames = frames;
+	if (resampling.size())
+		for (auto& i : resampling)
+			_frames.push_back(frames[i]);
+	else 
+		_frames = frames;
 
 	_FPS = FPS;
 	_frameIterator = 0;

@@ -29,6 +29,8 @@ class agp::DynamicObject : public CollidableObject
 		DynamicObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0);
 		virtual ~DynamicObject() {}
 
+		Direction facingDir() const { return _facingDir; }
+
 		// overrides MovableObject's move (+facing dir)
 		virtual void move(Direction xDir, Direction yDir) override;
 

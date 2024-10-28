@@ -16,6 +16,7 @@
 namespace agp
 {
 	class Link;
+	class Sword;
 }
 
 class agp::Link : public DynamicObject
@@ -31,7 +32,8 @@ class agp::Link : public DynamicObject
 
 		// decorations
 		RenderableObject* _shadow;
-		RenderableObject* _shields[4];
+		Sword* _sword;
+		//RenderableObject* _shields[4];
 
 	public:
 

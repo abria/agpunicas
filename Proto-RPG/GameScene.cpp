@@ -35,7 +35,7 @@ GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 	// setup view (SNES aspect ratio)
 	_view = new View(this, _rect);
 	_view->setFixedAspectRatio(Game::instance()->aspectRatio());
-	_view->setRect(RectF(0, 0, 8, 7.5));
+	_view->setRect(RectF(0, 0, 16, 15));
 }
 
 void GameScene::update(float timeToSimulate)
@@ -71,8 +71,8 @@ void GameScene::update(float timeToSimulate)
 	}
 
 	// camera: center view on player 
-	_view->setX(_player->rect().pos.x - 3.5f);
-	_view->setY(_player->rect().pos.y - 3.5f);
+	_view->setX(_player->rect().pos.x - 7);
+	_view->setY(_player->rect().pos.y - 7);
 }
 
 void GameScene::event(SDL_Event& evt)

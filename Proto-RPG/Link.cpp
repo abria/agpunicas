@@ -13,6 +13,7 @@
 #include "AnimatedSprite.h"
 #include "Game.h"
 #include "Scene.h"
+#include "Sword.h"
 
 using namespace agp;
 
@@ -25,6 +26,7 @@ Link::Link(Scene* scene, const PointF& pos)
 	_walking = false;
 	_attacking = false;
 	_layer = 2;
+	_sword = nullptr;
 
 	// animations
 	for (int i = 0; i < 4; i++)
@@ -37,10 +39,6 @@ Link::Link(Scene* scene, const PointF& pos)
 
 	// decorations
 	_shadow = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shadow")), _layer - 1);
-	//_shields[int(Direction::RIGHT)] = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shield_RIGHT")), _layer + 1);
-	//_shields[int(Direction::LEFT)] = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shield_LEFT")), _layer + 1);
-	//_shields[int(Direction::UP)] = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shield_UP")), _layer + 1);
-	//_shields[int(Direction::DOWN)] = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shield_DOWN")), _layer + 1);
 }
 
 void Link::update(float dt)
@@ -61,8 +59,6 @@ void Link::update(float dt)
 
 	// decorations
 	_shadow->setPos(_rect.pos +Vec2Df(dir2vec(_facingDir).x * (2.0f / _scene->pixelUnitSize().x), dir2vec(_facingDir).y == 0? 1.0f / _scene->pixelUnitSize().y : 0));
-	//for (int i = 0; i < 4; i++)
-	//	_shields[i]->setPos(_rect.pos);
 
 	// x-mirroring
 	if (_facingDir == Direction::LEFT)
@@ -76,8 +72,14 @@ void Link::attack()
 	if (_attacking)
 		return;
 
+	_sword = new Sword(this);
 	_attacking = true;
-	schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sprites[int(_facingDir)]["attack"])->duration(), [this]() {_attacking = false; });
+	schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sprites[int(_facingDir)]["attack"])->duration(), [this]() 
+		{
+			_attacking = false; 
+			_scene->killObject(_sword);
+			_sword = nullptr;
+		});
 }
 
 void Link::die()

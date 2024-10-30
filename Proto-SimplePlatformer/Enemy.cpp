@@ -33,7 +33,7 @@ bool Enemy::collision(CollidableObject* with, Direction fromDir)
 void Enemy::smash()
 {
 	_dying = true;
-	_y_gravity = 25;
+	_yGravityForce = 25;
 	_vel.y = -8;
 	_collidable = false;
 	_flip = SDL_FLIP_VERTICAL;

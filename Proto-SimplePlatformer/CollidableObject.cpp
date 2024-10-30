@@ -28,6 +28,11 @@ CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* spri
 	_collidable = true;
 }
 
+void CollidableObject::defaultCollider()
+{
+	_collider = { 0, 0, _rect.size.x, _rect.size.y };
+}
+
 void CollidableObject::update(float dt)
 {
 	MovableObject::update(dt);

@@ -26,21 +26,21 @@ class agp::MovableObject : public RenderableObject
 	protected:
 
 		// physics parameters (expressed in scene units/s)
-		float _y_gravity;		// vertical acceleration due to gravity
-		float _x_acc;			// horizontal acceleration due to movement
-		float _x_dec_rel;		// horizontal deceleration due to movement release
-		float _x_dec_skd;		// horizontal deceleration due to skidding (movement change)
-		float _x_vel_max;		// maximum horizontal velocity
-		float _x_vel_min;		// minimum horizontal velocity
-		float _y_vel_max;		// maximum vertical velocity
-		float _y_vel_min;		// minimum vertical velocity
-		float _y_vel_jmp;		// initial vertical velocity when jumping
+		float _yGravityForce;	// vertical acceleration due to gravity
+		float _xMoveForce;		// horizontal acceleration due to movement
+		float _xFrictionForce;	// horizontal deceleration due to movement release
+		float _xSkiddingForce;	// horizontal deceleration due to skidding (movement change)
+		float _xVelMax;			// maximum horizontal velocity
+		float _xVelMin;			// minimum horizontal velocity
+		float _yVelMax;			// maximum vertical velocity
+		float _yVelMin;			// minimum vertical velocity
+		float _yJumpImpulse;	// initial vertical velocity when jumping
 		virtual void defaultPhysics();
 
 		// attributes
-		Direction _x_dir;		// current horizontal movement direction
+		Direction _xDir;		// current horizontal movement direction
 		Vec2Df _vel;			// current velocity
-		Vec2Df _prev_vel;		// velocity in the previous iteration
+		Vec2Df _prevVel;		// velocity in the previous iteration
 
 	public:
 

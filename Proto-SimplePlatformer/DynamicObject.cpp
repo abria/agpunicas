@@ -19,4 +19,15 @@ DynamicObject::DynamicObject(Scene* scene, const RectF& rect, Sprite* sprite, in
 	// compenetration does not need to be resolved in these cases
 	// since the collision is resolved "logically" by the collision method
 	_compenetrable = true;
+
+	_facingDir = Direction::RIGHT;
+}
+
+// overrides MovableObject's move (+facing dir)
+void DynamicObject::move(Direction xDir)
+{
+	if (xDir != Direction::NONE && xDir != _facingDir)
+		_facingDir = xDir;
+
+	CollidableObject::move(xDir);
 }

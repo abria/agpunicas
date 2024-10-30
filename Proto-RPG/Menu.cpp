@@ -44,7 +44,7 @@ void MenuItem::update(float dt)
 }
 
 Menu::Menu(const PointF& position, float width, Menu* parent, bool closable)
-	: UIScene(RectF(0, 0, 16, 15), { 16,16 })
+	: UIScene(RectF(0, 0, 16, 14), { 16,16 })
 {
 	_parent = parent;
 	_itemSelected = 0;
@@ -111,7 +111,7 @@ void Menu::event(SDL_Event& evt)
 
 Menu* Menu::mainMenu()
 {
-	Menu* menu = new Menu({ 5.0, 9.5 }, 6.0, 0, false);
+	Menu* menu = new Menu({ 3.0, 11 }, 10.0, 0, false);
 
 	new RenderableObject(menu, RectF(0, 2, 16, 13), SpriteFactory::instance()->get("welcome"), -1);
 

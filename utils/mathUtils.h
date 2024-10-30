@@ -23,6 +23,8 @@ namespace agp
 	---------------------------------------------------------------------------------------------------------------------------*/
 	const float PI = 3.14159265f;				 //pi
 	const float LOG2E = 1.44269504f; //log2(e)
+	const int MAXINT = std::numeric_limits<int>::max();
+	const int MININT = std::numeric_limits<int>::min();
 	/*-------------------------------------------------------------------------------------------------------------------------*/
 
 	// floating point comparisons

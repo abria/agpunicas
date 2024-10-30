@@ -32,6 +32,9 @@ class agp::CollidableObject : public MovableObject
 		// collision detection/resolution
 		virtual void resolveCollisions(float dt);
 
+		// set collider to default (whole rect)
+		void defaultCollider();
+
 	public:
 
 		CollidableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0);

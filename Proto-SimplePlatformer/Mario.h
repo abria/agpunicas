@@ -28,8 +28,8 @@ class agp::Mario : public DynamicObject
 		bool _invincible;
 		bool _dying;
 		bool _dead;
-
-		double _x_vel_last_nonzero;	// last nonzero horizontal velocity
+		bool _attacking;
+		double _xLastNonZeroVel;
 		
 		std::map<std::string, Sprite*> _sprites;
 
@@ -49,6 +49,7 @@ class agp::Mario : public DynamicObject
 		virtual void run(bool on = true);
 
 		// scripted actions
+		virtual void attack();
 		virtual void die();
 		virtual void hurt();
 

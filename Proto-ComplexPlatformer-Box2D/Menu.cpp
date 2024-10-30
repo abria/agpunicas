@@ -44,7 +44,7 @@ void MenuItem::update(float dt)
 }
 
 Menu::Menu(const PointF& position, float width, Menu* parent, bool closable)
-	: UIScene(RectF(0, 0, 30, 15))
+	: UIScene(RectF(0, 0, 30, 15), {16, 16})
 {
 	_parent = parent;
 	_itemSelected = 0;

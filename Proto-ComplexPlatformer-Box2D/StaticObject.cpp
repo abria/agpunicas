@@ -27,6 +27,4 @@ StaticObject::StaticObject(GameScene* scene, const RotatedRectF& obb, Sprite* sp
 void StaticObject::collision(RigidObject* with, bool begin, const Vec2Df& normal, b2ShapeId& shapeA, b2ShapeId& shapeB)
 {
 	RigidObject::collision(with, begin, normal, shapeA, shapeB);
-
-	_focused = begin;
 }

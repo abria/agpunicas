@@ -43,7 +43,7 @@ class agp::RigidObject : public RenderableObject
 		virtual void update(float dt) override;
 
 		// extends rendering (+collider)
-		virtual void render(SDL_Renderer* renderer, Transform camera) override;
+		virtual void draw(SDL_Renderer* renderer, Transform camera) override;
 
 		// extends freezed state (+Box2D disable)
 		virtual void setFreezed(bool on) override;

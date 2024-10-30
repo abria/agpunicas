@@ -11,7 +11,9 @@
 #include "SpriteFactory.h"
 #include "Audio.h"
 #include "AnimatedSprite.h"
-#include "Game.h"
+#include "PlatformerGame.h"
+#include "Sword.h"
+#include "Scene.h"
 
 using namespace agp;
 
@@ -25,9 +27,10 @@ Mario::Mario(Scene* scene, const PointF& pos)
 	_running = false;
 	_dying = false;
 	_dead = false;
-	_invincible = true;
+	_invincible = false;
+	_attacking = false;
 
-	_x_vel_last_nonzero = 0;
+	_xLastNonZeroVel = 0;
 
 	_sprites["stand"] = SpriteFactory::instance()->get("mario_stand");
 	_sprites["walk"] = SpriteFactory::instance()->get("mario_walk");
@@ -35,6 +38,7 @@ Mario::Mario(Scene* scene, const PointF& pos)
 	_sprites["skid"] = SpriteFactory::instance()->get("mario_skid");
 	_sprites["jump"] = SpriteFactory::instance()->get("mario_jump");
 	_sprites["die"] = SpriteFactory::instance()->get("mario_die");
+	_sprites["attack"] = SpriteFactory::instance()->get("mario_attack");
 	_sprite = _sprites["stand"];
 }
 
@@ -47,13 +51,15 @@ void Mario::update(float dt)
 	if (_jumping && grounded())
 		_jumping = false;
 	if (_vel.x != 0 && !_jumping)
-		_x_vel_last_nonzero = _vel.x;
+		_xLastNonZeroVel = _vel.x;
 	_walking = _vel.x != 0;
 	_running = std::abs(_vel.x) > 6;
 
 	// animations
 	if(_dying)
 		_sprite = _sprites["die"];
+	else if(_attacking)
+		_sprite = _sprites["attack"];
 	else if (_jumping)
 		_sprite = _sprites["jump"];
 	else if (skidding())
@@ -66,7 +72,7 @@ void Mario::update(float dt)
 		_sprite = _sprites["stand"];
 
 	// x-mirroring
-	if ((_vel.x < 0 && !_jumping) || _x_vel_last_nonzero < 0)
+	if ((_vel.x < 0 && !_jumping) || _xLastNonZeroVel < 0)
 		_flip = SDL_FLIP_HORIZONTAL;
 	else
 		_flip = SDL_FLIP_NONE;
@@ -77,7 +83,7 @@ void Mario::move(Direction dir)
 	if (_dying || _dead)
 		return;
 
-	MovableObject::move(dir);
+	DynamicObject::move(dir);
 }
 
 void Mario::jump(bool on)
@@ -87,18 +93,18 @@ void Mario::jump(bool on)
 
 	if (on && !midair())
 	{
-		velAdd(Vec2Df(0, -_y_vel_jmp));
+		velAdd(Vec2Df(0, -_yJumpImpulse));
 
 		if (std::abs(_vel.x) < 9)
-			_y_gravity = 25;
+			_yGravityForce = 25;
 		else
-			_y_gravity = 21;
+			_yGravityForce = 21;
 
 		_jumping = true;
 		Audio::instance()->playSound("jump-small");
 	}
 	else if (!on && midair() && !_dying)
-		_y_gravity = 100;
+		_yGravityForce = 100;
 }
 
 void Mario::run(bool on)
@@ -108,14 +114,30 @@ void Mario::run(bool on)
 
 	if (on)
 	{
-		_x_vel_max = 10;
-		_x_acc = 13;
+		_xVelMax = 10;
+		_xMoveForce = 13;
 	}
 	else
 	{
-		_x_vel_max = 6;	
-		_x_acc = 8;
+		_xVelMax = 6;	
+		_xMoveForce = 8;
 	}
+}
+
+void Mario::attack()
+{
+	if (_attacking || _dying || _dead)
+		return;
+
+	Audio::instance()->playSound("fireball");
+
+	Sword* sword = new Sword(this);
+	_attacking = true;
+	schedule("attack_off", dynamic_cast<AnimatedSprite*>(sword->sprite())->duration(), [this, sword]()
+		{
+			_attacking = false;
+			_scene->killObject(sword);
+		});
 }
 
 void Mario::die()
@@ -125,21 +147,21 @@ void Mario::die()
 
 	_dying = true;
 	_collidable = false;
-	_y_gravity = 0;
+	_yGravityForce = 0;
 	_vel = { 0,0 };
-	_x_dir = Direction::NONE;
+	_xDir = Direction::NONE;
 	Audio::instance()->haltMusic();
 	Audio::instance()->playSound("death");
-	Game::instance()->freeze(true);
+	dynamic_cast<PlatformerGame*>(Game::instance())->freeze(true);
 
 	schedule("dying", 0.5f, [this]()
 		{
-			_y_gravity = 25;
-			velAdd(Vec2Df(0, -_y_vel_jmp));
+			_yGravityForce = 25;
+			velAdd(Vec2Df(0, -_yJumpImpulse));
 			schedule("die", 3, [this]()
 				{
 					_dead = true;
-					Game::instance()->gameover();
+					dynamic_cast<PlatformerGame*>(Game::instance())->gameover();
 				});
 		});
 }
@@ -147,5 +169,5 @@ void Mario::die()
 void Mario::hurt()
 {
 	// TODO: powerdown (e.g. if Mario is big, becomes small)
-	//die();
+	die();
 }

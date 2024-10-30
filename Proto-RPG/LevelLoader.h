@@ -13,7 +13,7 @@
 
 namespace agp
 {
-	class GameScene;
+	class Scene;
 	class LevelLoader;
 }
 
@@ -31,5 +31,5 @@ class agp::LevelLoader
 		// singleton
 		static LevelLoader* instance();
 
-		GameScene* load(const std::string& name);
+		Scene* load(const std::string& name);
 };

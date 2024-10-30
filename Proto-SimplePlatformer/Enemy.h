@@ -24,13 +24,10 @@ class agp::Enemy : public DynamicObject
 
 		bool _smashable;
 		bool _dying;
-		Direction _facingDir;
 
 	public:
 
 		Enemy(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0);
-
-		Direction facingDir() { return _facingDir; }
 
 		// actions
 		//virtual void stomp();					// mario jumps on top of the enemy

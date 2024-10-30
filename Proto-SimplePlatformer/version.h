@@ -11,15 +11,18 @@
 
 namespace agp
 {
-    // Version components
-    constexpr int VERSION_MAJOR = 1;
-    constexpr int VERSION_MINOR = 0;
-    constexpr int VERSION_PATCH = 0;
+	namespace SimplePlatformer
+	{
+		// Version components
+		constexpr int VERSION_MAJOR = 1;
+		constexpr int VERSION_MINOR = 1;
+		constexpr int VERSION_PATCH = 0;
 
-    // Function to retrieve the version string
-    inline static std::string VERSION() {
-        return std::to_string(VERSION_MAJOR) + "." +
-               std::to_string(VERSION_MINOR) + "." +
-               std::to_string(VERSION_PATCH);
-    }
+		// Function to retrieve the version string
+		inline static std::string VERSION() {
+			return std::to_string(VERSION_MAJOR) + "." +
+				   std::to_string(VERSION_MINOR) + "." +
+				   std::to_string(VERSION_PATCH);
+		}
+	}
 }

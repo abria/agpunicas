@@ -11,19 +11,19 @@ Hammer::Hammer(Scene* scene, const PointF& pos, Enemy* thrower)
 	_smashable = false;
 	_thrower = thrower;
 	_throwing = false;
-	_y_gravity = 0;
-	_x_dec_rel = 0;
-	_x_dec_skd = 0;
-	_x_acc = 1000;
-	_x_vel_max = 4;
-	_x_dir = Direction::NONE;
+	_yGravityForce = 0;
+	_xFrictionForce = 0;
+	_xSkiddingForce = 0;
+	_xMoveForce = 1000;
+	_xVelMax = 4;
+	_xDir = Direction::NONE;
 
 	schedule("throwing_on", 0.5f, [this]()
 		{
 			_throwing = true;
-			_y_gravity = 25;
+			_yGravityForce = 25;
 			velAdd(Vec2Df(0, -9));
-			_x_dir = _thrower->facingDir();
+			_xDir = _thrower->facingDir();
 			_angularVelocity = 1000;
 		});
 }

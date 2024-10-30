@@ -11,7 +11,7 @@
 #include "SpriteFactory.h"
 #include "RenderableObject.h"
 #include "StaticObject.h"
-#include "GameScene.h"
+#include "RPGGameScene.h"
 #include "Link.h"
 #include "Trigger.h"
 #include <iostream>
@@ -29,13 +29,13 @@ LevelLoader::LevelLoader()
 	// e.g. load level maps from disk
 }
 
-GameScene* LevelLoader::load(const std::string& name)
+Scene* LevelLoader::load(const std::string& name)
 {
 	SpriteFactory* spriteLoader = SpriteFactory::instance();
 
 	if (name == "overworld")
 	{
-		GameScene* world = new GameScene(RectF(0, 0, 256, 256), { 16,16 }, 1 / 100.0f);
+		RPGGameScene* world = new RPGGameScene(RectF(0, 0, 256, 256), { 16,16 }, 1 / 100.0f);
 
 		new RenderableObject(world, RectF(0, 0, 256, 256), spriteLoader->get("overworld"));
 		

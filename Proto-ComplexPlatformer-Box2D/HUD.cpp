@@ -15,7 +15,7 @@
 using namespace agp;
 
 HUD::HUD()
-	: UIScene(RectF(0, 0, 36, 20))
+	: UIScene(RectF(0, 0, 36, 20), { 32,32 })
 {
 	setBackgroundColor(Color(0, 0, 0, 0));
 

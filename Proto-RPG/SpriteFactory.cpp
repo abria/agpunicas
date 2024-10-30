@@ -77,15 +77,15 @@ Sprite* SpriteFactory::get(const std::string& id)
 	else if (id == "link_walk_DOWN")
 		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][0].begin() + 1, _autoTiles["player"][0].begin() + 8 }, 20, Direction::UP);
 	else if (id == "link_attack_DOWN")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][1].begin(), _autoTiles["player"][1].begin() + 6 }, 44, Direction::UP, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 });
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][1].begin(), _autoTiles["player"][1].begin() + 6 }, 44, Direction::UP, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
 	else if (id == "link_walk_UP")
 		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][4].begin() + 1, _autoTiles["player"][4].begin() + 8 }, 20, Direction::UP);
 	else if (id == "link_attack_UP")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][5].begin(), _autoTiles["player"][5].begin() + 6 }, 44, Direction::UP, {0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5});
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][5].begin(), _autoTiles["player"][5].begin() + 6 }, 44, Direction::UP, {0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5}, 1);
 	else if (id == "link_walk_RIGHT" || id == "link_walk_LEFT")
 		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][2].begin() + 1, _autoTiles["player"][2].begin() + 8 }, 20, Direction::UP);
 	else if (id == "link_attack_RIGHT" || id == "link_attack_LEFT")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][3].begin(), _autoTiles["player"][3].begin() + 6 }, 44, id == "link_attack_RIGHT" ? Direction::RIGHT : Direction::LEFT, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 });
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][3].begin(), _autoTiles["player"][3].begin() + 6 }, 44, id == "link_attack_RIGHT" ? Direction::RIGHT : Direction::LEFT, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
 	else if (id == "link_sword_RIGHT")
 		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][9].begin(), _autoTiles["player"][9].begin() + 9 }, 44, Direction::NONE, {0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8});
 	else if (id == "hud_coin")

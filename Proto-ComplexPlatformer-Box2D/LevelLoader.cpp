@@ -10,7 +10,7 @@
 #include "LevelLoader.h"
 #include "SpriteFactory.h"
 #include "RenderableObject.h"
-#include "GameScene.h"
+#include "ComplexPlatformerGameScene.h"
 #include "OverlayScene.h"
 #include "StaticObject.h"
 #include "Terrain.h"
@@ -33,15 +33,15 @@ LevelLoader::LevelLoader()
 	// e.g. load level maps from disk
 }
 
-GameScene* LevelLoader::load(const std::string& name)
+Scene* LevelLoader::load(const std::string& name)
 {
 	SpriteFactory* spriteLoader = SpriteFactory::instance();
 	
-	GameScene* world = nullptr;
+	ComplexPlatformerGameScene* world = nullptr;
 
 	if (name == "level0")
 	{
-		world = new GameScene(RectF(0, 0, 96, 13, true), 1 / 100.0f);
+		world = new ComplexPlatformerGameScene(RectF(0, 0, 96, 13, true), {32, 32}, 1 / 100.0f);
 
 		// game foreground
 		new RenderableObject(world, world->rect(), spriteLoader->get("fg_ground"), 0);

@@ -8,7 +8,7 @@
 // ----------------------------------------------------------------
 
 #include "RigidObject.h"
-#include "GameScene.h"
+#include "ComplexPlatformerGameScene.h"
 #include "sdlUtils.h"
 #include "View.h"
 
@@ -27,7 +27,7 @@ RigidObject::RigidObject(GameScene* scene, const RotatedRectF& obb, Sprite* spri
 	bodyDef.fixedRotation = false;
 	bodyDef.userData = this;
 	bodyDef.type = type;
-	_bodyId = b2CreateBody(scene->worldId(), &bodyDef);
+	_bodyId = b2CreateBody(dynamic_cast<ComplexPlatformerGameScene*>(scene)->worldId(), &bodyDef);
 }
 
 void RigidObject::update(float dt)
@@ -42,9 +42,9 @@ void RigidObject::update(float dt)
 	_angle = rad2deg(_obb.angle);
 }
 
-void RigidObject::render(SDL_Renderer* renderer, Transform camera)
+void RigidObject::draw(SDL_Renderer* renderer, Transform camera)
 {
-	RenderableObject::render(renderer, camera);
+	RenderableObject::draw(renderer, camera);
 
 	GameScene* gameScene = dynamic_cast<GameScene*>(_scene);
 	if (gameScene && gameScene->collidersVisible())

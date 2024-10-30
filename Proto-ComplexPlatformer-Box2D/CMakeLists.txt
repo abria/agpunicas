@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB sources *.h *.hpp *.cpp *.c)
 
 # libraries
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../core ${CMAKE_CURRENT_BINARY_DIR}/core_build)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_mixer REQUIRED)
@@ -38,10 +39,11 @@ endif()
 # Include Box2D headers
 include_directories(${BOX2D_INCLUDE_DIR})
 
+
 # utils (header-only) library
-get_filename_component(PARENT_DIR ../ ABSOLUTE)
-include_directories(${PARENT_DIR}/utils)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core)
 
 # create exe and link
 add_executable(${project_name} ${sources})
-target_link_libraries(${project_name} SDL2::SDL2main SDL2::SDL2 SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer $<IF:$<CONFIG:Debug>,${BOX2D_LIB_DIR_DEBUG},${BOX2D_LIB_DIR_RELEASE}>)
+target_link_libraries(${project_name} SDL2::SDL2main SDL2::SDL2 SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer agpcore $<IF:$<CONFIG:Debug>,${BOX2D_LIB_DIR_DEBUG},${BOX2D_LIB_DIR_RELEASE}>)

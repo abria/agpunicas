@@ -45,7 +45,7 @@ void KinematicObject::update(float dt)
 
 bool KinematicObject::collision(CollidableObject* with, Direction fromDir)
 {
-	_focused = true;
+	//_focused = true;
 
 	DynamicObject* dobj = with->to<DynamicObject*>();
 	if (dobj)

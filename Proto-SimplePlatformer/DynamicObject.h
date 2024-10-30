@@ -20,10 +20,19 @@ namespace agp
 //   since DynamicObject accepts (and resolves) collision with any CollidableObject
 class agp::DynamicObject : public CollidableObject
 {
+	protected:
+
+		Direction _facingDir;
+
 	public:
 
 		DynamicObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0);
 		virtual ~DynamicObject() {}
+
+		Direction facingDir() const { return _facingDir; }
+
+		// overrides MovableObject's move (+facing dir)
+		void move(Direction xDir) override;
 
 		virtual std::string name() override { 
 			return strprintf("DynamicObject[%d]", _id); 

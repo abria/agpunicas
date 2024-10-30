@@ -10,26 +10,26 @@
 #pragma once
 
 #include <string>
+#include "Singleton.h"
 
 namespace agp
 {
-	class GameScene;
+	class Scene;
 	class LevelLoader;
 }
 
 // LevelLoader (singleton)
 // - provides game scene creation methods
-class agp::LevelLoader
+class agp::LevelLoader : public Singleton<LevelLoader>
 {
+	friend class Singleton<LevelLoader>;
+
 	protected:
 
-		// constructor inaccesible due to singleton
+		// constructor accessible only to Singleton (thanks to friend declaration)
 		LevelLoader();
 
 	public:
 
-		// singleton
-		static LevelLoader* instance();
-
-		GameScene* load(const std::string& name);
+		Scene* load(const std::string& name);
 };

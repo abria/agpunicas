@@ -1,7 +1,7 @@
 #include "HammerBrother.h"
 #include "SpriteFactory.h"
 #include "Hammer.h"
-#include "GameScene.h"
+#include "PlatformerGameScene.h"
 #include "Mario.h"
 #include <random>
 
@@ -21,12 +21,12 @@ HammerBrother::HammerBrother(Scene* scene, const PointF& pos)
 	_chasing = false;
 
 	// default physics
-	_y_gravity = 25;
-	_x_acc = 1000;
-	_x_dec_rel = 0;
-	_x_dec_skd = 1000;
-	_x_vel_max = 1;
-	_x_dir = Direction::LEFT;
+	_yGravityForce = 25;
+	_xMoveForce = 1000;
+	_xFrictionForce = 0;
+	_xSkiddingForce = 1000;
+	_xVelMax = 1;
+	_xDir = Direction::LEFT;
 	_halfRangeX = 0.7f;
 
 	// scripting (hammer spawn loop)
@@ -47,7 +47,7 @@ HammerBrother::HammerBrother(Scene* scene, const PointF& pos)
 			{
 				if (rand() % 2)					// 50% probability full jump
 				{
-					velAdd(Vec2Df(0, -_y_vel_jmp));
+					velAdd(Vec2Df(0, -_yJumpImpulse));
 					_collidable = false; 
 					schedule("collidable_on", 0.5f, [this]() {_collidable = true; });
 				}
@@ -64,7 +64,7 @@ HammerBrother::HammerBrother(Scene* scene, const PointF& pos)
 	schedule("chasing", 15.0f + rand() % 10, [this]
 		{
 			_chasing = true;
-			_x_vel_max *= 2;
+			_xVelMax *= 2;
 		});
 }
 
@@ -72,7 +72,12 @@ void HammerBrother::update(float dt)
 {
 	Enemy::update(dt);
 
-	Mario* mario = dynamic_cast<GameScene*>(_scene)->player();
+	Mario* mario = dynamic_cast<Mario*>(dynamic_cast<PlatformerGameScene*>(_scene)->player());
+
+	//_facingDir = Direction::NONE;
+	//_x_dir = Direction::NONE;
+	//_vel.x = 0;
+	//return;
 
 	// state changes logic
 	if(mario->rect().center().x > _rect.center().x)
@@ -82,11 +87,11 @@ void HammerBrother::update(float dt)
 	
 	// horizontal movement
 	if (_chasing)
-		_x_dir = _facingDir;
+		_xDir = _facingDir;
 	else if (_rect.center().x >= _pivot.x + _halfRangeX)
-		_x_dir = Direction::LEFT;
+		_xDir = Direction::LEFT;
 	else if(_rect.center().x <= _pivot.x - _halfRangeX)
-		_x_dir = Direction::RIGHT;
+		_xDir = Direction::RIGHT;
 
 	// animations
 	if(!_dying)

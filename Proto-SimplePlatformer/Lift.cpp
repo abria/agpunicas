@@ -12,16 +12,16 @@ Lift::Lift(Scene* scene, const RectF& rect, Sprite* sprite, bool vertical, float
 
 	if (_vertical)
 	{
-		_y_gravity = 3.f;
-		_y_vel_max = 3;
-		_y_vel_min = 0;
+		_yGravityForce = 3.f;
+		_yVelMax = 3;
+		_yVelMin = 0;
 	}
 	else
 	{
-		_y_gravity = 0;
-		_x_acc = 3.f;
-		_x_dec_skd = 3.f;
-		_x_vel_max = 3;
+		_yGravityForce = 0;
+		_xMoveForce = 3.f;
+		_xSkiddingForce = 3.f;
+		_xVelMax = 3;
 		move(Direction::RIGHT);
 	}
 }
@@ -31,9 +31,9 @@ void Lift::update(float dt)
 	if (_vertical)
 	{
 		if (_rect.pos.y < _r0)
-			_y_gravity = 3.f;
+			_yGravityForce = 3.f;
 		else if (_rect.pos.y > _r1)
-			_y_gravity = -3.f;
+			_yGravityForce = -3.f;
 	}
 	else
 	{

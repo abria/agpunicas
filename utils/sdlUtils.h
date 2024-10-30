@@ -231,7 +231,10 @@ namespace agp
         std::vector< std::vector < RectI > > & rects,
         const Color& backgroundMask,
         const Color & spriteMask,
-        int yDistanceThreshold = 5)
+        int yDistanceThreshold = 5,
+        bool detectCornerWithBackgroundOnly = false,
+        bool alignYCenters = true,
+        bool verbose = false)
     {
         SDL_Surface* surf = IMG_Load(filepath.c_str());
         if (!surf)
@@ -260,7 +263,7 @@ namespace agp
                 Color pixelW  = x ? Color(row     + (x - 1) * bpp) : backgroundMask;
 
                 // up-left corner detection
-                if (pixel != backgroundMask &&
+                if ((detectCornerWithBackgroundOnly ? pixel != backgroundMask : pixel == spriteMask) &&
                     pixelN == backgroundMask &&
                     pixelNW == backgroundMask &&
                     pixelW == backgroundMask)
@@ -294,9 +297,9 @@ namespace agp
         SDL_UnlockSurface(surf);
 
         // group rects row-wise
-        std::sort(allRects.begin(), allRects.end(), [yDistanceThreshold](const RectI& a, const RectI& b) 
+        std::sort(allRects.begin(), allRects.end(), [yDistanceThreshold, alignYCenters](const RectI& a, const RectI& b)
         {
-	        return std::abs(a.center().y - b.center().y) > yDistanceThreshold ? a.center().y < b.center().y : a.pos.x < b.pos.x;
+	        return std::abs(alignYCenters ? a.center().y - b.center().y : a.pos.y - b.pos.y) > yDistanceThreshold ? a.center().y < b.center().y : a.pos.x < b.pos.x;
 	    });
         rects.push_back(std::vector <RectI>());
         for (int k = 0; k < allRects.size(); k++)
@@ -306,9 +309,18 @@ namespace agp
             rects[rects.size()-1].push_back(allRects[k]);
         }
 
-       /* printf("\n");
-        for (int i = 0; i < rects.size(); i++)
-            printf("[%02d]: %d sprites\n", i, rects[i].size());*/
+        if (verbose)
+        {
+            printf("\nloadTextureAutoDetect:\n");
+            printf("extracted %d rects in total\n", int(allRects.size()));
+            for (int i = 0; i < rects.size(); i++)
+            {
+                printf("row %02d: %d rects\n", i, int(rects[i].size()));
+                for (int j = 0; j < rects[i].size(); j++)
+                    printf("[%d %d %d %d] ", rects[i][j].pos.x, rects[i][j].pos.y, rects[i][j].size.x, rects[i][j].size.y);
+                printf("\n");
+            }
+        }
 
         // set transparent color
         SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, spriteMask.r, spriteMask.g, spriteMask.b));

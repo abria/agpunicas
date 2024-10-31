@@ -46,7 +46,6 @@ void Scene::killObject(Object* obj)
 
 void Scene::changeLayerObject(Object* obj, int newLayer)
 {
-	printf("Changing layer of %s from %d to %d\n", obj->name().c_str(), obj->layer(), newLayer);
 	_changeLayerObjects.push_back(std::pair<int, Object*>(newLayer, obj));
 }
 
@@ -71,6 +70,7 @@ void Scene::refreshObjects()
 		_sortedObjects[p.first].emplace_back(p.second);
 		p.second->_layer = p.first;
 	}
+	_changeLayerObjects.clear();
 }
 
 std::list<Object*> Scene::objects()

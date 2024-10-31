@@ -76,8 +76,8 @@ void Sword::update(float dt)
 	else if (_facingDir == Direction::UP)
 		_collider.adjust(std::min(0.1f + tparam, 0.9f), std::max(2 - tparam * 2, 0.2f), std::max(-tparam - 0.1f, -0.9f), 0);
 
-	//if (animSprite->currentTime() > 0.5f && _layer < _link->layer())
-	//	_scene->changeLayerObject(this, _link->layer() + 1);
+	if (animSprite->currentTime() > 0.5f && _layer < _link->layer())
+		_scene->changeLayerObject(this, _link->layer() + 1);
 
 	DynamicObject::update(dt);
 }

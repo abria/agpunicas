@@ -15,6 +15,19 @@ Header-only library for game programming utils, including:
 - file/folder management (get files in folder, etc.)
 - collision (SAT, Swept AABB vs. AABB, Sweept AABB vs. Line, etc.)
 
+## Core
+Rendering+audio engine based on SDL, utilized by all game prototypes.
+- game loop with semi-fixed timestep
+- Scene/View/Window framework with automatic scaling to screen resolution and scene layering
+- separation between UI scenes and game scenes
+- basic object model with positioning, rendering, updating, and scheduling methods
+- sprite system (animations, tiling, filling) with on-the-fly GPU blitting from spritesheets
+- camera (both manual and follows-the-player)
+- audio system with playable/resumable sounds and musics
+- parallax and overlay scenes layering
+
+<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Core.png">
+
 ## Proto-SimplePlatformer
 Game prototype for simple 2D platformers with SDL and custom physics engine.
 For demonstration purposes, a small portion of SuperMarioBros (NES) is implemented.
@@ -29,15 +42,11 @@ For demonstration purposes, a small portion of SuperMarioBros (NES) is implement
 - AABB colliders
 - bug-free sliding collision resolution
 - collision filters (type-based)
-- semi-fixed timestep
 - configurable linear dynamics with simple friction and skidding
 - static, dynamic, kinematic object categories
 - all collidable objects are informed when collision starts (with normals and metadatas)
-- sprite system with on-the-fly GPU blitting from spritesheets
-- triggers (sensors) and schedulers
+- triggers (a.k.a. sensors)
 - basic UI (HUD, menus)
-- basic Audio (sounds and music with stop/resume)
-- Scene/View/Window framework with Scene (world) -> View -> Screen transforms
 
 #### Limitations
 - no "onCollisionEnd" events
@@ -45,7 +54,6 @@ For demonstration purposes, a small portion of SuperMarioBros (NES) is implement
 - no slopes
 - teleports break CCD and must be handled carefully
 - narrow collision detection phase is based on linear search with view box intersection
-
 
 ## Proto-ComplexPlatformer
 Game prototype for complex 2D platformers with SDL and Box2D physics engine.
@@ -58,15 +66,11 @@ Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 #### Features
 - Box2D powered physics and collision detection/resolution
 - compound colliders
-- semi-fixed timestep
 - static, dynamic, kinematic object categories
 - all collidable objects are informed when collision starts and ends (with normals and metadatas)
-- sprite system with on-the-fly GPU blitting from spritesheets
-- triggers (sensors) and schedulers
+- triggers (a.k.a. sensors)
 - basic UI (HUD, menus)
-- basic Audio (sounds and music with stop/resume)
-- Scene/View/Window framework with Scene (world) -> View -> Screen transforms
-- parallax and overlay scenes layering
+- example parallax and overlay scenes
 - example player physics with walking, jumping, dashing and tangent force compensation on slopes
 - example compound kinematic object (gear)
 - example dynamic object (box)

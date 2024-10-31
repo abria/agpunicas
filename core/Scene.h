@@ -11,6 +11,7 @@
 #include <map>
 #include <vector>
 #include <list>
+#include <set>
 #include "geometryUtils.h"
 #include "graphicsUtils.h"
 
@@ -32,12 +33,15 @@ class agp::Scene
 
 		typedef std::map< int, std::vector< Object*> > ObjectsMap;
 		typedef std::list< Object*> ObjectsList;
+		typedef std::set< Object*> ObjectsSet;
+		typedef std::list< std::pair<int, Object*>> ObjectsLayersList;
 
 	protected:
-
+		
 		ObjectsMap  _sortedObjects;	// objects sorted by ascending z-level
-		ObjectsList _newObjects;	// new objects that need to be added
-		ObjectsList _deadObjects;	// dead objects that need to be deallocated
+		ObjectsSet _newObjects;		// new objects that need to be added
+		ObjectsSet _deadObjects;	// dead objects that need to be deallocated
+		ObjectsLayersList _changeLayerObjects;	// objects that need to change layer
 		RectF _rect;				// the scene (world) rectangle
 		Point _pixelUnitSize;		// unit size in pixels
 		Color _backgroundColor;		// background color
@@ -72,6 +76,7 @@ class agp::Scene
 		// add/remove objects
 		void newObject(Object* obj);
 		void killObject(Object* obj);
+		void changeLayerObject(Object* obj, int newLayer);
 		void refreshObjects();
 
 		// objects selection methods

@@ -17,6 +17,7 @@ namespace agp
 }
 
 // Link's sword class.
+// - starts brandishing when spawned
 class agp::Sword : public DynamicObject
 {
 	protected:

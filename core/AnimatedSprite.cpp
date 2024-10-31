@@ -27,6 +27,7 @@ AnimatedSprite::AnimatedSprite(
 		_frames = frames;
 
 	_loops = loops;
+	_loopsStored = loops;
 	_FPS = FPS;
 	_frameIterator = 0;
 }
@@ -61,4 +62,5 @@ void AnimatedSprite::update(float dt)
 void AnimatedSprite::reset()
 {
 	_frameIterator = 0;
+	_loops = _loopsStored;
 }

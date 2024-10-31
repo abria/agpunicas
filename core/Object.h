@@ -38,6 +38,8 @@ class agp::Object
 		bool _freezed;	// if false, does not update
 		std::map<std::string, Scheduler> _schedulers;
 
+		friend class Scene;
+
 	public:
 
 		Object(Scene* scene, const RectF& rect, int layer = 0);

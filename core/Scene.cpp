@@ -36,33 +36,40 @@ Scene::~Scene()
 
 void Scene::newObject(Object* obj)
 {
-	_newObjects.push_front(obj);
+	_newObjects.insert(obj);
 }
 
 void Scene::killObject(Object* obj)
 {
-	_deadObjects.push_back(obj);
+	_deadObjects.insert(obj);
+}
+
+void Scene::changeLayerObject(Object* obj, int newLayer)
+{
+	printf("Changing layer of %s from %d to %d\n", obj->name().c_str(), obj->layer(), newLayer);
+	_changeLayerObjects.push_back(std::pair<int, Object*>(newLayer, obj));
 }
 
 void Scene::refreshObjects()
 {
-	while (!_newObjects.empty())
-	{
-		Object* obj = _newObjects.back();
+	for(auto& obj : _newObjects)
 		_sortedObjects[obj->layer()].emplace_back(obj);
+	_newObjects.clear();
 
-		_newObjects.pop_back();
-	}
-
-	while (!_deadObjects.empty())
+	for (auto& obj : _deadObjects)
 	{
-		Object* obj = _deadObjects.back();
-
 		auto& layer = _sortedObjects[obj->layer()];
 		layer.erase(std::remove(layer.begin(), layer.end(), obj), layer.end());
 		delete obj;
+	}
+	_deadObjects.clear();
 
-		_deadObjects.pop_back();
+	for (auto& p : _changeLayerObjects)
+	{
+		auto& layer = _sortedObjects[p.second->layer()];
+		layer.erase(std::remove(layer.begin(), layer.end(), p.second), layer.end());
+		_sortedObjects[p.first].emplace_back(p.second);
+		p.second->_layer = p.first;
 	}
 }
 

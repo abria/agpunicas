@@ -29,7 +29,7 @@ SpriteFactory::SpriteFactory()
 	}
 
 	SDL_Renderer* renderer = Game::instance()->window()->renderer();
-	_spriteSheets["mario"] = loadTextureAutoDetect(renderer, "sprites/mario.png", _autoTiles["mario"], {27, 89, 153}, { 147, 187, 236 }, 5, false, true, true);
+	_spriteSheets["mario"] = loadTextureAutoDetect(renderer, "sprites/mario.png", _autoTiles["mario"], {27, 89, 153}, { 147, 187, 236 });
 	_spriteSheets["enemies"] = loadTextureAutoDetect(renderer, "sprites/enemies.png", _autoTiles["enemies"], { 27, 89, 153 }, { 147, 187, 236 }, 17);
 	_spriteSheets["hud"] = loadTexture(renderer, "sprites/hud.png", { 147, 187, 236 });
 	_spriteSheets["tiles"] = loadTextureAutoDetect(renderer, "sprites/stage_tiles.png", _autoTiles["tiles"], { 27, 89, 153 }, { 147, 187, 236 }, 5, true, false);

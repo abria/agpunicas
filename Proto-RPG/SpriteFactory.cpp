@@ -87,7 +87,7 @@ Sprite* SpriteFactory::get(const std::string& id)
 	else if (id == "link_attack_RIGHT" || id == "link_attack_LEFT")
 		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][3].begin(), _autoTiles["player"][3].begin() + 6 }, 44, id == "link_attack_RIGHT" ? Direction::RIGHT : Direction::LEFT, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
 	else if (id == "link_sword_RIGHT")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][9].begin(), _autoTiles["player"][9].begin() + 9 }, 44, Direction::NONE, {0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8});
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][9].begin(), _autoTiles["player"][9].begin() + 9 }, 44, Direction::NONE, {0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8}, 1);
 	else if (id == "hud_coin")
 	{
 		rects.push_back(moveBy(hud_coin, 0, 0));

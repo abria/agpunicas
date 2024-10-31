@@ -22,7 +22,7 @@ RPGGame::RPGGame() : Game("RPG Game", { 600,600 }, 1.216f)
 void RPGGame::init()
 {
 	pushScene(LevelLoader::instance()->load("overworld"));
-	_hud = new HUD();
-	pushScene(_hud);
+	//_hud = new HUD();
+	//pushScene(_hud);
 	pushScene(Menu::mainMenu());
 }

@@ -69,8 +69,14 @@ void Link::update(float dt)
 
 void Link::attack()
 {
+	Audio::instance()->playSound("fighter sword 1");
+
 	if (_attacking)
-		return;
+	{
+		_sprite->reset();
+		if (_sword)
+			_scene->killObject(_sword);
+	}
 
 	_sword = new Sword(this);
 	_attacking = true;

@@ -27,6 +27,7 @@ class agp::AnimatedSprite : public Sprite
 		float _frameIterator;
 		float _FPS;
 		int _loops;
+		int _loopsStored;
 
 	public:
 
@@ -40,12 +41,12 @@ class agp::AnimatedSprite : public Sprite
 
 		float FPS() const { return _FPS; }
 		void setFPS(float fps) { _FPS = fps; }
-		float duration() { return _frames.size() / _FPS; }
-		float currentTime() { return _frameIterator / _frames.size(); }
+		float duration() const { return _frames.size() / _FPS; }
+		float currentTime() const { return _frameIterator / _frames.size(); }
 
 		// extends update method (+animations)
 		virtual void update(float dt) override;
 
-		// extends reset method (+ restart frameIterator )
+		// extends reset method (+restart frameIterator )
 		virtual void reset() override;
 };

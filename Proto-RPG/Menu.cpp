@@ -22,7 +22,7 @@ MenuItem::MenuItem(Menu* container, int index, const std::string& text, std::fun
 			container->menuRect().left(), 
 			container->menuRect().top() + 0.5f + 0.7f * index, 
 			container->menuRect().size.x, 0.5f),
-		SpriteFactory::instance()->getText(' ' + text, { 0.5f, 0.5f }, 0, ' ', false))
+		SpriteFactory::instance()->getText(' ' + text, { 0.5f, 0.5f }, 0, ' ', false), 1)
 {
 	_container = container;
 	_index = index;

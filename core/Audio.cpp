@@ -26,6 +26,7 @@ Audio::Audio()
 	for (auto& f : soundFiles)
 	{
 		std::string name = getFileName(f, false);
+		//printf("sound: \"%s\"\n", name.c_str());
 
 		Mix_Chunk* chunk = Mix_LoadWAV(("sounds/" + f).c_str());
 		if (!chunk)
@@ -38,6 +39,7 @@ Audio::Audio()
 	for (auto& f : musicFiles)
 	{
 		std::string name = getFileName(f, false);
+		//printf("music: \"%s\"\n", name.c_str());
 
 		Mix_Music* music = Mix_LoadMUS(("musics/" + f).c_str());
 		if (!music)

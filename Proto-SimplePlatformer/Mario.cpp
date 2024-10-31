@@ -27,7 +27,7 @@ Mario::Mario(Scene* scene, const PointF& pos)
 	_running = false;
 	_dying = false;
 	_dead = false;
-	_invincible = false;
+	_invincible = true;
 	_attacking = false;
 
 	_xLastNonZeroVel = 0;
@@ -129,7 +129,7 @@ void Mario::attack()
 	if (_attacking || _dying || _dead)
 		return;
 
-	Audio::instance()->playSound("fireball");
+	Audio::instance()->playSound("sword");
 
 	Sword* sword = new Sword(this);
 	_attacking = true;
@@ -169,5 +169,6 @@ void Mario::die()
 void Mario::hurt()
 {
 	// TODO: powerdown (e.g. if Mario is big, becomes small)
-	die();
+	if(!_invincible)
+		die();
 }

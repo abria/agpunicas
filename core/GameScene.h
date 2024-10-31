@@ -66,7 +66,7 @@ class agp::GameScene : public Scene
 		//virtual std::list<Object*> objects(const RectF& cullingRect) override;
 
 		// overrides Scene's render (+overlay scenes)
-		virtual void render();
+		virtual void render() override;
 
 		// implements game scene update logic (+overlay, controls, +integration, +camera)
 		virtual void update(float timeToSimulate) override;

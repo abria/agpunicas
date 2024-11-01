@@ -37,7 +37,7 @@ namespace agp
     static inline void DrawCapsule(SDL_Renderer* renderer, const PointF& centerDown, const PointF& centerUp, float radius, const Color& color, int nSegments = 100)
     {
        
-        float angle = std::atan2f(centerUp.y - centerDown.y, centerUp.x - centerDown.x) + PI/2;
+        float angle = std::atan2(centerUp.y - centerDown.y, centerUp.x - centerDown.x) + PI/2;
         DrawCircle(renderer, centerUp, radius, color, nSegments, angle-PI, angle);
         DrawCircle(renderer, centerDown, radius, color, nSegments, angle, PI+angle);
 

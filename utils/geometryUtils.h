@@ -319,7 +319,7 @@ namespace agp
 			size = { upperEdgeVec.mag(), height };
 			Vec2D<T> normal = upperEdgeVec.perp(yUpwards).norm();
 			center = upperEdge.start + (upperEdgeVec / 2) + (height / 2) * normal;
-			angle = std::atan2f(upperEdgeVec.y, upperEdgeVec.x);
+			angle = std::atan2(upperEdgeVec.y, upperEdgeVec.x);
 		}
 		RotatedRect(const RotatedRect& r) : center(r.center), size(r.size), angle(r.angle), yUp(r.yUp) {}
 

@@ -55,17 +55,6 @@ void Scene::refreshObjects()
 		_sortedObjects[obj->layer()].emplace_back(obj);
 	_newObjects.clear();
 
-	for (auto& obj : _deadObjects)
-	{
-		auto& layer = _sortedObjects[obj->layer()];
-		auto removeIt = std::remove(layer.begin(), layer.end(), obj);
-		if (removeIt == layer.end())
-			std::cerr << "Cannot remove " << obj->name() << " from layer " << obj->layer() <<": object not found\n";
-		layer.erase(removeIt, layer.end());
-		delete obj;
-	}
-	_deadObjects.clear();
-
 	for (auto& p : _changeLayerObjects)
 	{
 		auto& layer = _sortedObjects[p.second->layer()];
@@ -84,6 +73,17 @@ void Scene::refreshObjects()
 
 	}
 	_changeLayerObjects.clear();
+
+	for (auto& obj : _deadObjects)
+	{
+		auto& layer = _sortedObjects[obj->layer()];
+		auto removeIt = std::remove(layer.begin(), layer.end(), obj);
+		if (removeIt == layer.end())
+			std::cerr << "Cannot remove " << obj->name() << " from layer " << obj->layer() << ": object not found\n";
+		layer.erase(removeIt, layer.end());
+		delete obj;
+	}
+	_deadObjects.clear();
 }
 
 std::list<Object*> Scene::objects()

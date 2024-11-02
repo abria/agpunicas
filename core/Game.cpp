@@ -79,7 +79,7 @@ void Game::processEvents()
 	// if there are scenes to be deleted, better to do this after event dispatching
 	for (; _scenesToPop > 0; _scenesToPop--)
 		popScene();
-	// same for reset
+	
 	if (_reset)
 	{
 		_reset = false;

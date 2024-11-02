@@ -37,7 +37,9 @@ SpriteFactory::SpriteFactory()
 	SDL_Renderer* renderer = Game::instance()->window()->renderer();
 	_spriteSheets["overworld"] = loadTexture(renderer, "sprites/scene_overworld.png");
 	_spriteSheets["welcome"] = loadTexture(renderer, "sprites/welcome.png");
-	_spriteSheets["hud"] = loadTexture(renderer, "sprites/hud_mario.png", { 147, 187, 236 });
+	_spriteSheets["hud_mario"] = loadTexture(renderer, "sprites/hud_mario.png", { 147, 187, 236 });
+	_spriteSheets["hud"] = loadTexture(renderer, "sprites/hud.png", { 255, 0, 255 });
+	_spriteSheets["inventory"] = loadTexture(renderer, "sprites/menus3.png", { 0, 91, 127 });
 	_spriteSheets["player"] = loadTextureAutoDetect(renderer, "sprites/player_corrected.png", _autoTiles["player"], { 0, 128, 128 }, {0, 64, 64});
 }
 
@@ -58,8 +60,12 @@ Sprite* SpriteFactory::get(const std::string& id)
 	// single-frame sprites
 	if (id == "welcome")
 		return new Sprite(_spriteSheets["welcome"]);
+	else if (id == "hud")
+		return new Sprite(_spriteSheets["hud"], RectI(0, 0, 16 * 16, 16 * 14));
+	else if (id == "inventory")
+		return new Sprite(_spriteSheets["inventory"], RectI(8, 10, 16 * 16, 16 * 14));
 	else if (id == "gameover")
-		return new Sprite(_spriteSheets["hud"], RectI(260, 253, 16 * 16, 15 * 16));
+		return new Sprite(_spriteSheets["hud_mario"], RectI(260, 253, 16 * 16, 15 * 16));
 	else if (id == "overworld")
 		return new Sprite(_spriteSheets["overworld"]);
 	else if (id == "link_stand_DOWN")
@@ -72,6 +78,26 @@ Sprite* SpriteFactory::get(const std::string& id)
 		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0], Direction::LEFT);
 	else if (id == "link_shadow")
 		return new Sprite(_spriteSheets["player"], _autoTiles["player"][6].back(), Direction::UP);
+
+	// inventory
+	else if (id.compare(0, 15, "inventory_icon_") == 0)
+	{
+		std::string digits = id.substr(15);
+		int index = std::stoi(digits);
+		int y = index / 5;
+		int x = index % 5;
+		return new Sprite(_spriteSheets["inventory"], moveBy(RectI(116, 560, 16, 16), x, y, 16, 16, 56, 56));
+	}
+	else if (id.compare(0, 16, "inventory_label_") == 0)
+	{
+		std::string digits = id.substr(16);
+		int index = std::stoi(digits);
+		int y = index / 5;
+		int x = index % 5;
+		return new Sprite(_spriteSheets["inventory"], moveBy(RectI(92, 608, 64, 16), x, y, 64, 16, 8, 56));
+	}
+	else if (id == "inventory_selected")
+		return new Sprite(_spriteSheets["inventory"], RectI(464, 328, 32, 32));
 
 	// animated sprites
 	else if (id == "link_walk_DOWN")
@@ -96,7 +122,7 @@ Sprite* SpriteFactory::get(const std::string& id)
 		rects.push_back(moveBy(hud_coin, 1, 0, 8, 8));
 		rects.push_back(moveBy(hud_coin, 0, 0));
 		rects.push_back(moveBy(hud_coin, 0, 0));
-		return new AnimatedSprite(_spriteSheets["hud"], rects, 6);
+		return new AnimatedSprite(_spriteSheets["hud_mario"], rects, 6);
 	}
 
 	// tiled sprites
@@ -139,5 +165,5 @@ Sprite* SpriteFactory::getText(std::string text, const Vec2Df& size, int fillN, 
 			tiles.push_back(moveBy(hud_letter, 0, -5, 8, 8));	// empty space
 	}
 
-	return new TiledSprite(_spriteSheets["hud"], tiles, size);
+	return new TiledSprite(_spriteSheets["hud_mario"], tiles, size);
 }

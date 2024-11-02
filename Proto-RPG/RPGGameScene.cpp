@@ -15,6 +15,7 @@
 #include "timeUtils.h"
 #include "HUD.h"
 #include "RPGGame.h"
+#include "HUD.h"
 
 using namespace agp;
 
@@ -51,7 +52,7 @@ void RPGGameScene::event(SDL_Event& evt)
 	Link* link = dynamic_cast<Link*>(_player);
 
 	if (evt.type == SDL_KEYDOWN && (evt.key.keysym.scancode == SDL_SCANCODE_RETURN || evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE))
-		Game::instance()->pushScene(Menu::pauseMenu());
+		HUD::instance()->inventory(true);// Game::instance()->pushScene(Menu::pauseMenu());
 	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_A && !evt.key.repeat)
 		link->attack();
 }

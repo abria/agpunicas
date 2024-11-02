@@ -52,6 +52,7 @@ Menu::Menu(const PointF& position, float width, Menu* parent, bool closable)
 	_closable = closable;
 
 	// menu layer
+	_backgroundColor = { 0, 0, 0, 255 };
 	_menuBackground = new RenderableObject(this, _menuRect, Color(200, 76, 12, 255));
 
 	// default: modal menu (blocks all lower scenes)
@@ -113,7 +114,7 @@ Menu* Menu::mainMenu()
 {
 	Menu* menu = new Menu({ 3.0, 11 }, 10.0, 0, false);
 
-	new RenderableObject(menu, RectF(0, 2, 16, 13), SpriteFactory::instance()->get("welcome"), -1);
+	new RenderableObject(menu, RectF(0, -1, 16, 13), SpriteFactory::instance()->get("welcome"), -1);
 
 	menu->addItem("New Game", []() 
 	{

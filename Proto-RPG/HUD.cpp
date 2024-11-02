@@ -11,40 +11,47 @@
 #include "SpriteFactory.h"
 #include "View.h"
 #include "Game.h"
+#include "Item.h"
 
 using namespace agp;
 
 HUD::HUD()
-	: UIScene(RectF(0, 0, 16, 14), { 16, 16 })
+	: UIScene(RectF(0, 0, 256, 224), { 1, 1 })
 {
+	_fps = 0;
+	_inventoryOpened = false;
+	_inventoryTransition = false;
+	_blocking = false;
+
 	setBackgroundColor(Color(0, 0, 0, 0));
 
-	_score = 0;
-	_coins = 0;
-	_world = 1;
-	_level = 1;
-	_time = 400;
-	_fps = 0;
+	// backgrounds
+	new RenderableObject(this, RectF(0, 0, 256, 224), SpriteFactory::instance()->get("hud"));
+	new RenderableObject(this, RectF(0, -224, 256, 224), SpriteFactory::instance()->get("inventory"));
+	
+	// inventory items
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 5; j++)
+			_inventoryItems[i][j] = new Item(Item::Type(i * 5 + j));
 
-	new RenderableObject(this, RectF(1.5, 0.5, 2.5, 0.5), SpriteFactory::instance()->getText("MARIO", {0.5f, 0.5f}));
-	new RenderableObject(this, RectF(5.5, 0.5, 2, 0.5), SpriteFactory::instance()->getText("F-", { 0.5f, 0.5f }));
-	new RenderableObject(this, RectF(9.0, 0.5, 2.5, 0.5), SpriteFactory::instance()->getText("WORLD", { 0.5f, 0.5f }));
-	new RenderableObject(this, RectF(12.5, 0.5, 2, 0.5), SpriteFactory::instance()->getText("TIME", { 0.5f, 0.5f }));
-	new RenderableObject(this, RectF(6.0, 1, 0.5, 0.5), SpriteFactory::instance()->getText("*", { 0.5f, 0.5f }));
-	new RenderableObject(this, RectF(10, 1, 0.5, 0.5), SpriteFactory::instance()->getText("-", { 0.5f, 0.5f }));
+	// inventory graphics
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 5; j++)
+		{
+			_inventoryIcons[i][j] = new RenderableObject(this, RectI(29 + j * 24, -244 + 50 + i * 24, 16, 16), nullptr, 2);
+			_inventoryIcons[i][j]->setSprite(_inventoryItems[i][j]->icon());
+		}
+	_currentItemIcon = new RenderableObject(this, RectI(200, -244 + 41, 16, 16), Color(0, 0, 255), 1);
+	_currentItemLabel = new RenderableObject(this, RectI(176, -244+57, 64, 16), Color(0, 0, 255), 1);
+	_currentHUDItemIcon = new RenderableObject(this, RectI(40, 23, 16, 16), Color(0, 0, 255), 1);
+	_selectionIcon = new RenderableObject(this, RectI(0, 0, 32, 32), SpriteFactory::instance()->get("inventory_selected"), 1);
+	_currentItemIndex = { 0,0 }; 
+	moveItemSelection(0, 0);
 
-	_fpsObj = new RenderableObject(this, RectF(6.5, 0.5, 2, 0.5), SpriteFactory::instance()->getText(std::to_string(_fps), { 0.5f, 0.5f }));
-	_scoreObj = new RenderableObject(this, RectF(1.5, 1, 3, 0.5), SpriteFactory::instance()->getText(std::to_string(_score), { 0.5f, 0.5f }, 6, '0'));
-	_flashingCoinObj = new RenderableObject(this, RectF(5.5, 1, 0.5, 0.5), SpriteFactory::instance()->get("hud_coin"));
-	_coinsObj = new RenderableObject(this, RectF(6.5, 1, 1, 0.5), SpriteFactory::instance()->getText(std::to_string(_coins), { 0.5f, 0.5f }, 2, '0'));
-	_worldObj = new RenderableObject(this, RectF(9.5, 1, 0.5, 0.5), SpriteFactory::instance()->getText(std::to_string(_world), { 0.5f, 0.5f }));
-	_levelObj = new RenderableObject(this, RectF(10.5, 1, 0.5, 0.5), SpriteFactory::instance()->getText(std::to_string(_level), { 0.5f, 0.5f }));
-	_timeObj = new RenderableObject(this, RectF(13, 1, 1.5, 0.5), SpriteFactory::instance()->getText(std::to_string(int(round(_time))), { 0.5f, 0.5f }, 3, '0'));
-
-	// setup view (specific for super mario bros)
+	// SNES aspect ratio
 	_view = new View(this, _rect);
 	_view->setFixedAspectRatio(Game::instance()->aspectRatio());
-	_view->setRect(RectF(0, 0, 16, 15));
+	_view->setRect(RectF(0, 0, 256, 224));
 }
 
 // extends update logic (+time management)
@@ -55,20 +62,73 @@ void HUD::update(float timeToSimulate)
 	if (!_active)
 		return;
 
-	int timePrev = int(round(_time));
-	_time -= timeToSimulate;
-	int timeCurr = int(round(_time));
-	if(timePrev != timeCurr)
-		_timeObj->setSprite(SpriteFactory::instance()->getText(std::to_string(timeCurr), { 0.5f, 0.5f }, 3, '0'), true);
+	if (_inventoryTransition && !_inventoryOpened)
+		_view->move({ 0, -224 * timeToSimulate });
+	else if (_inventoryTransition && _inventoryOpened)
+		_view->move({ 0, 224 * timeToSimulate });
 
-	setFPS(Game::instance()->currentFPS());
+	//setFPS(Game::instance()->currentFPS());
+}
+
+void HUD::inventory(bool open)
+{
+	// do nothing while finalizing action
+	if (_inventoryTransition || open == _inventoryOpened)
+		return;
+
+	_inventoryTransition = true;
+
+	if (open)
+		_blocking = true;
+
+	schedule("transitionOff", 1, [this, open]() {
+		_inventoryTransition = false;
+		_inventoryOpened = !_inventoryOpened;
+		_blocking = open;
+		});
 }
 
 void HUD::setFPS(int fps) 
 { 
-	if (fps != _fps)
+	/*if (fps != _fps)
 	{
 		_fps = fps;
 		_fpsObj->setSprite(SpriteFactory::instance()->getText(std::to_string(_fps), { 0.5f, 0.5f }), true);
+	}*/
+}
+
+void HUD::moveItemSelection(int dx, int dy)
+{
+	_currentItemIndex += Point(dx, dy);
+	_currentItemIndex.x = std::min(_currentItemIndex.x, 4);
+	_currentItemIndex.x = std::max(_currentItemIndex.x, 0);
+	_currentItemIndex.y = std::min(_currentItemIndex.y, 3);
+	_currentItemIndex.y = std::max(_currentItemIndex.y, 0);
+	_selectionIcon->setPos(_inventoryIcons[_currentItemIndex.y][_currentItemIndex.x]->rect().pos - PointF{ 8, 8 });
+	_currentItemIcon->setSprite(_inventoryItems[_currentItemIndex.y][_currentItemIndex.x]->icon());
+	_currentItemLabel->setSprite(_inventoryItems[_currentItemIndex.y][_currentItemIndex.x]->label());
+	_currentHUDItemIcon->setSprite(_inventoryItems[_currentItemIndex.y][_currentItemIndex.x]->icon());
+
+}
+
+void HUD::event(SDL_Event& evt)
+{
+	UIScene::event(evt);
+
+	if (_inventoryTransition || !_inventoryOpened)
+		return;
+
+	if (evt.type == SDL_KEYDOWN)
+	{
+		if (evt.key.keysym.scancode == SDL_SCANCODE_RETURN)
+			inventory(false);
+		else if (evt.key.keysym.scancode == SDL_SCANCODE_RIGHT)
+			moveItemSelection(1, 0);
+		else if (evt.key.keysym.scancode == SDL_SCANCODE_LEFT)
+			moveItemSelection(-1, 0);
+		else if (evt.key.keysym.scancode == SDL_SCANCODE_UP)
+			moveItemSelection(0, -1);
+		else if (evt.key.keysym.scancode == SDL_SCANCODE_DOWN)
+			moveItemSelection(0, 1);
 	}
 }

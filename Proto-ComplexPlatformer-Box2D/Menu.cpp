@@ -12,6 +12,7 @@
 #include "View.h"
 #include "Game.h"
 #include "Window.h"
+#include "Audio.h"
 
 using namespace agp;
 
@@ -96,6 +97,7 @@ void Menu::event(SDL_Event& evt)
 	{
 		if (evt.key.keysym.scancode == SDL_SCANCODE_DOWN)
 		{
+			Audio::instance()->playSound("fireball");
 			_items[_itemSelected]->setSelected(false);
 			_itemSelected = (_itemSelected + 1) % int(_items.size());
 			_items[_itemSelected]->setSelected(true);

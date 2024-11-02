@@ -14,6 +14,7 @@
 #include <set>
 #include "geometryUtils.h"
 #include "graphicsUtils.h"
+#include "Scheduler.h"
 
 namespace agp
 {
@@ -27,6 +28,7 @@ namespace agp
 //   with interface methods like rendering, logic update, and event processing
 // - contains objects sorted by ascending z-level (painter algorithm)
 // - provides efficient access to objects
+// - provides globale action scheduling
 class agp::Scene
 {
 	public:
@@ -51,6 +53,7 @@ class agp::Scene
 		bool _blocking;				// whether blocks events propagation and logic update
 									// for scenes in lower layers of the stack
 		bool _rectsVisible;			// whether objects rects are visible
+		std::map<std::string, Scheduler> _schedulers;
 
 	public:
 
@@ -89,6 +92,9 @@ class agp::Scene
 
 		// update
 		virtual void update(float timeToSimulate);
+
+		// scheduling
+		virtual void schedule(const std::string& id, float delaySeconds, std::function<void()> action, int loop = 0, bool overwrite = true);
 
 		// event handler
 		virtual void event(SDL_Event& evt);

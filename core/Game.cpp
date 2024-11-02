@@ -43,8 +43,12 @@ void Game::run()
 		processEvents();
 
 		float frameTime = frameTimer.restart();
-		for (auto& layer : _scenes)
-			layer->update(frameTime);
+		for (int i = int(_scenes.size()) - 1; i >= 0; i--)
+		{
+			_scenes[i]->update(frameTime);
+			if (_scenes[i]->blocking())
+				break;
+		}
 
 		_window->render(_scenes);
 
@@ -108,10 +112,6 @@ void Game::dispatchEvent(SDL_Event& evt)
 
 void Game::pushScene(Scene* scene)
 {
-	if(scene->blocking() && _scenes.size())
-		for(auto & scene : _scenes)
-			scene->setActive(false);
-
 	_scenes.push_back(scene);
 }
 
@@ -119,18 +119,6 @@ void Game::popScene()
 {
 	if (_scenes.size())
 	{
-		// last scene is blocking lower scenes
-		if (_scenes.back()->blocking())
-		{
-			// reactivate lower scenes down to first blocking scene
-			for (int i = int(_scenes.size()) - 2; i >= 0; i--)
-			{
-				_scenes[i]->setActive(true);
-				if (_scenes[i]->blocking())
-					break;
-			}
-		}
-
 		delete _scenes.back();
 		_scenes.pop_back();
 	}

@@ -58,7 +58,10 @@ void Scene::refreshObjects()
 	for (auto& obj : _deadObjects)
 	{
 		auto& layer = _sortedObjects[obj->layer()];
-		layer.erase(std::remove(layer.begin(), layer.end(), obj), layer.end());
+		auto removeIt = std::remove(layer.begin(), layer.end(), obj);
+		if (removeIt == layer.end())
+			std::cerr << "Cannot remove " << obj->name() << " from layer " << obj->layer() <<": object not found\n";
+		layer.erase(removeIt, layer.end());
 		delete obj;
 	}
 	_deadObjects.clear();
@@ -66,9 +69,19 @@ void Scene::refreshObjects()
 	for (auto& p : _changeLayerObjects)
 	{
 		auto& layer = _sortedObjects[p.second->layer()];
-		layer.erase(std::remove(layer.begin(), layer.end(), p.second), layer.end());
-		_sortedObjects[p.first].emplace_back(p.second);
-		p.second->_layer = p.first;
+		auto removeIt = std::remove(layer.begin(), layer.end(), p.second);
+		if (removeIt == layer.end())
+			std::cerr << "Cannot remove " << p.second->name() << " from layer " << p.second->layer() << " when changing layer: object not found\n";
+		layer.erase(removeIt, layer.end());
+
+		if (std::find(_sortedObjects[p.first].begin(), _sortedObjects[p.first].end(), p.second) == _sortedObjects[p.first].end())
+		{
+			_sortedObjects[p.first].emplace_back(p.second);
+			p.second->_layer = p.first;
+		}
+		else
+			std::cerr << "Cannot re-insert " << p.second->name() << " in layer " << p.first << " when changing layer: object already present\n";
+
 	}
 	_changeLayerObjects.clear();
 }
@@ -114,6 +127,24 @@ void Scene::render()
 void Scene::update(float timeToSimulate)
 {
 	refreshObjects();
+
+	auto iter = _schedulers.begin();
+	for (; iter != _schedulers.end(); )
+	{
+		if (iter->second.on())
+		{
+			iter->second.update(timeToSimulate);
+			++iter;
+		}
+		else
+			iter = _schedulers.erase(iter);
+	}
+}
+
+void Scene::schedule(const std::string& id, float delaySeconds, std::function<void()> action, int loop, bool overwrite)
+{
+	if (overwrite || _schedulers.find(id) == _schedulers.end())
+		_schedulers[id] = Scheduler(delaySeconds, action, loop);
 }
 
 void Scene::event(SDL_Event& evt)

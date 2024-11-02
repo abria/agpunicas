@@ -28,6 +28,10 @@ class agp::Game : public Singleton<Game>
 { 
 	friend class Singleton<Game>;
 
+	public:
+
+		//typedef std::set< Scene*> SceneSet;
+
 	protected:
 
 		// attributes

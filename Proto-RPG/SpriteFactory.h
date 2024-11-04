@@ -12,6 +12,7 @@
 #include <string>
 #include "SDL.h"
 #include "geometryUtils.h"
+#include "Singleton.h"
 
 namespace agp
 {
@@ -22,8 +23,10 @@ namespace agp
 // SpriteFactory (singleton)
 // - loads spritesheets
 // - instances sprites by id
-class agp::SpriteFactory
+class agp::SpriteFactory : public Singleton<SpriteFactory>
 {
+	friend class Singleton<SpriteFactory>;
+
 	private:
 
 		std::map<std::string, SDL_Texture*> _spriteSheets;
@@ -34,10 +37,7 @@ class agp::SpriteFactory
 
 	public:
 
-		// singleton
-		static SpriteFactory* instance();
-
-		// creation
+		// factory methods
 		Sprite* get(const std::string& id);
-		Sprite* getText(std::string text, const Vec2Df& size = { 1,1 }, int fillN = 0, char fillChar = ' ', bool enabled = true);
+		Sprite* getTextSMB(std::string text, const Vec2Df& size = { 1,1 }, int fillN = 0, char fillChar = ' ', bool enabled = true);
 };

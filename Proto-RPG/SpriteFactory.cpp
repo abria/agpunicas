@@ -20,12 +20,6 @@
 
 using namespace agp;
 
-SpriteFactory* SpriteFactory::instance()
-{
-	static SpriteFactory uniqueInstance;
-	return &uniqueInstance;
-}
-
 SpriteFactory::SpriteFactory()
 {
 	if (IMG_Init(IMG_INIT_PNG) == 0)
@@ -41,6 +35,7 @@ SpriteFactory::SpriteFactory()
 	_spriteSheets["hud"] = loadTexture(renderer, "sprites/hud.png", { 255, 0, 255 });
 	_spriteSheets["inventory"] = loadTexture(renderer, "sprites/menus3.png", { 0, 91, 127 });
 	_spriteSheets["player"] = loadTextureAutoDetect(renderer, "sprites/player_corrected.png", _autoTiles["player"], { 0, 128, 128 }, {0, 64, 64});
+	_spriteSheets["enemies"] = loadTextureAutoDetect(renderer, "sprites/enemies_3.png", _autoTiles["enemies"], { 255, 0, 255 }, { 128, 255, 255 });
 }
 
 // anchors
@@ -114,6 +109,18 @@ Sprite* SpriteFactory::get(const std::string& id)
 		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][3].begin(), _autoTiles["player"][3].begin() + 6 }, 44, id == "link_attack_RIGHT" ? Direction::RIGHT : Direction::LEFT, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
 	else if (id == "link_sword_RIGHT")
 		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][9].begin(), _autoTiles["player"][9].begin() + 9 }, 44, Direction::NONE, {0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8}, 1);
+	else if (id == "soldier_attack_DOWN")
+		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][0].begin(), _autoTiles["enemies"][0].begin() + 4 }, 8, Direction::DOWN);
+	else if (id == "soldier_attack_RIGHT" || id == "soldier_attack_LEFT")
+		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][2].begin(), _autoTiles["enemies"][2].begin() + 3 }, 6, id == "soldier_attack_RIGHT" ? Direction::RIGHT : Direction::LEFT);
+	else if (id == "soldier_attack_UP")
+		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][4].begin(), _autoTiles["enemies"][4].begin() + 4 }, 8, Direction::UP);
+	else if (id == "soldier_DOWN")
+		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][1].begin(), _autoTiles["enemies"][1].begin() + 3 }, 6);
+	else if (id == "soldier_RIGHT" || id == "soldier_LEFT")
+		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][3].begin(), _autoTiles["enemies"][3].begin() + 3 }, 6);
+	else if (id == "soldier_UP")
+		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][5].begin(), _autoTiles["enemies"][5].begin() + 3 }, 6); 
 	else if (id == "hud_coin")
 	{
 		rects.push_back(moveBy(hud_coin, 0, 0));
@@ -134,7 +141,7 @@ Sprite* SpriteFactory::get(const std::string& id)
 	}
 }
 
-Sprite* SpriteFactory::getText(std::string text, const Vec2Df& size, int fillN, char fillChar, bool enabled)
+Sprite* SpriteFactory::getTextSMB(std::string text, const Vec2Df& size, int fillN, char fillChar, bool enabled)
 {
 	std::vector< RectI> tiles;
 

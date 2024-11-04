@@ -31,5 +31,7 @@ void DynamicObject::move(Direction xDir, Direction yDir)
 	if (yDir != Direction::NONE && yDir != _facingDir)
 		_facingDir = yDir;
 
+	//if(name().compare(0, 7, "Soldier") == 0)
+	//	printf("move %s %s\n", dir2str(xDir).c_str(), dir2str(yDir).c_str());
 	CollidableObject::move(xDir, yDir);
 }

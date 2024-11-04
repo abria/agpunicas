@@ -14,6 +14,7 @@
 namespace agp
 {
 	class Soldier;
+	class Link;
 }
 
 // Soldier class
@@ -22,14 +23,18 @@ class agp::Soldier : public Enemy
 {
 	public:
 
-		enum class State{PATROL, CHASING, REACHSTART};
+		enum class State { PATROL, SLEEP, CHASING };
 
 	protected:
 
 		State _state;
-		RectF _patrolRect;
-		PointF _nextPoint;
+		RectF _patrolArea;
+		int _currentWaypointIndex;
+		PointF _target;
 		std::map<std::string, Sprite*> _sprites[4];
+
+		// finite state machine AI
+		void AI(bool targetReached);
 
 	public:
 

@@ -26,9 +26,7 @@ class agp::Enemy : public DynamicObject
 
 		Enemy(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0);
 
-		// actions
-		
-		// extends logic collision (+smashed, +hurt Mario)
+		// extends logic collision (+hurt by sword)
 		virtual bool collision(CollidableObject* with, Direction fromDir) override;
 
 		virtual std::string name() override { return strprintf("Enemy[%d]", _id); }

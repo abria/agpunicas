@@ -37,14 +37,8 @@ void CollidableObject::update(float dt)
 {
 	MovableObject::update(dt);
 
-	// undo move since collision detection is based on CCD
-	_rect.pos -= _vel * dt;
-	
-	// detect and resolve collisions by updating velocities
-	resolveCollisions(dt);
-
-	// move with updated velocity
-	_rect.pos += _vel * dt;
+	detectCollisions();
+	resolveCollisions();
 }
 
 RectF CollidableObject::sceneCollider() const
@@ -52,10 +46,39 @@ RectF CollidableObject::sceneCollider() const
 	return _collider + _rect.pos;
 }
 
-void CollidableObject::resolveCollisions(float dt)
+void CollidableObject::detectCollisions()
 {
 	if (!_collidable)
 		return;
+
+	_collisions.clear();
+	_collisionAxes.clear();
+	_collisionDepths.clear();
+
+	auto objectsInRect = _scene->objects(_rect);
+	for (auto& obj : objectsInRect)
+	{
+		CollidableObject* collObj = obj->to<CollidableObject*>();
+		if (collObj && collObj != this && collObj->collidable() && collidableWith(collObj) && collObj->collidableWith(this))
+		{
+			Direction axis;
+			float depth;
+			if (checkCollisionAABB(sceneCollider(), collObj->sceneCollider(), axis, depth))
+			{
+				_collisions.push_back(collObj);
+				_collisionAxes.push_back(dir2vec(axis));
+				_collisionDepths.push_back(depth);
+				collision(collObj, axis);
+				collObj->collision(this, inverse(axis));
+			}
+		}
+	}
+}
+
+bool CollidableObject::collision(CollidableObject* with, Direction fromDir) 
+{
+	//printf("%s collided with %s from %s\n", name().c_str(), with->name().c_str(), dir2str(fromDir).c_str());
+	return true; 
 }
 
 void CollidableObject::draw(SDL_Renderer* renderer, Transform camera)

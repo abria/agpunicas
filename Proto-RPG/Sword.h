@@ -9,6 +9,7 @@
 
 #pragma once
 #include "DynamicObject.h"
+#include "Enemy.h"
 
 namespace agp
 {
@@ -31,6 +32,9 @@ class agp::Sword : public DynamicObject
 
 		// extends game logic (+adapt to Link)
 		virtual void update(float dt) override;
+
+		// defines acceptable collisions (enemies only)
+		virtual bool collidableWith(CollidableObject* obj) { return obj->to<Enemy*>(); }
 
 		virtual std::string name() override { 
 			return strprintf("Sword[%d]", _id); 

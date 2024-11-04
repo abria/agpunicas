@@ -12,7 +12,7 @@ Enemy::Enemy(Scene* scene, const RectF& rect, Sprite* sprite, int layer)
 
 bool Enemy::collision(CollidableObject* with, Direction fromDir)
 {
-	Link* link = dynamic_cast<Link*>(with);
+	DynamicObject::collision(with, fromDir);
 
 	return false;
 }

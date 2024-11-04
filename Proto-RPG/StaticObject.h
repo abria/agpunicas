@@ -34,6 +34,9 @@ class agp::StaticObject : public CollidableObject
 		// extends logic collision (+scheduler example)
 		virtual bool collision(CollidableObject* with, Direction fromDir) override;
 
+		// implements CollidableObject's abstract method (do nothing)
+		virtual void resolveCollisions() override { }
+
 		virtual std::string name() override {
 			return strprintf("StaticObject[%d]", _id);
 		}

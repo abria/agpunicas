@@ -34,6 +34,9 @@ class agp::DynamicObject : public CollidableObject
 		// overrides MovableObject's move (+facing dir)
 		virtual void move(Direction xDir, Direction yDir) override;
 
+		// implements CollidableObject's abstract method
+		virtual void resolveCollisions() override;
+
 		virtual std::string name() override { 
 			return strprintf("DynamicObject[%d]", _id); 
 		}

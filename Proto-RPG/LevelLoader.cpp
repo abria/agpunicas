@@ -40,8 +40,10 @@ Scene* LevelLoader::load(const std::string& name)
 
 		new RenderableObject(world, RectF(0, 0, 256, 256), spriteLoader->get("overworld"));
 		
-		new Soldier(world, PointF(135, 185), RectF(140, 179, 4, 7));
+		new StaticObject(world, RectF(137, 171, 6, 6), nullptr);
 
+		new Soldier(world, PointF(130, 185), RectF(133, 178, 2, 3));
+		
 		// player
 		Link* player = new Link(world, PointF(140, 179));
 		world->setPlayer(player);

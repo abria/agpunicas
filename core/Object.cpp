@@ -44,3 +44,9 @@ void Object::schedule(const std::string& id, float delaySeconds, std::function<v
 	if (overwrite || _schedulers.find(id) == _schedulers.end())
 		_schedulers[id] = Scheduler(delaySeconds, action, loop);
 }
+
+void Object::unschedule(const std::string& id)
+{
+	if (_schedulers.find(id) != _schedulers.end())
+		_schedulers.erase(id);
+}

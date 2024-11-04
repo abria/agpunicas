@@ -14,6 +14,47 @@
 
 namespace agp
 {
+	static inline bool checkCollisionAABB(
+		const RectF& rectA, 
+		const RectF& rectB, 
+		Direction& collisionAxis, 
+		float& collisionDepth)
+	{
+		if (!rectA.intersects(rectB))
+			return false;
+
+		float dx, dy;
+		if (rectA.yUp)
+		{
+			dx = std::min(rectA.right(), rectB.right()) - std::max(rectA.left(), rectB.left());
+			dy = std::min(rectA.top(), rectB.top()) - std::max(rectA.bottom(), rectB.bottom());
+		}
+		else
+		{
+			dx = std::min(rectA.right(), rectB.right()) - std::max(rectA.left(), rectB.left());
+			dy = std::min(rectA.bottom(), rectB.bottom()) - std::max(rectA.top(), rectB.top());
+		}
+
+		if (dx < dy)
+		{
+			collisionDepth = dx;
+			if (rectA.center().x < rectB.center().x)
+				collisionAxis = Direction::RIGHT;
+			else 
+				collisionAxis = Direction::LEFT;
+		}
+		else
+		{
+			collisionDepth = dy;
+			if (rectA.center().y < rectB.center().y)
+				collisionAxis = rectA.yUp ? Direction::UP : Direction::DOWN;
+			else
+				collisionAxis = rectA.yUp ? Direction::DOWN : Direction::UP;
+		}
+
+		return true;
+	}
+
 	// SAT Polygon vs. Polygon collision detection
 	// for better performance, replace std::vector with static std::array[MAX_DIM]
 	static inline bool checkCollisionSAT(

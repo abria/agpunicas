@@ -62,6 +62,7 @@ class agp::Object
 
 		// scheduling
 		virtual void schedule(const std::string& id, float delaySeconds, std::function<void()> action, int loop = 0, bool overwrite = true);
+		virtual void unschedule(const std::string& id);
 
 		// type conversion
 		template <class T>

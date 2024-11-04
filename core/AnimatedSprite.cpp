@@ -30,14 +30,15 @@ AnimatedSprite::AnimatedSprite(
 	_loopsStored = loops;
 	_FPS = FPS;
 	_frameIterator = 0;
+	_paused = false;
 }
 
 void AnimatedSprite::update(float dt)
 {
 	Sprite::update(dt);
 
-	// animation stops if no loops are available
-	if (_loops <= 0)
+	// animation stops if no loops are available or paused
+	if (_loops <= 0 || _paused)
 		return;
 
 	// update current frame based on frame rate and delta time

@@ -465,16 +465,25 @@ namespace agp
 		else
 			return Direction::NONE;
 	}
-	static Direction normal2dir(Vec2Df _normal, bool yUp = false)
+	static Direction normal2dir(Vec2Df normal, bool yUp = false)
 	{
-		if (_normal.x == 0 && (yUp ? _normal.y == -1 : _normal.y == 1))
+		if (normal.x == 0 && (yUp ? normal.y == -1 : normal.y == 1))
 			return Direction::DOWN;
-		else if (_normal.x == 0 && (yUp ? _normal.y == 1 : _normal.y == -1))
+		else if (normal.x == 0 && (yUp ? normal.y == 1 : normal.y == -1))
 			return Direction::UP;
-		else if (_normal.x == 1 && _normal.y == 0)
+		else if (normal.x == 1 && normal.y == 0)
 			return Direction::RIGHT;
-		else if (_normal.x == -1 && _normal.y == 0)
+		else if (normal.x == -1 && normal.y == 0)
 			return Direction::LEFT;
+		else
+			return Direction::NONE;
+	}
+	static Direction vec2dir(Vec2Df vec, bool yUp = false)
+	{
+		if (std::abs(vec.x) > std::abs(vec.y))
+			return vec.x > 0 ? Direction::RIGHT : Direction::LEFT;
+		else if (std::abs(vec.x) < std::abs(vec.y))
+			return vec.y > 0 ? (yUp ? Direction::UP : Direction::DOWN) : (yUp ? Direction::DOWN : Direction::UP);
 		else
 			return Direction::NONE;
 	}

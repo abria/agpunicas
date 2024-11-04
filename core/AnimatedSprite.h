@@ -28,6 +28,7 @@ class agp::AnimatedSprite : public Sprite
 		float _FPS;
 		int _loops;
 		int _loopsStored;
+		bool _paused;
 
 	public:
 
@@ -43,6 +44,7 @@ class agp::AnimatedSprite : public Sprite
 		void setFPS(float fps) { _FPS = fps; }
 		float duration() const { return _frames.size() / _FPS; }
 		float currentTime() const { return _frameIterator / _frames.size(); }
+		void setPaused(bool paused) { _paused = paused; }
 
 		// extends update method (+animations)
 		virtual void update(float dt) override;

@@ -30,7 +30,7 @@ Rendering+audio engine based on SDL, utilized by all game prototypes.
 
 ## Proto-SimplePlatformer
 Game prototype for simple 2D platformers with SDL and custom physics engine.
-For demonstration purposes, a small portion of SuperMarioBros (NES) is implemented.
+For demonstration purposes, a small portion of <i>Super Mario Bros</i> (NES) is implemented.
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros.png">
 
@@ -80,3 +80,27 @@ Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 - player not steady on moving platforms (can be fixed with force compensation like for slopes)
 - no joint examples (see Box2D docs)
 - no enemies
+
+## Proto-RPG
+Game prototype for RPG/action games with SDL and Box2D physics engine.
+For demonstration purposes, a small portion of <i>Legend of Zelda: A Link to the Past</i> (NES) is implemented.
+
+<img src="https://github.com/abria/agpunicas/blob/main/demo_RPG.png">
+
+#### Class Diagram
+<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_RPG.png">
+
+#### Features
+- AABB collision detection/resolution
+- static and dynamic object categories
+- all collidable objects are informed when collision starts (with normals and metadatas)
+- triggers (a.k.a. sensors)
+- advanced UI (HUD + inventory)
+- example player attack with sword
+- example collider animation (sword)
+- example NPC (soldier with patrolling + chasing script)
+
+#### Limitations
+- no scene transitions from indoor to outdoor and viceversa
+- no text dialogs
+- no "onCollisionEnd" events

@@ -14,6 +14,9 @@
 #include "geometryUtils.h"
 #include "mathUtils.h"
 #include "fileUtils.h"
+#include <vector>
+#include <unordered_map>
+#include <iostream>
 
 namespace agp
 {
@@ -347,5 +350,296 @@ namespace agp
         RectI dstRect = srcRect;
         dstRect.pos = { srcRect.pos.x + x * dx + x * border_x, srcRect.pos.y + y * dy + y * border_y };
         return dstRect;
+    }
+
+    // Union-Find data structure for connected component labeling
+    class UnionFind 
+    {
+        private:
+           
+            std::vector<int> parent;
+
+        public:
+
+            UnionFind(int size) : parent(size) 
+            {
+                for (int i = 0; i < size; ++i)
+                    parent[i] = i;
+            }
+
+            int Find(int x) 
+            {
+                if (parent[x] != x)
+                    parent[x] = Find(parent[x]); // Path compression
+                return parent[x];
+            }
+
+            void Union(int x, int y) 
+            {
+                int xroot = Find(x);
+                int yroot = Find(y);
+                if (xroot != yroot)
+                    parent[yroot] = xroot;
+            }
+    };
+
+    // load image from file into texture and detect rects with connected component labeling
+    static inline SDL_Texture* loadTextureConnectedComponents(
+        SDL_Renderer* renderer,
+        const std::string& filepath,
+        std::vector< RectI >& rects,
+        const Color& backgroundMask,
+        bool verbose = false)
+    {
+        // load image
+        SDL_Surface* surface = IMG_Load(filepath.c_str());
+        if (!surface)
+        {
+            SDL_Log("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
+            return nullptr;
+        }
+
+        // retrieve basic metadata
+        SDL_LockSurface(surface);
+        int width = surface->w;
+        int height = surface->h;
+        int pitch = surface->pitch;
+        Uint8* pixels = (Uint8*)surface->pixels;
+        int BytesPerPixel = surface->format->BytesPerPixel;
+
+        // check format
+        if (BytesPerPixel < 3 || BytesPerPixel > 4) 
+        {
+            std::cerr << "Unsupported bitdepth (must be 24 or 32 bits per pixel).\n";
+            SDL_UnlockSurface(surface);
+            return nullptr;
+        }
+
+        // initialize labels and union-find structure
+        int nextLabel = 1;
+        std::vector<int> labels(width * height, 0);
+        UnionFind uf(width * height);
+
+        // data structure to store bounding boxes: label -> (minX, minY, maxX, maxY)
+        std::unordered_map<int, RectI> boundingBoxes;
+
+        // FIRST PASS: assign provisional labels and record equivalences
+        for (int y = 0; y < height; ++y) 
+        {
+            Uint8* row = pixels + y * pitch;
+            for (int x = 0; x < width; ++x) 
+            {
+                Uint8* pixel = row + x * BytesPerPixel;
+                Uint8 r, g, b;
+
+                Uint32 pixelValue = 0;
+                memcpy(&pixelValue, pixel, BytesPerPixel);
+                SDL_GetRGB(pixelValue, surface->format, &r, &g, &b);
+
+                // determine if the pixel is foreground or background
+                bool isForeground = (r != backgroundMask.r && g != backgroundMask.g && b != backgroundMask.b);
+                int currentIdx = y * width + x;
+                std::vector<int> neighborLabels;
+
+                // define neighbor offsets based on connectivity
+                std::vector<std::pair<int, int>> neighborOffsets;
+
+                if (isForeground) 
+                {
+                    // Use 8-connectivity for foreground pixels
+                    neighborOffsets = 
+                    {
+                        {-1, -1}, {-1, 0}, {-1, 1}, { 0, -1}
+                    };
+                }
+                else 
+                {
+                    // Use 4-connectivity for background pixels
+                    neighborOffsets = 
+                    {
+                        {-1, 0}, { 0, -1}
+                    };
+                }
+
+                // Check neighbors
+                for (const auto& offset : neighborOffsets) 
+                {
+                    int ny = y + offset.first;
+                    int nx = x + offset.second;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) 
+                    {
+                        int neighborIdx = ny * width + nx;
+                        int neighborLabel = labels[neighborIdx];
+
+                        // Check if neighbor is of the same type (foreground or background)
+                        Uint8* neighborPixel = pixels + ny * pitch + nx * BytesPerPixel;
+                        Uint8 nr, ng, nb;
+
+                        Uint32 neighborPixelValue = 0;
+                        memcpy(&neighborPixelValue, neighborPixel, BytesPerPixel);
+                        SDL_GetRGB(neighborPixelValue, surface->format, &nr, &ng, &nb);
+
+                        bool neighborIsForeground = (nr != backgroundMask.r && ng != backgroundMask.g && nb != backgroundMask.b);
+
+                        if (neighborIsForeground == isForeground && neighborLabel != 0)
+                            neighborLabels.push_back(neighborLabel);
+                    }
+                }
+
+                if (neighborLabels.empty()) 
+                {
+                    // Assign a new label
+                    labels[currentIdx] = nextLabel;
+                    nextLabel++;
+
+                    // Initialize bounding box for the new label
+                    boundingBoxes[labels[currentIdx]] = { x, y, x, y };
+                }
+                else 
+                {
+                    // Assign the smallest neighbor label
+                    int minLabel = *std::min_element(neighborLabels.begin(), neighborLabels.end());
+                    labels[currentIdx] = minLabel;
+
+                    // Union the labels
+                    for (int l : neighborLabels)
+                        uf.Union(minLabel, l);
+                }
+
+                // Update bounding box for the current label
+                int label = labels[currentIdx];
+                if (boundingBoxes.find(label) == boundingBoxes.end())
+                    boundingBoxes[label] = { x, y, x, y };
+                else 
+                {
+                    RectI& bbox = boundingBoxes[label];
+                    if (x < bbox.pos.x) bbox.pos.x = x;
+                    if (y < bbox.pos.y) bbox.pos.y = y;
+                    if (x > bbox.size.x) bbox.size.x = x;
+                    if (y > bbox.size.y) bbox.size.y = y;
+                }
+            }
+        }
+
+        // SECOND PASS: Resolve labels and update bounding boxes
+        std::unordered_map<int, int> labelMap;
+        std::unordered_map<int, RectI> resolvedBoundingBoxes;
+        int currentForegroundLabel = 1;
+        int currentBackgroundLabel = 1;
+
+        for (int i = 0; i < width * height; ++i) 
+        {
+            int label = labels[i];
+            if (label != 0) 
+            {
+                int rootLabel = uf.Find(label);
+
+                // Determine if the pixel is foreground or background
+                int y = i / width;
+                int x = i % width;
+                Uint8* pixel = pixels + y * pitch + x * BytesPerPixel;
+                Uint8 r, g, b;
+
+                Uint32 pixelValue = 0;
+                memcpy(&pixelValue, pixel, BytesPerPixel);
+                SDL_GetRGB(pixelValue, surface->format, &r, &g, &b);
+
+                bool isForeground = (r != backgroundMask.r && g != backgroundMask.g && b != backgroundMask.b);
+
+                // Map labels separately for foreground and background
+                int resolvedLabel;
+                if (isForeground) 
+                {
+                    if (labelMap.find(rootLabel) == labelMap.end()) 
+                    {
+                        labelMap[rootLabel] = currentForegroundLabel;
+                        resolvedLabel = currentForegroundLabel;
+                        currentForegroundLabel++;
+                    }
+                    else
+                        resolvedLabel = labelMap[rootLabel];
+                    labels[i] = resolvedLabel;
+                }
+                else 
+                {
+                    if (labelMap.find(rootLabel) == labelMap.end()) 
+                    {
+                        labelMap[rootLabel] = -currentBackgroundLabel; // Negative labels for background
+                        resolvedLabel = -currentBackgroundLabel;
+                        currentBackgroundLabel++;
+                    }
+                    else
+                        resolvedLabel = labelMap[rootLabel];
+                    labels[i] = resolvedLabel;
+                }
+
+                // Update bounding boxes with resolved labels
+                if (resolvedBoundingBoxes.find(resolvedLabel) == resolvedBoundingBoxes.end())
+                    resolvedBoundingBoxes[resolvedLabel] = boundingBoxes[label];
+                else 
+                {
+                    RectI& bbox = resolvedBoundingBoxes[resolvedLabel];
+                    RectI& originalBbox = boundingBoxes[label];
+                    if (originalBbox.pos.x < bbox.pos.x) bbox.pos.x = originalBbox.pos.x;
+                    if (originalBbox.pos.y < bbox.pos.y) bbox.pos.y = originalBbox.pos.y;
+                    if (originalBbox.size.x > bbox.size.x) bbox.size.x = originalBbox.size.x;
+                    if (originalBbox.size.y > bbox.size.y) bbox.size.y = originalBbox.size.y;
+                }
+            }
+        }
+
+        std::map<int, RectI> orderedComponents(resolvedBoundingBoxes.begin(), resolvedBoundingBoxes.end());
+        for (auto& elem : orderedComponents)
+            if (elem.first >= 0)
+                rects.push_back(RectI(elem.second.pos.x, elem.second.pos.y, elem.second.size.x - elem.second.pos.x + 1, elem.second.size.y - elem.second.pos.y + 1));
+
+        if (verbose)
+        {
+            printf("Extracted %d components\n", rects.size());
+            for (int i = 0; i < rects.size(); i++)
+                printf("%d: %s\n", i, rects[i].str().c_str());
+        }
+
+        //int numForegroundComponents = currentForegroundLabel - 1;
+        //int numBackgroundComponents = currentBackgroundLabel - 1;
+        //if (verbose)
+        //{
+        //    std::cout << "Number of foreground connected components: " << numForegroundComponents << "\n";
+        //    std::cout << "Number of background connected components: " << numBackgroundComponents << "\n";
+        //}
+
+        //// output bounding rectangles
+        //if(verbose)
+        //    for (const auto& entry : resolvedBoundingBoxes) 
+        //    {
+        //        int label = entry.first;
+        //        if (label > 0) 
+        //        { 
+        //            // Foreground components have positive labels
+        //            RectI bbox = entry.second;
+        //            // Convert from (minX, minY, maxX, maxY) to (x, y, width, height)
+        //            int x = bbox.pos.x;
+        //            int y = bbox.pos.y;
+        //            int w = bbox.size.x - bbox.pos.x + 1;
+        //            int h = bbox.size.y - bbox.pos.y + 1;
+        //            std::cout << "Component " << label << ": x=" << x << ", y=" << y << ", w=" << w << ", h=" << h << "\n";
+        //        }
+        //    }
+
+        SDL_UnlockSurface(surface);
+
+        // set transparent color
+        SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, backgroundMask.r, backgroundMask.g, backgroundMask.b));
+
+        // create texture from surf
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+        if (!tex)
+        {
+            SDL_Log("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
+            return nullptr;
+        }
+
+        return tex;
     }
 }

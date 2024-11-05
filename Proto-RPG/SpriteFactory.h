@@ -31,6 +31,7 @@ class agp::SpriteFactory : public Singleton<SpriteFactory>
 
 		std::map<std::string, SDL_Texture*> _spriteSheets;
 		std::map<std::string, std::vector< std::vector<RectI > > > _autoTiles;
+		std::map<std::string, std::vector<RectI > > _autoComponents;
 
 		// constructor inaccesible due to singleton
 		SpriteFactory();

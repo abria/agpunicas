@@ -75,7 +75,7 @@ void HammerBrother::update(float dt)
 	Mario* mario = dynamic_cast<Mario*>(dynamic_cast<PlatformerGameScene*>(_scene)->player());
 
 	//_facingDir = Direction::NONE;
-	//_x_dir = Direction::NONE;
+	//_xDir = Direction::NONE;
 	//_vel.x = 0;
 	//return;
 

@@ -22,6 +22,7 @@ Sword::Sword(Mario* mario)
 	_link = mario;
 	_facingDir = _link->facingDir();
 	_yGravityForce = 0;
+	_CCD = false;
 
 	setSprite(SpriteFactory::instance()->get("link_sword"));
 }
@@ -70,7 +71,7 @@ bool Sword::collision(CollidableObject* with, Direction fromDir)
 {
 	Enemy* enemy = dynamic_cast<Enemy*>(with);
 	if (enemy)
-		printf("Sword collided with %s\n", enemy->name().c_str());
+		enemy->smash();
 
 	return true;
 }

@@ -27,7 +27,7 @@ Mario::Mario(Scene* scene, const PointF& pos)
 	_running = false;
 	_dying = false;
 	_dead = false;
-	_invincible = true;
+	_invincible = false;
 	_attacking = false;
 	_sword = nullptr;
 

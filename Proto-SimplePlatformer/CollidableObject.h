@@ -28,9 +28,17 @@ class agp::CollidableObject : public MovableObject
 		bool _collidable;
 		bool _compenetrable;
 		const Color _colliderColor = { 255, 255, 0, 255 };
+		bool _CCD;
+		std::vector<CollidableObject*> _collisions;
+		std::vector<Vec2Df> _collisionAxes;
+		std::vector<float> _collisionDepths;
 
-		// collision detection/resolution
-		virtual void resolveCollisions(float dt);
+		// CCD collision detection/resolution
+		virtual void detectResolveCollisionsCCD(float dt);
+
+		// AABB intersection-based collision detection and resolution
+		virtual void detectCollisions();
+		virtual void resolveCollisions() {}
 
 		// set collider to default (whole rect)
 		void defaultCollider();

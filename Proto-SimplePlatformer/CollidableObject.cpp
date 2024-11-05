@@ -26,6 +26,9 @@ CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* spri
 	// default collision: non compenetration
 	_compenetrable = false;
 	_collidable = true;
+
+	// default collision system: Continous Collision Detection (CCD)
+	_CCD = true;
 }
 
 void CollidableObject::defaultCollider()
@@ -37,14 +40,22 @@ void CollidableObject::update(float dt)
 {
 	MovableObject::update(dt);
 
-	// undo move since collision detection is based on CCD
-	_rect.pos -= _vel * dt;
-	
-	// detect and resolve collisions by updating velocities
-	resolveCollisions(dt);
+	if (_CCD)
+	{
+		// undo move since collision detection is based on CCD
+		_rect.pos -= _vel * dt;
 
-	// move with updated velocity
-	_rect.pos += _vel * dt;
+		// detect and resolve collisions by updating velocities
+		detectResolveCollisionsCCD(dt);
+
+		// move with updated velocity
+		_rect.pos += _vel * dt;
+	}
+	else
+	{
+		detectCollisions();
+		resolveCollisions();
+	}
 }
 
 RectF CollidableObject::sceneCollider() const
@@ -52,7 +63,7 @@ RectF CollidableObject::sceneCollider() const
 	return _collider + _rect.pos;
 }
 
-void CollidableObject::resolveCollisions(float dt)
+void CollidableObject::detectResolveCollisionsCCD(float dt)
 {
 	if (!_collidable)
 		return;
@@ -96,6 +107,35 @@ void CollidableObject::resolveCollisions(float dt)
 			obj.first->collision(this, normal2dir(cn));
 			collision(obj.first, inverse(normal2dir(cn)));
 		}
+}
+
+void CollidableObject::detectCollisions()
+{
+	if (!_collidable)
+		return;
+
+	_collisions.clear();
+	_collisionAxes.clear();
+	_collisionDepths.clear();
+
+	auto objectsInRect = _scene->objects(sceneCollider());
+	for (auto& obj : objectsInRect)
+	{
+		CollidableObject* collObj = obj->to<CollidableObject*>();
+		if (collObj && collObj != this && collObj->collidable() && collidableWith(collObj))
+		{
+			Direction axis;
+			float depth;
+			if (checkCollisionAABB(sceneCollider(), collObj->sceneCollider(), axis, depth))
+			{
+				_collisions.push_back(collObj);
+				_collisionAxes.push_back(dir2vec(axis));
+				_collisionDepths.push_back(depth);
+				collision(collObj, axis);
+				collObj->collision(this, inverse(axis));
+			}
+		}
+	}
 }
 
 void CollidableObject::draw(SDL_Renderer* renderer, Transform camera)

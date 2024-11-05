@@ -47,6 +47,8 @@ static RectI hud_number(519, 263, 8, 8);
 static RectI hud_letter_disabled(519, 366, 8, 8);
 static RectI hud_number_disabled(519, 375, 8, 8);
 static RectI hud_coin(519, 289, 8, 8);
+static RectI hudzelda_number(259, 13, 7, 7);
+static RectI hudzelda_heart(259, 56, 7, 7);
 
 Sprite* SpriteFactory::get(const std::string& id)
 {
@@ -93,6 +95,14 @@ Sprite* SpriteFactory::get(const std::string& id)
 	}
 	else if (id == "inventory_selected")
 		return new Sprite(_spriteSheets["inventory"], RectI(464, 328, 32, 32));
+
+	// hud
+	else if (id == "hud_heart")
+		return new Sprite(_spriteSheets["hud"], hudzelda_heart);
+	else if (id == "hud_heart_half")
+		return new Sprite(_spriteSheets["hud"], moveBy(hudzelda_heart, 2, 0, 7, 7));
+	else if (id == "hud_heart_empty")
+		return new Sprite(_spriteSheets["hud"], moveBy(hudzelda_heart, 4, 0, 7, 7));
 
 	// animated sprites
 	else if (id == "link_walk_DOWN")
@@ -173,4 +183,25 @@ Sprite* SpriteFactory::getTextSMB(std::string text, const Vec2Df& size, int fill
 	}
 
 	return new TiledSprite(_spriteSheets["hud_mario"], tiles, size);
+}
+
+Sprite* SpriteFactory::getNumberHUD(int n, int fill)
+{
+	std::vector< RectI> tiles;
+
+	std::string text = std::to_string(n);
+
+	if (fill)
+		while (text.size() != fill)
+			text = '0' + text;
+
+	RectI& number_anchor = hudzelda_number;
+
+	for (auto& c : text)
+	{
+		if (isdigit(c))
+			tiles.push_back(moveBy(number_anchor, c - '0' - (c - '0' < 5 ? 0 : 5), c - '0' < 5 ? 0 : 1, 7, 7));
+	}
+
+	return new TiledSprite(_spriteSheets["hud"], tiles, {7, 7});
 }

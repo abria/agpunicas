@@ -26,6 +26,19 @@ class agp::HUD : public UIScene, public Singleton<HUD>
 
 	protected:
 
+		// hud
+		int _coins;
+		int _bombs;
+		int _arrows;
+		int _keys;
+		int _halfHearts;
+		int _heartsCapacity;
+		RenderableObject* _coinsText;
+		RenderableObject* _bombsText;
+		RenderableObject* _arrowsText;
+		RenderableObject* _keysText;
+		RenderableObject* _heartIcons[10];
+
 		// inventory
 		bool _inventoryOpened;
 		bool _inventoryTransition;
@@ -37,11 +50,12 @@ class agp::HUD : public UIScene, public Singleton<HUD>
 		RenderableObject* _currentHUDItemIcon;
 		RenderableObject* _selectionIcon;
 
-		// raw data
+		// others
 		int _fps;
 
 		// helper functions
 		void moveItemSelection(int dx, int dy);
+		void refreshHearts();
 
 		HUD();
 
@@ -49,7 +63,13 @@ class agp::HUD : public UIScene, public Singleton<HUD>
 
 		virtual ~HUD() {};
 
-		// getters/setters (to be completed)
+		// getters/setters
+		void setCoins(int newCoins);
+		void setBombs(int newBombs);
+		void setArrows(int newArrows);
+		void setKeys(int newKeys);
+		void setHalfHearts(int newHalfHearts);
+		void setHeartsCapacity(int newCapacity);
 		void setFPS(int fps);
 
 		// actions

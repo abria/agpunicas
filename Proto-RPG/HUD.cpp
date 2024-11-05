@@ -18,6 +18,12 @@ using namespace agp;
 HUD::HUD()
 	: UIScene(RectF(0, 0, 256, 224), { 1, 1 })
 {
+	_coins = -1;
+	_bombs = -1;
+	_arrows = -1;
+	_keys = -1;
+	_halfHearts = -1;
+	_heartsCapacity = 10;
 	_fps = 0;
 	_inventoryOpened = false;
 	_inventoryTransition = false;
@@ -29,6 +35,19 @@ HUD::HUD()
 	new RenderableObject(this, RectF(0, 0, 256, 224), SpriteFactory::instance()->get("hud"));
 	new RenderableObject(this, RectF(0, -224, 256, 224), SpriteFactory::instance()->get("inventory"));
 	
+	// HUD graphics
+	_coinsText = new RenderableObject(this, RectI(65, 24, 3 * 7 + 2, 7), nullptr, 1);
+	_bombsText = new RenderableObject(this, RectI(97, 24, 2 * 7 + 1, 7), nullptr, 1);
+	_arrowsText = new RenderableObject(this, RectI(121, 24, 2 * 7 + 1, 7), nullptr, 1);
+	_keysText = new RenderableObject(this, RectI(145, 24, 7, 7), nullptr, 1);
+	for (int i = 0; i < 10; i++)
+		_heartIcons[i] = new RenderableObject(this, RectI(161 + i * 8, 24, 7, 7), nullptr, 1);
+	setCoins(0);
+	setBombs(3);
+	setArrows(15);
+	setKeys(1);
+	setHalfHearts(10);
+
 	// inventory items
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 5; j++)
@@ -67,7 +86,7 @@ void HUD::update(float timeToSimulate)
 	else if (_inventoryTransition && _inventoryOpened)
 		_view->move({ 0, 224 * timeToSimulate });
 
-	//setFPS(Game::instance()->currentFPS());
+	setFPS(Game::instance()->currentFPS());
 }
 
 void HUD::inventory(bool open)
@@ -88,8 +107,80 @@ void HUD::inventory(bool open)
 		});
 }
 
+void HUD::setCoins(int newCoins)
+{
+	if (newCoins == _coins)
+		return;
+
+	_coins = newCoins;
+	_coinsText->setSprite(SpriteFactory::instance()->getNumberHUD(_coins, 3));
+}
+
+void HUD::setBombs(int newBombs)
+{
+	if (newBombs == _bombs)
+		return;
+
+	_bombs = newBombs;
+	_bombsText->setSprite(SpriteFactory::instance()->getNumberHUD(_bombs, 2));
+}
+
+void HUD::setArrows(int newArrows)
+{
+	if (newArrows == _arrows)
+		return;
+
+	_arrows = newArrows;
+	_arrowsText->setSprite(SpriteFactory::instance()->getNumberHUD(_arrows, 2));
+}
+
+void HUD::setKeys(int newKeys)
+{
+	if (newKeys == _keys)
+		return;
+
+	_keys = newKeys;
+	_keysText->setSprite(SpriteFactory::instance()->getNumberHUD(_keys, 1));
+}
+
+void HUD::refreshHearts()
+{
+	int fullHearts = _halfHearts / 2;
+	int halfHearts = _halfHearts % 2;
+	for (int i = 0; i < 10; i++)
+	{
+		if (i < fullHearts)
+			_heartIcons[i]->setSprite(SpriteFactory::instance()->get("hud_heart"), true);
+		else if (halfHearts && i == fullHearts)
+			_heartIcons[i]->setSprite(SpriteFactory::instance()->get("hud_heart_half"), true);
+		else if (i < _heartsCapacity)
+			_heartIcons[i]->setSprite(SpriteFactory::instance()->get("hud_heart_empty"), true);
+		else
+			_heartIcons[i]->setSprite(nullptr);
+	}
+}
+
+void HUD::setHalfHearts(int newHalfHearts)
+{
+	if (newHalfHearts == _halfHearts)
+		return;
+
+	_halfHearts = newHalfHearts;
+	refreshHearts();
+}
+
+void HUD::setHeartsCapacity(int newCapacity)
+{
+	if (_heartsCapacity == newCapacity)
+		return;
+
+	_heartsCapacity = newCapacity;
+	refreshHearts();
+}
+
 void HUD::setFPS(int fps) 
 { 
+	setCoins(fps);
 	/*if (fps != _fps)
 	{
 		_fps = fps;

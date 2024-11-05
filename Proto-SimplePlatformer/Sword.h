@@ -34,6 +34,9 @@ class agp::Sword : public DynamicObject
 		// extends logic collision (+hurt enemies)
 		virtual bool collision(CollidableObject* with, Direction fromDir) override;
 
+		// extends collision logic (+collision with Enemy only)
+		virtual bool collidableWith(CollidableObject* obj) override;
+
 		virtual std::string name() override { 
 			return strprintf("Sword[%d]", _id); 
 		}

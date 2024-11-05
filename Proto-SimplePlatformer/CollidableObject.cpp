@@ -67,7 +67,7 @@ void CollidableObject::resolveCollisions(float dt)
 	for (auto item : items_in_rect)
 	{
 		CollidableObject* obj = item->to<CollidableObject*>();
-		if (obj && obj != this && obj->collidable()  && collidableWith(obj))
+		if (obj && obj != this && obj->collidable() && collidableWith(obj))
 			likely_collisions.push_back(obj);
 	}
 	_rect.pos = curPos;	// restore current pos

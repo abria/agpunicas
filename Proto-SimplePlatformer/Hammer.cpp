@@ -8,7 +8,7 @@ Hammer::Hammer(Scene* scene, const PointF& pos, Enemy* thrower)
 	: Enemy(scene, RectF(pos.x, pos.y, 1, 1), SpriteFactory::instance()->get("hammer"))
 {
 	_collider.adjust(0.2f, 0.2f, -0.2f, -0.2f);
-	_smashable = false;
+	_smashable = true;
 	_thrower = thrower;
 	_throwing = false;
 	_yGravityForce = 0;

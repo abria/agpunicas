@@ -16,6 +16,7 @@
 namespace agp
 {
 	class Mario;
+	class Sword;
 }
 
 class agp::Mario : public DynamicObject
@@ -30,6 +31,7 @@ class agp::Mario : public DynamicObject
 		bool _dead;
 		bool _attacking;
 		double _xLastNonZeroVel;
+		Sword* _sword;
 		
 		std::map<std::string, Sprite*> _sprites;
 

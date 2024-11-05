@@ -61,6 +61,11 @@ void Sword::update(float dt)
 	DynamicObject::update(dt);
 }
 
+bool Sword::collidableWith(CollidableObject* obj)
+{
+	return dynamic_cast<Enemy*>(obj);
+}
+
 bool Sword::collision(CollidableObject* with, Direction fromDir)
 {
 	Enemy* enemy = dynamic_cast<Enemy*>(with);

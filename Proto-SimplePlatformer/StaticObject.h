@@ -31,9 +31,6 @@ class agp::StaticObject : public CollidableObject
 		// extends game logic (-physics, -collisions)
 		virtual void update(float dt) override { RenderableObject::update(dt); }
 
-		// extends logic collision (+scheduler example)
-		virtual bool collision(CollidableObject* with, Direction fromDir) override;
-
 		virtual std::string name() override {
 			return strprintf("StaticObject[%d]", _id);
 		}

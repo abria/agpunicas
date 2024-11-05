@@ -29,6 +29,7 @@ Mario::Mario(Scene* scene, const PointF& pos)
 	_dead = false;
 	_invincible = true;
 	_attacking = false;
+	_sword = nullptr;
 
 	_xLastNonZeroVel = 0;
 
@@ -126,17 +127,25 @@ void Mario::run(bool on)
 
 void Mario::attack()
 {
-	if (_attacking || _dying || _dead)
+	if (_dying || _dead)
 		return;
 
 	Audio::instance()->playSound("sword");
 
-	Sword* sword = new Sword(this);
+	if (_attacking)
+	{
+		_sprite->reset();
+		if (_sword)
+			_scene->killObject(_sword);
+	}
+
+	_sword = new Sword(this);
 	_attacking = true;
-	schedule("attack_off", dynamic_cast<AnimatedSprite*>(sword->sprite())->duration(), [this, sword]()
+	schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sword->sprite())->duration(), [this]()
 		{
 			_attacking = false;
-			_scene->killObject(sword);
+			_scene->killObject(_sword);
+			_sword = nullptr;
 		});
 }
 

@@ -59,7 +59,7 @@ void CollidableObject::detectCollisions()
 	for (auto& obj : objectsInRect)
 	{
 		CollidableObject* collObj = obj->to<CollidableObject*>();
-		if (collObj && collObj != this && collObj->collidable() && collidableWith(collObj) && collObj->collidableWith(this))
+		if (collObj && collObj != this && collObj->collidable() && collidableWith(collObj))
 		{
 			Direction axis;
 			float depth;

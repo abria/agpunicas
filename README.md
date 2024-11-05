@@ -30,7 +30,7 @@ Rendering+audio engine based on SDL, utilized by all game prototypes.
 
 ## Proto-SimplePlatformer
 Game prototype for simple 2D platformers with SDL and custom physics engine.
-For demonstration purposes, a small portion of SuperMarioBros (NES) is implemented.
+For demonstration purposes, a small portion of <i>Super Mario Bros</i> (NES) is implemented.
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros.png">
 
@@ -83,7 +83,7 @@ Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 
 ## Proto-RPG
 Game prototype for RPG/action games with SDL and Box2D physics engine.
-For demonstration purposes, a small portion of Legend of Zelda: A Link to the Past (NES) is implemented.
+For demonstration purposes, a small portion of <i>Legend of Zelda: A Link to the Past</i> (NES) is implemented.
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_RPG.png">
 

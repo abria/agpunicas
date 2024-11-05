@@ -397,3 +397,8 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 Proto-RPG/sprites/Thumbs.db
+Proto-RPG/sprites/Thumbs.db
+Proto-ComplexPlatformer-Box2D/sprites/Slime/Thumbs.db
+*.db
+*.db
+Proto-RPG/sprites/Thumbs.db

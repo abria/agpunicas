@@ -16,6 +16,7 @@
 #include "RigidObject.h"
 #include "Player.h"
 #include "Box.h"
+#include "Slime.h"
 #include "OverlayScene.h"
 
 using namespace agp;
@@ -147,5 +148,7 @@ void ComplexPlatformerGameScene::event(SDL_Event& evt)
 
 		if (evt.button.button == SDL_BUTTON_LEFT)
 			new Box(this, RotatedRectF({ mousePoint.x, mousePoint.y }, { 1,1 }, 0, true));
+		else if (evt.button.button == SDL_BUTTON_RIGHT)
+			new Slime(this, { mousePoint.x, mousePoint.y });
 	}
 }

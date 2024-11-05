@@ -48,6 +48,7 @@ SpriteFactory::SpriteFactory()
 	_spriteSheets["player_walk"] = loadTextureSequence(renderer, "sprites/PlayerWalk", _autoTiles["player_walk"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
 	_spriteSheets["player_jump"] = loadTextureSequence(renderer, "sprites/PlayerJump", _autoTiles["player_jump"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
 	_spriteSheets["player_dash"] = loadTextureSequence(renderer, "sprites/PlayerDash/DashEffect", _autoTiles["player_dash"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
+	_spriteSheets["slime"] = loadTextureSequence(renderer, "sprites/Slime", _autoTiles["slime"]);
 }
 
 // anchors
@@ -86,6 +87,8 @@ Sprite* SpriteFactory::get(const std::string& id)
 		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 10);
 	else if (id == "player_dash")
 		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 10);
+	else if (id == "slime")
+		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 20);
 	else if (id == "rain")
 		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 30);
 	else

@@ -18,6 +18,7 @@
 #include "mathUtils.h"
 #include "Gear.h"
 #include "Box.h"
+#include "Slime.h"
 #include <iostream>
 
 using namespace agp;
@@ -56,6 +57,7 @@ Scene* LevelLoader::load(const std::string& name)
 
 		// dynamic objects
 		//new Box(world, RotatedRectF({ 5, 10 }, { 1,1 }, 0, true));
+		//new Slime(world, { 10, 15 });
 
 		// kinematic objects
 		new Gear(world, RotatedRectF({ 90, 2 }, { 15, 15 }, 0, true), spriteLoader->get("gear"), -1);

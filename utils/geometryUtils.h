@@ -96,7 +96,9 @@ namespace agp
 		Vec2D  operator /  (const T& v)     const { return Vec2D(this->x / v, this->y / v); }
 		Vec2D  operator /  (const Vec2D& v) const { return Vec2D(this->x / v.x, this->y / v.y); }
 		Vec2D& operator += (const Vec2D& v) { this->x += v.x; this->y += v.y; return *this; }
+		Vec2D& operator += (const T& v) { this->x += v; this->y += v; return *this; }
 		Vec2D& operator -= (const Vec2D& v) { this->x -= v.x; this->y -= v.y; return *this; }
+		Vec2D& operator -= (const T& v) { this->x -= v; this->y -= v; return *this; }
 		Vec2D& operator *= (const T& v) { this->x *= v; this->y *= v; return *this; }
 		Vec2D& operator /= (const T& v) { this->x /= v; this->y /= v; return *this; }
 		Vec2D& operator *= (const Vec2D& v) { this->x *= v.x; this->y *= v.y; return *this; }

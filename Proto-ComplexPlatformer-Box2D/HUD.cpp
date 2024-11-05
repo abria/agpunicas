@@ -49,6 +49,8 @@ void HUD::update(float timeToSimulate)
 	int timeCurr = int(round(_time));
 	if(timePrev != timeCurr)
 		_timeObj->setSprite(SpriteFactory::instance()->getText(std::to_string(timeCurr), { 0.5f, 0.5f }, 3, '0'));
+
+	setFPS(Game::instance()->currentFPS());
 }
 
 void HUD::setFPS(int fps) 

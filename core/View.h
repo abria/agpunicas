@@ -32,7 +32,9 @@ class agp::View
 		PointF _magf;			// view rect to viewport ratio (magnification factor)			
 		Transform _scene2view;	// scene 2 view transform		
 		Transform _view2scene;	// view 2 scene transform
-		float _aspectRatio;	// fixed width/height aspect ratio (0 = not fixed)
+		float _aspectRatio;		// fixed width/height aspect ratio (0 = not fixed)
+		RectF _clipRect;		// in relative [0,1] coords; if not set, _viewport is used
+		RectF _clipRectAbs;		// in absolute window coords
 
 	public:
 
@@ -50,6 +52,7 @@ class agp::View
 		void setFixedAspectRatio(float ratio) { _aspectRatio = ratio; updateViewport(); }
 		void setX(float x) { _rect.pos.x = x; }
 		void setY(float y) { _rect.pos.y = y; }
+		void setClipRect(const RectF& clipRect) { _clipRect = clipRect; updateViewport(); }
 
 		// render scene objects within view rect (culling)
 		void render();

@@ -590,11 +590,13 @@ namespace agp
             }
         }
 
+        // retrieve rects (label >= 0)
         std::map<int, RectI> orderedComponents(resolvedBoundingBoxes.begin(), resolvedBoundingBoxes.end());
         for (auto& elem : orderedComponents)
             if (elem.first >= 0)
                 rects.push_back(RectI(elem.second.pos.x, elem.second.pos.y, elem.second.size.x - elem.second.pos.x + 1, elem.second.size.y - elem.second.pos.y + 1));
 
+        // group row-wise
         std::sort(rects.begin(), rects.end(), [yDistanceThreshold, alignYCenters](const RectI& a, const RectI& b)
             {
                 return std::abs(alignYCenters ? a.center().y - b.center().y : a.pos.y - b.pos.y) > yDistanceThreshold ? a.center().y < b.center().y : a.pos.x < b.pos.x;
@@ -602,36 +604,10 @@ namespace agp
 
         if (verbose)
         {
-            printf("Extracted %d components\n", rects.size());
+            printf("Extracted %llu components\n", rects.size());
             for (int i = 0; i < rects.size(); i++)
                 printf("%d: %s\n", i, rects[i].str().c_str());
         }
-
-        //int numForegroundComponents = currentForegroundLabel - 1;
-        //int numBackgroundComponents = currentBackgroundLabel - 1;
-        //if (verbose)
-        //{
-        //    std::cout << "Number of foreground connected components: " << numForegroundComponents << "\n";
-        //    std::cout << "Number of background connected components: " << numBackgroundComponents << "\n";
-        //}
-
-        //// output bounding rectangles
-        //if(verbose)
-        //    for (const auto& entry : resolvedBoundingBoxes) 
-        //    {
-        //        int label = entry.first;
-        //        if (label > 0) 
-        //        { 
-        //            // Foreground components have positive labels
-        //            RectI bbox = entry.second;
-        //            // Convert from (minX, minY, maxX, maxY) to (x, y, width, height)
-        //            int x = bbox.pos.x;
-        //            int y = bbox.pos.y;
-        //            int w = bbox.size.x - bbox.pos.x + 1;
-        //            int h = bbox.size.y - bbox.pos.y + 1;
-        //            std::cout << "Component " << label << ": x=" << x << ", y=" << y << ", w=" << w << ", h=" << h << "\n";
-        //        }
-        //    }
 
         SDL_UnlockSurface(surface);
 

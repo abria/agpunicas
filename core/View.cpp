@@ -26,6 +26,8 @@ View::View(Scene* scene, const RectF& rect)
 	_magf = PointF(1, 1);
 	_aspectRatio = 0;
 	updateViewport();
+	_clipRect = RectF();
+	_clipRectAbs = RectF();
 }
 
 void View::setScene(Scene* scene)
@@ -65,7 +67,11 @@ void View::render()
 
 	// viewport clipping
 	SDL_Rect viewport_r = _viewportAbs.toSDL();
-	SDL_RenderSetClipRect(renderer, &viewport_r);
+	SDL_Rect cliprect_r = _clipRectAbs.toSDL();
+	if(_clipRectAbs.isValid())
+		SDL_RenderSetClipRect(renderer, &cliprect_r);
+	else
+		SDL_RenderSetClipRect(renderer, &viewport_r);
 
 	// viewport background
 	SDL_SetRenderDrawColor(renderer, _scene->backgroundColor().r, _scene->backgroundColor().g, _scene->backgroundColor().b, _scene->backgroundColor().a);
@@ -95,6 +101,14 @@ void View::updateViewport()
 		_viewport.pos.y * rendHeight,
 		_viewport.size.x * rendWidth,
 		_viewport.size.y * rendHeight);
+
+	// update cliprect
+	if(_clipRect.isValid())
+		_clipRectAbs = RectF(
+			_clipRect.pos.x * rendWidth,
+			_clipRect.pos.y * rendHeight,
+			_clipRect.size.x * rendWidth,
+			_clipRect.size.y * rendHeight);
 
 	// correct aspect ratio
 	if (_aspectRatio)

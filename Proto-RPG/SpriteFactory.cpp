@@ -37,6 +37,32 @@ SpriteFactory::SpriteFactory()
 	_spriteSheets["player"] = loadTextureAutoDetect(renderer, "sprites/player_corrected.png", _autoTiles["player"], { 0, 128, 128 }, {0, 64, 64});
 	_spriteSheets["enemies"] = loadTextureAutoDetect(renderer, "sprites/enemies_3.png", _autoTiles["enemies"], { 255, 0, 255 }, { 128, 255, 255 });
 	_spriteSheets["fonts"] = loadTextureConnectedComponents(renderer, "sprites/fonts.png", _autoComponents["fonts"], {56, 56, 94}, 5, true, true);
+
+	// font rectangles manual correction
+	for (int i = 0; i < _autoComponents["fonts"].size(); i++)
+	{
+		if (i < 26)
+			_autoComponents["fonts"][i].adjust(0, 0, 0, 2);
+		else if (i == 27)
+			_autoComponents["fonts"][i].adjust(0, -9, 0, 2);
+		else if (i >= 44 && i <= 45)
+			_autoComponents["fonts"][i].adjust(0, 0, 0, 2);
+		else if (i >= 48 && i <= 57)
+		{
+			_autoComponents["fonts"][i].pos.y = 205;
+			_autoComponents["fonts"][i].size.y = 15;
+		}
+		else if (i >= 58 && i <= 67)
+		{
+			_autoComponents["fonts"][i].pos.y = 221;
+			_autoComponents["fonts"][i].size.y = 15;
+		}
+		else if (i >= 68)
+		{
+			_autoComponents["fonts"][i].pos.y = 237;
+			_autoComponents["fonts"][i].size.y = 15;
+		}
+	}
 }
 
 // anchors
@@ -155,19 +181,19 @@ Sprite* SpriteFactory::get(const std::string& id)
 Sprite* SpriteFactory::getChar(char c)
 {
 	if (c >= 'A' && c <= 'Z')
-		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][c-'A'], Direction::UP);
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][c-'A']);
 	else if (c >= 'a' && c <= 'z')
-		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][48 + c-'a'], Direction::UP);
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][48 + c-'a']);
 	else if (c == '.')
-		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][27], Direction::UP);
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][27]);
 	else if (c == ',')
 		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][28], Direction::UP);
 	else if (c == '\'')
-		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][28], Direction::DOWN); 
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][28], Direction::DOWN);
 	else if (c == '!')
-		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][44], Direction::UP);
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][44]);
 	else if (c == '?')
-		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][45], Direction::UP);
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][45]);
 	else
 		return nullptr;
 }

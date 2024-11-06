@@ -12,6 +12,7 @@
 #include "View.h"
 #include "Game.h"
 #include "stringUtils.h"
+#include "Clipper.h"
 
 using namespace agp;
 
@@ -21,19 +22,28 @@ DialogBox::DialogBox(const std::string& text, int visibleLines, int wrapLength)
 	_text = text;
 	_visibleLines = visibleLines;
 	_blocking = true;
+	_backgroundColor = { 0, 0, 255, 128 };
 	
 	std::vector<std::string> textRows = wrapText(_text, wrapLength);
 	for (int i = 0; i < textRows.size(); i++)
 	{
 		_charObjects.push_back(std::vector <RenderableObject*>());
+		int x = 0;
 		for (int j = 0; j < textRows[i].size(); j++)
-			_charObjects.back().push_back(new RenderableObject(this, RectI(6*j, 18*i, 6, 14), SpriteFactory::instance()->getChar(textRows[i][j]), 1));
+		{
+			Sprite* charSprite = SpriteFactory::instance()->getChar(textRows[i][j]);
+			int dx = charSprite ? charSprite->rect().size.x : 7;
+			_charObjects.back().push_back(new RenderableObject(this, RectI(x, 18 * i, dx, 15), charSprite, 1));
+			x += dx;
+		}
 	}
 
 	// SNES aspect ratio
 	_view = new View(this, _rect);
-	_view->setFixedAspectRatio(Game::instance()->aspectRatio());
+	_view->setFixedAspectRatio(256.0f/224);
 	_view->setRect(RectF(0, 0, 256, 224));
+	//_view->setClipRect(RectF(0, 0, 1.0f, 51.0f/224));
+	new Clipper(this, RectF(0, 0, 1.0f, 51.0f / 224), 0);
 }
 
 void DialogBox::update(float timeToSimulate)
@@ -51,6 +61,6 @@ void DialogBox::event(SDL_Event& evt)
 	if (evt.type == SDL_KEYDOWN)
 	{
 		if (evt.key.keysym.scancode == SDL_SCANCODE_RETURN)
-			;
+			Game::instance()->popScene();
 	}
 }

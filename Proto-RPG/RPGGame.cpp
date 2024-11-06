@@ -14,7 +14,7 @@
 
 using namespace agp;
 
-RPGGame::RPGGame() : Game("RPG Game", { 600,600 }, 1.216f)
+RPGGame::RPGGame() : Game("RPG Game", { 600,600 }, 256.0f/224)
 {
 	_hud = nullptr;
 }

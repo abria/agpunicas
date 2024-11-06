@@ -16,7 +16,7 @@ namespace agp
 		// Version components
 		constexpr int VERSION_MAJOR = 1;
 		constexpr int VERSION_MINOR = 2;
-		constexpr int VERSION_PATCH = 0;
+		constexpr int VERSION_PATCH = 2;
 
 		// Function to retrieve the version string
 		inline static std::string VERSION() {

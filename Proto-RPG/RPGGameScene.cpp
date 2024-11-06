@@ -16,6 +16,7 @@
 #include "HUD.h"
 #include "RPGGame.h"
 #include "HUD.h"
+#include "DialogBox.h"
 
 using namespace agp;
 
@@ -51,8 +52,18 @@ void RPGGameScene::event(SDL_Event& evt)
 
 	Link* link = dynamic_cast<Link*>(_player);
 
-	if (evt.type == SDL_KEYDOWN && (evt.key.keysym.scancode == SDL_SCANCODE_RETURN || evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE))
-		HUD::instance()->inventory(true);// Game::instance()->pushScene(Menu::pauseMenu());
+	if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_RETURN)
+		HUD::instance()->inventory(true);
+	else if	(evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+		Game::instance()->pushScene(Menu::pauseMenu());
 	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_A && !evt.key.repeat)
 		link->attack();
+	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_T && !evt.key.repeat)
+		Game::instance()->pushScene(new DialogBox(
+			"The wizard, Agahnim, has done... something to the other missing girls. "
+		    "Now only I remain...\n"
+		    "Agahnim has seized control of the castle and is now trying to open "
+		    "the seven wise men's seal.\n"
+		    "I am in the dungeon of the castle.\n"
+		    "Please help me..."));
 }

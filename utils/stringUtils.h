@@ -212,6 +212,54 @@ namespace agp
 		}
 	}
 
+	// text wrap
+	static inline std::vector<std::string> wrapText(const std::string& text, size_t maxLineLength)
+	{
+		std::vector<std::string> lines;
+		std::istringstream textStream(text);
+		std::string paragraph;
+
+		// Split the text into paragraphs at '\n'
+		while (std::getline(textStream, paragraph, '\n')) {
+			// Skip empty paragraphs resulting from consecutive newlines
+			if (paragraph.empty()) {
+				continue;
+			}
+
+			std::istringstream wordStream(paragraph);
+			std::string word;
+			std::string currentLine;
+
+			// Read each word in the paragraph
+			while (wordStream >> word) {
+				if (currentLine.empty()) {
+					// Start a new line with the current word
+					currentLine = word;
+				}
+				else {
+					// Check if adding the next word would exceed the max line length
+					if (currentLine.length() + 1 + word.length() <= maxLineLength) {
+						// Append the word to the current line
+						currentLine += " " + word;
+					}
+					else {
+						// Add the current line to the list of lines
+						lines.push_back(currentLine);
+						// Start a new line with the current word
+						currentLine = word;
+					}
+				}
+			}
+
+			// Add any remaining text in currentLine to lines
+			if (!currentLine.empty()) {
+				lines.push_back(currentLine);
+			}
+		}
+
+		return lines;
+	}
+
 	// returns true if the given string <fullString> ends with <ending>
 	inline bool hasEnding (std::string const &fullString, std::string const &ending)
 	{

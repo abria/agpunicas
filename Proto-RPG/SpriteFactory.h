@@ -42,4 +42,5 @@ class agp::SpriteFactory : public Singleton<SpriteFactory>
 		Sprite* get(const std::string& id);
 		Sprite* getTextSMB(std::string text, const Vec2Df& size = { 1,1 }, int fillN = 0, char fillChar = ' ', bool enabled = true);
 		Sprite* getNumberHUD(int n, int fill = 1);
+		Sprite* getChar(char c);
 };

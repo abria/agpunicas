@@ -36,7 +36,7 @@ SpriteFactory::SpriteFactory()
 	_spriteSheets["inventory"] = loadTexture(renderer, "sprites/menus3.png", { 0, 91, 127 });
 	_spriteSheets["player"] = loadTextureAutoDetect(renderer, "sprites/player_corrected.png", _autoTiles["player"], { 0, 128, 128 }, {0, 64, 64});
 	_spriteSheets["enemies"] = loadTextureAutoDetect(renderer, "sprites/enemies_3.png", _autoTiles["enemies"], { 255, 0, 255 }, { 128, 255, 255 });
-	_spriteSheets["fonts"] = loadTextureConnectedComponents(renderer, "sprites/fonts.png", _autoComponents["fonts"], {56, 56, 94}, true);
+	_spriteSheets["fonts"] = loadTextureConnectedComponents(renderer, "sprites/fonts.png", _autoComponents["fonts"], {56, 56, 94}, 5, true, true);
 }
 
 // anchors
@@ -150,6 +150,26 @@ Sprite* SpriteFactory::get(const std::string& id)
 		std::cerr << "Cannot find sprite \"" << id << "\"\n";
 		return nullptr;
 	}
+}
+
+Sprite* SpriteFactory::getChar(char c)
+{
+	if (c >= 'A' && c <= 'Z')
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][c-'A'], Direction::UP);
+	else if (c >= 'a' && c <= 'z')
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][48 + c-'a'], Direction::UP);
+	else if (c == '.')
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][27], Direction::UP);
+	else if (c == ',')
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][28], Direction::UP);
+	else if (c == '\'')
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][28], Direction::DOWN); 
+	else if (c == '!')
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][44], Direction::UP);
+	else if (c == '?')
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][45], Direction::UP);
+	else
+		return nullptr;
 }
 
 Sprite* SpriteFactory::getTextSMB(std::string text, const Vec2Df& size, int fillN, char fillChar, bool enabled)

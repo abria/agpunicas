@@ -388,7 +388,9 @@ namespace agp
         SDL_Renderer* renderer,
         const std::string& filepath,
         std::vector< RectI >& rects,
-        const Color& backgroundMask,
+        const Color& backgroundMask, 
+        int yDistanceThreshold = 5,
+        bool alignYCenters = true,
         bool verbose = false)
     {
         // load image
@@ -592,6 +594,11 @@ namespace agp
         for (auto& elem : orderedComponents)
             if (elem.first >= 0)
                 rects.push_back(RectI(elem.second.pos.x, elem.second.pos.y, elem.second.size.x - elem.second.pos.x + 1, elem.second.size.y - elem.second.pos.y + 1));
+
+        std::sort(rects.begin(), rects.end(), [yDistanceThreshold, alignYCenters](const RectI& a, const RectI& b)
+            {
+                return std::abs(alignYCenters ? a.center().y - b.center().y : a.pos.y - b.pos.y) > yDistanceThreshold ? a.center().y < b.center().y : a.pos.x < b.pos.x;
+            });
 
         if (verbose)
         {

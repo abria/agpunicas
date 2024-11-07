@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Audio.h"
 #include "Scene.h"
+#include "Fire.h"
 
 using namespace agp;
 
@@ -16,8 +17,14 @@ void Enemy::collision(RigidObject* with, bool begin, const Vec2Df& normal, b2Sha
 {
 	Player* player = dynamic_cast<Player*>(with);
 
-	if (player)
+	Fire* fire = dynamic_cast<Fire*>(with);
+	if (fire)
+	{
 		hurt();
+		_scene->killObject(fire);
+	}
+	//if (player)
+	//	hurt();
 }
 
 void Enemy::update(float dt)

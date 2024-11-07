@@ -253,6 +253,13 @@ namespace agp
 			size.x += dx2 - dx1;
 			size.y += dy2 - dy1;
 		}
+		inline void scaleOnCenter(float s)
+		{
+			PointF sizeF(size);
+			sizeF *= s;
+			pos = center() - sizeF /2;
+			size = sizeF;
+		}
 		float aspectRatio() const
 		{
 			return float(size.x) / float(size.y);

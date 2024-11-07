@@ -49,6 +49,7 @@ SpriteFactory::SpriteFactory()
 	_spriteSheets["player_jump"] = loadTextureSequence(renderer, "sprites/PlayerJump", _autoTiles["player_jump"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
 	_spriteSheets["player_dash"] = loadTextureSequence(renderer, "sprites/PlayerDash/DashEffect", _autoTiles["player_dash"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
 	_spriteSheets["slime"] = loadTextureSequence(renderer, "sprites/Slime", _autoTiles["slime"]);
+	_spriteSheets["fire"] = loadTexture(renderer, "sprites/fire.png");
 }
 
 // anchors
@@ -91,6 +92,19 @@ Sprite* SpriteFactory::get(const std::string& id)
 		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 20);
 	else if (id == "rain")
 		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 30);
+	else if (id == "fire")
+	{
+		RectI baseRect(0, 0, 512, 512);
+		rects.push_back(baseRect);
+		rects.push_back(moveBy(baseRect, 1, 0, 512, 512, 0, 0));
+		rects.push_back(moveBy(baseRect, 2, 0, 512, 512, 0, 0));
+		rects.push_back(moveBy(baseRect, 3, 0, 512, 512, 0, 0));
+		rects.push_back(moveBy(baseRect, 4, 0, 512, 512, 0, 0));
+		rects.push_back(moveBy(baseRect, 5, 0, 512, 512, 0, 0));
+		for (auto& r : rects)
+			r.scaleOnCenter(0.5f);
+		return new AnimatedSprite(_spriteSheets[id], rects, 24);
+	}
 	else
 	{
 		std::cerr << "Cannot find sprite \"" << id << "\"\n";

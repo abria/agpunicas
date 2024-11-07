@@ -141,6 +141,8 @@ void ComplexPlatformerGameScene::event(SDL_Event& evt)
 			player->jump();
 		else if (evt.key.keysym.scancode == SDL_SCANCODE_D && !evt.key.repeat)
 			player->dash();
+		else if (evt.key.keysym.scancode == SDL_SCANCODE_F && !evt.key.repeat)
+			player->fire();
 	}
 	else if (evt.type == SDL_MOUSEBUTTONDOWN)
 	{

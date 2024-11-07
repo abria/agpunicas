@@ -32,7 +32,9 @@ class agp::Player : public DynamicObject
 		// override DynamicObject's move (+lastNonZeroXDir)
 		virtual void move(Direction dir) override;
 
+		// player actions
 		virtual void dash();
+		virtual void fire();
 
 		virtual std::string name() override { return strprintf("Player[%d]", _id); }
 };

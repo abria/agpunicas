@@ -7,13 +7,13 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
-#include "Box.h"
+#include "Fire.h"
 #include "SpriteFactory.h"
 
 using namespace agp;
 
-Box::Box(GameScene* scene, const RotatedRectF& obb)
-	: DynamicObject(scene, obb, SpriteFactory::instance()->get("box"))
+Fire::Fire(GameScene* scene, const PointF& spawnPoint, const Vec2Df& velocity)
+	: DynamicObject(scene, RotatedRectF(spawnPoint, {1,1}, 0, true), SpriteFactory::instance()->get("fire"), 1)
 {
 	_xVelMax = 10000;
 	_yVelMax = 10000;
@@ -23,6 +23,17 @@ Box::Box(GameScene* scene, const RotatedRectF& obb)
 	shapeDef.density = 1;
 	shapeDef.friction = 0.2f;
 	shapeDef.restitution = 0;
-	b2Polygon boxDef = b2MakeOffsetBox(_obb.size.x / 2, _obb.size.y / 2, { 0, 0 }, b2MakeRot(_obb.angle));
+	b2Polygon boxDef = b2MakeOffsetRoundedBox(_obb.size.x / 4, _obb.size.y / 4, { 0, 0 }, b2MakeRot(_obb.angle), 0.2f);
 	b2CreatePolygonShape(_bodyId, &shapeDef, &boxDef);
+
+	b2Body_SetFixedRotation(_bodyId, true);
+	b2Body_SetGravityScale(_bodyId, 0);
+	b2Body_SetLinearVelocity(_bodyId, velocity.toB2());
+}
+
+void Fire::update(float dt)
+{
+	DynamicObject::update(dt);
+
+	_flip = vel().x < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 }

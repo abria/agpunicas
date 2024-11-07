@@ -13,6 +13,7 @@
 #include "ComplexPlatformerGameScene.h"
 #include "SpriteFactory.h"
 #include "AnimatedSprite.h"
+#include "Fire.h"
 
 using namespace agp;
 
@@ -82,6 +83,15 @@ void Player::dash()
 			_xVelMax = 5;
 		});
 }
+
+void Player::fire()
+{
+	new Fire(
+		dynamic_cast<GameScene*>(_scene), 
+		_obb.center + dir2vec(_lastNonZeroXDir),
+		30*dir2vec(_lastNonZeroXDir));
+}
+
 
 void Player::update(float dt)
 {

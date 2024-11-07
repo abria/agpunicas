@@ -16,13 +16,15 @@
 
 using namespace agp;
 
-DialogBox::DialogBox(const std::string& text, int visibleLines, int wrapLength)
+DialogBox::DialogBox(const std::string& text, const PointF& pos, int visibleLines, int wrapLength)
 	: UIScene(RectF(0, 0, 256, 224), { 1, 1 })
 {
 	_text = text;
 	_visibleLines = visibleLines;
 	_blocking = true;
-	_backgroundColor = { 0, 0, 255, 128 };
+	//_backgroundColor = { 0, 0, 255, 128 };
+
+	RenderableObject* background = new RenderableObject(this, RectF(pos.x, pos.y, 7.0f * wrapLength, 18.0f * visibleLines), Color(0, 0, 255, 128), 0);
 	
 	std::vector<std::string> textRows = wrapText(_text, wrapLength);
 	for (int i = 0; i < textRows.size(); i++)
@@ -32,8 +34,8 @@ DialogBox::DialogBox(const std::string& text, int visibleLines, int wrapLength)
 		for (int j = 0; j < textRows[i].size(); j++)
 		{
 			Sprite* charSprite = SpriteFactory::instance()->getChar(textRows[i][j]);
-			int dx = charSprite ? charSprite->rect().size.x : 7;
-			_charObjects.back().push_back(new RenderableObject(this, RectI(x, 18 * i, dx, 15), charSprite, 1));
+			float dx = charSprite ? charSprite->rect().size.x : 7;
+			_charObjects.back().push_back(new RenderableObject(this, RectF(pos.x + x, pos.y + 18.0f * i, dx, 15), charSprite, 1));
 			x += dx;
 		}
 	}
@@ -42,8 +44,7 @@ DialogBox::DialogBox(const std::string& text, int visibleLines, int wrapLength)
 	_view = new View(this, _rect);
 	_view->setFixedAspectRatio(256.0f/224);
 	_view->setRect(RectF(0, 0, 256, 224));
-	//_view->setClipRect(RectF(0, 0, 1.0f, 51.0f/224));
-	new Clipper(this, RectF(0, 0, 1.0f, 51.0f / 224), 0);
+	new Clipper(this, RectF(0, background->pos().y/224, 1.0f, background->rect().size.y / 224), 0);
 }
 
 void DialogBox::update(float timeToSimulate)
@@ -52,6 +53,10 @@ void DialogBox::update(float timeToSimulate)
 
 	if (!_active)
 		return;
+
+	for (int i = 0; i < _charObjects.size(); i++)
+		for (int j = 0; j < _charObjects[i].size(); j++)
+			_charObjects[i][j]->setPos(_charObjects[i][j]->pos() + PointF{0, -16* timeToSimulate });
 }
 
 void DialogBox::event(SDL_Event& evt)

@@ -24,7 +24,7 @@ class agp::DialogBox : public UIScene
 
 	public:
 
-		DialogBox(const std::string& text, int visibleLines = 3, int wrapLength = 32);
+		DialogBox(const std::string& text, const PointF& pos = {1*16, 10*16}, int visibleLines = 3, int wrapLength = 32);
 
 		// extends update logic (+autoscroll)
 		virtual void update(float timeToSimulate) override;

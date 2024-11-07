@@ -27,17 +27,9 @@ Player::Player(GameScene* scene, PointF pos)
 	shapeDef.density = 1;
 	shapeDef.friction = 0.2f;
 	shapeDef.restitution = 0.0;
-	shapeDef.enableContactEvents = true;
+	shapeDef.filter.categoryBits = uint64_t(CollisionCategory::Player);
+	shapeDef.filter.maskBits = uint64_t(CollisionCategory::Enemy) | uint64_t(CollisionCategory::Static) | uint64_t(CollisionCategory::Kinematic);
 	b2CreateCapsuleShape(_bodyId, &shapeDef, &capsule);
-
-	// box-shaped player might get stuck on tiled platforms
-	/*b2ShapeDef shapeDef = b2DefaultShapeDef();
-	shapeDef.density = 1;
-	shapeDef.friction = 0.2f;
-	shapeDef.restitution = 0.0;
-	shapeDef.enableContactEvents = true;
-	b2Polygon boxDef = b2MakeOffsetBox(_obb.size.x / 2, _obb.size.y / 2, { 0, 0 }, { 1, 0 });
-	b2CreatePolygonShape(_bodyId, &shapeDef, &boxDef);*/
 
 	_xVelMax = 5;
 	_yVelMax = 10;
@@ -88,8 +80,8 @@ void Player::fire()
 {
 	new Fire(
 		dynamic_cast<GameScene*>(_scene), 
-		_obb.center + dir2vec(_lastNonZeroXDir),
-		30*dir2vec(_lastNonZeroXDir));
+		_obb.center,
+		10*dir2vec(_lastNonZeroXDir), _layer-1);
 }
 
 

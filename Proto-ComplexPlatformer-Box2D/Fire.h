@@ -13,7 +13,7 @@ class agp::Fire : public DynamicObject
 
 	public:
 
-		Fire(GameScene* scene, const PointF& spawnPoint, const Vec2Df& velocity);
+		Fire(GameScene* scene, const PointF& spawnPoint, const Vec2Df& velocity, int layer=0);
 
 		virtual void update(float dt) override;
 		virtual std::string name() override { return strprintf("Fire[%d]", _id); }

@@ -12,8 +12,8 @@
 
 using namespace agp;
 
-Fire::Fire(GameScene* scene, const PointF& spawnPoint, const Vec2Df& velocity)
-	: DynamicObject(scene, RotatedRectF(spawnPoint, {1,1}, 0, true), SpriteFactory::instance()->get("fire"), 1)
+Fire::Fire(GameScene* scene, const PointF& spawnPoint, const Vec2Df& velocity, int layer)
+	: DynamicObject(scene, RotatedRectF(spawnPoint, {1,1}, 0, true), SpriteFactory::instance()->get("fire"), layer)
 {
 	_xVelMax = 10000;
 	_yVelMax = 10000;
@@ -23,6 +23,8 @@ Fire::Fire(GameScene* scene, const PointF& spawnPoint, const Vec2Df& velocity)
 	shapeDef.density = 1;
 	shapeDef.friction = 0.2f;
 	shapeDef.restitution = 0;
+	shapeDef.filter.categoryBits = uint64_t(CollisionCategory::Weapon);
+	shapeDef.filter.maskBits = uint64_t(CollisionCategory::Enemy);
 	b2Polygon boxDef = b2MakeOffsetRoundedBox(_obb.size.x / 4, _obb.size.y / 4, { 0, 0 }, b2MakeRot(_obb.angle), 0.2f);
 	b2CreatePolygonShape(_bodyId, &shapeDef, &boxDef);
 

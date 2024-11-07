@@ -70,8 +70,8 @@ Scene* LevelLoader::load(const std::string& name)
 		world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_sky")));
 		world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_houses"), { 0.2f, 1 }, true));
 		world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_grass"), { 0.4f, 1 }, true));
-		//world->addForegroundScene(new OverlayScene(world, spriteLoader->get("rain")));
-		//world->addForegroundScene(new OverlayScene(world, spriteLoader->get("fg_fog"), { 1.2f, 1 }, true));
+		world->addForegroundScene(new OverlayScene(world, spriteLoader->get("rain")));
+		world->addForegroundScene(new OverlayScene(world, spriteLoader->get("fg_fog"), { 1.2f, 1 }, true));
 	}
 	else
 		std::cerr << "Unrecognized game scene name \"" << name << "\"\n";

@@ -10,7 +10,7 @@ Slime::Slime(GameScene* scene, const PointF& pos)
 	shapeDef.density = 1;
 	shapeDef.friction = 1.0f;
 	shapeDef.restitution = 0.0;
-	shapeDef.enableContactEvents = true;
+	shapeDef.filter.categoryBits = uint64_t(CollisionCategory::Enemy);
 	b2Polygon boxDef = b2MakeOffsetBox(_obb.size.x / 4, _obb.size.y / 4, { 0, 0 }, b2MakeRot(0));
 	b2CreatePolygonShape(_bodyId, &shapeDef, &boxDef);
 }

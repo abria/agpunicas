@@ -20,6 +20,7 @@ StaticObject::StaticObject(GameScene* scene, const RotatedRectF& obb, Sprite* sp
 	shapeDef.density = 1;
 	shapeDef.friction = 0.2f;
 	shapeDef.restitution = 0.0;
+	shapeDef.filter.categoryBits = uint64_t(CollisionCategory::Static);
 	b2Polygon boxDef = b2MakeOffsetBox(_obb.size.x / 2, _obb.size.y / 2, { 0, 0 }, {1, 0 });
 	b2CreatePolygonShape(_bodyId, &shapeDef, &boxDef);
 }

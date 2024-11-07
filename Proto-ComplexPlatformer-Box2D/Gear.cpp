@@ -23,6 +23,7 @@ Gear::Gear(GameScene* scene, const RotatedRectF& obb, Sprite* sprite, int layer)
 	shapeDef.density = 1;
 	shapeDef.friction = 0.2f;
 	shapeDef.restitution = 0.0;
+	shapeDef.filter.categoryBits = uint64_t(CollisionCategory::Kinematic);
 	b2CreateCircleShape(_bodyId, &shapeDef, &circle);
 
 	float angle_step = 2 * PI / 12;

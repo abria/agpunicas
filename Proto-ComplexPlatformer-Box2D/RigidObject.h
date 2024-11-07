@@ -15,6 +15,17 @@ namespace agp
 {
 	class GameScene;
 	class RigidObject;
+
+	// collision category masks (max 32)
+	enum class CollisionCategory
+	{
+		Static		= 1 << 0,		// 1 shifted left by 0 bits: 0001
+		Dynamic		= 1 << 1,		// 1 shifted left by 1 bit:  0010
+		Kinematic	= 1 << 2,		// ...
+		Player		= 1 << 3,
+		Weapon		= 1 << 4,
+		Enemy		= 1 << 5
+	};
 }
 
 // RigidObject class.

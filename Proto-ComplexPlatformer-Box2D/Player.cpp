@@ -81,7 +81,7 @@ void Player::fire()
 	new Fire(
 		dynamic_cast<GameScene*>(_scene), 
 		_obb.center,
-		10*dir2vec(_lastNonZeroXDir), _layer-1);
+		30*dir2vec(_lastNonZeroXDir), _layer-1);
 }
 
 

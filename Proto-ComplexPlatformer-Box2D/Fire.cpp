@@ -9,6 +9,7 @@
 
 #include "Fire.h"
 #include "SpriteFactory.h"
+#include "Scene.h"
 
 using namespace agp;
 
@@ -31,6 +32,9 @@ Fire::Fire(GameScene* scene, const PointF& spawnPoint, const Vec2Df& velocity, i
 	b2Body_SetFixedRotation(_bodyId, true);
 	b2Body_SetGravityScale(_bodyId, 0);
 	b2Body_SetLinearVelocity(_bodyId, velocity.toB2());
+
+	// schedule death to avoid memory consumption
+	schedule("death", 3, [this]() {_scene->killObject(this); });
 }
 
 void Fire::update(float dt)

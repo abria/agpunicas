@@ -107,8 +107,8 @@ void GameScene::updateCamera(float timeToSimulate)
 
 	if (_cameraManual)
 	{
-		_view->move((_cameraTranslateVel / _view->magf()) * dir2vec(xDir) * timeToSimulate);
-		_view->move((_cameraTranslateVel / _view->magf()) * dir2vec(yDir) * timeToSimulate);
+		_view->move((_cameraTranslateVel / _view->magf()) * dir2vec(xDir, _rect.yUp) * timeToSimulate);
+		_view->move((_cameraTranslateVel / _view->magf()) * dir2vec(yDir, _rect.yUp) * timeToSimulate);
 	}
 	else
 	{

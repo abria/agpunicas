@@ -36,7 +36,7 @@ SpriteFactory::SpriteFactory()
 	_spriteSheets["inventory"] = loadTexture(renderer, "sprites/menus3.png", { 0, 91, 127 });
 	_spriteSheets["player"] = loadTextureAutoDetect(renderer, "sprites/player_corrected.png", _autoTiles["player"], { 0, 128, 128 }, {0, 64, 64});
 	_spriteSheets["enemies"] = loadTextureAutoDetect(renderer, "sprites/enemies_3.png", _autoTiles["enemies"], { 255, 0, 255 }, { 128, 255, 255 });
-	_spriteSheets["fonts"] = loadTextureConnectedComponents(renderer, "sprites/fonts.png", _autoComponents["fonts"], {56, 56, 94}, 5, true, true);
+	_spriteSheets["fonts"] = loadTextureConnectedComponents(renderer, "sprites/fonts.png", _autoComponents["fonts"], {56, 56, 94});
 
 	// font rectangles manual correction
 	for (int i = 0; i < _autoComponents["fonts"].size(); i++)

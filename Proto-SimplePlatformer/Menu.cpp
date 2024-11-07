@@ -56,6 +56,11 @@ Menu::Menu(const PointF& position, float width, Menu* parent, bool closable)
 
 	// default: modal menu (blocks all lower scenes)
 	_blocking = true;
+
+	// setup view (NES aspect ratio)
+	_view = new View(this, _rect);
+	_view->setFixedAspectRatio(Game::instance()->aspectRatio());
+	_view->setRect(RectF(0, 0, 16, 15));
 }
 
 Menu::Menu(Menu* parent)

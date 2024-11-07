@@ -38,6 +38,7 @@ ComplexPlatformerGameScene::ComplexPlatformerGameScene(const RectF& rect, const 
 
 ComplexPlatformerGameScene::~ComplexPlatformerGameScene()
 {
+	printf("destroyer\n");
 	if (b2World_IsValid(_worldId))
 		b2DestroyWorld(_worldId);
 }

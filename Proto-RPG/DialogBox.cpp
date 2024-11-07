@@ -22,7 +22,6 @@ DialogBox::DialogBox(const std::string& text, const PointF& pos, int visibleLine
 	_text = text;
 	_visibleLines = visibleLines;
 	_blocking = true;
-	//_backgroundColor = { 0, 0, 255, 128 };
 
 	RenderableObject* background = new RenderableObject(this, RectF(pos.x, pos.y, 7.0f * wrapLength, 18.0f * visibleLines), Color(0, 0, 255, 128), 0);
 	
@@ -54,9 +53,15 @@ void DialogBox::update(float timeToSimulate)
 	if (!_active)
 		return;
 
-	for (int i = 0; i < _charObjects.size(); i++)
-		for (int j = 0; j < _charObjects[i].size(); j++)
-			_charObjects[i][j]->setPos(_charObjects[i][j]->pos() + PointF{0, -16* timeToSimulate });
+	bool scroll = false;
+	const Uint8* keyboard = SDL_GetKeyboardState(0);
+	if (keyboard[SDL_SCANCODE_DOWN])
+		scroll = true;
+
+	if(scroll)
+		for (int i = 0; i < _charObjects.size(); i++)
+			for (int j = 0; j < _charObjects[i].size(); j++)
+				_charObjects[i][j]->setPos(_charObjects[i][j]->pos() + PointF{0, -32* timeToSimulate });
 }
 
 void DialogBox::event(SDL_Event& evt)

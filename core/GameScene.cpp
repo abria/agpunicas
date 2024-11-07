@@ -121,6 +121,15 @@ void GameScene::event(SDL_Event& evt)
 {
 	Scene::event(evt);
 
+	// window resize events may affect overlay scenes
+	if (evt.type == SDL_WINDOWEVENT)
+	{
+		for (auto& bgScene : _backgroundScenes)
+			bgScene->event(evt);
+		for (auto& fgScene : _foregroundScenes)
+			fgScene->event(evt);
+	}
+
 	if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_C && !evt.key.repeat)
 		toggleColliders();
 	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_R && !evt.key.repeat)

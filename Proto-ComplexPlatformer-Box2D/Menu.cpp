@@ -22,7 +22,7 @@ MenuItem::MenuItem(Menu* container, int index, const std::string& text, std::fun
 			container->menuRect().left(), 
 			container->menuRect().top() + 0.5f + 0.7f * index, 
 			container->menuRect().size.x, 0.5f),
-		SpriteFactory::instance()->getText(' ' + text, { 0.5f, 0.5f }, 0, ' ', false), 1)
+		SpriteFactory::instance()->getText(' ' + text, { 0.5f, 0.5f }, 0, ' ', false), 2)
 {
 	_container = container;
 	_index = index;
@@ -59,7 +59,7 @@ Menu::Menu(const PointF& position, float width, Menu* parent, bool closable)
 		_transparentLayer = new RenderableObject(this, _rect, Color(255, 255, 255, 128));
 
 	// menu layer
-	_menuBackground = new RenderableObject(this, _menuRect, Color(100, 100, 100, 255));
+	_menuBackground = new RenderableObject(this, _menuRect, Color(100, 100, 100, 255), 1);
 	_menuBackground->setBorderColor({ 0, 0, 0, 255 });
 
 	// default: modal menu (blocks all lower scenes)

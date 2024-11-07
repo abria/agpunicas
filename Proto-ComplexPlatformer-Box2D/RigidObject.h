@@ -33,7 +33,7 @@ class agp::RigidObject : public RenderableObject
 	public:
 
 		RigidObject(GameScene* scene, const RotatedRectF& obb, Sprite* sprite, b2BodyType type, int layer = 0);
-		virtual ~RigidObject() { b2DestroyBody(_bodyId); }
+		virtual ~RigidObject() { if(b2Body_IsValid(_bodyId)) b2DestroyBody(_bodyId); }
 
 		// getters / setters
 		b2Vec2 vel() const { return b2Body_GetLinearVelocity(_bodyId); }

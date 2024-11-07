@@ -38,7 +38,6 @@ ComplexPlatformerGameScene::ComplexPlatformerGameScene(const RectF& rect, const 
 
 ComplexPlatformerGameScene::~ComplexPlatformerGameScene()
 {
-	printf("destroyer\n");
 	if (b2World_IsValid(_worldId))
 		b2DestroyWorld(_worldId);
 }
@@ -85,6 +84,7 @@ void ComplexPlatformerGameScene::updateWorld(float timeToSimulate)
 		_timeToSimulateAccum -= _dt;
 
 		// collisions (logic)
+		// 'standard' collisions
 		b2ContactEvents contactEvents = b2World_GetContactEvents(_worldId);
 		for (int i = 0; i < contactEvents.beginCount; ++i)
 		{
@@ -109,7 +109,7 @@ void ComplexPlatformerGameScene::updateWorld(float timeToSimulate)
 			objB->collision(objA, false, Vec2Df(), endEvent->shapeIdB, endEvent->shapeIdA);
 		}
 
-		// triggers (=sensors in Box2D)
+		// triggers (=sensors in Box2D) collisions
 		b2SensorEvents sensorEvents = b2World_GetSensorEvents(_worldId);
 		for (int i = 0; i < sensorEvents.beginCount; ++i)
 		{
@@ -118,6 +118,16 @@ void ComplexPlatformerGameScene::updateWorld(float timeToSimulate)
 			RigidObject* objB = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(beginTouch->visitorShapeId)));
 			objA->collision(objB, true, Vec2Df(), beginTouch->sensorShapeId, beginTouch->visitorShapeId);
 		}
+		for (int i = 0; i < sensorEvents.endCount; ++i)
+		{
+			b2SensorEndTouchEvent* endTouch = sensorEvents.endEvents + i;
+			RigidObject* objA = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(endTouch->sensorShapeId)));
+			RigidObject* objB = ((RigidObject*)b2Body_GetUserData(b2Shape_GetBody(endTouch->visitorShapeId)));
+			objA->collision(objB, false, Vec2Df(), endTouch->sensorShapeId, endTouch->visitorShapeId);
+		}
+
+		// hit collisions
+		// @TODO
 
 		// logic and animations
 		auto allObjects = objects();

@@ -126,7 +126,7 @@ void DialogBox::event(SDL_Event& evt)
 			_currentOption = (_currentOption + 1) % _optionObjects.size();
 			updateCurrentOption();
 		}
-		else if (evt.key.keysym.scancode == SDL_SCANCODE_RETURN)
+		else if (evt.key.keysym.scancode == SDL_SCANCODE_RETURN && _rowIterator == _charObjects.size())
 		{
 			if (_optionObjects.size())
 				dynamic_cast<RPGGame*>(Game::instance())->dialogOptionEntered(_name, _optionList[_currentOption]);

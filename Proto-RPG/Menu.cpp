@@ -117,7 +117,7 @@ void Menu::event(SDL_Event& evt)
 
 Menu* Menu::mainMenu()
 {
-	Menu* menu = new Menu({ 3.0, 11 }, 10.0, 0, false);
+	Menu* menu = new Menu({ 3.0, 10.5f }, 10.0, 0, false);
 
 	new RenderableObject(menu, RectF(0, -1, 16, 13), SpriteFactory::instance()->get("welcome"), -1);
 

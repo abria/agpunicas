@@ -45,6 +45,11 @@ SpriteFactory::SpriteFactory()
 			_autoComponents["fonts"][i].adjust(0, 0, 0, 2);
 		else if (i == 27)
 			_autoComponents["fonts"][i].adjust(0, -9, 0, 2);
+		else if (i >= 39 && i <= 40)
+		{
+			_autoComponents["fonts"][i].pos.y = 173;
+			_autoComponents["fonts"][i].size.y = 15;
+		}
 		else if (i >= 44 && i <= 45)
 			_autoComponents["fonts"][i].adjust(0, 0, 0, 2);
 		else if (i >= 48 && i <= 57)
@@ -194,6 +199,10 @@ Sprite* SpriteFactory::getChar(char c)
 		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][44]);
 	else if (c == '?')
 		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][45]);
+	else if (c == '<')
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][39]);
+	else if (c == '>')
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][40]);
 	else
 		return nullptr;
 }

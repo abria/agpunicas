@@ -26,8 +26,3 @@ void RPGGame::init()
 	pushScene(_hud);
 	pushScene(Menu::mainMenu());
 }
-
-void RPGGame::dialogOptionEntered(const std::string& dialogName, const std::string& option)
-{
-	printf("Player has entered option \"%s\" from dialog \"%s\"\n", option.c_str(), dialogName.c_str());
-}

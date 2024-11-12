@@ -44,6 +44,7 @@ class agp::RenderableObject : public Object
 
 		// getters/setters
 		const Color& color() { return _color; }
+		void setColor(const Color& newColor) { _color = newColor; }
 		void setBorderColor(const Color& borderColor) { _borderColor = borderColor; }
 		void setVisible(bool visible) { _visible = visible; }
 		Sprite* sprite() { return _sprite; }

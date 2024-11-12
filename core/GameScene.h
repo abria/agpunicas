@@ -9,12 +9,16 @@
 
 #pragma once
 #include "Scene.h"
+#include "graphicsUtils.h"
 
 namespace agp
 {
 	class GameScene;
 	class OverlayScene;
 	class Link;
+	class StaticObject;
+	class RenderableObject;
+	class EditableObject;
 }
 
 // GameScene (or World) class
@@ -50,6 +54,18 @@ class agp::GameScene : public Scene
 		virtual void updateWorld(float timeToSimulate);
 		virtual void updateCamera(float timeToSimulate);
 
+		// editor
+		bool _editMode;
+		bool _snapOnGrid;
+		EditableObject* _editCurrentCell;
+		EditableObject* _editCurrentObject;
+		std::vector<EditableObject*> _editObjects;
+		std::vector<RenderableObject*> _editGrid;
+		int _editCurrentCategory;
+		const int MAX_CATEGORIES = 10;
+		virtual void loadEditor();
+		virtual void saveEditor();
+
 	public:
 
 		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
@@ -61,6 +77,8 @@ class agp::GameScene : public Scene
 		void toggleColliders() { _collidersVisible = !_collidersVisible; }
 		void toggleCameraManual() { _cameraManual = !_cameraManual; }
 		void toggleCameraFollowsPlayer() { _cameraFollowsPlayer = !_cameraFollowsPlayer; }
+		void toggleEditMode();
+		void toggleSnapGrid() { _snapOnGrid = !_snapOnGrid; }
 		void addBackgroundScene(OverlayScene* bgScene) { _backgroundScenes.push_back(bgScene); }
 		void addForegroundScene(OverlayScene* fgScene) { _foregroundScenes.push_back(fgScene); }
 

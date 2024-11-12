@@ -56,6 +56,7 @@ class agp::Object
 		void toggleFreezed() { _freezed = !_freezed; }
 		bool contains(const Vec2Df& p) { return _rect.contains(p); }
 		Scene* scene() const { return _scene; }
+		void setSize(const PointF& newSize) { _rect.size = newSize; }
 
 		// core game logic (physics, ...)
 		virtual void update(float dt);

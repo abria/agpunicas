@@ -26,6 +26,7 @@ GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 	_cameraTranslateVel = { 500, 500 };
 	_collidersVisible = false;
 	_cameraManual = false;
+	_cameraFollowsPlayer = true;
 
 	_view = new View(this, _rect);
 	float ar = Game::instance()->aspectRatio();
@@ -110,7 +111,7 @@ void GameScene::updateCamera(float timeToSimulate)
 		_view->move((_cameraTranslateVel / _view->magf()) * dir2vec(xDir, _rect.yUp) * timeToSimulate);
 		_view->move((_cameraTranslateVel / _view->magf()) * dir2vec(yDir, _rect.yUp) * timeToSimulate);
 	}
-	else
+	else if(_cameraFollowsPlayer)
 	{
 		_view->setX(_player->rect().pos.x - _view->rect().size.x / 2);
 		_view->setY(_player->rect().pos.y - _view->rect().size.y / 2);
@@ -135,7 +136,7 @@ void GameScene::event(SDL_Event& evt)
 	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_R && !evt.key.repeat)
 		toggleRects();
 	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_M && !evt.key.repeat)
-		toggleCamera();
+		toggleCameraManual();
 	else if (evt.type == SDL_MOUSEWHEEL)
 	{
 		if (evt.wheel.y > 0)

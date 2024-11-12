@@ -34,6 +34,7 @@ class agp::GameScene : public Scene
 		Object* _player;
 		bool _collidersVisible;
 		bool _cameraManual;
+		bool _cameraFollowsPlayer;
 
 		// scene overlays
 		std::vector < OverlayScene*> _backgroundScenes;
@@ -58,7 +59,8 @@ class agp::GameScene : public Scene
 		virtual void setPlayer(Object* player) { _player = player; }
 		bool collidersVisible() const { return _collidersVisible; }
 		void toggleColliders() { _collidersVisible = !_collidersVisible; }
-		void toggleCamera() { _cameraManual = !_cameraManual; }
+		void toggleCameraManual() { _cameraManual = !_cameraManual; }
+		void toggleCameraFollowsPlayer() { _cameraFollowsPlayer = !_cameraFollowsPlayer; }
 		void addBackgroundScene(OverlayScene* bgScene) { _backgroundScenes.push_back(bgScene); }
 		void addForegroundScene(OverlayScene* fgScene) { _foregroundScenes.push_back(fgScene); }
 

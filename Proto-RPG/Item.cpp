@@ -14,9 +14,9 @@
 
 using namespace agp;
 
-Item::Item(Type type)
+Item::Item(Type category)
 {
-	_type = type;
-	_icon = SpriteFactory::instance()->get(strprintf("inventory_icon_%d", int(_type)));
-	_label = SpriteFactory::instance()->get(strprintf("inventory_label_%d", int(_type)));
+	_category = category;
+	_icon = SpriteFactory::instance()->get(strprintf("inventory_icon_%d", int(_category)));
+	_label = SpriteFactory::instance()->get(strprintf("inventory_label_%d", int(_category)));
 }

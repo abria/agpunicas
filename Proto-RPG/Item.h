@@ -31,13 +31,13 @@ class agp::Item
 
 	protected:
 
-		Type _type;
+		Type _category;
 		Sprite* _icon;
 		Sprite* _label;
 
 	public:
 
-		Item(Type type);
+		Item(Type category);
 		virtual ~Item() {};	
 
 		Sprite* icon() const { return _icon; }

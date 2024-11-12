@@ -30,6 +30,7 @@ SpriteFactory::SpriteFactory()
 
 	SDL_Renderer* renderer = Game::instance()->window()->renderer();
 	_spriteSheets["overworld"] = loadTexture(renderer, "sprites/scene_overworld.png");
+	_spriteSheets["linkhouse"] = loadTexture(renderer, "sprites/scene_linkhouse.png");
 	_spriteSheets["welcome"] = loadTexture(renderer, "sprites/welcome.png");
 	_spriteSheets["hud_mario"] = loadTexture(renderer, "sprites/hud_mario.png", { 147, 187, 236 });
 	_spriteSheets["hud"] = loadTexture(renderer, "sprites/hud.png", { 255, 0, 255 });
@@ -97,6 +98,8 @@ Sprite* SpriteFactory::get(const std::string& id)
 		return new Sprite(_spriteSheets["hud_mario"], RectI(260, 253, 16 * 16, 15 * 16));
 	else if (id == "overworld")
 		return new Sprite(_spriteSheets["overworld"]);
+	else if (id == "linkhouse")
+		return new Sprite(_spriteSheets["linkhouse"]);
 	else if (id == "link_stand_DOWN")
 		return new Sprite(_spriteSheets["player"], _autoTiles["player"][0][0], Direction::DOWN);
 	else if (id == "link_stand_UP")

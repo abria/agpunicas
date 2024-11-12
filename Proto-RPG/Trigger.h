@@ -35,6 +35,9 @@ class agp::Trigger : public CollidableObject
 		// extends logic collision (+trigger behavior)
 		virtual bool collision(CollidableObject* with, Direction fromDir) override;
 
+		// implements CollidableObject's abstract method (do nothing)
+		virtual void resolveCollisions() override { }
+
 		virtual std::string name() override {
 			return strprintf("Trigger[%d]", _id);
 		}

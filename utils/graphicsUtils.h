@@ -83,40 +83,42 @@ namespace agp
 		friend std::ostream& operator << (std::ostream& os, const Color& c) { os << c.str(); return os; }
 	};
 
-    inline static std::vector<Color> distinctColors(int n)
+    inline static Color distinctColor(int n)
     {
-        std::vector<Color> distinctColors;
-        if(n > 0)
-            distinctColors.push_back({ 255, 255, 25 }); // yellow
-        if (n > 1)
-            distinctColors.push_back({ 0, 130, 200 });  // blue
-        if (n > 2)
-            distinctColors.push_back({ 60, 180, 75 });  // green
-        if (n > 3)
-            distinctColors.push_back({ 245, 130, 48 }); // orange
-        if (n > 4)
-            distinctColors.push_back({ 70, 240, 240 }); // cyan
-        if (n > 5)
-            distinctColors.push_back({ 145, 30, 180 }); // purple
-        if (n > 6)
-            distinctColors.push_back({ 230, 25, 75 });  // red
-        if (n > 7)
-            distinctColors.push_back({ 210, 245, 60 }); // lime
-        if (n > 8)
-            distinctColors.push_back({ 240, 50, 230 }); // magenta
-        if (n > 9)
-            distinctColors.push_back({ 0, 0, 128 });    // navy
-        if (n > 10)
-            distinctColors.push_back({ 128, 0, 0 });    // maroon
-        if (n > 11)
-            distinctColors.push_back({ 170, 110, 40 }); // brown
-        if (n > 12)
-            distinctColors.push_back({ 128, 128, 0 });  // olive
-        if (n > 13)
-            distinctColors.push_back({ 0, 128, 128 });  // teal
-        if (n > 14)
-            std::cerr << "Cannot generate " << n << " distinct colors\n";
-
-        return distinctColors;
+        if(n == 0)
+            return { 255, 255, 25 };  // yellow
+        else if (n == 1)
+            return { 0, 130, 200 };  // blue
+        else if (n == 2)
+            return { 60, 180, 75 };  // green
+        else if (n ==  3)
+            return { 245, 130, 48 }; // orange
+        else if (n ==  4)
+            return { 70, 240, 240 }; // cyan
+        else if (n ==  5)
+            return { 145, 30, 180 }; // purple
+        else if (n ==  6)
+            return { 230, 25, 75 };  // red
+        else if (n ==  7)
+            return { 210, 245, 60 }; // lime
+        else if (n ==  8)
+            return { 240, 50, 230 }; // magenta
+        else if (n ==  9)
+            return { 0, 0, 128 };    // navy
+        else if (n ==  10)
+            return { 128, 0, 0 };    // maroon
+        else if (n ==  11)
+            return { 170, 110, 40 }; // brown
+        else if (n ==  12)
+            return { 128, 128, 0 };  // olive
+        else if (n ==  13)
+            return { 0, 128, 128 };  // teal
+        else if (n == 14)
+            return { 0, 0, 0 };      // black
+        else
+        {
+            std::cerr << "Cannot generate " << n << "-th distinct color\n";
+            return { 0, 0, 0 };      // black
+        }
     }
 }

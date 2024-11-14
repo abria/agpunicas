@@ -25,16 +25,16 @@ class agp::View
 {
 	private:
 
-		RectF _rect;			// view rect in scene coords
-		Scene* _scene;			// scene (or world)
-		RectF _viewport;		// viewport in relative [0,1] window coords
-		RectF _viewportAbs;		// viewport in absolute window coords
-		PointF _magf;			// view rect to viewport ratio (magnification factor)			
-		Transform _scene2view;	// scene 2 view transform		
-		Transform _view2scene;	// view 2 scene transform
-		float _aspectRatio;		// fixed width/height aspect ratio (0 = not fixed)
-		RectF _clipRect;		// in relative [0,1] coords; if not set, _viewport is used
-		RectF _clipRectAbs;		// in absolute window coords
+		RectF _rect;				// view rect in scene coords
+		Scene* _scene;				// scene (or world)
+		RectF _viewport;			// viewport in relative [0,1] window coords
+		RectF _viewportAbs;			// viewport in absolute window coords
+		PointF _magf;				// view rect to viewport ratio (magnification factor)			
+		Transform _scene2view;		// scene 2 view transform		
+		Transform _view2scene;		// view 2 scene transform
+		float _aspectRatio;			// fixed width/height aspect ratio (0 = not fixed)
+		RectF _clipRect;			// in relative [0,1] coords; if not set, _viewport is used
+		RectF _clipRectAbs;			// in absolute window coords
 
 	public:
 
@@ -45,7 +45,7 @@ class agp::View
 		Scene* scene() { return _scene; }
 		void setScene(Scene* scene);
 		const RectF& rect() const { return _rect; }
-		void setRect(const RectF& r) { _rect = r; updateViewport();}
+		void setRect(const RectF& r);
 		const RectF& viewport() const { return _viewport; }
 		PointF magf() const { return _magf; }
 		void setViewport(const RectF& r) { _viewport = r; updateViewport();}

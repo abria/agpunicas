@@ -32,7 +32,6 @@ void Sprite::render(
 {
 	SDL_Rect srcRect = _rect.toSDL();
 	SDL_FRect drawRect_sdl;
-
 	// drawRect expansion to keep sprite aspect ratio
 	if (_expandDir != Direction::NONE && _rect.aspectRatio() != drawRect.aspectRatio())
 	{

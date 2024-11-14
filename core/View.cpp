@@ -36,6 +36,12 @@ void View::setScene(Scene* scene)
 	_rect = scene->rect();
 }
 
+void View::setRect(const RectF& r)
+{ 
+	_rect = r; 
+	updateViewport(); 
+}
+
 void View::move(const Vec2Df& ds)
 {
 	_rect.pos += ds;

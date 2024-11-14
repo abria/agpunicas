@@ -10,53 +10,57 @@
 #include "EditableObject.h"
 #include "Scene.h"
 #include "graphicsUtils.h"
-#include "json.hpp"
+#include "sdlUtils.h"
+#include "Game.h"
+#include "Window.h"
+#include "Sprite.h"
 
 using namespace agp;
 
-EditableObject::EditableObject(Scene* scene, const RectF& rect, int category, int layer)
-	: RenderableObject(scene, rect, nullptr, layer)
+EditableObject::EditableObject(Scene* scene, const RectF& rect, int category)
+	: RenderableObject(scene, rect, nullptr, 1)
 {
 	_category = category;
 
-	Color col = distinctColors(10)[_category];
+	updateColor();
+}
+
+EditableObject::EditableObject(Scene* scene, const nlohmann::json& j)
+	: RenderableObject(scene, RectF(), nullptr, 1)
+{
+	_category = j["category"];
+	_rect.pos.x = j["rect"]["x"];
+	_rect.pos.y = j["rect"]["y"];
+	_rect.size.x = j["rect"]["width"];
+	_rect.size.y = j["rect"]["height"];
+	_rect.yUp = j["rect"]["yUp"];
+
+	updateColor();
+}
+
+void EditableObject::updateColor()
+{
+	Color col = distinctColor(_category);
 	setColor(col.adjustAlpha(128));
 	setBorderColor(col);
 }
 
-EditableObject::EditableObject(Scene* scene, const std::string& fromStr)
-	: RenderableObject(scene, RectF(), nullptr, 100)
-{
-	unserialize(fromStr);
-
-	Color col = distinctColors(10)[_category];
-	setColor(col.adjustAlpha(128));
-	setBorderColor(col);
+void EditableObject::setCategory(int newCategory)
+{ 
+	_category = newCategory; 
+	updateColor();
 }
 
-std::string EditableObject::serialize()
-{
-	nlohmann::json jroot;
-	jroot["category"] = _category;
-	
-	nlohmann::json jrect;
-	jrect["x"] = _rect.pos.x;
-	jrect["y"] = _rect.pos.y;
-	jrect["width"] = _rect.size.x;
-	jrect["height"] = _rect.size.y;
-	jrect["yUp"] = _rect.yUp;
-	jroot["rect"] = jrect;
 
-	return jroot.dump();
-}
-
-void EditableObject::unserialize(const std::string& str)
+nlohmann::ordered_json EditableObject::toJson()
 {
-	nlohmann::json jroot = nlohmann::json::parse(str);
-	_category = jroot["category"];
-	_rect.pos.x = jroot["rect"]["x"];
-	_rect.pos.y = jroot["rect"]["y"];
-	_rect.size.x = jroot["rect"]["width"];
-	_rect.size.y = jroot["rect"]["height"];
-	_rect.yUp = jroot["rect"]["yUp"];
+	nlohmann::ordered_json j;
+	j["category"] = _category;
+	j["rect"]["x"] = _rect.pos.x;
+	j["rect"]["y"] = _rect.pos.y;
+	j["rect"]["width"] = _rect.size.x;
+	j["rect"]["height"] = _rect.size.y;
+	j["rect"]["yUp"] = _rect.yUp;
+
+	return j;
 }

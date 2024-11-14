@@ -9,6 +9,7 @@
 
 #pragma once
 #include "RenderableObject.h"
+#include "json.hpp"
 
 namespace agp
 {
@@ -22,19 +23,20 @@ class agp::EditableObject : public RenderableObject
 {
 	protected:
 
+		std::string _text;
 		int _category;
+
+		void updateColor();
 
 	public:
 
-		EditableObject(Scene* scene, const RectF& rect, int category, int layer = 0);
-		EditableObject(Scene* scene, const std::string& fromStr);
+		EditableObject(Scene* scene, const RectF& rect, int category);
+		EditableObject(Scene* scene, const nlohmann::json& fromJson);
 
-		int category() { return _category; };
+		int category() { return _category; }
+		void setCategory(int newCategory);
 
-		virtual std::string name() override {
-			return strprintf("EditableObject[%d]", _id);
-		}
+		virtual std::string name() override { return strprintf("EditableObject[%d]", _id); }
 
-		std::string serialize();
-		void unserialize(const std::string& str);
+		nlohmann::ordered_json toJson();
 };

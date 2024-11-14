@@ -17,12 +17,15 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#ifdef WITH_TTF
+#include "SDL_ttf.h"
+#endif
 
 namespace agp
 {
-    static inline void DrawCircle(SDL_Renderer* renderer, const PointF& center, float radius, const Color& color, int nSegments = 100, float angleStart = 0, float angleEnd = 2*PI)
+    static inline void DrawCircle(SDL_Renderer* renderer, const PointF& center, float radius, const Color& color, int nSegments = 100, float angleStart = 0, float angleEnd = 2 * PI)
     {
-        float angleStep = (angleEnd-angleStart) / nSegments;
+        float angleStep = (angleEnd - angleStart) / nSegments;
 
         for (int i = 0; i < nSegments; ++i)
         {
@@ -39,10 +42,10 @@ namespace agp
 
     static inline void DrawCapsule(SDL_Renderer* renderer, const PointF& centerDown, const PointF& centerUp, float radius, const Color& color, int nSegments = 100)
     {
-       
-        float angle = std::atan2(centerUp.y - centerDown.y, centerUp.x - centerDown.x) + PI/2;
-        DrawCircle(renderer, centerUp, radius, color, nSegments, angle-PI, angle);
-        DrawCircle(renderer, centerDown, radius, color, nSegments, angle, PI+angle);
+
+        float angle = std::atan2(centerUp.y - centerDown.y, centerUp.x - centerDown.x) + PI / 2;
+        DrawCircle(renderer, centerUp, radius, color, nSegments, angle - PI, angle);
+        DrawCircle(renderer, centerDown, radius, color, nSegments, angle, PI + angle);
 
         SDL_FPoint aUp = { centerUp.x + radius * cosf(angle - PI), centerUp.y + radius * sinf(angle - PI) };
         SDL_FPoint bUp = { centerUp.x + radius * cosf(angle), centerUp.y + radius * sinf(angle) };
@@ -99,7 +102,7 @@ namespace agp
 
     // load texture sequence from multiple files into a single texture, row-wise
     static inline SDL_Texture* loadTextureSequence(
-        SDL_Renderer* renderer, 
+        SDL_Renderer* renderer,
         const std::string& folderPath,
         std::vector< RectI>& rects,             // output autotiles
         const Point& adjustPos = Point(),
@@ -127,7 +130,7 @@ namespace agp
                 SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, mask.r, mask.g, mask.b));
 
             // set image dimensions based on the first image
-            if (k==0)
+            if (k == 0)
             {
                 image_width = surf->w;
                 image_height = surf->h;
@@ -201,7 +204,7 @@ namespace agp
 
             SDL_Rect dest_rect = { col * image_width, row * image_height, image_width, image_height };
             SDL_BlitSurface(surfaces[i], NULL, big_surface, &dest_rect);
-            
+
             RectI rect(dest_rect.x, dest_rect.y, dest_rect.w, dest_rect.h);
             rect.adjust(adjustPos.x, adjustPos.y, adjustSize.x, adjustSize.y);
             rects.push_back(rect);
@@ -231,9 +234,9 @@ namespace agp
     static inline SDL_Texture* loadTextureAutoDetect(
         SDL_Renderer* renderer,
         const std::string& filepath,
-        std::vector< std::vector < RectI > > & rects,
+        std::vector< std::vector < RectI > >& rects,
         const Color& backgroundMask,
-        const Color & spriteMask,
+        const Color& spriteMask,
         int yDistanceThreshold = 5,
         bool detectCornerWithBackgroundOnly = false,
         bool alignYCenters = true,
@@ -254,16 +257,16 @@ namespace agp
         int height = surf->h;
         int pitch = surf->pitch; // Number of bytes in a row (may include padding)
         Uint8 bpp = surf->format->BytesPerPixel;
-        for (int y = 0; y < height; y++) 
+        for (int y = 0; y < height; y++)
         {
             Uint8* row = pixels + y * pitch;
             Uint8* rowPrev = pixels + (y - 1) * pitch;
             for (int x = 0; x < width; x++)
             {
-                Color pixel  (row + x * bpp);
-                Color pixelN  = y ? Color(rowPrev +  x * bpp) : backgroundMask;
+                Color pixel(row + x * bpp);
+                Color pixelN = y ? Color(rowPrev + x * bpp) : backgroundMask;
                 Color pixelNW = y ? Color(rowPrev + (x - 1) * bpp) : backgroundMask;
-                Color pixelW  = x ? Color(row     + (x - 1) * bpp) : backgroundMask;
+                Color pixelW = x ? Color(row + (x - 1) * bpp) : backgroundMask;
 
                 // up-left corner detection
                 if ((detectCornerWithBackgroundOnly ? pixel != backgroundMask : pixel == spriteMask) &&
@@ -293,7 +296,7 @@ namespace agp
         {
             Uint8* row = pixels + y * pitch;
             for (int x = 0; x < width; x++)
-                if(Color(row + x * bpp) == backgroundMask)
+                if (Color(row + x * bpp) == backgroundMask)
                     for (int c = 0; c < bpp; c++)
                         row[x * bpp + c] = spriteMask[c];
         }
@@ -301,15 +304,15 @@ namespace agp
 
         // group rects row-wise
         std::sort(allRects.begin(), allRects.end(), [yDistanceThreshold, alignYCenters](const RectI& a, const RectI& b)
-        {
-	        return std::abs(alignYCenters ? a.center().y - b.center().y : a.pos.y - b.pos.y) > yDistanceThreshold ? a.center().y < b.center().y : a.pos.x < b.pos.x;
-	    });
+            {
+                return std::abs(alignYCenters ? a.center().y - b.center().y : a.pos.y - b.pos.y) > yDistanceThreshold ? a.center().y < b.center().y : a.pos.x < b.pos.x;
+            });
         rects.push_back(std::vector <RectI>());
         for (int k = 0; k < allRects.size(); k++)
         {
             if (k && allRects[k].pos.x < allRects[k - 1].pos.x)
                 rects.push_back(std::vector <RectI>());
-            rects[rects.size()-1].push_back(allRects[k]);
+            rects[rects.size() - 1].push_back(allRects[k]);
         }
 
         if (verbose)
@@ -342,9 +345,9 @@ namespace agp
 
     // move rect within spritesheet
     static inline RectI moveBy(
-        RectI srcRect, 
-        int x, int y, 
-        int dx = 16, int dy = 16, 
+        RectI srcRect,
+        int x, int y,
+        int dx = 16, int dy = 16,
         int border_x = 1, int border_y = 1)
     {
         RectI dstRect = srcRect;
@@ -353,34 +356,34 @@ namespace agp
     }
 
     // Union-Find data structure for connected component labeling
-    class UnionFind 
+    class UnionFind
     {
-        private:
-           
-            std::vector<int> parent;
+    private:
 
-        public:
+        std::vector<int> parent;
 
-            UnionFind(int size) : parent(size) 
-            {
-                for (int i = 0; i < size; ++i)
-                    parent[i] = i;
-            }
+    public:
 
-            int Find(int x) 
-            {
-                if (parent[x] != x)
-                    parent[x] = Find(parent[x]); // Path compression
-                return parent[x];
-            }
+        UnionFind(int size) : parent(size)
+        {
+            for (int i = 0; i < size; ++i)
+                parent[i] = i;
+        }
 
-            void Union(int x, int y) 
-            {
-                int xroot = Find(x);
-                int yroot = Find(y);
-                if (xroot != yroot)
-                    parent[yroot] = xroot;
-            }
+        int Find(int x)
+        {
+            if (parent[x] != x)
+                parent[x] = Find(parent[x]); // Path compression
+            return parent[x];
+        }
+
+        void Union(int x, int y)
+        {
+            int xroot = Find(x);
+            int yroot = Find(y);
+            if (xroot != yroot)
+                parent[yroot] = xroot;
+        }
     };
 
     // load image from file into texture and detect rects with connected component labeling
@@ -388,7 +391,7 @@ namespace agp
         SDL_Renderer* renderer,
         const std::string& filepath,
         std::vector< RectI >& rects,
-        const Color& backgroundMask, 
+        const Color& backgroundMask,
         int yDistanceThreshold = 5,
         bool alignYCenters = true,
         bool verbose = false)
@@ -410,7 +413,7 @@ namespace agp
         int BytesPerPixel = surface->format->BytesPerPixel;
 
         // check format
-        if (BytesPerPixel < 3 || BytesPerPixel > 4) 
+        if (BytesPerPixel < 3 || BytesPerPixel > 4)
         {
             std::cerr << "Unsupported bitdepth (must be 24 or 32 bits per pixel).\n";
             SDL_UnlockSurface(surface);
@@ -426,10 +429,10 @@ namespace agp
         std::unordered_map<int, RectI> boundingBoxes;
 
         // FIRST PASS: assign provisional labels and record equivalences
-        for (int y = 0; y < height; ++y) 
+        for (int y = 0; y < height; ++y)
         {
             Uint8* row = pixels + y * pitch;
-            for (int x = 0; x < width; ++x) 
+            for (int x = 0; x < width; ++x)
             {
                 Uint8* pixel = row + x * BytesPerPixel;
                 Uint8 r, g, b;
@@ -446,29 +449,29 @@ namespace agp
                 // define neighbor offsets based on connectivity
                 std::vector<std::pair<int, int>> neighborOffsets;
 
-                if (isForeground) 
+                if (isForeground)
                 {
                     // Use 8-connectivity for foreground pixels
-                    neighborOffsets = 
+                    neighborOffsets =
                     {
                         {-1, -1}, {-1, 0}, {-1, 1}, { 0, -1}
                     };
                 }
-                else 
+                else
                 {
                     // Use 4-connectivity for background pixels
-                    neighborOffsets = 
+                    neighborOffsets =
                     {
                         {-1, 0}, { 0, -1}
                     };
                 }
 
                 // Check neighbors
-                for (const auto& offset : neighborOffsets) 
+                for (const auto& offset : neighborOffsets)
                 {
                     int ny = y + offset.first;
                     int nx = x + offset.second;
-                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) 
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height)
                     {
                         int neighborIdx = ny * width + nx;
                         int neighborLabel = labels[neighborIdx];
@@ -488,7 +491,7 @@ namespace agp
                     }
                 }
 
-                if (neighborLabels.empty()) 
+                if (neighborLabels.empty())
                 {
                     // Assign a new label
                     labels[currentIdx] = nextLabel;
@@ -497,7 +500,7 @@ namespace agp
                     // Initialize bounding box for the new label
                     boundingBoxes[labels[currentIdx]] = { x, y, x, y };
                 }
-                else 
+                else
                 {
                     // Assign the smallest neighbor label
                     int minLabel = *std::min_element(neighborLabels.begin(), neighborLabels.end());
@@ -512,7 +515,7 @@ namespace agp
                 int label = labels[currentIdx];
                 if (boundingBoxes.find(label) == boundingBoxes.end())
                     boundingBoxes[label] = { x, y, x, y };
-                else 
+                else
                 {
                     RectI& bbox = boundingBoxes[label];
                     if (x < bbox.pos.x) bbox.pos.x = x;
@@ -529,10 +532,10 @@ namespace agp
         int currentForegroundLabel = 1;
         int currentBackgroundLabel = 1;
 
-        for (int i = 0; i < width * height; ++i) 
+        for (int i = 0; i < width * height; ++i)
         {
             int label = labels[i];
-            if (label != 0) 
+            if (label != 0)
             {
                 int rootLabel = uf.Find(label);
 
@@ -550,9 +553,9 @@ namespace agp
 
                 // Map labels separately for foreground and background
                 int resolvedLabel;
-                if (isForeground) 
+                if (isForeground)
                 {
-                    if (labelMap.find(rootLabel) == labelMap.end()) 
+                    if (labelMap.find(rootLabel) == labelMap.end())
                     {
                         labelMap[rootLabel] = currentForegroundLabel;
                         resolvedLabel = currentForegroundLabel;
@@ -562,9 +565,9 @@ namespace agp
                         resolvedLabel = labelMap[rootLabel];
                     labels[i] = resolvedLabel;
                 }
-                else 
+                else
                 {
-                    if (labelMap.find(rootLabel) == labelMap.end()) 
+                    if (labelMap.find(rootLabel) == labelMap.end())
                     {
                         labelMap[rootLabel] = -currentBackgroundLabel; // Negative labels for background
                         resolvedLabel = -currentBackgroundLabel;
@@ -578,7 +581,7 @@ namespace agp
                 // Update bounding boxes with resolved labels
                 if (resolvedBoundingBoxes.find(resolvedLabel) == resolvedBoundingBoxes.end())
                     resolvedBoundingBoxes[resolvedLabel] = boundingBoxes[label];
-                else 
+                else
                 {
                     RectI& bbox = resolvedBoundingBoxes[resolvedLabel];
                     RectI& originalBbox = boundingBoxes[label];
@@ -625,4 +628,27 @@ namespace agp
 
         return tex;
     }
+
+#ifdef WITH_TTF
+    static inline SDL_Texture* generateText(
+        const std::string& text,
+        SDL_Renderer* renderer,
+        const std::string& fontPath,
+        const Color& fontColor,
+        int fontSize)
+    {
+        TTF_Font* font = TTF_OpenFont(fontPath.c_str(), fontSize);
+        if (!font)
+        {
+            SDL_Log("Cannot open font from %s: %s", fontPath.c_str(), TTF_GetError());
+            return nullptr;
+        }
+        SDL_Color textColor = { fontColor.r, fontColor.g, fontColor.b, fontColor.a }; // Black text
+        SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), textColor);
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_FreeSurface(textSurface);
+
+        return textTexture;
+    }
+#endif
 }

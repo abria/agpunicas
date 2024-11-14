@@ -42,9 +42,15 @@ class agp::Singleton
         // needed for polymorphic behavior
         static void setInstance(T* newInstance) 
         {
+            uninstance();
+            _instance = newInstance;
+        }
+
+        static void uninstance()
+        {
             if (_instance)
                 delete _instance;
-            _instance = newInstance;
+            _instance = nullptr;
         }
 
         // delete copy constructor and assignment operator to prevent copies

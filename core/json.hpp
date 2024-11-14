@@ -14829,8 +14829,8 @@ class json_ref
         : value_ref(&value)
     {}
 
-    json_ref(std::initializer_list<json_ref> init)
-        : owned_value(init)
+    json_ref(std::initializer_list<json_ref> updateColor)
+        : owned_value(updateColor)
     {}
 
     template <
@@ -15117,7 +15117,7 @@ class binary_writer
             case value_t::discarded:
             default:
             {
-                JSON_THROW(type_error::create(317, concat("to serialize to BSON, top-level type must be object, but is ", j.type_name()), &j));
+                JSON_THROW(type_error::create(317, concat("to toJson to BSON, top-level type must be object, but is ", j.type_name()), &j));
             }
         }
     }
@@ -19052,8 +19052,8 @@ template <class Key, class T, class IgnoredLess = std::less<Key>,
     template <class It>
     ordered_map(It first, It last, const Allocator& alloc = Allocator())
         : Container{first, last, alloc} {}
-    ordered_map(std::initializer_list<value_type> init, const Allocator& alloc = Allocator() )
-        : Container{init, alloc} {}
+    ordered_map(std::initializer_list<value_type> updateColor, const Allocator& alloc = Allocator() )
+        : Container{updateColor, alloc} {}
 
     std::pair<iterator, bool> emplace(const key_type& key, T&& t)
     {
@@ -20201,13 +20201,13 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
 
     /// @brief create a container (array or object) from an initializer list
     /// @sa https://json.nlohmann.me/api/basic_json/basic_json/
-    basic_json(initializer_list_t init,
+    basic_json(initializer_list_t updateColor,
                bool type_deduction = true,
                value_t manual_type = value_t::array)
     {
         // check if each element is an array with two elements whose first
         // element is a string
-        bool is_an_object = std::all_of(init.begin(), init.end(),
+        bool is_an_object = std::all_of(updateColor.begin(), updateColor.end(),
                                         [](const detail::json_ref<basic_json>& element_ref)
         {
             // The cast is to ensure op[size_type] is called, bearing in mind size_type may not be int;
@@ -20238,7 +20238,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
             m_data.m_type = value_t::object;
             m_data.m_value = value_t::object;
 
-            for (auto& element_ref : init)
+            for (auto& element_ref : updateColor)
             {
                 auto element = element_ref.moved_or_copied();
                 m_data.m_value.object->emplace(
@@ -20250,7 +20250,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
         {
             // the initializer list describes an array -> create array
             m_data.m_type = value_t::array;
-            m_data.m_value.array = create<array_t>(init.begin(), init.end());
+            m_data.m_value.array = create<array_t>(updateColor.begin(), updateColor.end());
         }
 
         set_parents();
@@ -20260,61 +20260,61 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     /// @brief explicitly create a binary array (without subtype)
     /// @sa https://json.nlohmann.me/api/basic_json/binary/
     JSON_HEDLEY_WARN_UNUSED_RESULT
-    static basic_json binary(const typename binary_t::container_type& init)
+    static basic_json binary(const typename binary_t::container_type& updateColor)
     {
         auto res = basic_json();
         res.m_data.m_type = value_t::binary;
-        res.m_data.m_value = init;
+        res.m_data.m_value = updateColor;
         return res;
     }
 
     /// @brief explicitly create a binary array (with subtype)
     /// @sa https://json.nlohmann.me/api/basic_json/binary/
     JSON_HEDLEY_WARN_UNUSED_RESULT
-    static basic_json binary(const typename binary_t::container_type& init, typename binary_t::subtype_type subtype)
+    static basic_json binary(const typename binary_t::container_type& updateColor, typename binary_t::subtype_type subtype)
     {
         auto res = basic_json();
         res.m_data.m_type = value_t::binary;
-        res.m_data.m_value = binary_t(init, subtype);
+        res.m_data.m_value = binary_t(updateColor, subtype);
         return res;
     }
 
     /// @brief explicitly create a binary array
     /// @sa https://json.nlohmann.me/api/basic_json/binary/
     JSON_HEDLEY_WARN_UNUSED_RESULT
-    static basic_json binary(typename binary_t::container_type&& init)
+    static basic_json binary(typename binary_t::container_type&& updateColor)
     {
         auto res = basic_json();
         res.m_data.m_type = value_t::binary;
-        res.m_data.m_value = std::move(init);
+        res.m_data.m_value = std::move(updateColor);
         return res;
     }
 
     /// @brief explicitly create a binary array (with subtype)
     /// @sa https://json.nlohmann.me/api/basic_json/binary/
     JSON_HEDLEY_WARN_UNUSED_RESULT
-    static basic_json binary(typename binary_t::container_type&& init, typename binary_t::subtype_type subtype)
+    static basic_json binary(typename binary_t::container_type&& updateColor, typename binary_t::subtype_type subtype)
     {
         auto res = basic_json();
         res.m_data.m_type = value_t::binary;
-        res.m_data.m_value = binary_t(std::move(init), subtype);
+        res.m_data.m_value = binary_t(std::move(updateColor), subtype);
         return res;
     }
 
     /// @brief explicitly create an array from an initializer list
     /// @sa https://json.nlohmann.me/api/basic_json/array/
     JSON_HEDLEY_WARN_UNUSED_RESULT
-    static basic_json array(initializer_list_t init = {})
+    static basic_json array(initializer_list_t updateColor = {})
     {
-        return basic_json(init, false, value_t::array);
+        return basic_json(updateColor, false, value_t::array);
     }
 
     /// @brief explicitly create an object from an initializer list
     /// @sa https://json.nlohmann.me/api/basic_json/object/
     JSON_HEDLEY_WARN_UNUSED_RESULT
-    static basic_json object(initializer_list_t init = {})
+    static basic_json object(initializer_list_t updateColor = {})
     {
-        return basic_json(init, false, value_t::object);
+        return basic_json(updateColor, false, value_t::object);
     }
 
     /// @brief construct an array with count copies of given value
@@ -22483,25 +22483,25 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
 
     /// @brief add an object to an object
     /// @sa https://json.nlohmann.me/api/basic_json/push_back/
-    void push_back(initializer_list_t init)
+    void push_back(initializer_list_t updateColor)
     {
-        if (is_object() && init.size() == 2 && (*init.begin())->is_string())
+        if (is_object() && updateColor.size() == 2 && (*updateColor.begin())->is_string())
         {
-            basic_json&& key = init.begin()->moved_or_copied();
+            basic_json&& key = updateColor.begin()->moved_or_copied();
             push_back(typename object_t::value_type(
-                          std::move(key.get_ref<string_t&>()), (init.begin() + 1)->moved_or_copied()));
+                          std::move(key.get_ref<string_t&>()), (updateColor.begin() + 1)->moved_or_copied()));
         }
         else
         {
-            push_back(basic_json(init));
+            push_back(basic_json(updateColor));
         }
     }
 
     /// @brief add an object to an object
     /// @sa https://json.nlohmann.me/api/basic_json/operator+=/
-    reference operator+=(initializer_list_t init)
+    reference operator+=(initializer_list_t updateColor)
     {
-        push_back(init);
+        push_back(updateColor);
         return *this;
     }
 

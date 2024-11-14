@@ -15,10 +15,7 @@ namespace agp
 {
 	class GameScene;
 	class OverlayScene;
-	class Link;
-	class StaticObject;
 	class RenderableObject;
-	class EditableObject;
 }
 
 // GameScene (or World) class
@@ -43,6 +40,7 @@ class agp::GameScene : public Scene
 		// scene overlays
 		std::vector < OverlayScene*> _backgroundScenes;
 		std::vector < OverlayScene*> _foregroundScenes;
+		bool _hideOverlayScenes;
 	
 		// camera controls
 		Vec2Df _cameraTranslateVel;
@@ -54,18 +52,6 @@ class agp::GameScene : public Scene
 		virtual void updateWorld(float timeToSimulate);
 		virtual void updateCamera(float timeToSimulate);
 
-		// editor
-		bool _editMode;
-		bool _snapOnGrid;
-		EditableObject* _editCurrentCell;
-		EditableObject* _editCurrentObject;
-		std::vector<EditableObject*> _editObjects;
-		std::vector<RenderableObject*> _editGrid;
-		int _editCurrentCategory;
-		const int MAX_CATEGORIES = 10;
-		virtual void loadEditor();
-		virtual void saveEditor();
-
 	public:
 
 		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
@@ -74,13 +60,12 @@ class agp::GameScene : public Scene
 		Object* player() { return _player; }
 		virtual void setPlayer(Object* player) { _player = player; }
 		bool collidersVisible() const { return _collidersVisible; }
-		void toggleColliders() { _collidersVisible = !_collidersVisible; }
-		void toggleCameraManual() { _cameraManual = !_cameraManual; }
-		void toggleCameraFollowsPlayer() { _cameraFollowsPlayer = !_cameraFollowsPlayer; }
-		void toggleEditMode();
-		void toggleSnapGrid() { _snapOnGrid = !_snapOnGrid; }
-		void addBackgroundScene(OverlayScene* bgScene) { _backgroundScenes.push_back(bgScene); }
-		void addForegroundScene(OverlayScene* fgScene) { _foregroundScenes.push_back(fgScene); }
+		virtual void toggleColliders() { _collidersVisible = !_collidersVisible; }
+		virtual void toggleCameraManual() {	_cameraManual = !_cameraManual;	}
+		virtual void toggleCameraFollowsPlayer() { _cameraFollowsPlayer = !_cameraFollowsPlayer; }
+		virtual void addBackgroundScene(OverlayScene* bgScene) { _backgroundScenes.push_back(bgScene); }
+		virtual void addForegroundScene(OverlayScene* fgScene) { _foregroundScenes.push_back(fgScene); }
+		void hideOverlayScenes(bool active) { _hideOverlayScenes = active; }
 
 		// overrides scene object selection (+octree or +BVH, NOT implemented)
 		//virtual std::list<Object*> objects(const RectF& cullingRect) override;

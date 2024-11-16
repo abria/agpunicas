@@ -75,3 +75,10 @@ void RPGGameScene::event(SDL_Event& evt)
 			}));
 	}
 }
+
+void RPGGameScene::displayGameSceneOnly(bool on) 
+{ 
+	GameScene::displayGameSceneOnly(on);
+
+	HUD::instance()->setVisible(!on);
+}

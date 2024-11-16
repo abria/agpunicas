@@ -32,4 +32,7 @@ class agp::RPGGameScene : public GameScene
 
 		// override (+custom game controls)
 		virtual void event(SDL_Event& evt) override;
+
+		// override (+hide HUD)
+		virtual void displayGameSceneOnly(bool on) override;
 };

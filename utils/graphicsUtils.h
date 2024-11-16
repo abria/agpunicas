@@ -13,9 +13,81 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 namespace agp
 {
+    // Helper function to convert RGB to HSL
+    inline static void RGBtoHSL(unsigned char r, unsigned char g, unsigned char b, float& h, float& s, float& l)
+    {
+        float rf = r / 255.0f;
+        float gf = g / 255.0f;
+        float bf = b / 255.0f;
+
+        float max = std::max({ rf, gf, bf });
+        float min = std::min({ rf, gf, bf });
+        float delta = max - min;
+
+        l = (max + min) / 2.0f;
+
+        if (delta == 0.0f)
+        {
+            h = s = 0.0f; // Achromatic
+        }
+        else
+        {
+            s = l < 0.5f ? delta / (max + min) : delta / (2.0f - max - min);
+
+            if (max == rf)
+                h = (gf - bf) / delta + (gf < bf ? 6.0f : 0.0f);
+            else if (max == gf)
+                h = (bf - rf) / delta + 2.0f;
+            else // max == bf
+                h = (rf - gf) / delta + 4.0f;
+
+            h /= 6.0f;
+        }
+    }
+
+    // Helper function used in HSL to RGB conversion
+    inline static float HueToRGB(float p, float q, float t)
+    {
+        if (t < 0.0f) t += 1.0f;
+        if (t > 1.0f) t -= 1.0f;
+
+        if (t < 1.0f / 6.0f)
+            return p + (q - p) * 6.0f * t;
+        if (t < 1.0f / 2.0f)
+            return q;
+        if (t < 2.0f / 3.0f)
+            return p + (q - p) * (2.0f / 3.0f - t) * 6.0f;
+        return p;
+    }
+
+    // Helper function to convert HSL back to RGB
+    inline static void HSLtoRGB(float h, float s, float l, unsigned char& r, unsigned char& g, unsigned char& b)
+    {
+        float rf, gf, bf;
+
+        if (s == 0.0f)
+        {
+            rf = gf = bf = l; // Achromatic
+        }
+        else
+        {
+            float q = l < 0.5f ? l * (1.0f + s) : l + s - l * s;
+            float p = 2.0f * l - q;
+
+            rf = HueToRGB(p, q, h + 1.0f / 3.0f);
+            gf = HueToRGB(p, q, h);
+            bf = HueToRGB(p, q, h - 1.0f / 3.0f);
+        }
+
+        r = static_cast<unsigned char>(std::round(rf * 255.0f));
+        g = static_cast<unsigned char>(std::round(gf * 255.0f));
+        b = static_cast<unsigned char>(std::round(bf * 255.0f));
+    }
+
 	// color class
 	struct Color
 	{
@@ -76,7 +148,42 @@ namespace agp
             return !(*this == other);
         }
 
-        Color& adjustAlpha(int newAlpha) { a = newAlpha; return *this; }
+        Color adjustAlpha(int newAlpha) 
+        { 
+            Color newColor = *this;
+            newColor.a = newAlpha;
+            return newColor;
+        }
+
+        Color adjustBrightness(float factor) 
+        {
+            Color newColor = *this;
+
+            if (factor < 0.0f) factor = 0.0f;
+
+            newColor.r = (unsigned char)(std::min(r * factor, 255.0f));
+            newColor.g = (unsigned char)(std::min(g * factor, 255.0f));
+            newColor.b = (unsigned char)(std::min(b * factor, 255.0f));
+            return newColor;
+        }
+
+        Color brighter()
+        {
+            float h, s, l;
+            RGBtoHSL(r, g, b, h, s, l);
+
+            // Adjust the lightness
+            if (l < 0.5f)
+                l = 0.7f; // Set lightness to 70% for darker colors
+            else
+                l = std::min(l + 0.3f, 1.0f); // Increase lightness for lighter colors
+
+            // Convert back to RGB
+            unsigned char newR, newG, newB;
+            HSLtoRGB(h, s, l, newR, newG, newB);
+
+            return Color(newR, newG, newB, a);
+        }
 
 		// string
 		const std::string str() const { return std::string("(") + std::to_string(r) + ", " + std::to_string(g) + ", " + std::to_string(b) + ", " + std::to_string(a) + ")"; }

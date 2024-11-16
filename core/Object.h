@@ -47,8 +47,8 @@ class agp::Object
 
 		// getters/setters
 		const RectF& rect() const { return _rect; }
-		void setRect(const RectF& rect) { _rect = rect; }
-		void setPos(const PointF& newPos) { _rect.pos = newPos; }
+		virtual void setRect(const RectF& rect) { _rect = rect; }
+		virtual void setPos(const PointF& newPos) { _rect.pos = newPos; }
 		PointF pos() const { return _rect.pos; }
 		int layer() { return _layer; }
 		bool freezed() { return _freezed; }
@@ -56,7 +56,7 @@ class agp::Object
 		void toggleFreezed() { _freezed = !_freezed; }
 		bool contains(const Vec2Df& p) { return _rect.contains(p); }
 		Scene* scene() const { return _scene; }
-		void setSize(const PointF& newSize) { _rect.size = newSize; }
+		virtual void setSize(const PointF& newSize) { _rect.size = newSize; }
 
 		// core game logic (physics, ...)
 		virtual void update(float dt);
@@ -69,7 +69,11 @@ class agp::Object
 		template <class T>
 		T to() { return dynamic_cast<T>(this); }
 
+		// kill
+		virtual void kill();
+
 		// debugging
 		int id() const { return _id; }
 		virtual std::string name() { return strprintf("Object[%d]", _id); }
+
 };

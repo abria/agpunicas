@@ -15,6 +15,7 @@
 #include "mathUtils.h"
 #include "fileUtils.h"
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include <iostream>
 #ifdef WITH_TTF
@@ -23,6 +24,25 @@
 
 namespace agp
 {
+    static inline void DrawThickRect(SDL_Renderer* renderer, SDL_FRect rect, float thickness) 
+    {
+        // Top side
+        SDL_FRect top = { rect.x, rect.y, rect.w, thickness };
+        SDL_RenderFillRectF(renderer, &top);
+
+        // Bottom side
+        SDL_FRect bottom = { rect.x, rect.y + rect.h - thickness, rect.w, thickness };
+        SDL_RenderFillRectF(renderer, &bottom);
+
+        // Left side
+        SDL_FRect left = { rect.x, rect.y + thickness, thickness, rect.h - 2 * thickness };
+        SDL_RenderFillRectF(renderer, &left);
+
+        // Right side
+        SDL_FRect right = { rect.x + rect.w - thickness, rect.y + thickness, thickness, rect.h - 2 * thickness };
+        SDL_RenderFillRectF(renderer, &right);
+    }
+
     static inline void DrawCircle(SDL_Renderer* renderer, const PointF& center, float radius, const Color& color, int nSegments = 100, float angleStart = 0, float angleEnd = 2 * PI)
     {
         float angleStep = (angleEnd - angleStart) / nSegments;
@@ -635,7 +655,8 @@ namespace agp
         SDL_Renderer* renderer,
         const std::string& fontPath,
         const Color& fontColor,
-        int fontSize)
+        int fontSize,
+        int fontStyle)
     {
         TTF_Font* font = TTF_OpenFont(fontPath.c_str(), fontSize);
         if (!font)
@@ -643,9 +664,12 @@ namespace agp
             SDL_Log("Cannot open font from %s: %s", fontPath.c_str(), TTF_GetError());
             return nullptr;
         }
-        SDL_Color textColor = { fontColor.r, fontColor.g, fontColor.b, fontColor.a }; // Black text
-        SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), textColor);
+        TTF_SetFontStyle(font, fontStyle);
+        TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
+        SDL_Color textColor = { fontColor.r, fontColor.g, fontColor.b, fontColor.a };
+        SDL_Surface* textSurface = TTF_RenderText_Blended(font, text.c_str(), textColor);
         SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_SetTextureScaleMode(textTexture, SDL_ScaleModeBest);
         SDL_FreeSurface(textSurface);
 
         return textTexture;

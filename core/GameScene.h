@@ -40,7 +40,7 @@ class agp::GameScene : public Scene
 		// scene overlays
 		std::vector < OverlayScene*> _backgroundScenes;
 		std::vector < OverlayScene*> _foregroundScenes;
-		bool _hideOverlayScenes;
+		bool _displayGameSceneOnly;
 	
 		// camera controls
 		Vec2Df _cameraTranslateVel;
@@ -65,7 +65,7 @@ class agp::GameScene : public Scene
 		virtual void toggleCameraFollowsPlayer() { _cameraFollowsPlayer = !_cameraFollowsPlayer; }
 		virtual void addBackgroundScene(OverlayScene* bgScene) { _backgroundScenes.push_back(bgScene); }
 		virtual void addForegroundScene(OverlayScene* fgScene) { _foregroundScenes.push_back(fgScene); }
-		void hideOverlayScenes(bool active) { _hideOverlayScenes = active; }
+		virtual void displayGameSceneOnly(bool on) { _displayGameSceneOnly = on; }
 
 		// overrides scene object selection (+octree or +BVH, NOT implemented)
 		//virtual std::list<Object*> objects(const RectF& cullingRect) override;

@@ -14,6 +14,7 @@
 namespace agp
 {
 	class EditorScene;
+	class EditorUI;
 	class GameScene;
 	class RenderableObject;
 	class EditableObject;
@@ -24,19 +25,29 @@ namespace agp
 // - load/save from/to json
 class agp::EditorScene : public UIScene
 {
+	public:
+
+		enum class State { DEFAULT, CREATE, RENAME_CATEGORY, RENAME_OBJECT, SELECT };
+
 	protected:
 
 		GameScene* _gameScene;
 		RectF _gameRect;
+		EditorUI* _ui;
 
 		bool _snapGrid;
+		PointF _mouseCoordsF;
+		PointF _mouseCoordsSnap;
 		EditableObject* _currentCell;
 		EditableObject* _currentObject;
 		std::vector<EditableObject*> _editObjects;
 		std::vector<RenderableObject*> _grid;
 		int _currentCategory;
+		std::string _textInput;
 		std::vector<std::string> _categories;
+		State _state;
 		static const int MAX_CATEGORIES = 15;
+
 
 		// camera controls
 		Vec2Df _cameraTranslateVel;
@@ -45,10 +56,12 @@ class agp::EditorScene : public UIScene
 		// helper functions
 		virtual void fromJson();
 		virtual void toJson();
+		virtual void updateState(State newState);
+		EditableObject* editableUnderMouse();
 
 	public:
 
-		EditorScene(GameScene* gameScene);
+		EditorScene(GameScene* gameScene, EditorUI* ui);
 		virtual ~EditorScene() {};
 
 		void toggleSnapGrid() { _snapGrid = !_snapGrid; }

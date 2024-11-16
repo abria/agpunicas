@@ -14,6 +14,7 @@
 #include "Audio.h"
 #include "OverlayScene.h"
 #include "EditorScene.h"
+#include "EditorUI.h"
 
 using namespace agp;
 
@@ -28,7 +29,7 @@ GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 	_collidersVisible = false;
 	_cameraManual = false;
 	_cameraFollowsPlayer = true;
-	_hideOverlayScenes = false;
+	_displayGameSceneOnly = false;
 
 	_view = new View(this, _rect);
 	float ar = Game::instance()->aspectRatio();
@@ -40,13 +41,13 @@ void GameScene::render()
 {
 	if (_active)
 	{
-		if (!_hideOverlayScenes)
+		if (!_displayGameSceneOnly)
 			for (auto& bgScene : _backgroundScenes)
 				bgScene->render();
 
 		_view->render();
 
-		if(!_hideOverlayScenes)
+		if(!_displayGameSceneOnly)
 			for (auto& fgScene : _foregroundScenes)
 				fgScene->render();
 	}
@@ -149,6 +150,13 @@ void GameScene::event(SDL_Event& evt)
 		else if (evt.wheel.y < 0)
 			_view->scale(1 + _cameraZoomVel);
 	}
+
+	// open editor
 	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_E && !evt.key.repeat)
-		Game::instance()->pushScene(new EditorScene(this));
+	{
+		EditorUI* editorUI = new EditorUI();
+		EditorScene* editorScene = new EditorScene(this, editorUI);
+		Game::instance()->pushScene(editorScene);
+		Game::instance()->pushScene(editorUI);
+	}
 }

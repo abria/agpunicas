@@ -29,6 +29,7 @@ class agp::Sprite
 	public:
 
 		Sprite(SDL_Texture* spritesheet, const RectI& rect = RectI(), Direction expandDir = Direction::NONE);
+		virtual ~Sprite() {}
 		RectI rect() { return _rect; }
 
 		// render method (for rendering)

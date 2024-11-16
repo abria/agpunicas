@@ -23,18 +23,31 @@ class agp::EditableObject : public RenderableObject
 {
 	protected:
 
-		std::string _text;
+		std::string _name;
 		int _category;
+		bool _selected;
+		RenderableObject* _renderedText;
+		RenderableObject* _renderedCategory;
+		std::vector<std::string>& _categories;
 
-		void updateColor();
+		void init();
 
 	public:
 
-		EditableObject(Scene* scene, const RectF& rect, int category);
-		EditableObject(Scene* scene, const nlohmann::json& fromJson);
+		EditableObject(Scene* scene, const RectF& rect, const std::string& name, int category, std::vector<std::string>& categories);
+		EditableObject(Scene* scene, const nlohmann::json& fromJson, std::vector<std::string>& categories);
+		virtual ~EditableObject();
 
 		int category() { return _category; }
 		void setCategory(int newCategory);
+		std::string editName() { return _name; }
+		void setName(const std::string& name);
+		void setFocused(bool on);
+		void setSelected(bool on);
+
+		virtual void setVisible(bool visible) override;
+		virtual void setPos(const PointF& newPos) override;
+		virtual void setSize(const PointF& newSize) override;
 
 		virtual std::string name() override { return strprintf("EditableObject[%d]", _id); }
 

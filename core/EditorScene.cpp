@@ -4,27 +4,30 @@
 #include "View.h"
 #include "Window.h"
 #include "EditableObject.h"
+#include "EditorUI.h"
 #include "Game.h"
 #include "GameScene.h"
 #include "core_version.h"
 
 using namespace agp;
 
-EditorScene::EditorScene(GameScene* gameScene)
+EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 	: UIScene(gameScene->rect(), gameScene->pixelUnitSize())
 {
 	_gameScene = gameScene;
+	_ui = ui;
 	_gameRect = _gameScene->view()->rect();
-	_gameScene->hideOverlayScenes(true);
-	_currentCell = nullptr;
+	_gameScene->displayGameSceneOnly(true);
+	_currentCategory = 0;
 	_currentObject = nullptr;
 	_snapGrid = true;
-	_currentCategory = 0;
 	_blocking = true;
 	_cameraZoomVel = 0.1f;
 	_cameraTranslateVel = { 500, 500 };
 	for (int i = 0; i < MAX_CATEGORIES; i++)
 		_categories.push_back(strprintf("Category %d", i));
+
+	_currentCell = new EditableObject(this, RectF(0, 0, 1, 1), "", _currentCategory, _categories);
 
 	_view = new View(this, gameScene->view()->rect());
 	float ar = Game::instance()->aspectRatio();
@@ -32,6 +35,8 @@ EditorScene::EditorScene(GameScene* gameScene)
 		_view->setFixedAspectRatio(ar);
 
 	fromJson();
+
+	updateState(State::DEFAULT);
 }
 
 void EditorScene::fromJson()
@@ -56,7 +61,7 @@ void EditorScene::fromJson()
 	_categories = j["categories"].get<std::vector<std::string>>();
 	std::vector<nlohmann::json> jsonObjects = j["objects"].get<std::vector<nlohmann::json>>();
 	for (auto& json : jsonObjects)
-		_editObjects.push_back(new EditableObject(this, json));
+		_editObjects.push_back(new EditableObject(this, json, _categories));
 	f.close();
 }
 
@@ -78,6 +83,55 @@ void EditorScene::toJson()
 	
 	f << j.dump(3);
 	f.close();
+}
+
+void EditorScene::updateState(State newState)
+{
+	_ui->clearHelpText();
+
+	if (newState == State::DEFAULT)
+	{
+		_ui->setHelpText(1, "Mouse: [LEFT] select, [RIGHT] delete");
+		_ui->setHelpText(0, "Keys: [C]reate, [Q]uit/save");
+		_ui->setCrossCursor(false);
+		_currentCell->setVisible(false);
+		if (_currentObject)
+			_currentObject->setSelected(false);
+		_currentObject = nullptr;
+	}
+	else if (newState == State::CREATE)
+	{
+		_ui->setHelpText(2, strprintf("Category: %s.", _categories[_currentCategory].c_str()));
+		_ui->setHelpText(1, "Mouse: [LEFT] start/end drawing");
+		_ui->setHelpText(0, "Keys: [SPACE] change, [R]ename, [ESC]ape");
+		_ui->setCrossCursor(true);
+		_currentCell->setVisible(true);
+	}
+	else if (newState == State::RENAME_CATEGORY)
+	{
+		_ui->setHelpText(1, strprintf("Rename \"%s\" to: \"%s\"", _categories[_currentCategory].c_str(), _textInput.c_str()));
+		_ui->setHelpText(0, "Keys: [ENTER] accept, [ESC]ape");
+		_ui->setCrossCursor(false);
+		_currentCell->setVisible(true);
+	}
+	else if (newState == State::RENAME_OBJECT)
+	{
+		_ui->setHelpText(1, strprintf("Rename \"%s\" to: \"%s\".", _currentObject->editName().c_str(), _textInput.c_str()));
+		_ui->setHelpText(0, "Keys: [ENTER] accept, [ESC]ape");
+		_ui->setCrossCursor(false);
+		_currentCell->setVisible(false);
+	}
+	else if (newState == State::SELECT)
+	{
+		_ui->setHelpText(2, strprintf("\"%s\" selected, category: \"%s\"", _currentObject->editName().c_str(), _categories[_currentObject->category()].c_str()));
+		_ui->setHelpText(1, "Mouse: [SCROLL] rotate");
+		_ui->setHelpText(0, "Keys: [R]ename, [ESC]ape");
+		_ui->setCrossCursor(false);
+		_currentCell->setVisible(false);
+		_currentObject->setSelected(true);
+	}
+
+	_state = newState;
 }
 
 void EditorScene::update(float timeToSimulate)
@@ -102,35 +156,99 @@ void EditorScene::update(float timeToSimulate)
 	_view->move((_cameraTranslateVel / _view->magf()) * dir2vec(yDir, _rect.yUp) * timeToSimulate);
 
 	_gameScene->view()->setRect(_view->rect());
+
+	if (_state == State::CREATE)
+	{
+		if(_snapGrid)
+			_ui->setCursorText(strprintf("%.0f,%.0f", _mouseCoordsSnap.x, _mouseCoordsSnap.y));
+		else
+			_ui->setCursorText(strprintf("%.1f,%.1f", _mouseCoordsF.x, _mouseCoordsF.y));
+	}
+	else
+		_ui->setCursorText("");
 }
 
 void EditorScene::event(SDL_Event& evt)
 {
 	UIScene::event(evt);
 
-	PointF mousePoint(float(evt.button.x), float(evt.button.y));
-	mousePoint = _view->mapToScene(mousePoint);
-	if (_snapGrid)
-		mousePoint = Point(int(mousePoint.x), int(mousePoint.y));
+	// reset focused states
+	for (auto& editable : _editObjects)
+		editable->setFocused(false);
 
-	// keyboard
-	if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_SPACE && !evt.key.repeat && !_currentObject)
+	// process text input first
+	if (_state == State::RENAME_CATEGORY || _state == State::RENAME_OBJECT)
 	{
-		_currentCategory = (_currentCategory++) % MAX_CATEGORIES;
-		if (_currentCell)
+		if (evt.type == SDL_TEXTINPUT)
+			_textInput += evt.text.text;
+		else if (evt.type == SDL_KEYDOWN) 
+		{
+			if (evt.key.keysym.scancode == SDL_SCANCODE_BACKSPACE && !_textInput.empty())
+				_textInput.pop_back();
+			else if (evt.key.keysym.scancode == SDL_SCANCODE_RETURN)
+			{
+				if (_state == State::RENAME_CATEGORY)
+				{
+					_categories[_currentCategory] = _textInput;
+					for (auto& editObj : _editObjects)
+						editObj->setCategory(editObj->category());
+				}
+				else
+					_currentObject->setName(_textInput);
+				_state = State::DEFAULT;
+			}
+			else if (evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+				_state = State::DEFAULT;
+		}
+		updateState(_state);
+		return;
+	}
+
+	// key events
+	if (evt.type == SDL_KEYDOWN && !evt.key.repeat)
+	{
+		if (evt.key.keysym.scancode == SDL_SCANCODE_S)
+			toggleSnapGrid();
+		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_C)
+			updateState(State::CREATE);
+		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_Q)
+		{
+			toJson();
+			_gameScene->view()->setRect(_gameRect);
+			_gameScene->displayGameSceneOnly(false);
+			Game::instance()->popSceneLater();
+			Game::instance()->popSceneLater();
+		}
+		else if (_state == State::CREATE && evt.key.keysym.scancode == SDL_SCANCODE_SPACE)
+		{
+			_currentCategory = (_currentCategory + 1) % MAX_CATEGORIES;
 			_currentCell->setCategory(_currentCategory);
-	}
-	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_S && !evt.key.repeat)
-		toggleSnapGrid();
-	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_Q && !evt.key.repeat)
-	{
-		toJson();
-		Game::instance()->popScene();
-		_gameScene->view()->setRect(_gameRect);
-		_gameScene->hideOverlayScenes(false);
+			updateState(State::CREATE);
+		}
+		else if (_state == State::CREATE && evt.key.keysym.scancode == SDL_SCANCODE_R)
+		{
+			updateState(State::RENAME_CATEGORY);
+			_textInput.clear();
+		}
+		else if (_state == State::SELECT && evt.key.keysym.scancode == SDL_SCANCODE_R)
+		{
+			updateState(State::RENAME_OBJECT);
+			_textInput.clear();
+		}
+		else if (evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+			updateState(State::DEFAULT);
 	}
 
-	// mouse
+	// update mouse coords
+	if (evt.type == SDL_MOUSEMOTION)
+	{
+		_mouseCoordsF = PointF(float(evt.button.x), float(evt.button.y));
+		_mouseCoordsF = _view->mapToScene(_mouseCoordsF);
+		_mouseCoordsSnap = Point(int(_mouseCoordsF.x) + (_mouseCoordsF.x < 0 ? -1 : 0), int(_mouseCoordsF.y) + (_mouseCoordsF.y < 0 ? -1 : 0));
+	}
+	PointF mousePoint = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
+
+	// mouse events
 	if (evt.type == SDL_MOUSEWHEEL)
 	{
 		if (evt.wheel.y > 0)
@@ -138,29 +256,67 @@ void EditorScene::event(SDL_Event& evt)
 		else if (evt.wheel.y < 0)
 			_view->scale(1 + _cameraZoomVel);
 	}
-	else if (evt.type == SDL_MOUSEMOTION)
+	else if (_state == State::CREATE && evt.type == SDL_MOUSEMOTION)
 	{
-		if (_currentCell)
-			_currentCell->setPos(mousePoint);
+		_currentCell->setPos(mousePoint);
 
-		else if (!_currentObject)
-			_currentCell = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, 1, 1), _currentCategory);
-
-		else if (_currentObject)
-			_currentObject->setSize(mousePoint - _currentObject->rect().pos + PointF(1, 1));
-	}
-	else if (evt.button.type == SDL_MOUSEBUTTONDOWN && evt.button.button == SDL_BUTTON_LEFT)
-	{
 		if (_currentObject)
-			_currentObject = nullptr;
-		else
+			_currentObject->setSize(mousePoint - _currentObject->rect().pos + (_snapGrid ? PointF(1, 1) : PointF(0, 0)));
+	}
+	else if (_state == State::DEFAULT && evt.type == SDL_MOUSEMOTION)
+	{
+		EditableObject* underMouse = editableUnderMouse();
+		if (underMouse)
+			underMouse->setFocused(true);
+	}
+	else if (evt.button.type == SDL_MOUSEBUTTONDOWN)
+	{
+		if (_state == State::CREATE && evt.button.button == SDL_BUTTON_LEFT)
 		{
-			killObject(_currentCell);
-			_currentCell = nullptr;
-			_currentObject = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, 1, 1), _currentCategory);
-			_editObjects.push_back(_currentObject);
+			if (_currentObject)
+			{
+				_currentObject = nullptr;
+				_currentCell->setVisible(true);
+			}
+			else
+			{
+				_currentCell->setVisible(false);
+				_currentObject = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, 1, 1), "", _currentCategory, _categories);
+				_editObjects.push_back(_currentObject);
+			}
+		}
+		else if (_state == State::DEFAULT || _state == State::SELECT)
+		{
+			EditableObject* underMouse = editableUnderMouse();
+
+			if (underMouse && evt.button.button == SDL_BUTTON_RIGHT)
+			{
+				_editObjects.erase(std::remove(_editObjects.begin(), _editObjects.end(), underMouse), _editObjects.end());
+				killObject(underMouse);
+			}
+			else if (underMouse && evt.button.button == SDL_BUTTON_LEFT)
+			{
+				if(_currentObject)
+					_currentObject->setSelected(false);
+				_currentObject = underMouse;
+				_currentObject->setSelected(true);
+				updateState(State::SELECT);
+			}
+			else if (evt.button.button == SDL_BUTTON_LEFT)
+				updateState(State::DEFAULT);
 		}
 	}
-	//else if (evt.button.button == SDL_BUTTON_RIGHT)
-		//new Slime(this, { mousePoint.x, mousePoint.y });
+}
+
+EditableObject* EditorScene::editableUnderMouse()
+{
+	auto& objectsUnderMouse = objects(_mouseCoordsF);
+	std::list<EditableObject*> objectsVisible;
+	for (auto obj : objectsUnderMouse)
+		if (obj->to<EditableObject*>())
+			objectsVisible.push_back(obj->to<EditableObject*>());
+	if (objectsVisible.size())
+		return objectsVisible.front();
+	else
+		return nullptr;
 }

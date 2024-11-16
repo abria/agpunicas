@@ -9,6 +9,7 @@
 
 #include "RenderableObject.h"
 #include "Scene.h"
+#include "sdlUtils.h"
 
 using namespace agp;
 
@@ -24,6 +25,8 @@ RenderableObject::RenderableObject(Scene* scene, const RectF& rect, const Color&
 	_sprite = nullptr;
 	_focusColor = { 255, 255, 0, 128 };
 	_borderColor = { 0, 0, 0, 0 };
+	_borderThickness = 0;
+	_backgroundColor = { 0,0,0,0 };
 }
 
 RenderableObject::RenderableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer)
@@ -38,6 +41,8 @@ RenderableObject::RenderableObject(Scene* scene, const RectF& rect, Sprite* spri
 	_visible = true;
 	_focusColor = { 255, 255, 0, 128 };
 	_borderColor = { 0, 0, 0, 0 };
+	_borderThickness = 0;
+	_backgroundColor = { 0,0,0,0 };
 }
 
 void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
@@ -46,6 +51,12 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 		return;
 
 	SDL_FRect drawRect = RectF(camera(_rect.tl()), camera(_rect.br())).toSDLf();
+
+	if (_backgroundColor.a)
+	{
+		SDL_SetRenderDrawColor(renderer, _backgroundColor.r, _backgroundColor.g, _backgroundColor.b, _backgroundColor.a);
+		SDL_RenderFillRectF(renderer, &drawRect);
+	}
 
 	if (_sprite)
 		_sprite->render(renderer, _rect, camera, _scene->pixelUnitSize(), _angle, _flip);
@@ -64,7 +75,11 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 	if (_borderColor.a)
 	{
 		SDL_SetRenderDrawColor(renderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
-		SDL_RenderDrawRectF(renderer, &drawRect);
+		
+		if (_borderThickness)
+			DrawThickRect(renderer, drawRect, _borderThickness);
+		else
+			SDL_RenderDrawRectF(renderer, &drawRect);
 	}
 
 	if (_focused)

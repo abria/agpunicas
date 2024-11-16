@@ -34,6 +34,8 @@ class agp::RenderableObject : public Object
 		float _angularVelocity;	// generic rotation (degrees/s, clockwise)
 		Color _focusColor;
 		Color _borderColor;
+		float _borderThickness;	// in screen points
+		Color _backgroundColor;
 		const Color _rectColor = { 255, 0, 0, 255 };
 
 	public:
@@ -45,8 +47,11 @@ class agp::RenderableObject : public Object
 		// getters/setters
 		const Color& color() { return _color; }
 		void setColor(const Color& newColor) { _color = newColor; }
+		void setBackgroundColor(const Color& newColor) { _backgroundColor = newColor; }
 		void setBorderColor(const Color& borderColor) { _borderColor = borderColor; }
-		void setVisible(bool visible) { _visible = visible; }
+		void setBorderThickness(float thickness) { _borderThickness = thickness; }
+		virtual void setVisible(bool visible) { _visible = visible; }
+		bool visible() { return _visible; }
 		Sprite* sprite() { return _sprite; }
 		virtual void setSprite(Sprite* sprite, bool deallocateSprite = false, bool resetOnChange = true);
 

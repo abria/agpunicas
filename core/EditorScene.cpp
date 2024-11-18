@@ -14,34 +14,34 @@ using namespace agp;
 EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 	: UIScene(gameScene->rect(), gameScene->pixelUnitSize())
 {
-	_gameScene = gameScene;
+	// new attributes
 	_ui = ui;
+	_gameScene = gameScene;
 	_gameRect = _gameScene->view()->rect();
 	_gameScene->displayGameSceneOnly(true);
 	_currentCategory = 0;
+	for (int i = 0; i < MAX_CATEGORIES; i++)
+		_categories.push_back(strprintf("Category %d", i));
 	_currentObject = nullptr;
 	_snapGrid = true;
+	_currentCell = new EditableObject(this, RectF(0, 0, 1, 1, _rect.yUp), "", _currentCategory, _categories);
+
+	// inherited
 	_blocking = true;
 	_cameraZoomVel = 0.1f;
 	_cameraTranslateVel = { 500, 500 };
-	for (int i = 0; i < MAX_CATEGORIES; i++)
-		_categories.push_back(strprintf("Category %d", i));
-
-	_currentCell = new EditableObject(this, RectF(0, 0, 1, 1), "", _currentCategory, _categories);
-
 	_view = new View(this, gameScene->view()->rect());
 	float ar = Game::instance()->aspectRatio();
 	if (ar)
 		_view->setFixedAspectRatio(ar);
 
+	generateGrid();
 	fromJson();
-
 	updateState(State::DEFAULT);
 }
 
-void EditorScene::fromJson()
+void EditorScene::generateGrid()
 {
-	// generate grid
 	for (float x = _rect.pos.x; x < _rect.pos.x + _rect.size.x; x++)
 	{
 		_grid.push_back(new RenderableObject(this, RectF(x, _rect.pos.y, 1, _rect.size.y, _rect.yUp), nullptr));
@@ -52,22 +52,28 @@ void EditorScene::fromJson()
 		_grid.push_back(new RenderableObject(this, RectF(_rect.pos.x, y, _rect.size.x, 1, _rect.yUp), nullptr));
 		_grid.back()->setBorderColor(GRID_COLOR);
 	}
+}
 
-	// load objects from json file
-	std::ifstream f("leveleditor.json");
+void EditorScene::fromJson()
+{
+	std::ifstream f(DEFAULT_SAVE_FILENAME);
 	if (!f.is_open())
 		return;
+
 	nlohmann::json j = nlohmann::json::parse(f);
+
 	_categories = j["categories"].get<std::vector<std::string>>();
+
 	std::vector<nlohmann::json> jsonObjects = j["objects"].get<std::vector<nlohmann::json>>();
 	for (auto& json : jsonObjects)
 		_editObjects.push_back(new EditableObject(this, json, _categories));
+
 	f.close();
 }
 
 void EditorScene::toJson()
 {
-	std::ofstream f("leveleditor.json");
+	std::ofstream f(DEFAULT_SAVE_FILENAME);
 	if (!f.is_open())
 		return;
 
@@ -88,51 +94,41 @@ void EditorScene::toJson()
 void EditorScene::updateState(State newState)
 {
 	_ui->clearHelpboxText();
+	_ui->setCrossCursor(newState == State::CREATE);
+	_currentCell->setVisible(newState == State::RENAME_CATEGORY || (newState == State::CREATE && !_currentObject));
+
+	if(newState != State::RENAME_CATEGORY && newState != State::RENAME_OBJECT)
+		SDL_StopTextInput();
 
 	if (newState == State::DEFAULT)
 	{
 		_ui->setHelpboxText(1, "Mouse: [LEFT] select, [RIGHT] delete");
 		_ui->setHelpboxText(0, "Keys: [C]reate, [G]rid on/off, [Q]uit/save");
-		_ui->setCrossCursor(false);
-		_currentCell->setVisible(false);
+		
 		if (_currentObject)
 			_currentObject->setSelected(false);
 		_currentObject = nullptr;
-		SDL_StopTextInput();
 	}
 	else if (newState == State::CREATE)
 	{
-		//_ui->setHelpboxText(2, strprintf("Category: %s.", _categories[_currentCategory].c_str()));
 		_ui->setHelpboxText(1, "Mouse: [LEFT] start/end drawing");
 		_ui->setHelpboxText(0, "Keys: [SPACE] change, [R]ename, [ESC]ape");
-		_ui->setCrossCursor(true);
-		if(!_currentObject)
-			_currentCell->setVisible(true);
-		SDL_StopTextInput();
 	}
 	else if (newState == State::RENAME_CATEGORY)
 	{
 		_ui->setHelpboxText(1, strprintf("Rename to \"%s|\"", _textInput.c_str()));
 		_ui->setHelpboxText(0, "Keys: [ENTER] accept, [ESC]ape");
-		_ui->setCrossCursor(false);
-		_currentCell->setVisible(true);
 	}
 	else if (newState == State::RENAME_OBJECT)
 	{
 		_ui->setHelpboxText(1, strprintf("Rename to \"%s|\"", _textInput.c_str()));
 		_ui->setHelpboxText(0, "Keys: [ENTER] accept, [ESC]ape");
-		_ui->setCrossCursor(false);
-		_currentCell->setVisible(false);
 	}
 	else if (newState == State::SELECT)
 	{
-		//_ui->setHelpboxText(2, strprintf("\"%s\" selected, category: \"%s\"", _currentObject->editName().c_str(), _categories[_currentObject->category()].c_str()));
 		_ui->setHelpboxText(1, "Mouse: [SCROLL] rotate");
 		_ui->setHelpboxText(0, "Keys: [R]ename, [ESC]ape");
-		_ui->setCrossCursor(false);
-		_currentCell->setVisible(false);
 		_currentObject->setSelected(true);
-		SDL_StopTextInput();
 	}
 
 	_state = newState;
@@ -196,13 +192,16 @@ void EditorScene::event(SDL_Event& evt)
 					_categories[_currentCategory] = _textInput;
 					for (auto& editObj : _editObjects)
 						editObj->setCategory(editObj->category());
+					_state = State::CREATE;
 				}
-				else
+				else if (_state == State::RENAME_OBJECT)
+				{
 					_currentObject->setName(_textInput);
-				_state = State::DEFAULT;
+					_state = State::SELECT;
+				}
 			}
 			else if (evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-				_state = State::DEFAULT;
+				_state = _state == State::RENAME_CATEGORY ? _state = State::CREATE : _state = State::SELECT;
 		}
 		updateState(_state);
 		return;
@@ -220,8 +219,8 @@ void EditorScene::event(SDL_Event& evt)
 			toJson();
 			_gameScene->view()->setRect(_gameRect);
 			_gameScene->displayGameSceneOnly(false);
-			Game::instance()->popSceneLater();
-			Game::instance()->popSceneLater();
+			Game::instance()->popSceneLater();	// _ui scene
+			Game::instance()->popSceneLater();	// this scene
 		}
 		else if (_state == State::CREATE && evt.key.keysym.scancode == SDL_SCANCODE_SPACE)
 		{
@@ -234,15 +233,15 @@ void EditorScene::event(SDL_Event& evt)
 		{
 			updateState(State::RENAME_CATEGORY);
 			_textInput = _categories[_currentCategory];
-			SDL_StartTextInput();              // Start text input
-			SDL_FlushEvent(SDL_TEXTINPUT);     // Flush pending text input events
+			SDL_StartTextInput();
+			SDL_FlushEvent(SDL_TEXTINPUT);     // flush pending text input events
 		}
 		else if (_state == State::SELECT && evt.key.keysym.scancode == SDL_SCANCODE_R)
 		{
 			updateState(State::RENAME_OBJECT);
 			_textInput = _currentObject->editName();
-			SDL_StartTextInput();              // Start text input
-			SDL_FlushEvent(SDL_TEXTINPUT);     // Flush pending text input events
+			SDL_StartTextInput();
+			SDL_FlushEvent(SDL_TEXTINPUT);     // flush pending text input events
 		}
 		else if (evt.key.keysym.scancode == SDL_SCANCODE_G)
 			toggleGrid();
@@ -292,7 +291,7 @@ void EditorScene::event(SDL_Event& evt)
 			else
 			{
 				_currentCell->setVisible(false);
-				_currentObject = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, 1, 1), "Unnamed", _currentCategory, _categories);
+				_currentObject = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, 1, 1, _rect.yUp), "Unnamed", _currentCategory, _categories);
 				_editObjects.push_back(_currentObject);
 			}
 		}

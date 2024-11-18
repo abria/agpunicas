@@ -28,10 +28,10 @@ class agp::EditorUI : public UIScene
 
 
 		// scale parameters in [0,1] relative window coords
-		static constexpr float CURSOR_TEXT_HEIGHT = 0.03f;
+		static constexpr float CURSOR_TEXT_HEIGHT = 0.04f;
 		static constexpr float CURSOR_TEXT_MARGIN_X = 0.02f;
 		static constexpr float CURSOR_TEXT_MARGIN_Y = 0.02f;
-		static constexpr float HELPBOX_TEXT_HEIGHT = 0.05f;
+		static constexpr float HELPBOX_TEXT_HEIGHT = 0.06f;
 		static constexpr float HELPBOX_MARGIN_X = 0.01f;
 		static constexpr float HELPBOX_MARGIN_Y = 0.01f;
 

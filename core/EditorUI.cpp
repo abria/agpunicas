@@ -16,22 +16,25 @@
 using namespace agp;
 
 EditorUI::EditorUI()
-	: UIScene(RectF(0, 0, 1, 1), { 1,1 })
+	: UIScene(RectF(0, 0, 1, 1 / Game::instance()->aspectRatio()), { 1,1 })
 {
-	_cursorCoords = new RenderableObject(this, RectF(0, 0, 1, CURSOR_TEXT_HEIGHT), 
-		new TextSprite("", "font.ttf"));
+	_cursorCoords = new RenderableObject(this, RectF(0, 0, 1, CURSOR_TEXT_HEIGHT * _rect.size.y),
+		new TextSprite("", "font.ttf"), 1);
 
+	float helpboxTextHeighNorm = HELPBOX_TEXT_HEIGHT * _rect.size.y;
+	float helpboxMarginXNorm = HELPBOX_MARGIN_X * _rect.size.x;
+	float helpboxMarginYNorm = HELPBOX_MARGIN_Y * _rect.size.y;
 	for (int i = 0; i < HELPBOX_MAX_ROWS; i++)
 	{
-		_helpboxRows[i] = new RenderableObject(this, RectF(0, 1 - HELPBOX_TEXT_HEIGHT * (HELPBOX_MAX_ROWS - i), 1, HELPBOX_TEXT_HEIGHT),
-			new TextSprite("", "font.ttf", { 0,0,0 }, { HELPBOX_MARGIN_X, HELPBOX_MARGIN_Y }));
+		_helpboxRows[i] = new RenderableObject(this, RectF(0, _rect.bottom() - helpboxTextHeighNorm * (HELPBOX_MAX_ROWS - i), 1, helpboxTextHeighNorm),
+			new TextSprite("", "font.ttf", { 0,0,0 }, { helpboxMarginXNorm, helpboxMarginYNorm }));
 		_helpboxRows[i]->setBackgroundColor(Color(255, 255, 255, 128));
 		_helpboxRows[i]->setVisible(false);
 	}
 
 	_view = new View(this, _rect);
 	_view->setFixedAspectRatio(Game::instance()->aspectRatio());
-	_view->setRect(RectF(0, 0, 1, 1));
+	_view->setRect(_rect);
 
 	_crossCursor = nullptr;
 }
@@ -94,6 +97,6 @@ void EditorUI::event(SDL_Event& evt)
 		PointF mousePoint(float(evt.button.x), float(evt.button.y));
 		mousePoint = _view->mapToScene(mousePoint);
 
-		_cursorCoords->setPos(mousePoint + PointF{ CURSOR_TEXT_MARGIN_X, CURSOR_TEXT_MARGIN_Y });
+		_cursorCoords->setPos(mousePoint + PointF{ CURSOR_TEXT_MARGIN_X * _rect.size.x, CURSOR_TEXT_MARGIN_Y * _rect.size.y });
 	}
 }

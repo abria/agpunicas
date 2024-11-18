@@ -29,7 +29,7 @@ class agp::EditorScene : public UIScene
 
 		enum class State { 
 			DEFAULT, CREATE, RENAME_CATEGORY, 
-			RENAME_OBJECT, SELECT, ROTATE, SAVE };
+			RENAME_OBJECT, SELECT };
 
 	protected:
 
@@ -55,11 +55,13 @@ class agp::EditorScene : public UIScene
 		// constants
 		static constexpr int MAX_CATEGORIES = 15;
 		const Color GRID_COLOR = { 100,100,100 };
+		const std::string DEFAULT_SAVE_FILENAME = "EditorScene.json";
 
 		// helper functions
-		virtual void fromJson();
-		virtual void toJson();
-		virtual void updateState(State newState);
+		void fromJson();
+		void toJson();
+		void updateState(State newState);
+		void generateGrid();
 		EditableObject* editableUnderMouse();
 
 	public:

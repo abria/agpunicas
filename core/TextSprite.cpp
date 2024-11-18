@@ -118,7 +118,7 @@ void TextSprite::render(
 	}
 
 	// initialize correctedDrawRectAR
-	RectF correctedDrawRectAR;
+	RectF correctedDrawRectAR = correctedDrawRect;
 	correctedDrawRectAR.size.x = scaledWidth;
 	correctedDrawRectAR.size.y = scaledHeight;
 
@@ -133,9 +133,9 @@ void TextSprite::render(
 	// vertical alignment
 	if (_vertAlign == VAlign::CENTER)
 		correctedDrawRectAR.pos.y = correctedDrawRect.pos.y + (correctedDrawRect.size.y - correctedDrawRectAR.size.y) / 2;
-	else if (_vertAlign == VAlign::BOTTOM)
+	else if ( (_vertAlign == VAlign::BOTTOM && !drawRect.yUp) || (_vertAlign == VAlign::TOP && drawRect.yUp))
 		correctedDrawRectAR.pos.y = correctedDrawRect.pos.y + correctedDrawRect.size.y - correctedDrawRectAR.size.y;
-	else // VAlign::TOP
+	else // VAlign::TOP && !drawRect.yUp || VAlign::BOTTOM && drawRect.yUp 
 		correctedDrawRectAR.pos.y = correctedDrawRect.pos.y;
 
 	SDL_Rect srcRect = _rect.toSDL();
@@ -144,6 +144,9 @@ void TextSprite::render(
 	SDL_RenderCopyF(renderer, _spritesheet, &srcRect, &drawRect_sdl);
 #else
 	if (_regenerateTexture)
-		printf("%s\n", _text);
+	{
+		printf("%s\n", _text.c_str());
+		_regenerateTexture = false;
+	}
 #endif
 }

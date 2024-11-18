@@ -142,6 +142,9 @@ void EditableObject::setPos(const PointF& newPos)
 
 void EditableObject::setSize(const PointF& newSize)
 { 
+	if (newSize.x <= 0 || newSize.y <= 0)
+		return;
+
 	RenderableObject::setSize(newSize);
 	_renderedName->setRect(_rect);
 	_renderedCategory->setRect(_rect);

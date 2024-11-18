@@ -18,16 +18,17 @@ TextSprite::TextSprite(
 	const std::string& fontPath,
 	const Color& fontColor,
 	const PointF& margin,
-	Direction expandDir,
+	const PointF& maxSize,
 	VAlign vertAlign,
 	HAlign horzAlign,
 	Style style)
-	: Sprite(nullptr, RectI(), expandDir)
+	: Sprite(nullptr)
 {
 	_text = text;
 	_fontPath = fontPath;
 	_fontColor = fontColor;
 	_margin = margin;
+	_maxSize = maxSize;
 	_fontStyle = style;
 	_vertAlign = vertAlign;
 	_horzAlign = horzAlign;
@@ -86,10 +87,7 @@ void TextSprite::render(
 	correctedDrawRect.size.x -= 2 * _margin.x;
 	correctedDrawRect.size.y -= 2 * _margin.y;
 
-	// initialize correctedDrawRectAR
-	RectF correctedDrawRectAR = correctedDrawRect;
-
-	// gt the original texture size
+	// get the original texture size
 	float originalWidth = static_cast<float>(_rect.size.x);
 	float originalHeight = static_cast<float>(_rect.size.y);
 
@@ -100,9 +98,29 @@ void TextSprite::render(
 	// choose the smaller scale factor to maintain aspect ratio
 	float scale = (std::min)(scaleX, scaleY);
 
-	// calculate the new size
-	correctedDrawRectAR.size.x = originalWidth * scale;
-	correctedDrawRectAR.size.y = originalHeight * scale;
+	// calculate the initial scaled size
+	float scaledWidth = originalWidth * scale;
+	float scaledHeight = originalHeight * scale;
+
+	// apply maximum width and height constraints to the scaled size
+	if (_maxSize.x && scaledWidth > _maxSize.x)
+	{
+		scale = _maxSize.x / originalWidth;
+		scaledWidth = _maxSize.x;
+		scaledHeight = originalHeight * scale;
+	}
+
+	if (_maxSize.y && scaledHeight > _maxSize.y)
+	{
+		scale = _maxSize.y / originalHeight;
+		scaledHeight = _maxSize.y;
+		scaledWidth = originalWidth * scale;
+	}
+
+	// initialize correctedDrawRectAR
+	RectF correctedDrawRectAR;
+	correctedDrawRectAR.size.x = scaledWidth;
+	correctedDrawRectAR.size.y = scaledHeight;
 
 	// horizontal alignment
 	if (_horzAlign == HAlign::CENTER)
@@ -124,5 +142,8 @@ void TextSprite::render(
 	SDL_FRect drawRect_sdl = RectF(camera(correctedDrawRectAR.tl()), camera(correctedDrawRectAR.br())).toSDLf();
 
 	SDL_RenderCopyF(renderer, _spritesheet, &srcRect, &drawRect_sdl);
+#else
+	if (_regenerateTexture)
+		printf("%s\n", _text);
 #endif
 }

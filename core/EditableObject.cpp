@@ -49,23 +49,23 @@ void EditableObject::init()
 	setColor(col.adjustAlpha(160));
 	setBorderColor(col);
 
-	_renderedText = new RenderableObject(
-		_scene, 
+	_renderedName = new RenderableObject(
+		_scene,
 		_rect,
-		new TextSprite(_name, "font.ttf", col.brighter(), {0.1f, 0.1f},
-			Direction::UP, TextSprite::VAlign::CENTER, TextSprite::HAlign::CENTER), 2);
+		new TextSprite(_name, "font.ttf", col.brighter(), { NAME_MARGIN_X, 0.0f }, { 0, NAME_MAX_HEIGHT },
+			TextSprite::VAlign::CENTER, TextSprite::HAlign::CENTER), 2);
 
 	_renderedCategory = new RenderableObject(
 		_scene,
 		_rect,
-		new TextSprite(_categories[_category], "font.ttf", col.brighter(), {_rect.size.x / 4, 0},
-			Direction::UP, TextSprite::VAlign::TOP, TextSprite::HAlign::CENTER, TextSprite::Style::ITALIC), 2);
+		new TextSprite(_categories[_category], "font.ttf", col.brighter(), {0.0f, CATEGORY_MARGIN_Y}, { 0, CATEGORY_MAX_HEIGHT },
+			TextSprite::VAlign::TOP, TextSprite::HAlign::CENTER, TextSprite::Style::ITALIC), 2);
 }
 
 EditableObject::~EditableObject()
 {
-	if (_renderedText)
-		_renderedText->kill();
+	if (_renderedName)
+		_renderedName->kill();
 	if (_renderedCategory)
 		_renderedCategory->kill();
 }
@@ -75,7 +75,7 @@ void EditableObject::setCategory(int newCategory)
 	_category = newCategory; 
 
 	Color col = distinctColor(_category);
-	setColor(col.adjustAlpha(160));
+	setColor(col.adjustAlpha(ALPHA_NORMAL));
 	setBorderColor(col);
 
 	dynamic_cast<TextSprite*>(_renderedCategory->sprite())->setText(_categories[_category]);
@@ -84,7 +84,7 @@ void EditableObject::setCategory(int newCategory)
 void EditableObject::setName(const std::string& name)
 { 
 	_name = name;
-	dynamic_cast<TextSprite*>(_renderedText->sprite())->setText(_name);
+	dynamic_cast<TextSprite*>(_renderedName->sprite())->setText(_name);
 }
 
 nlohmann::ordered_json EditableObject::toJson()
@@ -107,21 +107,21 @@ void EditableObject::setFocused(bool on)
 		return;
 
 	if (on)
-		_color.a = 200;
+		_color.a = ALPHA_FOCUSED;
 	else
-		_color.a = 160;
+		_color.a = ALPHA_NORMAL;
 
-	setBorderThickness(on ? 5.0f : 0);
+	setBorderThickness(on ? SELECTED_BORDER_THICKNESS : 0);
 }
 
 void EditableObject::setSelected(bool on)
 {
 	if (on)
-		_color.a = 100;
+		_color.a = ALPHA_SELECTED;
 	else
-		_color.a = 160;
+		_color.a = ALPHA_NORMAL;
 
-	setBorderThickness(on ? 5.0f : 0);
+	setBorderThickness(on ? SELECTED_BORDER_THICKNESS : 0);
 
 	_selected = on;
 }
@@ -129,21 +129,20 @@ void EditableObject::setSelected(bool on)
 void EditableObject::setVisible(bool visible)
 {
 	RenderableObject::setVisible(visible);
-	_renderedText->setVisible(visible);
+	_renderedName->setVisible(visible);
 	_renderedCategory->setVisible(visible);
 }
 
 void EditableObject::setPos(const PointF& newPos)
 {
 	RenderableObject::setPos(newPos);
-	_renderedText->setPos(newPos);
+	_renderedName->setPos(newPos);
 	_renderedCategory->setPos(newPos);
 }
 
 void EditableObject::setSize(const PointF& newSize)
 { 
 	RenderableObject::setSize(newSize);
-	_renderedText->setRect(_rect);
+	_renderedName->setRect(_rect);
 	_renderedCategory->setRect(_rect);
-	dynamic_cast<TextSprite*>(_renderedCategory->sprite())->setMargin({ _rect.size.x / 4, 0 });
 }

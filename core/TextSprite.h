@@ -17,7 +17,7 @@ namespace agp
 }
 
 // TextSprite
-// - sprite that renders font-based left-justified text
+// - sprite that renders font-based text with configurable alignment
 class agp::TextSprite : public Sprite
 {
 	public:
@@ -35,9 +35,10 @@ class agp::TextSprite : public Sprite
 		VAlign _vertAlign;
 		HAlign _horzAlign;
 		PointF _margin;						// in scene units
+		PointF _maxSize;					// in scene units
 		bool _regenerateTexture;
 
-		static const int pointSize = 100;	// font resolution when generated natively
+		static constexpr int pointSize = 100;	// font resolution for rasterization
 
 	public:
 
@@ -46,7 +47,7 @@ class agp::TextSprite : public Sprite
 			const std::string& fontPath,
 			const Color& fontColor = { 0,0,0 },
 			const PointF& margin = { 0,0 },
-			Direction expandDir = Direction::RIGHT,
+			const PointF& maxSize = { 0,0 },
 			VAlign vertAlign = VAlign::CENTER,
 			HAlign horzAlign = HAlign::LEFT,
 			Style style = Style::NORMAL);

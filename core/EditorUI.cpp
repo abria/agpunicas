@@ -16,17 +16,17 @@
 using namespace agp;
 
 EditorUI::EditorUI()
-	: UIScene(RectF(0, 0, 1, 1), {1,1})
+	: UIScene(RectF(0, 0, 1, 1), { 1,1 })
 {
-	_cursorObj = new RenderableObject(this, RectF(0, 0, 1, cursorTextSize), 
-		new TextSprite("0,0", "font.ttf"));
+	_cursorCoords = new RenderableObject(this, RectF(0, 0, 1, CURSOR_TEXT_HEIGHT), 
+		new TextSprite("", "font.ttf"));
 
-	for (int i = 0; i < MAX_HELP_ROWS; i++)
+	for (int i = 0; i < HELPBOX_MAX_ROWS; i++)
 	{
-		_helpObjects[i] = new RenderableObject(this, RectF(0, 1 - helpTextSize * (MAX_HELP_ROWS - i), 1, helpTextSize),
-			new TextSprite("", "font.ttf", { 0,0,0 }, { 0.01f, 0.01f }));
-		_helpObjects[i]->setBackgroundColor(Color(255, 255, 255, 128));
-		_helpObjects[i]->setVisible(false);
+		_helpboxRows[i] = new RenderableObject(this, RectF(0, 1 - HELPBOX_TEXT_HEIGHT * (HELPBOX_MAX_ROWS - i), 1, HELPBOX_TEXT_HEIGHT),
+			new TextSprite("", "font.ttf", { 0,0,0 }, { HELPBOX_MARGIN_X, HELPBOX_MARGIN_Y }));
+		_helpboxRows[i]->setBackgroundColor(Color(255, 255, 255, 128));
+		_helpboxRows[i]->setVisible(false);
 	}
 
 	_view = new View(this, _rect);
@@ -60,21 +60,21 @@ void EditorUI::setCrossCursor(bool on)
 
 void EditorUI::setCursorText(const std::string& text, const Color& textColor)
 {
-	dynamic_cast<TextSprite*>(_cursorObj->sprite())->setText(text);
-	dynamic_cast<TextSprite*>(_cursorObj->sprite())->setColor(textColor);
+	dynamic_cast<TextSprite*>(_cursorCoords->sprite())->setText(text);
+	dynamic_cast<TextSprite*>(_cursorCoords->sprite())->setColor(textColor);
 }
 
-void EditorUI::setHelpText(int row, const std::string& text, const Color& textColor)
+void EditorUI::setHelpboxText(int row, const std::string& text, const Color& textColor)
 {
-	_helpObjects[MAX_HELP_ROWS - row - 1]->setVisible(true);
-	dynamic_cast<TextSprite*>(_helpObjects[MAX_HELP_ROWS - row - 1]->sprite())->setText(text);
-	dynamic_cast<TextSprite*>(_helpObjects[MAX_HELP_ROWS - row - 1]->sprite())->setColor(textColor);
+	_helpboxRows[HELPBOX_MAX_ROWS - row - 1]->setVisible(true);
+	dynamic_cast<TextSprite*>(_helpboxRows[HELPBOX_MAX_ROWS - row - 1]->sprite())->setText(text);
+	dynamic_cast<TextSprite*>(_helpboxRows[HELPBOX_MAX_ROWS - row - 1]->sprite())->setColor(textColor);
 }
 
-void EditorUI::clearHelpText()
+void EditorUI::clearHelpboxText()
 {
-	for (int i = 0; i < MAX_HELP_ROWS; i++)
-		_helpObjects[i]->setVisible(false);
+	for (int i = 0; i < HELPBOX_MAX_ROWS; i++)
+		_helpboxRows[i]->setVisible(false);
 }
 
 void EditorUI::update(float timeToSimulate)
@@ -94,6 +94,6 @@ void EditorUI::event(SDL_Event& evt)
 		PointF mousePoint(float(evt.button.x), float(evt.button.y));
 		mousePoint = _view->mapToScene(mousePoint);
 
-		_cursorObj->setPos(mousePoint + PointF{ 0.02f, 0.02f });
+		_cursorCoords->setPos(mousePoint + PointF{ CURSOR_TEXT_MARGIN_X, CURSOR_TEXT_MARGIN_Y });
 	}
 }

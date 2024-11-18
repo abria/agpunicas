@@ -27,31 +27,34 @@ class agp::EditorScene : public UIScene
 {
 	public:
 
-		enum class State { DEFAULT, CREATE, RENAME_CATEGORY, RENAME_OBJECT, SELECT };
+		enum class State { 
+			DEFAULT, CREATE, RENAME_CATEGORY, 
+			RENAME_OBJECT, SELECT, ROTATE, SAVE };
 
 	protected:
 
 		GameScene* _gameScene;
 		RectF _gameRect;
 		EditorUI* _ui;
-
 		bool _snapGrid;
 		PointF _mouseCoordsF;
 		PointF _mouseCoordsSnap;
+		int _currentCategory;
 		EditableObject* _currentCell;
 		EditableObject* _currentObject;
 		std::vector<EditableObject*> _editObjects;
 		std::vector<RenderableObject*> _grid;
-		int _currentCategory;
 		std::string _textInput;
 		std::vector<std::string> _categories;
 		State _state;
-		static const int MAX_CATEGORIES = 15;
-
 
 		// camera controls
 		Vec2Df _cameraTranslateVel;
 		float _cameraZoomVel;		// camera zoom velocity (in [0,1] relative scale units)
+
+		// constants
+		static constexpr int MAX_CATEGORIES = 15;
+		const Color GRID_COLOR = { 100,100,100 };
 
 		// helper functions
 		virtual void fromJson();
@@ -65,6 +68,7 @@ class agp::EditorScene : public UIScene
 		virtual ~EditorScene() {};
 
 		void toggleSnapGrid() { _snapGrid = !_snapGrid; }
+		void toggleGrid();
 
 		// +syncronization with game scene
 		virtual void update(float timeToSimulate) override;

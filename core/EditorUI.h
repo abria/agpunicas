@@ -18,18 +18,28 @@ namespace agp
 }
 
 // EditorUI
-// - implements Editor User Interface (commands, buttons, etc.)
+// - implements Editor User Interface with:
+//    - configurable helpbox (bottom region)
+//    - scene coords at cursor's position
+//    - cursor's system icon states
 class agp::EditorUI : public UIScene
 {
 	protected:
 
-		RenderableObject* _cursorObj;
-		static const int MAX_HELP_ROWS = 3;
-		RenderableObject* _helpObjects[MAX_HELP_ROWS];
-		SDL_Cursor* _crossCursor;
 
-		const float cursorTextSize = 0.03f;	// in [0,1] relative window coords
-		const float helpTextSize = 0.05f;	// in [0,1] relative window coords
+		// scale parameters in [0,1] relative window coords
+		static constexpr float CURSOR_TEXT_HEIGHT = 0.03f;
+		static constexpr float CURSOR_TEXT_MARGIN_X = 0.02f;
+		static constexpr float CURSOR_TEXT_MARGIN_Y = 0.02f;
+		static constexpr float HELPBOX_TEXT_HEIGHT = 0.05f;
+		static constexpr float HELPBOX_MARGIN_X = 0.01f;
+		static constexpr float HELPBOX_MARGIN_Y = 0.01f;
+
+		static constexpr int HELPBOX_MAX_ROWS = 3;
+
+		RenderableObject* _cursorCoords;
+		RenderableObject* _helpboxRows[HELPBOX_MAX_ROWS];
+		SDL_Cursor* _crossCursor;
 
 	public:
 
@@ -38,8 +48,8 @@ class agp::EditorUI : public UIScene
 
 		void setCrossCursor(bool on);
 		void setCursorText(const std::string& text, const Color& textColor = { 0,0,0 });
-		void setHelpText(int row, const std::string& text, const Color& textColor = { 0,0,0 });
-		void clearHelpText();
+		void setHelpboxText(int row, const std::string& text, const Color& textColor = { 0,0,0 });
+		void clearHelpboxText();
 
 		virtual void update(float timeToSimulate) override;
 

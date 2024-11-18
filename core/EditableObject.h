@@ -26,9 +26,23 @@ class agp::EditableObject : public RenderableObject
 		std::string _name;
 		int _category;
 		bool _selected;
-		RenderableObject* _renderedText;
+		RenderableObject* _renderedName;
 		RenderableObject* _renderedCategory;
 		std::vector<std::string>& _categories;
+
+		// in scene coords
+		static constexpr float CATEGORY_MAX_HEIGHT = 0.5f;
+		static constexpr float CATEGORY_MARGIN_Y = 0.1f;
+		static constexpr float NAME_MAX_HEIGHT = 1;
+		static constexpr float NAME_MARGIN_X = 0.1f;
+
+		// in screen points
+		static constexpr float SELECTED_BORDER_THICKNESS = 5.0f;
+
+		// in alpha [0, 255] values
+		static constexpr int ALPHA_NORMAL = 160;
+		static constexpr int ALPHA_SELECTED = 100;
+		static constexpr int ALPHA_FOCUSED = 200;
 
 		void init();
 

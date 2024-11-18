@@ -45,12 +45,12 @@ void EditorScene::fromJson()
 	for (float x = _rect.pos.x; x < _rect.pos.x + _rect.size.x; x++)
 	{
 		_grid.push_back(new RenderableObject(this, RectF(x, _rect.pos.y, 1, _rect.size.y, _rect.yUp), nullptr));
-		_grid.back()->setBorderColor(Color(100, 100, 100));
+		_grid.back()->setBorderColor(GRID_COLOR);
 	}
 	for (float y = _rect.pos.y; y < _rect.pos.y + _rect.size.y; y++)
 	{
 		_grid.push_back(new RenderableObject(this, RectF(_rect.pos.x, y, _rect.size.x, 1, _rect.yUp), nullptr));
-		_grid.back()->setBorderColor(Color(100, 100, 100));
+		_grid.back()->setBorderColor(GRID_COLOR);
 	}
 
 	// load objects from json file
@@ -87,48 +87,52 @@ void EditorScene::toJson()
 
 void EditorScene::updateState(State newState)
 {
-	_ui->clearHelpText();
+	_ui->clearHelpboxText();
 
 	if (newState == State::DEFAULT)
 	{
-		_ui->setHelpText(1, "Mouse: [LEFT] select, [RIGHT] delete");
-		_ui->setHelpText(0, "Keys: [C]reate, [Q]uit/save");
+		_ui->setHelpboxText(1, "Mouse: [LEFT] select, [RIGHT] delete");
+		_ui->setHelpboxText(0, "Keys: [C]reate, [G]rid on/off, [Q]uit/save");
 		_ui->setCrossCursor(false);
 		_currentCell->setVisible(false);
 		if (_currentObject)
 			_currentObject->setSelected(false);
 		_currentObject = nullptr;
+		SDL_StopTextInput();
 	}
 	else if (newState == State::CREATE)
 	{
-		_ui->setHelpText(2, strprintf("Category: %s.", _categories[_currentCategory].c_str()));
-		_ui->setHelpText(1, "Mouse: [LEFT] start/end drawing");
-		_ui->setHelpText(0, "Keys: [SPACE] change, [R]ename, [ESC]ape");
+		//_ui->setHelpboxText(2, strprintf("Category: %s.", _categories[_currentCategory].c_str()));
+		_ui->setHelpboxText(1, "Mouse: [LEFT] start/end drawing");
+		_ui->setHelpboxText(0, "Keys: [SPACE] change, [R]ename, [ESC]ape");
 		_ui->setCrossCursor(true);
-		_currentCell->setVisible(true);
+		if(!_currentObject)
+			_currentCell->setVisible(true);
+		SDL_StopTextInput();
 	}
 	else if (newState == State::RENAME_CATEGORY)
 	{
-		_ui->setHelpText(1, strprintf("Rename \"%s\" to: \"%s\"", _categories[_currentCategory].c_str(), _textInput.c_str()));
-		_ui->setHelpText(0, "Keys: [ENTER] accept, [ESC]ape");
+		_ui->setHelpboxText(1, strprintf("Rename to \"%s|\"", _textInput.c_str()));
+		_ui->setHelpboxText(0, "Keys: [ENTER] accept, [ESC]ape");
 		_ui->setCrossCursor(false);
 		_currentCell->setVisible(true);
 	}
 	else if (newState == State::RENAME_OBJECT)
 	{
-		_ui->setHelpText(1, strprintf("Rename \"%s\" to: \"%s\".", _currentObject->editName().c_str(), _textInput.c_str()));
-		_ui->setHelpText(0, "Keys: [ENTER] accept, [ESC]ape");
+		_ui->setHelpboxText(1, strprintf("Rename to \"%s|\"", _textInput.c_str()));
+		_ui->setHelpboxText(0, "Keys: [ENTER] accept, [ESC]ape");
 		_ui->setCrossCursor(false);
 		_currentCell->setVisible(false);
 	}
 	else if (newState == State::SELECT)
 	{
-		_ui->setHelpText(2, strprintf("\"%s\" selected, category: \"%s\"", _currentObject->editName().c_str(), _categories[_currentObject->category()].c_str()));
-		_ui->setHelpText(1, "Mouse: [SCROLL] rotate");
-		_ui->setHelpText(0, "Keys: [R]ename, [ESC]ape");
+		//_ui->setHelpboxText(2, strprintf("\"%s\" selected, category: \"%s\"", _currentObject->editName().c_str(), _categories[_currentObject->category()].c_str()));
+		_ui->setHelpboxText(1, "Mouse: [SCROLL] rotate");
+		_ui->setHelpboxText(0, "Keys: [R]ename, [ESC]ape");
 		_ui->setCrossCursor(false);
 		_currentCell->setVisible(false);
 		_currentObject->setSelected(true);
+		SDL_StopTextInput();
 	}
 
 	_state = newState;
@@ -222,19 +226,26 @@ void EditorScene::event(SDL_Event& evt)
 		else if (_state == State::CREATE && evt.key.keysym.scancode == SDL_SCANCODE_SPACE)
 		{
 			_currentCategory = (_currentCategory + 1) % MAX_CATEGORIES;
+			if (_currentObject)
+				_currentObject->setCategory(_currentCategory);
 			_currentCell->setCategory(_currentCategory);
-			updateState(State::CREATE);
 		}
 		else if (_state == State::CREATE && evt.key.keysym.scancode == SDL_SCANCODE_R)
 		{
 			updateState(State::RENAME_CATEGORY);
-			_textInput.clear();
+			_textInput = _categories[_currentCategory];
+			SDL_StartTextInput();              // Start text input
+			SDL_FlushEvent(SDL_TEXTINPUT);     // Flush pending text input events
 		}
 		else if (_state == State::SELECT && evt.key.keysym.scancode == SDL_SCANCODE_R)
 		{
 			updateState(State::RENAME_OBJECT);
-			_textInput.clear();
+			_textInput = _currentObject->editName();
+			SDL_StartTextInput();              // Start text input
+			SDL_FlushEvent(SDL_TEXTINPUT);     // Flush pending text input events
 		}
+		else if (evt.key.keysym.scancode == SDL_SCANCODE_G)
+			toggleGrid();
 		else if (evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 			updateState(State::DEFAULT);
 	}
@@ -281,7 +292,7 @@ void EditorScene::event(SDL_Event& evt)
 			else
 			{
 				_currentCell->setVisible(false);
-				_currentObject = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, 1, 1), "", _currentCategory, _categories);
+				_currentObject = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, 1, 1), "Unnamed", _currentCategory, _categories);
 				_editObjects.push_back(_currentObject);
 			}
 		}
@@ -319,4 +330,10 @@ EditableObject* EditorScene::editableUnderMouse()
 		return objectsVisible.front();
 	else
 		return nullptr;
+}
+
+void EditorScene::toggleGrid()
+{
+	for (auto& g : _grid)
+		g->setVisible(!g->visible());
 }

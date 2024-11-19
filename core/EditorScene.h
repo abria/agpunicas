@@ -36,6 +36,7 @@ class agp::EditorScene : public UIScene
 		GameScene* _gameScene;
 		RectF _gameRect;
 		EditorUI* _ui;
+		float _gridCellSize;
 		bool _snapGrid;
 		PointF _mouseCoordsF;
 		PointF _mouseCoordsSnap;

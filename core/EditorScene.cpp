@@ -24,7 +24,8 @@ EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 		_categories.push_back(strprintf("Category %d", i));
 	_currentObject = nullptr;
 	_snapGrid = true;
-	_currentCell = new EditableObject(this, RectF(0, 0, 1, 1, _rect.yUp), "", _currentCategory, _categories);
+	_gridCellSize = 1;
+	_currentCell = new EditableObject(this, RectF(0, 0, _gridCellSize, _gridCellSize, _rect.yUp), "", _currentCategory, _categories);
 
 	// inherited
 	_blocking = true;
@@ -42,14 +43,17 @@ EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 
 void EditorScene::generateGrid()
 {
-	for (float x = _rect.pos.x; x < _rect.pos.x + _rect.size.x; x++)
+	for (auto& g : _grid)
+		g->kill();
+	_grid.clear();
+	for (float x = _rect.pos.x; x < _rect.pos.x + _rect.size.x; x += _gridCellSize)
 	{
-		_grid.push_back(new RenderableObject(this, RectF(x, _rect.pos.y, 1, _rect.size.y, _rect.yUp), nullptr));
+		_grid.push_back(new RenderableObject(this, RectF(x, _rect.pos.y, _gridCellSize, _rect.size.y, _rect.yUp), nullptr));
 		_grid.back()->setBorderColor(GRID_COLOR);
 	}
-	for (float y = _rect.pos.y; y < _rect.pos.y + _rect.size.y; y++)
+	for (float y = _rect.pos.y; y < _rect.pos.y + _rect.size.y; y += _gridCellSize)
 	{
-		_grid.push_back(new RenderableObject(this, RectF(_rect.pos.x, y, _rect.size.x, 1, _rect.yUp), nullptr));
+		_grid.push_back(new RenderableObject(this, RectF(_rect.pos.x, y, _rect.size.x, _gridCellSize, _rect.yUp), nullptr));
 		_grid.back()->setBorderColor(GRID_COLOR);
 	}
 }
@@ -172,6 +176,11 @@ void EditorScene::event(SDL_Event& evt)
 {
 	UIScene::event(evt);
 
+	// detect CTRL and SHIFT modifiers
+	const Uint8* keyboardState = SDL_GetKeyboardState(0);
+	bool ctrlPressed = keyboardState[SDL_SCANCODE_LCTRL] || keyboardState[SDL_SCANCODE_RCTRL];
+	bool shiftPressed = keyboardState[SDL_SCANCODE_LSHIFT] || keyboardState[SDL_SCANCODE_RSHIFT];
+
 	// reset focused states
 	for (auto& editable : _editObjects)
 		editable->setFocused(false);
@@ -192,6 +201,7 @@ void EditorScene::event(SDL_Event& evt)
 					_categories[_currentCategory] = _textInput;
 					for (auto& editObj : _editObjects)
 						editObj->setCategory(editObj->category());
+					_currentCell->setCategory(_currentCategory);
 					_state = State::CREATE;
 				}
 				else if (_state == State::RENAME_OBJECT)
@@ -254,24 +264,37 @@ void EditorScene::event(SDL_Event& evt)
 	{
 		_mouseCoordsF = PointF(float(evt.button.x), float(evt.button.y));
 		_mouseCoordsF = _view->mapToScene(_mouseCoordsF);
-		_mouseCoordsSnap = Point(int(_mouseCoordsF.x) + (_mouseCoordsF.x < 0 ? -1 : 0), int(_mouseCoordsF.y) + (_mouseCoordsF.y < 0 ? -1 : 0));
+		_mouseCoordsSnap.x = floor(_mouseCoordsF.x / _gridCellSize) * _gridCellSize;
+		_mouseCoordsSnap.y = floor(_mouseCoordsF.y / _gridCellSize) * _gridCellSize;
 	}
 	PointF mousePoint = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
 
 	// mouse events
 	if (evt.type == SDL_MOUSEWHEEL)
 	{
-		if (evt.wheel.y > 0)
-			_view->scale(1 - _cameraZoomVel);
-		else if (evt.wheel.y < 0)
-			_view->scale(1 + _cameraZoomVel);
+		if (ctrlPressed)
+		{
+			if (evt.wheel.y > 0)
+				_gridCellSize *= 2;
+			else if (evt.wheel.y < 0)
+				_gridCellSize /= 2;
+			generateGrid();
+			_currentCell->setSize(PointF(_gridCellSize, _gridCellSize));
+		}
+		else
+		{
+			if (evt.wheel.y > 0)
+				_view->scale(1 - _cameraZoomVel);
+			else if (evt.wheel.y < 0)
+				_view->scale(1 + _cameraZoomVel);
+		}
 	}
 	else if (_state == State::CREATE && evt.type == SDL_MOUSEMOTION)
 	{
 		_currentCell->setPos(mousePoint);
 
 		if (_currentObject)
-			_currentObject->setSize(mousePoint - _currentObject->rect().pos + (_snapGrid ? PointF(1, 1) : PointF(0, 0)));
+			_currentObject->setSize(mousePoint - _currentObject->rect().pos + (_snapGrid ? PointF(_gridCellSize, _gridCellSize) : PointF(0, 0)));
 	}
 	else if (_state == State::DEFAULT && evt.type == SDL_MOUSEMOTION)
 	{
@@ -291,7 +314,7 @@ void EditorScene::event(SDL_Event& evt)
 			else
 			{
 				_currentCell->setVisible(false);
-				_currentObject = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, 1, 1, _rect.yUp), "Unnamed", _currentCategory, _categories);
+				_currentObject = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, _gridCellSize, _gridCellSize, _rect.yUp), "Unnamed", _currentCategory, _categories);
 				_editObjects.push_back(_currentObject);
 			}
 		}

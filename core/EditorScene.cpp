@@ -14,7 +14,6 @@ using namespace agp;
 EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 	: UIScene(gameScene->rect(), gameScene->pixelUnitSize())
 {
-	// new attributes
 	_ui = ui;
 	_gameScene = gameScene;
 	_gameRect = _gameScene->view()->rect();
@@ -29,12 +28,10 @@ EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 	_currentCell = new EditableObject(this, RectF(0, 0, _gridCellSize, _gridCellSize, _rect.yUp), "", _currentCategory, _categories);
 	_isPanning = false;
 	_isDragging = false;
-
-	// inherited
-	_blocking = true;
 	_cameraZoomVel = 0.1f;
-	_cameraTranslateVel = { 500, 500 };
-	_view = new View(this, gameScene->view()->rect());
+	_blocking = true;
+
+	_view->setRect(_gameRect);
 	float ar = Game::instance()->aspectRatio();
 	if (ar)
 		_view->setFixedAspectRatio(ar);
@@ -145,13 +142,14 @@ void EditorScene::update(float timeToSimulate)
 {
 	UIScene::update(timeToSimulate);
 
+	// panning
 	if (_panningDelta.x != 0 || _panningDelta.y != 0)
 	{
 		_view->move(-_panningDelta / _view->magf());
 		_panningDelta = PointF(0, 0);
-		_gameScene->view()->setRect(_view->rect());
 	}
 
+	// update cursor text
 	if (_state == State::CREATE)
 	{
 		if(_snapGrid)
@@ -161,6 +159,9 @@ void EditorScene::update(float timeToSimulate)
 	}
 	else
 		_ui->setCursorText("");
+
+	// sync view with game scene's view
+	_gameScene->view()->setRect(_view->rect());
 }
 
 void EditorScene::event(SDL_Event& evt)
@@ -176,7 +177,7 @@ void EditorScene::event(SDL_Event& evt)
 	for (auto& editable : _editObjects)
 		editable->setFocused(false);
 
-	// text inputs (first)
+	// text inputting
 	if (_state == State::RENAME_CATEGORY || _state == State::RENAME_OBJECT)
 	{
 		if (evt.type == SDL_TEXTINPUT)
@@ -251,16 +252,16 @@ void EditorScene::event(SDL_Event& evt)
 	}
 
 	// mouse motion
-	PointF mousePoint;
 	if (evt.type == SDL_MOUSEMOTION)
 	{
-		// update mouse positions
+		// mouse tracking
 		_mouseCoordsF = PointF(float(evt.button.x), float(evt.button.y));
 		_mouseCoordsF = _view->mapToScene(_mouseCoordsF);
 		_mouseCoordsSnap.x = floor(_mouseCoordsF.x / _gridCellSize) * _gridCellSize;
 		_mouseCoordsSnap.y = floor(_mouseCoordsF.y / _gridCellSize) * _gridCellSize;
-		mousePoint = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
+		_mousePointCurr = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
 
+		// panning
 		if (_isPanning)
 		{
 			PointF delta = PointF(float(evt.button.x), float(evt.button.y)) - _lastMousePositionPanning;
@@ -268,6 +269,7 @@ void EditorScene::event(SDL_Event& evt)
 			_lastMousePositionPanning = PointF(float(evt.button.x), float(evt.button.y));
 		}
 
+		// drag
 		if (!_isDragging)
 		{
 			float dragThreshold = _gridCellSize; // 1 grid unit
@@ -280,7 +282,8 @@ void EditorScene::event(SDL_Event& evt)
 				_dragStartObjectPosition = _draggedObject->pos();
 			}
 		}
-		else
+		// drop
+		else if (_draggedObject)
 		{
 			PointF delta = _mouseCoordsF - _dragStartMousePosition;
 			PointF newPos = _dragStartObjectPosition + delta;
@@ -292,19 +295,19 @@ void EditorScene::event(SDL_Event& evt)
 			}
 
 			if (_draggedObject->pos() != newPos)
-			{
 				_draggedObject->setPos(newPos);
-				//_dragStartMousePosition = _mouseCoordsF;
-			}
 		}
 
+		// object resizing
 		if (_state == State::CREATE)
 		{
-			_currentCell->setPos(mousePoint);
+			_currentCell->setPos(_mousePointCurr);
 
 			if (_currentObject)
-				_currentObject->setSize(mousePoint - _currentObject->rect().pos + (_snapGrid ? PointF(_gridCellSize, _gridCellSize) : PointF(0, 0)));
+				_currentObject->setSize(_mousePointCurr - _currentObject->rect().pos + (_snapGrid ? PointF(_gridCellSize, _gridCellSize) : PointF(0, 0)));
 		}
+
+		// object focus
 		else if (_state == State::DEFAULT)
 		{
 			EditableObject* underMouse = editableUnderMouse();
@@ -316,6 +319,7 @@ void EditorScene::event(SDL_Event& evt)
 	// mouse buttons
 	if (evt.type == SDL_MOUSEWHEEL)
 	{
+		// grid
 		if (ctrlPressed)
 		{
 			if (evt.wheel.y > 0)
@@ -325,6 +329,7 @@ void EditorScene::event(SDL_Event& evt)
 			generateGrid();
 			_currentCell->setSize(PointF(_gridCellSize, _gridCellSize));
 		}
+		// zooom
 		else
 		{
 			if (evt.wheel.y > 0)
@@ -345,7 +350,7 @@ void EditorScene::event(SDL_Event& evt)
 			else
 			{
 				_currentCell->setVisible(false);
-				_currentObject = new EditableObject(this, RectF(mousePoint.x, mousePoint.y, _gridCellSize, _gridCellSize, _rect.yUp), "Unnamed", _currentCategory, _categories);
+				_currentObject = new EditableObject(this, RectF(_mousePointCurr.x, _mousePointCurr.y, _gridCellSize, _gridCellSize, _rect.yUp), "Unnamed", _currentCategory, _categories);
 				_editObjects.push_back(_currentObject);
 			}
 		}

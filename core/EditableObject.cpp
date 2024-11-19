@@ -79,6 +79,8 @@ void EditableObject::setCategory(int newCategory)
 	setBorderColor(col);
 
 	dynamic_cast<TextSprite*>(_renderedCategory->sprite())->setText(_categories[_category]);
+	dynamic_cast<TextSprite*>(_renderedCategory->sprite())->setColor(col.brighter());
+	dynamic_cast<TextSprite*>(_renderedName->sprite())->setColor(col.brighter());
 }
 
 void EditableObject::setName(const std::string& name)

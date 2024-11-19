@@ -94,9 +94,9 @@ void EditorUI::event(SDL_Event& evt)
 
 	if (evt.type == SDL_MOUSEMOTION)
 	{
-		PointF mousePoint(float(evt.button.x), float(evt.button.y));
-		mousePoint = _view->mapToScene(mousePoint);
+		PointF _mousePointCurr(float(evt.button.x), float(evt.button.y));
+		_mousePointCurr = _view->mapToScene(_mousePointCurr);
 
-		_cursorCoords->setPos(mousePoint + PointF{ CURSOR_TEXT_MARGIN_X * _rect.size.x, CURSOR_TEXT_MARGIN_Y * _rect.size.y });
+		_cursorCoords->setPos(_mousePointCurr + PointF{ CURSOR_TEXT_MARGIN_X * _rect.size.x, CURSOR_TEXT_MARGIN_Y * _rect.size.y });
 	}
 }

@@ -21,7 +21,9 @@ namespace agp
 }
 
 // EditorScene (or Map Editor) class
-// - mouse-interaction-based object editing
+// - 
+// - mouse interactions (pan/zoom, selection, drag-and-drop)
+// - text input (objects' categories and names)
 // - load/save from/to json
 class agp::EditorScene : public UIScene
 {
@@ -36,29 +38,37 @@ class agp::EditorScene : public UIScene
 		GameScene* _gameScene;
 		RectF _gameRect;
 		EditorUI* _ui;
-		float _gridCellSize;
-		bool _snapGrid;
+
+		// mouse tracking
 		PointF _mouseCoordsF;
 		PointF _mouseCoordsSnap;
+		PointF _mousePointCurr;
+
+		// pan & zoom
 		bool _isPanning;
 		PointF _panningDelta;
 		PointF _lastMousePositionPanning;
+		float _cameraZoomVel;		// camera zoom velocity (in [0,1] relative scale units)
+
+		// drag and drop
 		bool _isDragging;
 		PointF _dragStartMousePosition;
 		PointF _dragStartObjectPosition;
 		EditableObject* _draggedObject;
+
+		// renderables
+		std::vector<EditableObject*> _editObjects;
+		std::vector<RenderableObject*> _grid;
+
+		// state attributes
+		float _gridCellSize;
+		bool _snapGrid;
 		int _currentCategory;
 		EditableObject* _currentCell;
 		EditableObject* _currentObject;
-		std::vector<EditableObject*> _editObjects;
-		std::vector<RenderableObject*> _grid;
 		std::string _textInput;
 		std::vector<std::string> _categories;
 		State _state;
-
-		// camera controls
-		Vec2Df _cameraTranslateVel;
-		float _cameraZoomVel;		// camera zoom velocity (in [0,1] relative scale units)
 
 		// constants
 		static constexpr int MAX_CATEGORIES = 15;

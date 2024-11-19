@@ -42,7 +42,11 @@ class agp::EditorScene : public UIScene
 		PointF _mouseCoordsSnap;
 		bool _isPanning;
 		PointF _panningDelta;
-		PointF _lastMousePosition;
+		PointF _lastMousePositionPanning;
+		bool _isDragging;
+		PointF _dragStartMousePosition;
+		PointF _dragStartObjectPosition;
+		EditableObject* _draggedObject;
 		int _currentCategory;
 		EditableObject* _currentCell;
 		EditableObject* _currentObject;

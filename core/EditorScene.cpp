@@ -23,10 +23,12 @@ EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 	for (int i = 0; i < MAX_CATEGORIES; i++)
 		_categories.push_back(strprintf("Category %d", i));
 	_currentObject = nullptr;
+	_draggedObject = nullptr;
 	_snapGrid = true;
 	_gridCellSize = 1;
 	_currentCell = new EditableObject(this, RectF(0, 0, _gridCellSize, _gridCellSize, _rect.yUp), "", _currentCategory, _categories);
 	_isPanning = false;
+	_isDragging = false;
 
 	// inherited
 	_blocking = true;
@@ -131,7 +133,7 @@ void EditorScene::updateState(State newState)
 	}
 	else if (newState == State::SELECT)
 	{
-		_ui->setHelpboxText(1, "Mouse: [SCROLL] rotate");
+		_ui->setHelpboxText(1, "Mouse: [LEFT] drag/drop");
 		_ui->setHelpboxText(0, "Keys: [R]ename, [ESC]ape");
 		_currentObject->setSelected(true);
 	}
@@ -174,7 +176,7 @@ void EditorScene::event(SDL_Event& evt)
 	for (auto& editable : _editObjects)
 		editable->setFocused(false);
 
-	// process text input first
+	// text inputs (first)
 	if (_state == State::RENAME_CATEGORY || _state == State::RENAME_OBJECT)
 	{
 		if (evt.type == SDL_TEXTINPUT)
@@ -248,24 +250,70 @@ void EditorScene::event(SDL_Event& evt)
 			updateState(State::DEFAULT);
 	}
 
-	// update mouse coords
+	// mouse motion
+	PointF mousePoint;
 	if (evt.type == SDL_MOUSEMOTION)
 	{
+		// update mouse positions
 		_mouseCoordsF = PointF(float(evt.button.x), float(evt.button.y));
 		_mouseCoordsF = _view->mapToScene(_mouseCoordsF);
 		_mouseCoordsSnap.x = floor(_mouseCoordsF.x / _gridCellSize) * _gridCellSize;
 		_mouseCoordsSnap.y = floor(_mouseCoordsF.y / _gridCellSize) * _gridCellSize;
+		mousePoint = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
 
 		if (_isPanning)
 		{
-			PointF delta = PointF(float(evt.button.x), float(evt.button.y)) - _lastMousePosition;
+			PointF delta = PointF(float(evt.button.x), float(evt.button.y)) - _lastMousePositionPanning;
 			_panningDelta += delta;
-			_lastMousePosition = PointF(float(evt.button.x), float(evt.button.y));
+			_lastMousePositionPanning = PointF(float(evt.button.x), float(evt.button.y));
+		}
+
+		if (!_isDragging)
+		{
+			float dragThreshold = _gridCellSize; // 1 grid unit
+			float distance = (_mouseCoordsF - _dragStartMousePosition).mag();
+
+			if (distance > dragThreshold && _draggedObject)
+			{
+				_isDragging = true;
+				_dragStartMousePosition = _mouseCoordsF;
+				_dragStartObjectPosition = _draggedObject->pos();
+			}
+		}
+		else
+		{
+			PointF delta = _mouseCoordsF - _dragStartMousePosition;
+			PointF newPos = _dragStartObjectPosition + delta;
+
+			if (_snapGrid)
+			{
+				newPos.x = roundf(newPos.x / _gridCellSize) * _gridCellSize;
+				newPos.y = roundf(newPos.y / _gridCellSize) * _gridCellSize;
+			}
+
+			if (_draggedObject->pos() != newPos)
+			{
+				_draggedObject->setPos(newPos);
+				//_dragStartMousePosition = _mouseCoordsF;
+			}
+		}
+
+		if (_state == State::CREATE)
+		{
+			_currentCell->setPos(mousePoint);
+
+			if (_currentObject)
+				_currentObject->setSize(mousePoint - _currentObject->rect().pos + (_snapGrid ? PointF(_gridCellSize, _gridCellSize) : PointF(0, 0)));
+		}
+		else if (_state == State::DEFAULT)
+		{
+			EditableObject* underMouse = editableUnderMouse();
+			if (underMouse)
+				underMouse->setFocused(true);
 		}
 	}
-	PointF mousePoint = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
 
-	// mouse events
+	// mouse buttons
 	if (evt.type == SDL_MOUSEWHEEL)
 	{
 		if (ctrlPressed)
@@ -284,19 +332,6 @@ void EditorScene::event(SDL_Event& evt)
 			else if (evt.wheel.y < 0)
 				_view->scale(1 + _cameraZoomVel);
 		}
-	}
-	else if (_state == State::CREATE && evt.type == SDL_MOUSEMOTION)
-	{
-		_currentCell->setPos(mousePoint);
-
-		if (_currentObject)
-			_currentObject->setSize(mousePoint - _currentObject->rect().pos + (_snapGrid ? PointF(_gridCellSize, _gridCellSize) : PointF(0, 0)));
-	}
-	else if (_state == State::DEFAULT && evt.type == SDL_MOUSEMOTION)
-	{
-		EditableObject* underMouse = editableUnderMouse();
-		if (underMouse)
-			underMouse->setFocused(true);
 	}
 	else if (evt.button.type == SDL_MOUSEBUTTONDOWN)
 	{
@@ -330,6 +365,9 @@ void EditorScene::event(SDL_Event& evt)
 				_currentObject = underMouse;
 				_currentObject->setSelected(true);
 				updateState(State::SELECT);
+
+				_dragStartMousePosition = _mouseCoordsF;
+				_draggedObject = _currentObject;
 			}
 			else if (evt.button.button == SDL_BUTTON_LEFT)
 				updateState(State::DEFAULT);
@@ -338,13 +376,18 @@ void EditorScene::event(SDL_Event& evt)
 		if (evt.button.button == SDL_BUTTON_MIDDLE)
 		{
 			_isPanning = true;
-			_lastMousePosition = PointF(float(evt.button.x), float(evt.button.y));
+			_lastMousePositionPanning = PointF(float(evt.button.x), float(evt.button.y));
 		}
 	}
 	else if (evt.type == SDL_MOUSEBUTTONUP)
 	{
 		if (evt.button.button == SDL_BUTTON_MIDDLE)
 			_isPanning = false;
+		else if (_draggedObject && evt.button.button == SDL_BUTTON_LEFT)
+		{
+			_isDragging = false;
+			_draggedObject = nullptr;
+		}
 	}
 }
 

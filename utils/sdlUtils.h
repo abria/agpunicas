@@ -99,10 +99,7 @@ namespace agp
         // load from file
         SDL_Surface* surf = IMG_Load(filepath.c_str());
         if (!surf)
-        {
-            SDL_Log("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
-            return nullptr;
-        }
+            throw strprintf("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
 
         // set transparent color
         if (mask.a)
@@ -112,10 +109,7 @@ namespace agp
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
         SDL_FreeSurface(surf);
         if (!tex)
-        {
-            SDL_Log("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
-            return nullptr;
-        }
+            throw strprintf("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
 
         return tex;
     }
@@ -167,10 +161,7 @@ namespace agp
         }
 
         if (surfaces.empty())
-        {
-            printf("loadTextureSequence(): No images loaded.\n");
-            return nullptr;
-        }
+            throw strprintf("loadTextureSequence(): No images loaded.\n");
 
         // retrieve renderer's maximum texture size
         SDL_RendererInfo info;
@@ -178,12 +169,7 @@ namespace agp
         int max_texture_width = info.max_texture_width;
         int max_texture_height = info.max_texture_height;
         if (!max_texture_width || !max_texture_height)
-        {
-            printf("loadTextureSequence(): Cannot retrieve renderer max texture size.\n");
-            for (auto s : surfaces)
-                SDL_FreeSurface(s);
-            return nullptr;
-        }
+            throw strprintf("loadTextureSequence(): Cannot retrieve renderer max texture size.\n");
 
         // calculate the number of images per row and the total number of rows
         int images_per_row = max_texture_width / image_width;
@@ -193,12 +179,7 @@ namespace agp
         // check total height does not exceed max_texture_height
         int total_height = num_rows * image_height;
         if (total_height > max_texture_height)
-        {
-            printf("loadTextureSequence(): Cannot fit images within maximum texture size.\n");
-            for (auto s : surfaces)
-                SDL_FreeSurface(s);
-            return nullptr;
-        }
+            throw strprintf("loadTextureSequence(): Cannot fit images within maximum texture size.\n");
 
         // correct total width if there is just one row
         int total_width = images_per_row * image_width;
@@ -209,12 +190,7 @@ namespace agp
         SDL_Surface* big_surface = SDL_CreateRGBSurface(0, total_width, total_height, surfaces[0]->format->BitsPerPixel,
             surfaces[0]->format->Rmask, surfaces[0]->format->Gmask, surfaces[0]->format->Bmask, surfaces[0]->format->Amask);
         if (!big_surface)
-        {
-            SDL_Log("Failed to create big surf: %s", SDL_GetError());
-            for (auto s : surfaces)
-                SDL_FreeSurface(s);
-            return nullptr;
-        }
+            throw strprintf("Failed to create big surf: %s", SDL_GetError());
 
         // blit each image onto the big surf at the correct grid position
         for (int i = 0; i < surfaces.size(); ++i)
@@ -240,10 +216,7 @@ namespace agp
         // create a texture from the big surf
         SDL_Texture* result = SDL_CreateTextureFromSurface(renderer, big_surface);
         if (!result)
-        {
-            SDL_Log("Failed to convert big surf to big texture for %s: %s", folderPath.c_str(), SDL_GetError());
-            return nullptr;
-        }
+            throw strprintf("Failed to convert big surf to big texture for %s: %s", folderPath.c_str(), SDL_GetError());
 
         SDL_FreeSurface(big_surface);
 
@@ -264,10 +237,7 @@ namespace agp
     {
         SDL_Surface* surf = IMG_Load(filepath.c_str());
         if (!surf)
-        {
-            SDL_Log("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
-            return nullptr;
-        }
+            throw strprintf("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
 
         // corner-based rectangles detection
         std::vector < RectI > allRects;
@@ -355,10 +325,7 @@ namespace agp
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
         SDL_FreeSurface(surf);
         if (!tex)
-        {
-            SDL_Log("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
-            return nullptr;
-        }
+            throw strprintf("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
 
         return tex;
     }
@@ -419,10 +386,7 @@ namespace agp
         // load image
         SDL_Surface* surface = IMG_Load(filepath.c_str());
         if (!surface)
-        {
-            SDL_Log("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
-            return nullptr;
-        }
+            throw strprintf("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
 
         // retrieve basic metadata
         SDL_LockSurface(surface);
@@ -434,11 +398,7 @@ namespace agp
 
         // check format
         if (BytesPerPixel < 3 || BytesPerPixel > 4)
-        {
-            std::cerr << "Unsupported bitdepth (must be 24 or 32 bits per pixel).\n";
-            SDL_UnlockSurface(surface);
-            return nullptr;
-        }
+            throw strprintf("Unsupported bitdepth (must be 24 or 32 bits per pixel).\n");
 
         // initialize labels and union-find structure
         int nextLabel = 1;
@@ -641,10 +601,7 @@ namespace agp
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_FreeSurface(surface);
         if (!tex)
-        {
-            SDL_Log("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
-            return nullptr;
-        }
+            throw strprintf("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
 
         return tex;
     }
@@ -660,10 +617,7 @@ namespace agp
     {
         TTF_Font* font = TTF_OpenFont(fontPath.c_str(), fontSize);
         if (!font)
-        {
-            SDL_Log("Cannot open font from %s: %s", fontPath.c_str(), TTF_GetError());
-            return nullptr;
-        }
+            throw strprintf("Cannot open font from %s: %s", fontPath.c_str(), TTF_GetError());
         TTF_SetFontStyle(font, fontStyle);
         TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
         SDL_Color textColor = { fontColor.r, fontColor.g, fontColor.b, fontColor.a };

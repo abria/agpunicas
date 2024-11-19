@@ -22,26 +22,26 @@ Audio::Audio()
 	if(Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 512))
 		throw Mix_GetError();
 
-	auto soundFiles = getFilesInDirectory("sounds");
+	auto soundFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "sounds");
 	for (auto& f : soundFiles)
 	{
 		std::string name = getFileName(f, false);
 		//printf("sound: \"%s\"\n", name.c_str());
 
-		Mix_Chunk* chunk = Mix_LoadWAV(("sounds/" + f).c_str());
+		Mix_Chunk* chunk = Mix_LoadWAV((std::string(SDL_GetBasePath()) + "sounds/" + f).c_str());
 		if (!chunk)
 			std::cerr << Mix_GetError() << "\n";
 		else
 			_sounds[name] = chunk;
 	}
 
-	auto musicFiles = getFilesInDirectory("musics");
+	auto musicFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "musics");
 	for (auto& f : musicFiles)
 	{
 		std::string name = getFileName(f, false);
 		//printf("music: \"%s\"\n", name.c_str());
 
-		Mix_Music* music = Mix_LoadMUS(("musics/" + f).c_str());
+		Mix_Music* music = Mix_LoadMUS((std::string(SDL_GetBasePath()) + "musics/" + f).c_str());
 		if (!music)
 			std::cerr << Mix_GetError() << "\n";
 		else

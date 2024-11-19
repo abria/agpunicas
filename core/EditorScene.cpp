@@ -398,7 +398,7 @@ void EditorScene::event(SDL_Event& evt)
 
 EditableObject* EditorScene::editableUnderMouse()
 {
-	auto& objectsUnderMouse = objects(_mouseCoordsF);
+	auto objectsUnderMouse = objects(_mouseCoordsF);
 	std::list<EditableObject*> objectsVisible;
 	for (auto obj : objectsUnderMouse)
 		if (obj->to<EditableObject*>())

@@ -281,6 +281,9 @@ namespace agp
             }
         }
 
+        if(allRects.empty())
+            throw(strprintf("Unable to extract auto tiles from texture file %s", filepath.c_str()));
+
         // eliminate background to allow rect minor adjustments
         for (int y = 0; y < height; y++)
         {
@@ -578,6 +581,9 @@ namespace agp
         for (auto& elem : orderedComponents)
             if (elem.first >= 0)
                 rects.push_back(RectI(elem.second.pos.x, elem.second.pos.y, elem.second.size.x - elem.second.pos.x + 1, elem.second.size.y - elem.second.pos.y + 1));
+
+        if (rects.empty())
+            throw(strprintf("Unable to extract connected components from texture file %s", filepath.c_str()));
 
         // group row-wise
         std::sort(rects.begin(), rects.end(), [yDistanceThreshold, alignYCenters](const RectI& a, const RectI& b)

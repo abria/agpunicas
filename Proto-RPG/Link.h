@@ -48,7 +48,7 @@ class agp::Link : public DynamicObject
 		virtual void hurt();
 
 		// overrides acceptable collisions
-		virtual bool collidableWith(CollidableObject* obj) { return obj->collidableWith(this); }
+		virtual bool collidableWith(CollidableObject* obj) override { return obj->collidableWith(this); }
 
 		virtual std::string name() override { return strprintf("Link[%d]", _id); }
 };

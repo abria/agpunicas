@@ -29,15 +29,17 @@ SpriteFactory::SpriteFactory()
 	}
 
 	SDL_Renderer* renderer = Game::instance()->window()->renderer();
-	_spriteSheets["overworld"] = loadTexture(renderer, "sprites/scene_overworld.png");
-	_spriteSheets["linkhouse"] = loadTexture(renderer, "sprites/scene_linkhouse.png");
-	_spriteSheets["welcome"] = loadTexture(renderer, "sprites/welcome.png");
-	_spriteSheets["hud_mario"] = loadTexture(renderer, "sprites/hud_mario.png", { 147, 187, 236 });
-	_spriteSheets["hud"] = loadTexture(renderer, "sprites/hud.png", { 255, 0, 255 });
-	_spriteSheets["inventory"] = loadTexture(renderer, "sprites/menus3.png", { 0, 91, 127 });
-	_spriteSheets["player"] = loadTextureAutoDetect(renderer, "sprites/player_corrected.png", _autoTiles["player"], { 0, 128, 128 }, {0, 64, 64});
-	_spriteSheets["enemies"] = loadTextureAutoDetect(renderer, "sprites/enemies_3.png", _autoTiles["enemies"], { 255, 0, 255 }, { 128, 255, 255 });
-	_spriteSheets["fonts"] = loadTextureConnectedComponents(renderer, "sprites/fonts.png", _autoComponents["fonts"], {56, 56, 94});
+	_spriteSheets["overworld"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "/sprites/scene_overworld.png");
+	_spriteSheets["linkhouse"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/scene_linkhouse.png");
+	_spriteSheets["welcome"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/welcome.png");
+	_spriteSheets["hud_mario"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/hud_mario.png", { 147, 187, 236 });
+	_spriteSheets["hud"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/hud.png", { 255, 0, 255 });
+	_spriteSheets["inventory"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/menus3.png", { 0, 91, 127 });
+	_spriteSheets["player"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/player_corrected.png", _autoTiles["player"], { 0, 128, 128 }, {0, 64, 64});
+	_spriteSheets["enemies"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/enemies_3.png", _autoTiles["enemies"], { 255, 0, 255 }, { 128, 255, 255 });
+	_spriteSheets["fonts"] = loadTextureConnectedComponents(renderer, std::string(SDL_GetBasePath()) + "sprites/fonts.png", _autoComponents["fonts"], {56, 56, 94});
+	//_spriteSheets["knight"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/knight.png", _autoTiles["knight"], { 0, 128, 128 }, { 0, 255, 0 }, 5, false, false, true);
+
 
 	// font rectangles manual correction
 	for (int i = 0; i < _autoComponents["fonts"].size(); i++)

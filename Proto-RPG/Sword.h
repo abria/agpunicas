@@ -34,7 +34,7 @@ class agp::Sword : public DynamicObject
 		virtual void update(float dt) override;
 
 		// defines acceptable collisions (enemies only)
-		virtual bool collidableWith(CollidableObject* obj) { return obj->to<Enemy*>(); }
+		virtual bool collidableWith(CollidableObject* obj) override { return obj->to<Enemy*>(); }
 
 		virtual std::string name() override { 
 			return strprintf("Sword[%d]", _id); 

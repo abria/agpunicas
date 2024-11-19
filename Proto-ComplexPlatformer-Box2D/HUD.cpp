@@ -31,9 +31,7 @@ HUD::HUD()
 	_fpsObj = new RenderableObject(this, RectF(5.5, 1, 2, 0.5), SpriteFactory::instance()->getText(std::to_string(_fps), { 0.5f, 0.5f }, 2, '0'));
 	_timeObj = new RenderableObject(this, RectF(8.5, 1, 1.5, 0.5), SpriteFactory::instance()->getText(std::to_string(int(round(_time))), { 0.5f, 0.5f }, 3, '0'));
 
-	_view = new View(this, _rect);
 	_view->setFixedAspectRatio(Game::instance()->aspectRatio());
-	_view->setRect(RectF(0, 0, 36, 20));
 }
 
 // extends update logic (+time management)

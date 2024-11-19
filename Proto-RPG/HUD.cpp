@@ -68,9 +68,7 @@ HUD::HUD()
 	moveItemSelection(0, 0);
 
 	// SNES aspect ratio
-	_view = new View(this, _rect);
 	_view->setFixedAspectRatio(Game::instance()->aspectRatio());
-	_view->setRect(RectF(0, 0, 256, 224));
 }
 
 // extends update logic (+time management)

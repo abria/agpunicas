@@ -71,9 +71,7 @@ DialogBox::DialogBox(
 	updateCurrentOption();
 
 	// SNES aspect ratio
-	_view = new View(this, _rect);
 	_view->setFixedAspectRatio(256.0f/224);
-	_view->setRect(RectF(0, 0, 256, 224));
 	new Clipper(this, RectF(0, background->pos().y/224, 1.0f, background->rect().size.y / 224), 0);
 }
 

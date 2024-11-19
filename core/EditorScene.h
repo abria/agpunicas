@@ -40,6 +40,9 @@ class agp::EditorScene : public UIScene
 		bool _snapGrid;
 		PointF _mouseCoordsF;
 		PointF _mouseCoordsSnap;
+		bool _isPanning;
+		PointF _panningDelta;
+		PointF _lastMousePosition;
 		int _currentCategory;
 		EditableObject* _currentCell;
 		EditableObject* _currentObject;
@@ -73,7 +76,7 @@ class agp::EditorScene : public UIScene
 		void toggleSnapGrid() { _snapGrid = !_snapGrid; }
 		void toggleGrid();
 
-		// +syncronization with game scene
+		// +panning, +syncronization with game scene
 		virtual void update(float timeToSimulate) override;
 
 		// +editor controls

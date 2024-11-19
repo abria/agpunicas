@@ -26,6 +26,7 @@ EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 	_snapGrid = true;
 	_gridCellSize = 1;
 	_currentCell = new EditableObject(this, RectF(0, 0, _gridCellSize, _gridCellSize, _rect.yUp), "", _currentCategory, _categories);
+	_isPanning = false;
 
 	// inherited
 	_blocking = true;
@@ -106,7 +107,7 @@ void EditorScene::updateState(State newState)
 
 	if (newState == State::DEFAULT)
 	{
-		_ui->setHelpboxText(1, "Mouse: [LEFT] select, [RIGHT] delete");
+		_ui->setHelpboxText(1, "Mouse: [LEFT] select, [RIGHT] delete, [MIDDLE] pan/zoom");
 		_ui->setHelpboxText(0, "Keys: [C]reate, [G]rid on/off, [Q]uit/save");
 		
 		if (_currentObject)
@@ -142,24 +143,12 @@ void EditorScene::update(float timeToSimulate)
 {
 	UIScene::update(timeToSimulate);
 
-	const Uint8* keyboard = SDL_GetKeyboardState(0);
-
-	Direction xDir = Direction::NONE;
-	Direction yDir = Direction::NONE;
-
-	if (keyboard[SDL_SCANCODE_RIGHT] && !keyboard[SDL_SCANCODE_LEFT])
-		xDir = Direction::RIGHT;
-	if (keyboard[SDL_SCANCODE_LEFT] && !keyboard[SDL_SCANCODE_RIGHT])
-		xDir = Direction::LEFT;
-	if (keyboard[SDL_SCANCODE_UP] && !keyboard[SDL_SCANCODE_DOWN])
-		yDir = Direction::UP;
-	if (keyboard[SDL_SCANCODE_DOWN] && !keyboard[SDL_SCANCODE_UP])
-		yDir = Direction::DOWN;
-
-	_view->move((_cameraTranslateVel / _view->magf()) * dir2vec(xDir, _rect.yUp) * timeToSimulate);
-	_view->move((_cameraTranslateVel / _view->magf()) * dir2vec(yDir, _rect.yUp) * timeToSimulate);
-
-	_gameScene->view()->setRect(_view->rect());
+	if (_panningDelta.x != 0 || _panningDelta.y != 0)
+	{
+		_view->move(-_panningDelta / _view->magf());
+		_panningDelta = PointF(0, 0);
+		_gameScene->view()->setRect(_view->rect());
+	}
 
 	if (_state == State::CREATE)
 	{
@@ -266,6 +255,13 @@ void EditorScene::event(SDL_Event& evt)
 		_mouseCoordsF = _view->mapToScene(_mouseCoordsF);
 		_mouseCoordsSnap.x = floor(_mouseCoordsF.x / _gridCellSize) * _gridCellSize;
 		_mouseCoordsSnap.y = floor(_mouseCoordsF.y / _gridCellSize) * _gridCellSize;
+
+		if (_isPanning)
+		{
+			PointF delta = PointF(float(evt.button.x), float(evt.button.y)) - _lastMousePosition;
+			_panningDelta += delta;
+			_lastMousePosition = PointF(float(evt.button.x), float(evt.button.y));
+		}
 	}
 	PointF mousePoint = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
 
@@ -338,6 +334,17 @@ void EditorScene::event(SDL_Event& evt)
 			else if (evt.button.button == SDL_BUTTON_LEFT)
 				updateState(State::DEFAULT);
 		}
+
+		if (evt.button.button == SDL_BUTTON_MIDDLE)
+		{
+			_isPanning = true;
+			_lastMousePosition = PointF(float(evt.button.x), float(evt.button.y));
+		}
+	}
+	else if (evt.type == SDL_MOUSEBUTTONUP)
+	{
+		if (evt.button.button == SDL_BUTTON_MIDDLE)
+			_isPanning = false;
 	}
 }
 

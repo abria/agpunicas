@@ -330,7 +330,7 @@ namespace agp
         rects.push_back(std::vector <RectI>());
         for (int k = 0; k < allRects.size(); k++)
         {
-            if (k && allRects[k].pos.x < allRects[k - 1].pos.x)
+            if (k && allRects[k].left() < allRects[k - 1].right())
                 rects.push_back(std::vector <RectI>());
             rects[rects.size() - 1].push_back(allRects[k]);
         }
@@ -378,32 +378,32 @@ namespace agp
     // Union-Find data structure for connected component labeling
     class UnionFind
     {
-    private:
+        private:
 
-        std::vector<int> parent;
+            std::vector<int> parent;
 
-    public:
+        public:
 
-        UnionFind(int size) : parent(size)
-        {
-            for (int i = 0; i < size; ++i)
-                parent[i] = i;
-        }
+            UnionFind(int size) : parent(size)
+            {
+                for (int i = 0; i < size; ++i)
+                    parent[i] = i;
+            }
 
-        int Find(int x)
-        {
-            if (parent[x] != x)
-                parent[x] = Find(parent[x]); // Path compression
-            return parent[x];
-        }
+            int Find(int x)
+            {
+                if (parent[x] != x)
+                    parent[x] = Find(parent[x]); // Path compression
+                return parent[x];
+            }
 
-        void Union(int x, int y)
-        {
-            int xroot = Find(x);
-            int yroot = Find(y);
-            if (xroot != yroot)
-                parent[yroot] = xroot;
-        }
+            void Union(int x, int y)
+            {
+                int xroot = Find(x);
+                int yroot = Find(y);
+                if (xroot != yroot)
+                    parent[yroot] = xroot;
+            }
     };
 
     // load image from file into texture and detect rects with connected component labeling

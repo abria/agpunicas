@@ -16,6 +16,7 @@ using namespace agp;
 UIScene::UIScene(const RectF& rect, const Point& pixelUnitSize)
 	: Scene(rect, pixelUnitSize)
 {
+	_view = new View(this, _rect);
 }
 
 void UIScene::update(float timeToSimulate)

@@ -66,6 +66,8 @@ Menu::Menu(const PointF& position, float width, Menu* parent, bool closable)
 Menu::Menu(Menu* parent)
 	: Menu(parent->menuRect().tl(), parent->menuRect().size.x, parent)
 {
+	_view->setFixedAspectRatio(Game::instance()->aspectRatio());
+	_view->setRect(RectF(0, 0, 16, 15));
 }
 
 MenuItem* Menu::addItem(const std::string& text, std::function<void()> task)

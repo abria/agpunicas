@@ -145,6 +145,8 @@ void EditorScene::update(float timeToSimulate)
 	// panning
 	if (_panningDelta.x != 0 || _panningDelta.y != 0)
 	{
+		if (_rect.yUp)
+			_panningDelta.y = -_panningDelta.y;
 		_view->move(-_panningDelta / _view->magf());
 		_panningDelta = PointF(0, 0);
 	}

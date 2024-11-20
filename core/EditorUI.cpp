@@ -19,7 +19,7 @@ EditorUI::EditorUI()
 	: UIScene(RectF(0, 0, 1, 1 / Game::instance()->aspectRatio()), { 1,1 })
 {
 	_cursorCoords = new RenderableObject(this, RectF(0, 0, 1, CURSOR_TEXT_HEIGHT * _rect.size.y),
-		new TextSprite("", "font.ttf"), 1);
+		new TextSprite("", std::string(SDL_GetBasePath()) + "fonts/font.ttf"), 1);
 
 	float helpboxTextHeighNorm = HELPBOX_TEXT_HEIGHT * _rect.size.y;
 	float helpboxMarginXNorm = HELPBOX_MARGIN_X * _rect.size.x;
@@ -27,7 +27,7 @@ EditorUI::EditorUI()
 	for (int i = 0; i < HELPBOX_MAX_ROWS; i++)
 	{
 		_helpboxRows[i] = new RenderableObject(this, RectF(0, _rect.bottom() - helpboxTextHeighNorm * (HELPBOX_MAX_ROWS - i), 1, helpboxTextHeighNorm),
-			new TextSprite("", "font.ttf", { 0,0,0 }, { helpboxMarginXNorm, helpboxMarginYNorm }));
+			new TextSprite("", std::string(SDL_GetBasePath()) + "fonts/font.ttf", { 0,0,0 }, { helpboxMarginXNorm, helpboxMarginYNorm }));
 		_helpboxRows[i]->setBackgroundColor(Color(255, 255, 255, 128));
 		_helpboxRows[i]->setVisible(false);
 	}

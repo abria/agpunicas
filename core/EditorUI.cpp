@@ -36,29 +36,22 @@ EditorUI::EditorUI()
 	_view->setFixedAspectRatio(Game::instance()->aspectRatio());
 	_view->setRect(_rect);
 
-	_crossCursor = nullptr;
+	_cursor = nullptr;
 }
 
 EditorUI::~EditorUI()
 {
-	setCrossCursor(false);
+	SDL_FreeCursor(_cursor);
+	_cursor = nullptr;
 }
 
-void EditorUI::setCrossCursor(bool on)
+void EditorUI::setCursor(SDL_SystemCursor cursor)
 {
-	if (on && _crossCursor)
-		return;
-	if (!on && !_crossCursor)
-		return;
+	if (_cursor)
+		SDL_FreeCursor(_cursor);
 
-	if(on)
-		_crossCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
-	else
-	{
-		SDL_FreeCursor(_crossCursor);
-		_crossCursor = nullptr;
-	}
-	SDL_SetCursor(_crossCursor);
+	_cursor = SDL_CreateSystemCursor(cursor);
+	SDL_SetCursor(_cursor);
 }
 
 void EditorUI::setCursorText(const std::string& text, const Color& textColor)

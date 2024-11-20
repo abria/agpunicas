@@ -39,14 +39,14 @@ class agp::EditorUI : public UIScene
 
 		RenderableObject* _cursorCoords;
 		RenderableObject* _helpboxRows[HELPBOX_MAX_ROWS];
-		SDL_Cursor* _crossCursor;
+		SDL_Cursor* _cursor;
 
 	public:
 
 		EditorUI();
 		virtual ~EditorUI();
 
-		void setCrossCursor(bool on);
+		void setCursor(SDL_SystemCursor cursor);
 		void setCursorText(const std::string& text, const Color& textColor = { 0,0,0 });
 		void setHelpboxText(int row, const std::string& text, const Color& textColor = { 0,0,0 });
 		void clearHelpboxText();

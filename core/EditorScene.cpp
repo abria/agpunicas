@@ -98,7 +98,7 @@ void EditorScene::toJson()
 void EditorScene::updateState(State newState)
 {
 	_ui->clearHelpboxText();
-	_ui->setCrossCursor(newState == State::CREATE);
+	_ui->setCursor(newState == State::CREATE ? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_ARROW);
 	_currentCell->setVisible(newState == State::RENAME_CATEGORY || (newState == State::CREATE && !_currentObject));
 
 	if(newState != State::RENAME_CATEGORY && newState != State::RENAME_OBJECT)
@@ -382,12 +382,16 @@ void EditorScene::event(SDL_Event& evt)
 		{
 			_isPanning = true;
 			_lastMousePositionPanning = PointF(float(evt.button.x), float(evt.button.y));
+			_ui->setCursor(SDL_SYSTEM_CURSOR_HAND);
 		}
 	}
 	else if (evt.type == SDL_MOUSEBUTTONUP)
 	{
 		if (evt.button.button == SDL_BUTTON_MIDDLE)
+		{
 			_isPanning = false;
+			_ui->setCursor(SDL_SYSTEM_CURSOR_ARROW);
+		}
 		else if (_draggedObject && evt.button.button == SDL_BUTTON_LEFT)
 		{
 			_isDragging = false;

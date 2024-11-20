@@ -239,96 +239,191 @@ namespace agp
         if (!surf)
             throw strprintf("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
 
-        // corner-based rectangles detection
-        std::vector < RectI > allRects;
+        SDL_PixelFormat* format = surf->format;
+
+        if (format->BytesPerPixel != 3 && format->BytesPerPixel != 4)
+            throw strprintf("Unsupported image format in %s. Only 24-bit and 32-bit images are supported.", filepath.c_str());
+
+        // Helper function to get pixel color
+        auto getPixelColor = [format](Uint8* pixelPtr) -> Color
+        {
+            Uint32 pixelValue;
+            if (format->BytesPerPixel == 3)
+            {
+                // For 24-bit images, read 3 bytes
+                if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+                    pixelValue = pixelPtr[0] << 16 | pixelPtr[1] << 8 | pixelPtr[2];
+                else
+                    pixelValue = pixelPtr[0] | pixelPtr[1] << 8 | pixelPtr[2] << 16;
+            }
+            else // format->BytesPerPixel == 4
+            {
+                pixelValue = *(Uint32*)pixelPtr;
+            }
+
+            Uint8 r = (pixelValue & format->Rmask) >> format->Rshift;
+            Uint8 g = (pixelValue & format->Gmask) >> format->Gshift;
+            Uint8 b = (pixelValue & format->Bmask) >> format->Bshift;
+            Uint8 a = format->Amask ? (pixelValue & format->Amask) >> format->Ashift : 255;
+
+            // Adjust component sizes if necessary
+            if (format->Rloss)
+                r = (r << format->Rloss) + (r >> (8 - (format->Rloss)));
+            if (format->Gloss)
+                g = (g << format->Gloss) + (g >> (8 - (format->Gloss)));
+            if (format->Bloss)
+                b = (b << format->Bloss) + (b >> (8 - (format->Bloss)));
+            if (format->Aloss)
+                a = (a << format->Aloss) + (a >> (8 - (format->Aloss)));
+
+            return Color(r, g, b, a);
+        };
+
+        // Helper function to set pixel color
+        auto setPixelColor = [format](Uint8* pixelPtr, const Color& color)
+        {
+            Uint32 pixelValue =
+                ((color.r >> format->Rloss) << format->Rshift) |
+                ((color.g >> format->Gloss) << format->Gshift) |
+                ((color.b >> format->Bloss) << format->Bshift) |
+                (format->Amask ? ((color.a >> format->Aloss) << format->Ashift) : 0);
+
+            if (format->BytesPerPixel == 3)
+            {
+                if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+                {
+                    pixelPtr[0] = (pixelValue >> 16) & 0xFF;
+                    pixelPtr[1] = (pixelValue >> 8) & 0xFF;
+                    pixelPtr[2] = pixelValue & 0xFF;
+                }
+                else
+                {
+                    pixelPtr[0] = pixelValue & 0xFF;
+                    pixelPtr[1] = (pixelValue >> 8) & 0xFF;
+                    pixelPtr[2] = (pixelValue >> 16) & 0xFF;
+                }
+            }
+            else // format->BytesPerPixel == 4
+            {
+                *(Uint32*)pixelPtr = pixelValue;
+            }
+        };
+
+        // Corner-based rectangles detection
+        std::vector<RectI> allRects;
         SDL_LockSurface(surf);
-        Uint8* pixels = (Uint8*)surf->pixels;
+        Uint8* pixels = static_cast<Uint8*>(surf->pixels);
         int width = surf->w;
         int height = surf->h;
         int pitch = surf->pitch; // Number of bytes in a row (may include padding)
-        Uint8 bpp = surf->format->BytesPerPixel;
+        Uint8 bpp = format->BytesPerPixel;
+
         for (int y = 0; y < height; y++)
         {
             Uint8* row = pixels + y * pitch;
-            Uint8* rowPrev = pixels + (y - 1) * pitch;
+            Uint8* rowPrev = y > 0 ? pixels + (y - 1) * pitch : nullptr;
             for (int x = 0; x < width; x++)
             {
-                Color pixel(row + x * bpp);
-                Color pixelN = y ? Color(rowPrev + x * bpp) : backgroundMask;
-                Color pixelNW = y ? Color(rowPrev + (x - 1) * bpp) : backgroundMask;
-                Color pixelW = x ? Color(row + (x - 1) * bpp) : backgroundMask;
+                Uint8* pixelPtr = row + x * bpp;
+                Color pixel = getPixelColor(pixelPtr);
 
-                // up-left corner detection
+                Color pixelN = y > 0 ? getPixelColor(rowPrev + x * bpp) : backgroundMask;
+                Color pixelNW = (y > 0 && x > 0) ? getPixelColor(rowPrev + (x - 1) * bpp) : backgroundMask;
+                Color pixelW = x > 0 ? getPixelColor(pixelPtr - bpp) : backgroundMask;
+
+                // Up-left corner detection
                 if ((detectCornerWithBackgroundOnly ? pixel != backgroundMask : pixel == spriteMask) &&
                     pixelN == backgroundMask &&
                     pixelNW == backgroundMask &&
                     pixelW == backgroundMask)
                 {
-                    // up-right corner detection
+                    // Up-right corner detection
                     int right = x;
                     for (; right < width; right++)
-                        if (Color(row + right * bpp) == backgroundMask)
+                    {
+                        Color currentPixel = getPixelColor(row + right * bpp);
+                        if (currentPixel == backgroundMask)
                             break;
+                    }
 
-                    // bottom-right corner detection
+                    // Bottom-right corner detection
                     int bottom = y;
                     for (; bottom < height; bottom++)
-                        if (Color(pixels + bottom * pitch + (right - 1) * bpp) == backgroundMask)
+                    {
+                        Uint8* bottomRow = pixels + bottom * pitch;
+                        Color currentPixel = getPixelColor(bottomRow + (right - 1) * bpp);
+                        if (currentPixel == backgroundMask)
                             break;
+                    }
 
                     allRects.push_back(RectI(x, y, right - x, bottom - y));
                 }
             }
         }
 
-        if(allRects.empty())
-            throw(strprintf("Unable to extract auto tiles from texture file %s", filepath.c_str()));
+        if (allRects.empty())
+        {
+            SDL_UnlockSurface(surf);
+            SDL_FreeSurface(surf);
+            throw strprintf("Unable to extract auto tiles from texture file %s", filepath.c_str());
+        }
 
-        // eliminate background to allow rect minor adjustments
+        // Eliminate background to allow rect minor adjustments
         for (int y = 0; y < height; y++)
         {
             Uint8* row = pixels + y * pitch;
             for (int x = 0; x < width; x++)
-                if (Color(row + x * bpp) == backgroundMask)
-                    for (int c = 0; c < bpp; c++)
-                        row[x * bpp + c] = spriteMask[c];
+            {
+                Uint8* pixelPtr = row + x * bpp;
+                Color currentPixel = getPixelColor(pixelPtr);
+                if (currentPixel == backgroundMask)
+                    setPixelColor(pixelPtr, spriteMask);
+            }
         }
         SDL_UnlockSurface(surf);
 
-        // group rects row-wise
-        std::sort(allRects.begin(), allRects.end(), [yDistanceThreshold, alignYCenters](const RectI& a, const RectI& b)
+        // Group rects row-wise
+        std::sort(allRects.begin(), allRects.end(),
+            [yDistanceThreshold, alignYCenters](const RectI& a, const RectI& b)
             {
-                return std::abs(alignYCenters ? a.center().y - b.center().y : a.pos.y - b.pos.y) > yDistanceThreshold ? a.center().y < b.center().y : a.pos.x < b.pos.x;
+                return std::abs(alignYCenters ? a.center().y - b.center().y : a.pos.y - b.pos.y) > yDistanceThreshold
+                    ? a.center().y < b.center().y
+                    : a.pos.x < b.pos.x;
             });
-        rects.push_back(std::vector <RectI>());
-        for (int k = 0; k < allRects.size(); k++)
+        rects.push_back(std::vector<RectI>());
+        for (size_t k = 0; k < allRects.size(); k++)
         {
             if (k && allRects[k].left() < allRects[k - 1].right())
-                rects.push_back(std::vector <RectI>());
-            rects[rects.size() - 1].push_back(allRects[k]);
+                rects.push_back(std::vector<RectI>());
+            rects.back().push_back(allRects[k]);
         }
 
         if (verbose)
         {
             printf("\nloadTextureAutoDetect:\n");
-            printf("extracted %d rects in total\n", int(allRects.size()));
-            for (int i = 0; i < rects.size(); i++)
+            printf("extracted %d rects in total\n", static_cast<int>(allRects.size()));
+            for (size_t i = 0; i < rects.size(); i++)
             {
-                printf("row %02d: %d rects\n", i, int(rects[i].size()));
-                for (int j = 0; j < rects[i].size(); j++)
+                printf("row %02d: %d rects\n", static_cast<int>(i), static_cast<int>(rects[i].size()));
+                for (size_t j = 0; j < rects[i].size(); j++)
                     printf("[%d %d %d %d] ", rects[i][j].pos.x, rects[i][j].pos.y, rects[i][j].size.x, rects[i][j].size.y);
                 printf("\n");
             }
         }
 
-        // set transparent color
-        SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, spriteMask.r, spriteMask.g, spriteMask.b));
+        // Set transparent color
+        Uint32 spriteMaskPixelValue =
+            ((spriteMask.r >> format->Rloss) << format->Rshift) |
+            ((spriteMask.g >> format->Gloss) << format->Gshift) |
+            ((spriteMask.b >> format->Bloss) << format->Bshift);
 
-        // create texture from surf
+        SDL_SetColorKey(surf, SDL_TRUE, spriteMaskPixelValue);
+
+        // Create texture from surface
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
         SDL_FreeSurface(surf);
         if (!tex)
-            throw strprintf("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
+            throw strprintf("Failed to convert surface to texture for %s: %s", filepath.c_str(), SDL_GetError());
 
         return tex;
     }

@@ -25,7 +25,11 @@ int main(int argc, char *argv[])
 	}
     catch (const char* errMsg)
     {
-        printf("ERROR: \"%s\"\n", errMsg);
+        printf("ERROR: %s\n", errMsg);
+    }
+    catch (std::string errMsg)
+    {
+        printf("ERROR: %s\n", errMsg.c_str());
     }
 
     return EXIT_SUCCESS;

@@ -35,21 +35,21 @@ SpriteFactory::SpriteFactory()
 	}
 
 	SDL_Renderer* renderer = Game::instance()->window()->renderer();
-	_spriteSheets["hud"] = loadTexture(renderer, "sprites/hud.png", { 147, 187, 236 });
-	_spriteSheets["bg_sky"] = loadTexture(renderer, "sprites/bg_sky.png");
-	_spriteSheets["bg_houses"] = loadTexture(renderer, "sprites/bg_house.png");
-	_spriteSheets["bg_grass"] = loadTexture(renderer, "sprites/bg_grass.png");
-	_spriteSheets["fg_fog"] = loadTexture(renderer, "sprites/fg_fog.png");
-	_spriteSheets["fg_ground"] = loadTexture(renderer, "sprites/level_0.png");
-	_spriteSheets["gear"] = loadTexture(renderer, "sprites/gear.png");
-	_spriteSheets["box"] = loadTexture(renderer, "sprites/box.png");
-	_spriteSheets["rain"] = loadTextureSequence(renderer, "sprites/rain", _autoTiles["rain"], Point(), Point(), "*.png", { 0,0,0 });
-	_spriteSheets["player_idle"] = loadTextureSequence(renderer, "sprites/PlayerIdle", _autoTiles["player_idle"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
-	_spriteSheets["player_walk"] = loadTextureSequence(renderer, "sprites/PlayerWalk", _autoTiles["player_walk"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
-	_spriteSheets["player_jump"] = loadTextureSequence(renderer, "sprites/PlayerJump", _autoTiles["player_jump"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
-	_spriteSheets["player_dash"] = loadTextureSequence(renderer, "sprites/PlayerDash/DashEffect", _autoTiles["player_dash"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
-	_spriteSheets["slime"] = loadTextureSequence(renderer, "sprites/Slime", _autoTiles["slime"]);
-	_spriteSheets["fire"] = loadTexture(renderer, "sprites/fire.png");
+	_spriteSheets["hud"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/hud.png", { 147, 187, 236 });
+	_spriteSheets["bg_sky"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/bg_sky.png");
+	_spriteSheets["bg_houses"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/bg_house.png");
+	_spriteSheets["bg_grass"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/bg_grass.png");
+	_spriteSheets["fg_fog"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/fg_fog.png");
+	_spriteSheets["fg_ground"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/level_0.png");
+	_spriteSheets["gear"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/gear.png");
+	_spriteSheets["box"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/box.png");
+	_spriteSheets["rain"] = loadTextureSequence(renderer, std::string(SDL_GetBasePath()) + "sprites/rain", _autoTiles["rain"], Point(), Point(), "*.png", { 0,0,0 });
+	_spriteSheets["player_idle"] = loadTextureSequence(renderer, std::string(SDL_GetBasePath()) + "sprites/PlayerIdle", _autoTiles["player_idle"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
+	_spriteSheets["player_walk"] = loadTextureSequence(renderer, std::string(SDL_GetBasePath()) + "sprites/PlayerWalk", _autoTiles["player_walk"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
+	_spriteSheets["player_jump"] = loadTextureSequence(renderer, std::string(SDL_GetBasePath()) + "sprites/PlayerJump", _autoTiles["player_jump"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
+	_spriteSheets["player_dash"] = loadTextureSequence(renderer, std::string(SDL_GetBasePath()) + "sprites/PlayerDash/DashEffect", _autoTiles["player_dash"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
+	_spriteSheets["slime"] = loadTextureSequence(renderer, std::string(SDL_GetBasePath()) + "sprites/Slime", _autoTiles["slime"]);
+	_spriteSheets["fire"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/fire.png");
 }
 
 // anchors

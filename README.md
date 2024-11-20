@@ -25,7 +25,13 @@ Rendering+audio engine based on SDL, utilized by all game prototypes.
 - camera (both manual and follows-the-player)
 - audio system with playable/resumable sounds and musics
 - parallax and overlay scenes layering
+- text sprites based on SDL_ttf
+- helper functions for spritesheets (autotiling and connected components extraction)
+- level editor with json persistence
 
+<img src="https://github.com/abria/agpunicas/blob/main/demo_leveleditor.png">
+
+#### Class Diagram
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Core.png">
 
 ## Proto-SimplePlatformer

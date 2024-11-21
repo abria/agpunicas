@@ -90,6 +90,95 @@ namespace agp
         }
     }
 
+    static inline void DrawOBB(SDL_Renderer* renderer, std::array < PointF, 4> obb, const Color& color)
+    {
+        for (int k = 0; k < 4; k++)
+        {
+            SDL_FPoint a = obb[k].toSDLf();
+            SDL_FPoint b = obb[(k + 1) % 4].toSDLf();
+            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+            SDL_RenderDrawLineF(renderer, a.x, a.y, b.x, b.y);
+        }
+    }
+
+    static inline void DrawThickOBB(SDL_Renderer* renderer, std::array < PointF, 4> obb, float thickness, const Color& color) 
+    {
+        // Prepare vertices and indices
+        SDL_Vertex vertices[16];
+        int vertexCount = 0;
+        int indices[24];
+        int indexCount = 0;
+
+        // For each edge
+        for (int i = 0; i < 4; ++i) 
+        {
+            int next = (i + 1) % 4;
+            PointF p1 = obb[i];
+            PointF p2 = obb[next];
+
+            // Compute the edge direction
+            float dx = p2.x - p1.x;
+            float dy = p2.y - p1.y;
+            float length = sqrtf(dx * dx + dy * dy);
+
+            // Normalize
+            float dx_norm = dx / length;
+            float dy_norm = dy / length;
+
+            // Perpendicular vector
+            float nx = -dy_norm;
+            float ny = dx_norm;
+
+            // Offset for thickness
+            float halfThickness = thickness / 2.0f;
+            float offsetX = nx * halfThickness;
+            float offsetY = ny * halfThickness;
+
+            // Quad vertices
+            PointF quad[4];
+            quad[0] = { p1.x + offsetX, p1.y + offsetY };
+            quad[1] = { p1.x - offsetX, p1.y - offsetY };
+            quad[2] = { p2.x - offsetX, p2.y - offsetY };
+            quad[3] = { p2.x + offsetX, p2.y + offsetY };
+
+            // Add vertices
+            for (int j = 0; j < 4; ++j) 
+            {
+                vertices[vertexCount].position.x = quad[j].x;
+                vertices[vertexCount].position.y = quad[j].y;
+                vertices[vertexCount].color = { color.r, color.g, color.b, color.a };
+                vertexCount++;
+            }
+
+            // Define indices for two triangles
+            indices[indexCount++] = vertexCount - 4; // First triangle
+            indices[indexCount++] = vertexCount - 3;
+            indices[indexCount++] = vertexCount - 2;
+
+            indices[indexCount++] = vertexCount - 4; // Second triangle
+            indices[indexCount++] = vertexCount - 2;
+            indices[indexCount++] = vertexCount - 1;
+        }
+
+        // Render the geometry
+        SDL_RenderGeometry(renderer, nullptr, vertices, vertexCount, indices, indexCount);
+    }
+
+    static inline void FillOBB(SDL_Renderer* renderer, std::array < PointF, 4> obb, const Color& color)
+    {
+        // use SDL_RenderGeometry to draw 2 filled triangles per rect
+        std::array< SDL_Vertex, 4> SDL_vertices;
+        for (int i = 0; i < 4; i++)
+            SDL_vertices[i] =
+        {
+            SDL_FPoint{obb[i].x,obb[i].y},
+            SDL_Color {color.r, color.g, color.b, color.a},
+            SDL_FPoint {0}
+        };
+        std::array< int, 6> SDL_indices = { 0, 1, 2, 2, 3, 0 };
+        SDL_RenderGeometry(renderer, nullptr, &SDL_vertices[0], 6, &SDL_indices[0], 6);
+    }
+
     // load image from file into texture
     static inline SDL_Texture* loadTexture(
         SDL_Renderer* renderer,

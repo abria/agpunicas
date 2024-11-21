@@ -138,10 +138,18 @@ void TextSprite::render(
 	else // VAlign::TOP && !drawRect.yUp || VAlign::BOTTOM && drawRect.yUp 
 		correctedDrawRectAR.pos.y = correctedDrawRect.pos.y;
 
+	// apply camera transform to corrected draw rect
 	SDL_Rect srcRect = _rect.toSDL();
 	SDL_FRect drawRect_sdl = RectF(camera(correctedDrawRectAR.tl()), camera(correctedDrawRectAR.br())).toSDLf();
 
-	SDL_RenderCopyF(renderer, _spritesheet, &srcRect, &drawRect_sdl);
+	// calculate the rotation center relative to transformed drawRect
+	PointF drawRectCenter = correctedDrawRect.center(); 
+	PointF drawRectCenterScreen = camera(drawRectCenter);
+	SDL_FPoint rotationCenter;
+	rotationCenter.x = drawRectCenterScreen.x - drawRect_sdl.x;
+	rotationCenter.y = drawRectCenterScreen.y - drawRect_sdl.y;
+
+	SDL_RenderCopyExF(renderer, _spritesheet, &srcRect, &drawRect_sdl, angle, &rotationCenter, SDL_FLIP_NONE);
 #else
 	if (_regenerateTexture)
 	{

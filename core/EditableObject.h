@@ -10,6 +10,7 @@
 #pragma once
 #include "RenderableObject.h"
 #include "json.hpp"
+#include "mathUtils.h"
 
 namespace agp
 {
@@ -29,6 +30,7 @@ class agp::EditableObject : public RenderableObject
 		RenderableObject* _renderedName;
 		RenderableObject* _renderedCategory;
 		std::vector<std::string>& _categories;
+		RotatedRectF _rotRect;
 
 		// in scene coords
 		static constexpr float CATEGORY_MAX_HEIGHT = 0.5f;
@@ -52,16 +54,21 @@ class agp::EditableObject : public RenderableObject
 		EditableObject(Scene* scene, const nlohmann::json& fromJson, std::vector<std::string>& categories);
 		virtual ~EditableObject();
 
-		int category() { return _category; }
+		int category() const { return _category; }
 		void setCategory(int newCategory);
-		std::string editName() { return _name; }
+		std::string editName() const { return _name; }
 		void setName(const std::string& name);
 		void setFocused(bool on);
 		void setSelected(bool on);
 
+		void rotate(int angleDegrees);
+
+		virtual bool contains(const Vec2Df& p) override;
 		virtual void setVisible(bool visible) override;
 		virtual void setPos(const PointF& newPos) override;
 		virtual void setSize(const PointF& newSize) override;
+
+		virtual void draw(SDL_Renderer* renderer, Transform camera) override;
 
 		virtual std::string name() override { return strprintf("EditableObject[%d]", _id); }
 

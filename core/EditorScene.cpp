@@ -130,7 +130,7 @@ void EditorScene::updateState(State newState)
 	}
 	else if (newState == State::SELECT)
 	{
-		_ui->setHelpboxText(1, "Mouse: [LEFT] drag/drop");
+		_ui->setHelpboxText(1, "Mouse: [LEFT] drag/drop, [SCROLL] rotate");
 		_ui->setHelpboxText(0, "Keys: [R]ename, [ESC]ape");
 		_currentObject->setSelected(true);
 	}
@@ -318,11 +318,18 @@ void EditorScene::event(SDL_Event& evt)
 		}
 	}
 
-	// mouse buttons
+	// mouse scrool
 	if (evt.type == SDL_MOUSEWHEEL)
 	{
+		if (_state == State::SELECT)
+		{
+			if (evt.wheel.y > 0)
+				_currentObject->rotate(ctrlPressed ? 1 : 10);
+			else if (evt.wheel.y < 0)
+				_currentObject->rotate(ctrlPressed ? -1 : -10);
+		}
 		// grid
-		if (ctrlPressed)
+		else if (ctrlPressed)
 		{
 			if (evt.wheel.y > 0)
 				_gridCellSize *= 2;
@@ -331,7 +338,7 @@ void EditorScene::event(SDL_Event& evt)
 			generateGrid();
 			_currentCell->setSize(PointF(_gridCellSize, _gridCellSize));
 		}
-		// zooom
+		// zoom
 		else
 		{
 			if (evt.wheel.y > 0)
@@ -340,6 +347,8 @@ void EditorScene::event(SDL_Event& evt)
 				_view->scale(1 + _cameraZoomVel);
 		}
 	}
+
+	// mouse buttons
 	else if (evt.button.type == SDL_MOUSEBUTTONDOWN)
 	{
 		if (_state == State::CREATE && evt.button.button == SDL_BUTTON_LEFT)
@@ -405,6 +414,7 @@ void EditorScene::event(SDL_Event& evt)
 EditableObject* EditorScene::editableUnderMouse()
 {
 	auto objectsUnderMouse = objects(_mouseCoordsF);
+
 	std::list<EditableObject*> objectsVisible;
 	for (auto obj : objectsUnderMouse)
 		if (obj->to<EditableObject*>())

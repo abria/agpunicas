@@ -50,7 +50,7 @@ void RigidObject::draw(SDL_Renderer* renderer, Transform camera)
 	if (gameScene && gameScene->collidersVisible())
 	{
 		// draw body reference frame
-		RotatedRectF body_obb(camera(_obb.center), _scene->view()->magf() * _obb.size, _obb.angle, _obb.yUp);
+		RotatedRectF body_obb(camera(_obb.center), _scene->view()->magf() * _obb.size, _obb.angle);
 		DrawOBB(renderer, body_obb, _bodyFrameColor);
 
 		// draw shapes

@@ -30,8 +30,10 @@ class agp::EditorScene : public UIScene
 	public:
 
 		enum class State { 
-			DEFAULT, CREATE, RENAME_CATEGORY, 
-			RENAME_OBJECT, SELECT };
+			DEFAULT, 
+			DRAW_RECT, DRAW_LINE, 
+			RENAME_CATEGORY, RENAME_OBJECT, 
+			SELECT };
 
 	protected:
 
@@ -55,6 +57,10 @@ class agp::EditorScene : public UIScene
 		PointF _dragStartMousePosition;
 		PointF _dragStartObjectPosition;
 		EditableObject* _draggedObject;
+
+		// resizing
+		bool _isResizing;
+		EditableObject* _resizingObject;
 
 		// renderables
 		std::vector<EditableObject*> _editObjects;
@@ -81,6 +87,7 @@ class agp::EditorScene : public UIScene
 		void updateState(State newState);
 		void generateGrid();
 		EditableObject* editableUnderMouse();
+		void checkResizing();
 
 	public:
 

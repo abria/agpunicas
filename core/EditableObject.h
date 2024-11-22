@@ -20,6 +20,10 @@ namespace agp
 
 // EditableObject class.
 // - serializable editable object for level editing
+// - supported geometries:
+//   - AABB rect
+//   - rotated rect
+//   - multiline
 class agp::EditableObject : public RenderableObject
 {
 	protected:
@@ -31,12 +35,14 @@ class agp::EditableObject : public RenderableObject
 		RenderableObject* _renderedCategory;
 		std::vector<std::string>& _categories;
 		RotatedRectF _rotRect;
+		int _resizingEdgeIndex;
 
 		// in scene coords
 		static constexpr float CATEGORY_MAX_HEIGHT = 0.5f;
 		static constexpr float CATEGORY_MARGIN_Y = 0.1f;
 		static constexpr float NAME_MAX_HEIGHT = 1;
 		static constexpr float NAME_MARGIN_X = 0.1f;
+		static constexpr float RESIZING_HOOK_DISTANCE = 0.25f;
 
 		// in screen points
 		static constexpr float SELECTED_BORDER_THICKNESS = 5.0f;
@@ -55,13 +61,15 @@ class agp::EditableObject : public RenderableObject
 		virtual ~EditableObject();
 
 		int category() const { return _category; }
-		void setCategory(int newCategory);
+		virtual void setCategory(int newCategory);
 		std::string editName() const { return _name; }
-		void setName(const std::string& name);
-		void setFocused(bool on);
-		void setSelected(bool on);
+		virtual void setName(const std::string& name);
+		virtual void setFocused(bool on);
+		virtual void setSelected(bool on);
 
-		void rotate(int angleDegrees);
+		virtual bool resizableAt(const PointF& point);
+		virtual void resize(const PointF& point);
+		virtual void rotate(int angleDegrees);
 
 		virtual bool contains(const Vec2Df& p) override;
 		virtual void setVisible(bool visible) override;
@@ -72,5 +80,5 @@ class agp::EditableObject : public RenderableObject
 
 		virtual std::string name() override { return strprintf("EditableObject[%d]", _id); }
 
-		nlohmann::ordered_json toJson();
+		virtual nlohmann::ordered_json toJson();
 };

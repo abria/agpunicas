@@ -49,7 +49,7 @@ namespace agp
 		Vec2D  min(const Vec2D& v) const { return Vec2D(std::min(x, v.x), std::min(y, v.y)); }
 		T dot(const Vec2D& v) const { return this->x * v.x + this->y * v.y; }
 		T cross(const Vec2D& v) const { return this->x * v.y - this->y * v.x; }
-		T distance(const Vec2D& p) { return std::sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y)); }
+		T distance(const Vec2D& p) const { return std::sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y)); }
 		
 		// rotation by angle in radians w.r.t. horizontal axis, counterclockwise
 		Vec2D rot(T angle, const Vec2D& center, bool yUp = false) const
@@ -308,6 +308,30 @@ namespace agp
 	typedef Line<float> LineF;
 
 
+	// Helper function to compute the distance from a point to a line segment
+	template <class T>
+	static T pointToSegmentDistance(const Vec2D<T>& p, const Vec2D<T>& a, const Vec2D<T>& b)
+	{
+		// Vector from a to b
+		Vec2D<T> ab = b - a;
+		// Vector from a to p
+		Vec2D<T> ap = p - a;
+
+		// Compute the projection scalar of ap onto ab
+		T ab_squared = ab.dot(ab);
+		T t = ab.dot(ap) / ab_squared;
+
+		// Clamp t to the [0,1] interval to stay within the segment
+		t = std::max(T(0), std::min(T(1), t));
+
+		// Compute the closest point on the segment to p
+		Vec2D<T> closest = a + ab * t;
+
+		// Return the distance between p and the closest point
+		return (p - closest).mag();
+	}
+
+
 	// rotated rectangle class
 	template <class T>
 	struct RotatedRect
@@ -339,7 +363,7 @@ namespace agp
 			std::array < Vec2D<T>, 4> points = rect.vertices();
 			std::array < Vec2D<T>, 4> transformed_points;
 			for (int i = 0; i < 4; i++)
-				transformed_points[i] = points[i].rot(angle, center);
+				transformed_points[i] = points[i].rot(angle, center, yUp);
 			return transformed_points;
 		}
 		inline std::vector < Vec2D<T> > verticesVec() const
@@ -376,10 +400,13 @@ namespace agp
 		RotatedRect& operator *= (const T& s) { size.x *= s; size.y *= s; return *this; }
 
 		// operations
+		inline bool isValid() const { return size.x > 0 && size.y > 0; }
+
 		Rect<T> toRect() const
 		{
 			return Rect<T>(center.x - size.x / 2, center.y - size.y / 2, size.x, size.y, yUp);
 		}
+
 		Rect<T> boundingRect() const
 		{
 			std::array < Vec2D<T>, 4> verts = vertices();
@@ -396,6 +423,7 @@ namespace agp
 			}
 			return Rect<T>({ x_min, y_min }, { x_max, y_max }, yUp);
 		}
+
 		inline bool contains(const Vec2D<T>& p) const
 		{
 			// counterclockwise vertices (from top-left) a, b, c, d
@@ -417,6 +445,144 @@ namespace agp
 
 			// otherwise p must be in (or on) the rect 
 			return true;
+		}
+
+		void extendEdgeToPoint(const Vec2D<T>& point, int edgeIndex)
+		{
+			// Step 1: Compute vector from center to point
+			Vec2D<T> v = point - center;
+
+			// Compute sine and cosine of the angle
+			T s = std::sin(angle);
+			T c = std::cos(angle);
+
+			// Step 2: Rotate v by -angle to get local coordinates
+			T x_local, y_local;
+			if (yUp)
+			{
+				x_local = c * v.x + s * v.y;
+				y_local = -s * v.x + c * v.y;
+			}
+			else
+			{
+				x_local = c * v.x - s * v.y;
+				y_local = s * v.x + c * v.y;
+			}
+
+			// Initialize variables for center shift in local coordinates
+			T center_shift_local_x = 0;
+			T center_shift_local_y = 0;
+
+			// Step 3: Adjust size and center shift based on the edge
+			switch (edgeIndex)
+			{
+				case 3: // Top edge
+				{
+					// Stationary bottom edge at y = -size.y / 2
+					T y_stationary = size.y / 2;
+
+					// New size calculation
+					size.y = std::abs(y_local - y_stationary);
+
+					// Center shift in local coordinates
+					center_shift_local_y = (y_local + y_stationary) / 2;
+
+					break;
+				}
+				case 2: // Right edge
+				{
+					// Stationary left edge at x = -size.x / 2
+					T x_stationary = -size.x / 2;
+
+					// New size calculation
+					size.x = std::abs(x_local - x_stationary);
+
+					// Center shift in local coordinates
+					center_shift_local_x = (x_local + x_stationary) / 2;
+
+					break;
+				}
+				case 1: // Bottom edge
+				{
+					// Stationary top edge at y = size.y / 2
+					T y_stationary = -size.y / 2;
+
+					// New size calculation
+					size.y = std::abs(y_local - y_stationary);
+
+					// Center shift in local coordinates
+					center_shift_local_y = (y_local + y_stationary) / 2;
+
+					break;
+				}
+				case 0: // Left edge
+				{
+					// Stationary right edge at x = size.x / 2
+					T x_stationary = size.x / 2;
+
+					// New size calculation
+					size.x = std::abs(x_local - x_stationary);
+
+					// Center shift in local coordinates
+					center_shift_local_x = (x_local + x_stationary) / 2;
+
+					break;
+				}
+				default:
+					throw std::invalid_argument("edgeIndex must be in [0,3]");
+			}
+
+			// Step 4: Transform center shift from local to world coordinates
+			T delta_center_x, delta_center_y;
+
+			if (yUp)
+			{
+				delta_center_x = c * center_shift_local_x - s * center_shift_local_y;
+				delta_center_y = s * center_shift_local_x + c * center_shift_local_y;
+			}
+			else
+			{
+				delta_center_x = c * center_shift_local_x + s * center_shift_local_y;
+				delta_center_y = -s * center_shift_local_x + c * center_shift_local_y;
+			}
+
+			// Update center
+			center.x += delta_center_x;
+			center.y += delta_center_y;
+
+			// Step 5: Ensure sizes are positive and non-zero
+			size.x = std::max(size.x, std::numeric_limits<T>::epsilon());
+			size.y = std::max(size.y, std::numeric_limits<T>::epsilon());
+		}
+
+		int closestEdgeIndex(const Vec2D<T>& point, T& minDist) const
+		{
+			// Get the rectangle's vertices
+			auto verts = vertices();
+
+			// Initialize minimum distance and index
+			minDist = std::numeric_limits<T>::max();
+			int closestEdge = -1;
+
+			// Iterate over each edge
+			for (int i = 0; i < 4; ++i)
+			{
+				// Current edge from vertex i to vertex (i+1)%4
+				const Vec2D<T>& a = verts[i];
+				const Vec2D<T>& b = verts[(i + 1) % 4];
+
+				// Compute distance from point to edge
+				T dist = pointToSegmentDistance(point, a, b);
+
+				// Update minimum distance and closest edge index
+				if (dist < minDist)
+				{
+					minDist = dist;
+					closestEdge = i;
+				}
+			}
+
+			return closestEdge;
 		}
 		// not implemented. Suggestion: apply SAT
 		//inline bool intersects(const RotatedRect& r) const

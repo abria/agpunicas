@@ -30,6 +30,8 @@ EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 	_isDragging = false;
 	_cameraZoomVel = 0.1f;
 	_blocking = true;
+	_isResizing = false;
+	_resizingObject = false;
 
 	_view->setRect(_gameRect);
 	float ar = Game::instance()->aspectRatio();
@@ -98,25 +100,30 @@ void EditorScene::toJson()
 void EditorScene::updateState(State newState)
 {
 	_ui->clearHelpboxText();
-	_ui->setCursor(newState == State::CREATE ? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_ARROW);
-	_currentCell->setVisible(newState == State::RENAME_CATEGORY || (newState == State::CREATE && !_currentObject));
+	_ui->setCursor(newState == State::DRAW_RECT ? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_ARROW);
+	_currentCell->setVisible(newState == State::RENAME_CATEGORY || (newState == State::DRAW_RECT && !_currentObject));
 
 	if(newState != State::RENAME_CATEGORY && newState != State::RENAME_OBJECT)
 		SDL_StopTextInput();
 
 	if (newState == State::DEFAULT)
 	{
-		_ui->setHelpboxText(1, "Mouse: [LEFT] select, [RIGHT] delete, [MIDDLE] pan/zoom");
-		_ui->setHelpboxText(0, "Keys: [C]reate, [G]rid on/off, [Q]uit/save");
+		_ui->setHelpboxText(1, "Mouse: [L] select, [R] delete, [M] pan/zoom");
+		_ui->setHelpboxText(0, "Keys: [R]ect, [L]ine, [G]rid, [Q]uit/save");
 		
 		if (_currentObject)
 			_currentObject->setSelected(false);
 		_currentObject = nullptr;
 	}
-	else if (newState == State::CREATE)
+	else if (newState == State::DRAW_RECT)
 	{
-		_ui->setHelpboxText(1, "Mouse: [LEFT] start/end drawing");
+		_ui->setHelpboxText(1, "Mouse: [L] start/end drawing");
 		_ui->setHelpboxText(0, "Keys: [SPACE] change, [R]ename, [ESC]ape");
+	}
+	else if (newState == State::DRAW_LINE)
+	{
+		_ui->setHelpboxText(1, "Mouse: [L] draw multiline");
+		_ui->setHelpboxText(0, "Keys: [SPACE] change, [ESC]ape");
 	}
 	else if (newState == State::RENAME_CATEGORY)
 	{
@@ -130,7 +137,7 @@ void EditorScene::updateState(State newState)
 	}
 	else if (newState == State::SELECT)
 	{
-		_ui->setHelpboxText(1, "Mouse: [LEFT] drag/drop, [SCROLL] rotate");
+		_ui->setHelpboxText(1, "Mouse: [L] drag/drop, [SCROLL] rotate");
 		_ui->setHelpboxText(0, "Keys: [R]ename, [ESC]ape");
 		_currentObject->setSelected(true);
 	}
@@ -152,7 +159,7 @@ void EditorScene::update(float timeToSimulate)
 	}
 
 	// update cursor text
-	if (_state == State::CREATE)
+	if (_state == State::DRAW_RECT)
 	{
 		if(_snapGrid)
 			_ui->setCursorText(strprintf("%.0f,%.0f", _mouseCoordsSnap.x, _mouseCoordsSnap.y));
@@ -196,7 +203,7 @@ void EditorScene::event(SDL_Event& evt)
 					for (auto& editObj : _editObjects)
 						editObj->setCategory(editObj->category());
 					_currentCell->setCategory(_currentCategory);
-					_state = State::CREATE;
+					_state = State::DRAW_RECT;
 				}
 				else if (_state == State::RENAME_OBJECT)
 				{
@@ -205,7 +212,7 @@ void EditorScene::event(SDL_Event& evt)
 				}
 			}
 			else if (evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-				_state = _state == State::RENAME_CATEGORY ? _state = State::CREATE : _state = State::SELECT;
+				_state = _state == State::RENAME_CATEGORY ? _state = State::DRAW_RECT : _state = State::SELECT;
 		}
 		updateState(_state);
 		return;
@@ -216,8 +223,10 @@ void EditorScene::event(SDL_Event& evt)
 	{
 		if (evt.key.keysym.scancode == SDL_SCANCODE_S)
 			toggleSnapGrid();
-		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_C)
-			updateState(State::CREATE);
+		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_R)
+			updateState(State::DRAW_RECT);
+		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_L)
+			updateState(State::DRAW_LINE);
 		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_Q)
 		{
 			toJson();
@@ -226,14 +235,14 @@ void EditorScene::event(SDL_Event& evt)
 			Game::instance()->popSceneLater();	// _ui scene
 			Game::instance()->popSceneLater();	// this scene
 		}
-		else if (_state == State::CREATE && evt.key.keysym.scancode == SDL_SCANCODE_SPACE)
+		else if (_state == State::DRAW_RECT && evt.key.keysym.scancode == SDL_SCANCODE_SPACE)
 		{
 			_currentCategory = (_currentCategory + 1) % MAX_CATEGORIES;
 			if (_currentObject)
 				_currentObject->setCategory(_currentCategory);
 			_currentCell->setCategory(_currentCategory);
 		}
-		else if (_state == State::CREATE && evt.key.keysym.scancode == SDL_SCANCODE_R)
+		else if (_state == State::DRAW_RECT && evt.key.keysym.scancode == SDL_SCANCODE_R)
 		{
 			updateState(State::RENAME_CATEGORY);
 			_textInput = _categories[_currentCategory];
@@ -263,6 +272,11 @@ void EditorScene::event(SDL_Event& evt)
 		_mouseCoordsSnap.y = floor(_mouseCoordsF.y / _gridCellSize) * _gridCellSize;
 		_mousePointCurr = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
 
+		// resizing
+		checkResizing();
+		if (_isResizing && _resizingObject)
+			_resizingObject->resize(_mousePointCurr);
+
 		// panning
 		if (_isPanning)
 		{
@@ -282,6 +296,7 @@ void EditorScene::event(SDL_Event& evt)
 				_isDragging = true;
 				_dragStartMousePosition = _mouseCoordsF;
 				_dragStartObjectPosition = _draggedObject->pos();
+				_ui->setCursor(SDL_SYSTEM_CURSOR_SIZEALL);
 			}
 		}
 		// drop
@@ -301,7 +316,7 @@ void EditorScene::event(SDL_Event& evt)
 		}
 
 		// object resizing
-		if (_state == State::CREATE)
+		if (_state == State::DRAW_RECT)
 		{
 			_currentCell->setPos(_mousePointCurr);
 
@@ -318,7 +333,7 @@ void EditorScene::event(SDL_Event& evt)
 		}
 	}
 
-	// mouse scrool
+	// mouse scroll
 	if (evt.type == SDL_MOUSEWHEEL)
 	{
 		if (_state == State::SELECT)
@@ -351,7 +366,7 @@ void EditorScene::event(SDL_Event& evt)
 	// mouse buttons
 	else if (evt.button.type == SDL_MOUSEBUTTONDOWN)
 	{
-		if (_state == State::CREATE && evt.button.button == SDL_BUTTON_LEFT)
+		if (_state == State::DRAW_RECT && evt.button.button == SDL_BUTTON_LEFT)
 		{
 			if (_currentObject)
 			{
@@ -361,7 +376,7 @@ void EditorScene::event(SDL_Event& evt)
 			else
 			{
 				_currentCell->setVisible(false);
-				_currentObject = new EditableObject(this, RectF(_mousePointCurr.x, _mousePointCurr.y, _gridCellSize, _gridCellSize, _rect.yUp), "Unnamed", _currentCategory, _categories);
+				_currentObject = new EditableObject(this, RectF(_mousePointCurr.x, _mousePointCurr.y, _gridCellSize, _gridCellSize, _rect.yUp), "", _currentCategory, _categories);
 				_editObjects.push_back(_currentObject);
 			}
 		}
@@ -374,6 +389,8 @@ void EditorScene::event(SDL_Event& evt)
 				_editObjects.erase(std::remove(_editObjects.begin(), _editObjects.end(), underMouse), _editObjects.end());
 				killObject(underMouse);
 			}
+			else if (_resizingObject)
+				_isResizing = true;
 			else if (underMouse && evt.button.button == SDL_BUTTON_LEFT)
 			{
 				if(_currentObject)
@@ -407,7 +424,13 @@ void EditorScene::event(SDL_Event& evt)
 		{
 			_isDragging = false;
 			_draggedObject = nullptr;
+			_ui->setCursor(SDL_SYSTEM_CURSOR_ARROW);
 		}
+		else if (_resizingObject && evt.button.button == SDL_BUTTON_LEFT)
+		{
+			_isResizing = false;
+		}
+		
 	}
 }
 
@@ -423,6 +446,26 @@ EditableObject* EditorScene::editableUnderMouse()
 		return objectsVisible.front();
 	else
 		return nullptr;
+}
+
+void EditorScene::checkResizing()
+{
+	if (!_currentObject || _state != State::SELECT || _isResizing)
+		return;
+
+	if (_currentObject->resizableAt(_mouseCoordsF))
+	{
+		if (!_resizingObject)
+		{
+			_ui->setCursor(_rect.yUp ? SDL_SYSTEM_CURSOR_SIZENESW : SDL_SYSTEM_CURSOR_SIZENWSE);
+			_resizingObject = _currentObject;
+		}
+	}
+	else if (_resizingObject)
+	{
+		_ui->setCursor(SDL_SYSTEM_CURSOR_ARROW);
+		_resizingObject = nullptr;
+	}
 }
 
 void EditorScene::toggleGrid()

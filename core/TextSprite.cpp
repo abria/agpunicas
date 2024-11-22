@@ -149,9 +149,6 @@ void TextSprite::render(
 	rotationCenter.x = drawRectCenterScreen.x - drawRect_sdl.x;
 	rotationCenter.y = drawRectCenterScreen.y - drawRect_sdl.y;
 
-	if (drawRect.yUp)
-		angle = -angle;
-
 	SDL_RenderCopyExF(renderer, _spritesheet, &srcRect, &drawRect_sdl, angle, &rotationCenter, SDL_FLIP_NONE);
 #else
 	if (_regenerateTexture)

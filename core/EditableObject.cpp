@@ -28,6 +28,7 @@ EditableObject::EditableObject(Scene* scene, const RectF& rect, const std::strin
 	_rotRect.size = _rect.size;
 	_rotRect.angle = 0;
 	_rotRect.yUp = _rect.yUp;
+	_resizingEdgeIndex = -1;
 
 	init();
 }
@@ -204,6 +205,38 @@ void EditableObject::setSize(const PointF& newSize)
 
 	_rotRect.center = _rect.center();
 	_rotRect.size = _rect.size;
+}
+
+bool EditableObject::resizableAt(const PointF& point)
+{
+	if (_rotRect.angle)
+	{
+		RotatedRectF rotRectRadians = _rotRect;
+		rotRectRadians.angle = deg2rad(_rotRect.angle);
+		auto vertices = rotRectRadians.vertices();
+
+		float minDist;
+		_resizingEdgeIndex = rotRectRadians.closestEdgeIndex(point, minDist);
+		return minDist < RESIZING_HOOK_DISTANCE;
+	}
+	else
+		return point.distance(_rect.yUp ? _rect.tr() : _rect.br()) < RESIZING_HOOK_DISTANCE;
+}
+
+void EditableObject::resize(const PointF& point)
+{
+	if (_rotRect.angle)
+	{
+		RotatedRectF rotRectRadians = _rotRect;
+		rotRectRadians.angle = deg2rad(_rotRect.angle);
+		rotRectRadians.extendEdgeToPoint(point, _resizingEdgeIndex);
+		_rotRect = rotRectRadians;
+		_rotRect.angle = rad2deg(_rotRect.angle);
+		_rect = _rotRect.toRect();
+		setSize(_rect.size);
+	}
+	else
+		setSize(point - _rect.pos);
 }
 
 void EditableObject::rotate(int angleDegrees) 

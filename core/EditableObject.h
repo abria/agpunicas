@@ -71,6 +71,8 @@ class agp::EditableObject : public RenderableObject
 		virtual void resize(const PointF& point);
 		virtual void rotate(int angleDegrees);
 
+		virtual SDL_SystemCursor resizeCursor();
+
 		virtual bool contains(const Vec2Df& p) override;
 		virtual void setVisible(bool visible) override;
 		virtual void setPos(const PointF& newPos) override;

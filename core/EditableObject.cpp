@@ -209,18 +209,35 @@ void EditableObject::setSize(const PointF& newSize)
 
 bool EditableObject::resizableAt(const PointF& point)
 {
+	float minDist = inf<float>();
+	if (_rotRect.angle)
+	{
+		RotatedRectF rotRectRadians = _rotRect;
+		rotRectRadians.angle = deg2rad(_rotRect.angle);
+		_resizingEdgeIndex = closestEdgeIndex(rotRectRadians.vertices(), point, minDist);
+	}
+	else
+		_resizingEdgeIndex = closestEdgeIndex(_rect.vertices(), point, minDist);
+
+	return minDist < RESIZING_HOOK_DISTANCE;
+}
+
+SDL_SystemCursor EditableObject::resizeCursor()
+{
 	if (_rotRect.angle)
 	{
 		RotatedRectF rotRectRadians = _rotRect;
 		rotRectRadians.angle = deg2rad(_rotRect.angle);
 		auto vertices = rotRectRadians.vertices();
-
-		float minDist;
-		_resizingEdgeIndex = rotRectRadians.closestEdgeIndex(point, minDist);
-		return minDist < RESIZING_HOOK_DISTANCE;
+		return getPerpendicularCursor(vertices[_resizingEdgeIndex], vertices[(_resizingEdgeIndex + 1) % 4], _rotRect.yUp);
 	}
 	else
-		return point.distance(_rect.yUp ? _rect.tr() : _rect.br()) < RESIZING_HOOK_DISTANCE;
+	{
+		auto vertices = _rect.vertices();
+		return getPerpendicularCursor(vertices[_resizingEdgeIndex], vertices[(_resizingEdgeIndex + 1) % 4], _rotRect.yUp);
+	}
+
+	return SDL_SYSTEM_CURSOR_SIZENESW;
 }
 
 void EditableObject::resize(const PointF& point)
@@ -236,7 +253,11 @@ void EditableObject::resize(const PointF& point)
 		setSize(_rect.size);
 	}
 	else
-		setSize(point - _rect.pos);
+	{
+		_rotRect.extendEdgeToPoint(point, _resizingEdgeIndex);
+		_rect = _rotRect.toRect();
+		setSize(_rect.size);
+	}
 }
 
 void EditableObject::rotate(int angleDegrees) 

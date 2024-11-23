@@ -457,8 +457,8 @@ void EditorScene::checkResizing()
 	{
 		if (!_resizingObject)
 		{
-			_ui->setCursor(_rect.yUp ? SDL_SYSTEM_CURSOR_SIZENESW : SDL_SYSTEM_CURSOR_SIZENWSE);
 			_resizingObject = _currentObject;
+			_ui->setCursor(_resizingObject->resizeCursor());
 		}
 	}
 	else if (_resizingObject)

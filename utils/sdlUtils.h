@@ -819,4 +819,50 @@ namespace agp
         return textTexture;
     }
 #endif
+
+    // Function to get the perpendicular cursor, considering yUp
+    static inline SDL_SystemCursor getPerpendicularCursor(const Vec2Df& p1, const Vec2Df& p2, bool yUp)
+    {
+        // Compute the direction vector of the segment
+        float dx = p2.x - p1.x;
+        float dy = p2.y - p1.y;
+
+        // Adjust dy based on yUp
+        if (!yUp)
+            dy = -dy;
+
+        // Compute the angle of the segment in degrees
+        float theta = std::atan2(dy, dx) * 180.0f / static_cast<float>(M_PI);
+
+        // Compute the angle perpendicular to the segment
+        float theta_perp = theta + 90.0f;
+
+        // Normalize angle to the range [0, 360)
+        if (theta_perp < 0.0f)
+            theta_perp += 360.0f;
+        else if (theta_perp >= 360.0f)
+            theta_perp -= 360.0f;
+
+        // Map the angle to the nearest 45-degree increment
+        int angle_index = static_cast<int>((theta_perp + 22.5f) / 45.0f) % 8;
+
+        // Map angle index to cursors
+        switch (angle_index)
+        {
+            case 0: // 0 degrees (East)
+            case 4: // 180 degrees (West)
+                return SDL_SYSTEM_CURSOR_SIZEWE;    // East-West cursor
+            case 1: // 45 degrees (Northeast)
+            case 5: // 225 degrees (Southwest)
+                return SDL_SYSTEM_CURSOR_SIZENESW;  // Northeast-Southwest cursor
+            case 2: // 90 degrees (North)
+            case 6: // 270 degrees (South)
+                return SDL_SYSTEM_CURSOR_SIZENS;    // North-South cursor
+            case 3: // 135 degrees (Northwest)
+            case 7: // 315 degrees (Southeast)
+                return SDL_SYSTEM_CURSOR_SIZENWSE;  // Northwest-Southeast cursor
+            default:
+                return SDL_SYSTEM_CURSOR_ARROW;     // Default arrow cursor (should not reach here)
+        }
+    }
 }

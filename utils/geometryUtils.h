@@ -50,7 +50,8 @@ namespace agp
 		T dot(const Vec2D& v) const { return this->x * v.x + this->y * v.y; }
 		T cross(const Vec2D& v) const { return this->x * v.y - this->y * v.x; }
 		T distance(const Vec2D& p) const { return std::sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y)); }
-		
+		T angle() const { return std::atan2(y, x); }
+
 		// rotation by angle in radians w.r.t. horizontal axis, counterclockwise
 		Vec2D rot(T angle, const Vec2D& center, bool yUp = false) const
 		{
@@ -143,6 +144,58 @@ namespace agp
 	typedef Vec2Df PointF;
 	typedef Vec2D<int> Point;
 
+	// helper function to compute the distance from a point to a line segment
+	template <class T>
+	static T pointToSegmentDistance(const Vec2D<T>& p, const Vec2D<T>& a, const Vec2D<T>& b)
+	{
+		// Vector from a to b
+		Vec2D<T> ab = b - a;
+		// Vector from a to p
+		Vec2D<T> ap = p - a;
+
+		// Compute the projection scalar of ap onto ab
+		T ab_squared = ab.dot(ab);
+		T t = ab.dot(ap) / ab_squared;
+
+		// Clamp t to the [0,1] interval to stay within the segment
+		t = std::max(T(0), std::min(T(1), t));
+
+		// Compute the closest point on the segment to p
+		Vec2D<T> closest = a + ab * t;
+
+		// Return the distance between p and the closest point
+		return (p - closest).mag();
+	}
+
+	// helper function to compute the closest-to-point edge of a quadrilateral
+	template <class T>
+	static int closestEdgeIndex(const std::array < Vec2D<T>, 4> &quad, const Vec2D<T>& point, T& minDist)
+	{
+		// Initialize minimum distance and index
+		minDist = std::numeric_limits<T>::max();
+		int closestEdge = -1;
+
+		// Iterate over each edge
+		for (int i = 0; i < 4; ++i)
+		{
+			// Current edge from vertex i to vertex (i+1)%4
+			const Vec2D<T>& a = quad[i];
+			const Vec2D<T>& b = quad[(i + 1) % 4];
+
+			// Compute distance from point to edge
+			T dist = pointToSegmentDistance(point, a, b);
+
+			// Update minimum distance and closest edge index
+			if (dist < minDist)
+			{
+				minDist = dist;
+				closestEdge = i;
+			}
+		}
+
+		return closestEdge;
+	}
+
 	
 	// rectangle class
 	template <class T> 
@@ -178,9 +231,9 @@ namespace agp
 			if(yUp)
 				return {
 					Vec2D<T>(left(), bottom()),
-					Vec2D<T>(right(), bottom()),
+					Vec2D<T>(left(), top()),
 					Vec2D<T>(right(), top()),
-					Vec2D<T>(left(), top()) };
+					Vec2D<T>(right(), bottom()) };
 			else
 				return {
 					Vec2D<T>(left(), top()),
@@ -306,30 +359,6 @@ namespace agp
 		}
 	};
 	typedef Line<float> LineF;
-
-
-	// Helper function to compute the distance from a point to a line segment
-	template <class T>
-	static T pointToSegmentDistance(const Vec2D<T>& p, const Vec2D<T>& a, const Vec2D<T>& b)
-	{
-		// Vector from a to b
-		Vec2D<T> ab = b - a;
-		// Vector from a to p
-		Vec2D<T> ap = p - a;
-
-		// Compute the projection scalar of ap onto ab
-		T ab_squared = ab.dot(ab);
-		T t = ab.dot(ap) / ab_squared;
-
-		// Clamp t to the [0,1] interval to stay within the segment
-		t = std::max(T(0), std::min(T(1), t));
-
-		// Compute the closest point on the segment to p
-		Vec2D<T> closest = a + ab * t;
-
-		// Return the distance between p and the closest point
-		return (p - closest).mag();
-	}
 
 
 	// rotated rectangle class
@@ -555,35 +584,6 @@ namespace agp
 			size.y = std::max(size.y, std::numeric_limits<T>::epsilon());
 		}
 
-		int closestEdgeIndex(const Vec2D<T>& point, T& minDist) const
-		{
-			// Get the rectangle's vertices
-			auto verts = vertices();
-
-			// Initialize minimum distance and index
-			minDist = std::numeric_limits<T>::max();
-			int closestEdge = -1;
-
-			// Iterate over each edge
-			for (int i = 0; i < 4; ++i)
-			{
-				// Current edge from vertex i to vertex (i+1)%4
-				const Vec2D<T>& a = verts[i];
-				const Vec2D<T>& b = verts[(i + 1) % 4];
-
-				// Compute distance from point to edge
-				T dist = pointToSegmentDistance(point, a, b);
-
-				// Update minimum distance and closest edge index
-				if (dist < minDist)
-				{
-					minDist = dist;
-					closestEdge = i;
-				}
-			}
-
-			return closestEdge;
-		}
 		// not implemented. Suggestion: apply SAT
 		//inline bool intersects(const RotatedRect& r) const
 		//{

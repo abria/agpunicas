@@ -55,6 +55,7 @@ Scene* LevelLoader::load(const std::string& name)
 				{1.5f, 0}, {1.5f, 1}, {2, 0}, {4, -2}, {15.5f, 0}, {20, 0}
 			});
 
+
 		// dynamic objects
 		//new Box(world, RotatedRectF({ 5, 10 }, { 1,1 }, 0, true));
 		//new Slime(world, { 10, 15 });

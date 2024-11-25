@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <iostream>
 #ifdef WITH_TTF
-#include "SDL_ttf.h"
+    #include "SDL_ttf.h"
 #endif
 
 namespace agp
@@ -800,14 +800,10 @@ namespace agp
     static inline SDL_Texture* generateText(
         const std::string& text,
         SDL_Renderer* renderer,
-        const std::string& fontPath,
+        TTF_Font* font,
         const Color& fontColor,
-        int fontSize,
         int fontStyle)
     {
-        TTF_Font* font = TTF_OpenFont(fontPath.c_str(), fontSize);
-        if (!font)
-            throw strprintf("Cannot open font from %s: %s", fontPath.c_str(), TTF_GetError());
         TTF_SetFontStyle(font, fontStyle);
         TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
         SDL_Color textColor = { fontColor.r, fontColor.g, fontColor.b, fontColor.a };

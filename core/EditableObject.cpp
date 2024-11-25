@@ -103,14 +103,14 @@ void EditableObject::init()
 	_renderedName = new RenderableObject(
 		_scene,
 		_rect,
-		new TextSprite(_name, std::string(SDL_GetBasePath()) + "fonts/font.ttf", col.brighter(), { NAME_MARGIN_X, 0.0f }, { 0, NAME_MAX_HEIGHT },
+		new TextSprite(_name, "Lucida", col.brighter(), { NAME_MARGIN_X, 0.0f }, { 0, NAME_MAX_HEIGHT },
 			TextSprite::VAlign::CENTER, TextSprite::HAlign::CENTER), 2);
 	_renderedName->setAngle(-_rotRect.angle);
 
 	_renderedCategory = new RenderableObject(
 		_scene,
 		_rect,
-		new TextSprite(_categories[_category], std::string(SDL_GetBasePath()) + "fonts/font.ttf", col.brighter(), {0.0f, CATEGORY_MARGIN_Y}, { 0, CATEGORY_MAX_HEIGHT },
+		new TextSprite(_categories[_category], "Lucida", col.brighter(), {0.0f, CATEGORY_MARGIN_Y}, { 0, CATEGORY_MAX_HEIGHT },
 			TextSprite::VAlign::TOP, TextSprite::HAlign::CENTER, TextSprite::Style::ITALIC), 2);
 	_renderedCategory->setAngle(-_rotRect.angle);
 }

@@ -33,7 +33,7 @@ class agp::EditorScene : public UIScene
 			DEFAULT, 
 			DRAW_RECT, DRAW_LINE, 
 			RENAME_CATEGORY, RENAME_OBJECT, 
-			SELECT };
+			SELECT, SAVING };
 
 	protected:
 

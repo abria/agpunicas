@@ -12,10 +12,6 @@
 #include "View.h"
 #include "Scene.h"
 
-#ifdef WITH_TTF
-#include "SDL_ttf.h"
-#endif
-
 using namespace agp;
 
 Window::Window(const std::string& title, int width, int height)
@@ -48,20 +44,12 @@ Window::Window(const std::string& title, int width, int height)
 		throw SDL_GetError();
 
 	SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
-
-#ifdef WITH_TTF
-	TTF_Init();
-#endif
 }
 
 Window::~Window()
 {
 	SDL_DestroyRenderer(_renderer);
 	SDL_DestroyWindow(_window);
-
-#ifdef WITH_TTF
-	TTF_Quit();
-#endif
 }
 
 void Window::render(const std::vector<Scene*>& scenes)

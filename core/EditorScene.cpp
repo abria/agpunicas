@@ -25,13 +25,12 @@ EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 	_draggedObject = nullptr;
 	_snapGrid = true;
 	_gridCellSize = 1;
-	_currentCell = new EditableObject(this, RectF(0, 0, _gridCellSize, _gridCellSize, _rect.yUp), "", _currentCategory, _categories);
 	_isPanning = false;
 	_isDragging = false;
 	_cameraZoomVel = 0.1f;
 	_blocking = true;
 	_isResizing = false;
-	_resizingObject = false;
+	_resizingObject = nullptr;
 
 	_view->setRect(_gameRect);
 	float ar = Game::instance()->aspectRatio();
@@ -40,6 +39,9 @@ EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 
 	generateGrid();
 	fromJson();
+
+	_currentCell = new EditableObject(this, RectF(0, 0, _gridCellSize, _gridCellSize, _rect.yUp), "", _currentCategory, _categories);
+
 	updateState(State::DEFAULT);
 }
 
@@ -101,6 +103,7 @@ void EditorScene::updateState(State newState)
 {
 	_ui->clearHelpboxText();
 	_ui->setCursor(newState == State::DRAW_RECT ? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_ARROW);
+	_ui->setEditing(newState == State::RENAME_CATEGORY || newState == State::RENAME_OBJECT);
 	_currentCell->setVisible(newState == State::RENAME_CATEGORY || (newState == State::DRAW_RECT && !_currentObject));
 
 	if(newState != State::RENAME_CATEGORY && newState != State::RENAME_OBJECT)
@@ -140,6 +143,14 @@ void EditorScene::updateState(State newState)
 		_ui->setHelpboxText(1, "Mouse: [L] drag/drop, [SCROLL] rotate");
 		_ui->setHelpboxText(0, "Keys: [R]ename, [ESC]ape");
 		_currentObject->setSelected(true);
+	}
+	else if (newState == State::SAVING)
+	{
+		_ui->setHelpboxText(0, strprintf("Saved to %s", DEFAULT_SAVE_FILENAME.c_str()));
+		schedule("default_state", 2, [this]() 
+			{
+				updateState(State::DEFAULT);
+			});
 	}
 
 	_state = newState;
@@ -222,7 +233,15 @@ void EditorScene::event(SDL_Event& evt)
 	if (evt.type == SDL_KEYDOWN && !evt.key.repeat)
 	{
 		if (evt.key.keysym.scancode == SDL_SCANCODE_S)
-			toggleSnapGrid();
+		{
+			if(ctrlPressed)
+			{
+				toJson();
+				updateState(State::SAVING);
+			}
+			else
+				toggleSnapGrid();
+		}
 		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_R)
 			updateState(State::DRAW_RECT);
 		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_L)

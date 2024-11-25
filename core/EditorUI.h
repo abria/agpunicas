@@ -36,19 +36,24 @@ class agp::EditorUI : public UIScene
 		static constexpr float HELPBOX_MARGIN_Y = 0.01f;
 
 		static constexpr int HELPBOX_MAX_ROWS = 3;
+		static constexpr int HELPBOX_ALPHA = 128;
 
 		RenderableObject* _cursorCoords;
-		RenderableObject* _helpboxRows[HELPBOX_MAX_ROWS];
+		RenderableObject* _helpboxRows[HELPBOX_MAX_ROWS];	// displayed on bottom
 		SDL_Cursor* _cursor;
+		bool _showing;
+		bool _hiding;
+		bool _editing;
 
 	public:
 
 		EditorUI();
 		virtual ~EditorUI();
 
+		void setEditing(bool active) { _editing = active; }
 		void setCursor(SDL_SystemCursor cursor);
-		void setCursorText(const std::string& text, const Color& textColor = { 0,0,0 });
-		void setHelpboxText(int row, const std::string& text, const Color& textColor = { 0,0,0 });
+		void setCursorText(const std::string& text, const Color& textColor = { 0,0,0,0 });
+		void setHelpboxText(int row, const std::string& text, const Color& textColor = { 0,0,0,0 });
 		void clearHelpboxText();
 
 		virtual void update(float timeToSimulate) override;

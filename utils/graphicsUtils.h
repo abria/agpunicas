@@ -148,9 +148,11 @@ namespace agp
             return !(*this == other);
         }
 
-        Color adjustAlpha(int newAlpha) 
+        Color adjustAlpha(int newAlpha) const
         { 
             Color newColor = *this;
+            newAlpha = (std::min)(newAlpha, 255);
+            newAlpha = (std::max)(newAlpha, 0);
             newColor.a = newAlpha;
             return newColor;
         }

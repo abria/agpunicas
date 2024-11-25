@@ -30,7 +30,7 @@ class agp::TextSprite : public Sprite
 
 		std::string _text;
 		Color _fontColor;
-		std::string _fontPath;
+		std::string _fontName;
 		Style _fontStyle;
 		VAlign _vertAlign;
 		HAlign _horzAlign;
@@ -38,13 +38,13 @@ class agp::TextSprite : public Sprite
 		PointF _maxSize;					// in scene units
 		bool _regenerateTexture;
 
-		static constexpr int pointSize = 100;	// font resolution for rasterization
+		
 
 	public:
 
 		TextSprite(
 			const std::string& text,
-			const std::string& fontPath,
+			const std::string& fontName,
 			const Color& fontColor = { 0,0,0 },
 			const PointF& margin = { 0,0 },
 			const PointF& maxSize = { 0,0 },
@@ -52,6 +52,8 @@ class agp::TextSprite : public Sprite
 			HAlign horzAlign = HAlign::LEFT,
 			Style style = Style::NORMAL);
 		virtual ~TextSprite();
+
+		Color color() const { return _fontColor; }
 
 		// setters
 		void setText(const std::string& newText);

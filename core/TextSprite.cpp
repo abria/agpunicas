@@ -10,12 +10,13 @@
 #include "TextSprite.h"
 #include "sdlUtils.h"
 #include <algorithm>
+#include "Fonts.h"
 
 using namespace agp;
 
 TextSprite::TextSprite(
 	const std::string& text,
-	const std::string& fontPath,
+	const std::string& fontName,
 	const Color& fontColor,
 	const PointF& margin,
 	const PointF& maxSize,
@@ -25,7 +26,7 @@ TextSprite::TextSprite(
 	: Sprite(nullptr)
 {
 	_text = text;
-	_fontPath = fontPath;
+	_fontName = fontName;
 	_fontColor = fontColor;
 	_margin = margin;
 	_maxSize = maxSize;
@@ -75,7 +76,7 @@ void TextSprite::render(
 	{
 		if (_spritesheet)
 			SDL_DestroyTexture(_spritesheet);
-		_spritesheet = generateText(_text, renderer, _fontPath, _fontColor, pointSize, int(_fontStyle));
+		_spritesheet = generateText(_text, renderer, Fonts::instance()->font(_fontName), _fontColor, int(_fontStyle));
 		SDL_QueryTexture(_spritesheet, nullptr, nullptr, &_rect.size.x, &_rect.size.y);
 		_regenerateTexture = false;
 	}

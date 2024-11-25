@@ -8,6 +8,10 @@
 #include "core_version.h"
 #include "version.h"
 
+#ifdef WITH_TTF
+#include "Fonts.h"
+#endif
+
 int main(int argc, char *argv[])
 {
     printf("Proto-ComplexPlatformer v%s\n", agp::ComplexPlatformer::VERSION().c_str());
@@ -19,6 +23,10 @@ int main(int argc, char *argv[])
 		agp::SpriteFactory::instance();
 		agp::LevelLoader::instance();
 		agp::Audio::instance();
+
+#ifdef WITH_TTF
+        agp::Fonts::instance();
+#endif
 
 		agp::Game::instance()->init();
 		agp::Game::instance()->run();

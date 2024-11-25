@@ -277,6 +277,8 @@ void EditorScene::event(SDL_Event& evt)
 		}
 		else if (evt.key.keysym.scancode == SDL_SCANCODE_G)
 			toggleGrid();
+		else if (evt.key.keysym.scancode == SDL_SCANCODE_H)
+			_ui->toggleAutohide();
 		else if (evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 			updateState(State::DEFAULT);
 	}

@@ -44,6 +44,7 @@ class agp::EditorUI : public UIScene
 		bool _showing;
 		bool _hiding;
 		bool _editing;
+		bool _autohide;
 
 	public:
 
@@ -55,6 +56,7 @@ class agp::EditorUI : public UIScene
 		void setCursorText(const std::string& text, const Color& textColor = { 0,0,0,0 });
 		void setHelpboxText(int row, const std::string& text, const Color& textColor = { 0,0,0,0 });
 		void clearHelpboxText();
+		void toggleAutohide();
 
 		virtual void update(float timeToSimulate) override;
 

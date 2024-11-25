@@ -38,6 +38,7 @@ EditorUI::EditorUI()
 	_showing = false;
 	_hiding = false;
 	_editing = false;
+	_autohide = false;
 
 	_cursor = nullptr;
 }
@@ -87,6 +88,9 @@ void EditorUI::update(float timeToSimulate)
 	if (!_active)
 		return;
 
+	if (!_autohide)
+		return;
+
 	bool showingEnded = false;
 	bool hidingEnded = false;
 	for (int i = 0; i < HELPBOX_MAX_ROWS; i++)
@@ -114,6 +118,22 @@ void EditorUI::update(float timeToSimulate)
 		_hiding = false;
 }
 
+void EditorUI::toggleAutohide() 
+{ 
+	_autohide = !_autohide; 
+	if (!_autohide) 
+	{ 
+		_showing = false;
+		_hiding = false;
+		for (int i = 0; i < HELPBOX_MAX_ROWS; i++)
+		{
+			_helpboxRows[i]->setBackgroundColor(_helpboxRows[i]->backgroundColor().adjustAlpha(HELPBOX_ALPHA));
+			TextSprite* sprite = dynamic_cast<TextSprite*>(_helpboxRows[i]->sprite());
+			sprite->setColor(sprite->color().adjustAlpha(255));
+		}
+	} 
+}
+
 void EditorUI::event(SDL_Event& evt)
 {
 	UIScene::event(evt);
@@ -124,12 +144,12 @@ void EditorUI::event(SDL_Event& evt)
 		_mousePointCurr = _view->mapToScene(_mousePointCurr);
 
 		// helpbox show/hide
-		if (std::abs(_mousePointCurr.y - _rect.bottom()) < 0.1f)
+		if (_autohide && std::abs(_mousePointCurr.y - _rect.bottom()) < 0.1f)
 		{
 			_showing = true;
 			_hiding = false;
 		}
-		else if(!_editing && !_hiding)
+		else if(_autohide && !_editing && !_hiding)
 		{
 			schedule("hide_later", 1, [this]()
 				{

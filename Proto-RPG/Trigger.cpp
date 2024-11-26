@@ -20,9 +20,9 @@ Trigger::Trigger(Scene* scene, const RectF& rect, CollidableObject* watched, std
 }
 
 // extends logic collision (+trigger behavior)
-bool Trigger::collision(CollidableObject* with, Direction fromDir)
+bool Trigger::collision(CollidableObject* with, bool begin, Direction fromDir)
 {
-	if (with == _watched)
+	if (with == _watched && begin)
 	{
 		_task();
 		return true;

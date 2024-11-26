@@ -20,7 +20,7 @@ namespace agp
 // -  performs a given task when collides with given object
 class agp::Trigger : public CollidableObject
 {
-	private:
+	protected:
 
 		std::function<void()> _task;
 		CollidableObject* _watched;
@@ -29,11 +29,13 @@ class agp::Trigger : public CollidableObject
 
 		Trigger(Scene* scene, const RectF& rect, CollidableObject* watched, std::function<void()> task);
 
+		virtual void setTask(std::function<void()> newTask) { _task = newTask;}
+
 		// extends game logic (-physics, -collisions)
 		virtual void update(float dt) override { RenderableObject::update(dt); }
 
 		// extends logic collision (+trigger behavior)
-		virtual bool collision(CollidableObject* with, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
 
 		// implements CollidableObject's abstract method (do nothing)
 		virtual void resolveCollisions() override { }

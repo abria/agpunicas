@@ -32,7 +32,7 @@ class agp::StaticObject : public CollidableObject
 		virtual void update(float dt) override { RenderableObject::update(dt); }
 
 		// extends logic collision (+scheduler example)
-		virtual bool collision(CollidableObject* with, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
 
 		// implements CollidableObject's abstract method (do nothing)
 		virtual void resolveCollisions() override { }

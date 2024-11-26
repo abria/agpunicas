@@ -51,6 +51,7 @@ void CollidableObject::detectCollisions()
 	if (!_collidable)
 		return;
 
+	_collisionsPrev = _collisions;
 	_collisions.clear();
 	_collisionAxes.clear();
 	_collisionDepths.clear();
@@ -68,14 +69,21 @@ void CollidableObject::detectCollisions()
 				_collisions.push_back(collObj);
 				_collisionAxes.push_back(dir2vec(axis));
 				_collisionDepths.push_back(depth);
-				collision(collObj, axis);
-				collObj->collision(this, inverse(axis));
+				collision(collObj, true, axis);
+				collObj->collision(this, true, inverse(axis));
 			}
 		}
 	}
+
+	for(auto collObj : _collisionsPrev)
+		if (std::find(_collisions.begin(), _collisions.end(), collObj) == _collisions.end())
+		{
+			collision(collObj, false, Direction::NONE);
+			collObj->collision(this, false, Direction::NONE);
+		}
 }
 
-bool CollidableObject::collision(CollidableObject* with, Direction fromDir) 
+bool CollidableObject::collision(CollidableObject* with, bool begin, Direction fromDir)
 {
 	//printf("%s collided with %s from %s\n", name().c_str(), with->name().c_str(), dir2str(fromDir).c_str());
 	return true; 

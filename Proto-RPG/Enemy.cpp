@@ -11,9 +11,9 @@ Enemy::Enemy(Scene* scene, const RectF& rect, Sprite* sprite, int layer)
 {
 }
 
-bool Enemy::collision(CollidableObject* with, Direction fromDir)
+bool Enemy::collision(CollidableObject* with, bool begin, Direction fromDir)
 {
-	DynamicObject::collision(with, fromDir);
+	DynamicObject::collision(with, begin, fromDir);
 
 	if (with->to<Sword*>())
 		_scene->killObject(this);

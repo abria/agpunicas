@@ -32,6 +32,7 @@ class agp::CollidableObject : public MovableObject
 		std::vector<CollidableObject*> _collisions;
 		std::vector<Vec2Df> _collisionAxes;
 		std::vector<float> _collisionDepths;
+		std::vector<CollidableObject*> _collisionsPrev;
 
 		// collision detection/resolution
 		virtual void detectCollisions();
@@ -63,7 +64,7 @@ class agp::CollidableObject : public MovableObject
 		// defines logic collision, i.e. what to do when two objects collide
 		// from a game logic perspective (e.g. player dies if hit by enemy)
 		// returns true if logic collision is resolved, false otherwise
-		virtual bool collision(CollidableObject* with, Direction fromDir);
+		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir);
 
 		// euclidean distance between colliders
 		virtual float distance(CollidableObject* obj) const;

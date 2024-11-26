@@ -33,6 +33,23 @@ EditableObject::EditableObject(Scene* scene, const RectF& rect, const std::strin
 	init();
 }
 
+EditableObject::EditableObject(Scene* scene, const LineF& line, const std::string& name, int category, std::vector<std::string>& categories)
+	: RenderableObject(scene, line.boundingRect(scene->rect().yUp), nullptr, 1), _categories(categories)
+{
+	_category = category;
+	_name = name;
+	_selected = false;
+	_rotRect.center = _rect.center();
+	_rotRect.size = _rect.size;
+	_rotRect.angle = 0;
+	_rotRect.yUp = _rect.yUp;
+	_resizingEdgeIndex = -1;
+	_multiline.push_back(line.start);
+	_multiline.push_back(line.end);
+
+	init();
+}
+
 EditableObject::EditableObject(Scene* scene, const nlohmann::json& j, std::vector<std::string>& categories)
 	: RenderableObject(scene, RectF(), nullptr, 1), _categories(categories)
 {
@@ -61,10 +78,26 @@ EditableObject::EditableObject(Scene* scene, const nlohmann::json& j, std::vecto
 		_rotRect.yUp = j["rotRect"]["yUp"];
 		_rect = _rotRect.toRect();
 	}
+	else if (j.contains("multiline"))
+	{
+		std::vector<nlohmann::json> jlines = j["multiline"].get<std::vector<nlohmann::json>>();
+		for (auto& jline : jlines)
+			_multiline.push_back(PointF(jline["x"], jline["y"]));
+
+		_rect = LineF(_multiline[0], _multiline[1]).boundingRect(_scene->rect().yUp);
+		_rotRect.center = _rect.center();
+		_rotRect.size = _rect.size;
+		_rotRect.angle = 0;
+		_rotRect.yUp = _rect.yUp;
+		_resizingEdgeIndex = -1;
+	}
 
 	_selected = false;
 
 	init();
+
+	if(_multiline.size())
+		updateLineRect();
 }
 
 nlohmann::ordered_json EditableObject::toJson()
@@ -73,7 +106,19 @@ nlohmann::ordered_json EditableObject::toJson()
 	j["category"] = _category;
 	j["name"] = _name;
 
-	if (_rotRect.angle)
+	if (_multiline.size())
+	{
+		std::vector <nlohmann::ordered_json> jsonObjects;
+		for (auto& obj : _multiline)
+		{
+			nlohmann::ordered_json jline;
+			jline["x"] = obj.x;
+			jline["y"] = obj.y;
+			jsonObjects.push_back(jline);
+		}
+		j["multiline"] = jsonObjects;
+	}
+	else if (_rotRect.angle)
 	{
 		j["rotRect"]["cx"] = _rotRect.center.x;
 		j["rotRect"]["cy"] = _rotRect.center.y;
@@ -104,7 +149,7 @@ void EditableObject::init()
 		_scene,
 		_rect,
 		new TextSprite(_name, "Lucida", col.brighter(), { NAME_MARGIN_X, 0.0f }, { 0, NAME_MAX_HEIGHT },
-			TextSprite::VAlign::CENTER, TextSprite::HAlign::CENTER), 2);
+			isLine() ? TextSprite::VAlign::BOTTOM : TextSprite::VAlign::CENTER, TextSprite::HAlign::CENTER), 2);
 	_renderedName->setAngle(-_rotRect.angle);
 
 	_renderedCategory = new RenderableObject(
@@ -169,7 +214,14 @@ void EditableObject::setSelected(bool on)
 
 bool EditableObject::contains(const Vec2Df& p)
 {
-	if (_rotRect.angle == 0)
+	if (_multiline.size())
+	{
+		for (int i = 0; i < _multiline.size() - 1; i++)
+			if (LineF(_multiline[i], _multiline[i + 1]).distance(p) < LINE_HOOK_DISTANCE)
+				return true;
+		return false;
+	}
+	else if (_rotRect.angle == 0)
 		return RenderableObject::contains(p);
 	else
 	{
@@ -188,6 +240,9 @@ void EditableObject::setVisible(bool visible)
 
 void EditableObject::setPos(const PointF& newPos)
 {
+	if (_multiline.size())
+		return;
+
 	RenderableObject::setPos(newPos);
 	_renderedName->setPos(newPos);
 	_renderedCategory->setPos(newPos);
@@ -209,6 +264,9 @@ void EditableObject::setSize(const PointF& newSize)
 
 bool EditableObject::resizableAt(const PointF& point)
 {
+	if (_multiline.size())
+		return false;
+
 	float minDist = inf<float>();
 	if (_rotRect.angle)
 	{
@@ -224,6 +282,9 @@ bool EditableObject::resizableAt(const PointF& point)
 
 SDL_SystemCursor EditableObject::resizeCursor()
 {
+	if (_multiline.size())
+		return SDL_SYSTEM_CURSOR_ARROW;
+
 	if (_rotRect.angle)
 	{
 		RotatedRectF rotRectRadians = _rotRect;
@@ -242,6 +303,9 @@ SDL_SystemCursor EditableObject::resizeCursor()
 
 void EditableObject::resize(const PointF& point)
 {
+	if (_multiline.size())
+		return;
+
 	if (_rotRect.angle)
 	{
 		RotatedRectF rotRectRadians = _rotRect;
@@ -262,9 +326,48 @@ void EditableObject::resize(const PointF& point)
 
 void EditableObject::rotate(int angleDegrees) 
 { 
+	if (_multiline.size())
+		return;
+
 	_rotRect.angle = float( int(_rotRect.angle + angleDegrees) % 360 );
 	_renderedName->setAngle(-_rotRect.angle);
 	_renderedCategory->setAngle(-_rotRect.angle);
+}
+
+void EditableObject::addLinePoint(const PointF& p)
+{
+	_multiline.push_back(p);
+}
+
+void EditableObject::replaceLastPoint(const PointF& p)
+{
+	if (_multiline.size())
+	{
+		_multiline.pop_back();
+		_multiline.push_back(p);
+
+		if (_multiline.size() == 2)
+			updateLineRect();
+	}
+}
+
+void EditableObject::updateLineRect()
+{
+	LineF firstLine = LineF(_multiline[0], _multiline[1]);
+	_rotRect.center = firstLine.boundingRect(_rotRect.yUp).center();
+	_rotRect.size = { (firstLine.end - firstLine.start).mag(), 1.5f };
+	_rotRect.angle = (firstLine.end - firstLine.start).angle(_rotRect.yUp);
+	_rotRect.angle = rad2deg(_rotRect.angle);
+	_renderedName->setAngle(-_rotRect.angle);
+	_renderedCategory->setAngle(-_rotRect.angle);
+	_rect = _rotRect.toRect();
+	setSize(_rect.size);
+}
+
+void EditableObject::undoLineLastPoint()
+{
+	if (_multiline.size() > 2)
+		_multiline.pop_back();
 }
 
 void EditableObject::draw(SDL_Renderer* renderer, Transform camera)
@@ -272,22 +375,39 @@ void EditableObject::draw(SDL_Renderer* renderer, Transform camera)
 	if (!_visible)
 		return;
 
-	if (_rotRect.angle == 0)
+	if (_rotRect.angle == 0 && _multiline.empty())
 	{
 		RenderableObject::draw(renderer, camera);
 		return;
 	}
 
-	RotatedRectF rotRectRadians = _rotRect;
-	rotRectRadians.angle = deg2rad(_rotRect.angle);
-	std::array < PointF, 4> drawVertices = rotRectRadians.vertices();
-	for (int i = 0; i < 4; i++)
-		drawVertices[i] = camera(drawVertices[i]);
+	if (_multiline.empty())
+	{
+		RotatedRectF rotRectRadians = _rotRect;
+		rotRectRadians.angle = deg2rad(_rotRect.angle);
+		std::array < PointF, 4> drawVertices = rotRectRadians.vertices();
+		for (int i = 0; i < 4; i++)
+			drawVertices[i] = camera(drawVertices[i]);
 
-	FillOBB(renderer, drawVertices, _color);
+		FillOBB(renderer, drawVertices, _color);
 
-	if (_borderThickness)
-		DrawThickOBB(renderer, drawVertices, _borderThickness, _borderColor);
-	else
-		DrawOBB(renderer, drawVertices, _borderColor);
+		if (_borderThickness)
+			DrawThickOBB(renderer, drawVertices, _borderThickness, _borderColor);
+		else
+			DrawOBB(renderer, drawVertices, _borderColor);
+	}
+	else if(_multiline.size() > 1)
+	{
+		for (int i = 0; i < _multiline.size() - 1; i++)
+		{
+			LineF line = LineF(_multiline[i], _multiline[i + 1]);
+			RotatedRectF obb(line, LINE_THICKNESS, _scene->rect().yUp);
+
+			std::array < PointF, 4> drawVertices = obb.vertices();
+			for (int i = 0; i < 4; i++)
+				drawVertices[i] = camera(drawVertices[i]);
+
+			FillOBB(renderer, drawVertices, _borderThickness ? _color.adjustAlpha(255) : _color);
+		}
+	}
 }

@@ -36,6 +36,7 @@ class agp::EditableObject : public RenderableObject
 		std::vector<std::string>& _categories;
 		RotatedRectF _rotRect;
 		int _resizingEdgeIndex;
+		std::vector<PointF> _multiline;
 
 		// in scene coords
 		static constexpr float CATEGORY_MAX_HEIGHT = 0.5f;
@@ -43,6 +44,8 @@ class agp::EditableObject : public RenderableObject
 		static constexpr float NAME_MAX_HEIGHT = 1;
 		static constexpr float NAME_MARGIN_X = 0.1f;
 		static constexpr float RESIZING_HOOK_DISTANCE = 0.25f;
+		static constexpr float LINE_THICKNESS = 0.1f;
+		static constexpr float LINE_HOOK_DISTANCE = 0.3f;
 
 		// in screen points
 		static constexpr float SELECTED_BORDER_THICKNESS = 5.0f;
@@ -53,10 +56,12 @@ class agp::EditableObject : public RenderableObject
 		static constexpr int ALPHA_FOCUSED = 200;
 
 		void init();
+		void updateLineRect();
 
 	public:
 
 		EditableObject(Scene* scene, const RectF& rect, const std::string& name, int category, std::vector<std::string>& categories);
+		EditableObject(Scene* scene, const LineF& line, const std::string& name, int category, std::vector<std::string>& categories);
 		EditableObject(Scene* scene, const nlohmann::json& fromJson, std::vector<std::string>& categories);
 		virtual ~EditableObject();
 
@@ -66,6 +71,10 @@ class agp::EditableObject : public RenderableObject
 		virtual void setName(const std::string& name);
 		virtual void setFocused(bool on);
 		virtual void setSelected(bool on);
+		virtual void addLinePoint(const PointF& p);
+		virtual void replaceLastPoint(const PointF& p);
+		virtual void undoLineLastPoint();
+		virtual bool isLine() { return _multiline.size(); }
 
 		virtual bool resizableAt(const PointF& point);
 		virtual void resize(const PointF& point);

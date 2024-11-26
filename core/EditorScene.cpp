@@ -102,9 +102,11 @@ void EditorScene::toJson()
 void EditorScene::updateState(State newState)
 {
 	_ui->clearHelpboxText();
-	_ui->setCursor(newState == State::DRAW_RECT ? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_ARROW);
+	_ui->setCursor((newState == State::DRAW_RECT || newState == State::DRAW_LINE)? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_ARROW);
 	_ui->setEditing(newState == State::RENAME_CATEGORY || newState == State::RENAME_OBJECT);
 	_currentCell->setVisible(newState == State::RENAME_CATEGORY || (newState == State::DRAW_RECT && !_currentObject));
+	if (_currentObject && _state == State::DRAW_LINE)
+		_currentObject->undoLineLastPoint();
 
 	if(newState != State::RENAME_CATEGORY && newState != State::RENAME_OBJECT)
 		SDL_StopTextInput();
@@ -125,7 +127,7 @@ void EditorScene::updateState(State newState)
 	}
 	else if (newState == State::DRAW_LINE)
 	{
-		_ui->setHelpboxText(1, "Mouse: [L] draw multiline");
+		_ui->setHelpboxText(1, "Mouse: [L] draw, [R] undo");
 		_ui->setHelpboxText(0, "Keys: [SPACE] change, [ESC]ape");
 	}
 	else if (newState == State::RENAME_CATEGORY)
@@ -140,7 +142,8 @@ void EditorScene::updateState(State newState)
 	}
 	else if (newState == State::SELECT)
 	{
-		_ui->setHelpboxText(1, "Mouse: [L] drag/drop, [SCROLL] rotate");
+		if(!_currentObject->isLine())
+			_ui->setHelpboxText(1, "Mouse: [L] drag/drop, [SCROLL] rotate");
 		_ui->setHelpboxText(0, "Keys: [R]ename, [ESC]ape");
 		_currentObject->setSelected(true);
 	}
@@ -170,7 +173,7 @@ void EditorScene::update(float timeToSimulate)
 	}
 
 	// update cursor text
-	if (_state == State::DRAW_RECT)
+	if (_state == State::DRAW_RECT || _state == State::DRAW_LINE)
 	{
 		if(_snapGrid)
 			_ui->setCursorText(strprintf("%.0f,%.0f", _mouseCoordsSnap.x, _mouseCoordsSnap.y));
@@ -345,6 +348,13 @@ void EditorScene::event(SDL_Event& evt)
 				_currentObject->setSize(_mousePointCurr - _currentObject->rect().pos + (_snapGrid ? PointF(_gridCellSize, _gridCellSize) : PointF(0, 0)));
 		}
 
+		// multiline drawing
+		else if (_state == State::DRAW_LINE)
+		{
+			if (_currentObject)
+				_currentObject->replaceLastPoint(_mousePointCurr);
+		}
+
 		// object focus
 		else if (_state == State::DEFAULT)
 		{
@@ -401,6 +411,18 @@ void EditorScene::event(SDL_Event& evt)
 				_editObjects.push_back(_currentObject);
 			}
 		}
+		else if (_state == State::DRAW_LINE && evt.button.button == SDL_BUTTON_LEFT)
+		{
+			if (_currentObject)
+				_currentObject->addLinePoint(_mousePointCurr);
+			else
+			{
+				_currentObject = new EditableObject(this, LineF(_mousePointCurr, _mousePointCurr + PointF{ 0.05f, 0.05f }), "", _currentCategory, _categories);
+				_editObjects.push_back(_currentObject);
+			}
+		}
+		else if (_state == State::DRAW_LINE && evt.button.button == SDL_BUTTON_RIGHT)
+			_currentObject->undoLineLastPoint();
 		else if (_state == State::DEFAULT || _state == State::SELECT)
 		{
 			EditableObject* underMouse = editableUnderMouse();

@@ -22,7 +22,7 @@ namespace agp
 // - when constructed, it uses GameScene's view rect size to size its own view rect
 class agp::OverlayScene : public Scene
 {
-	private:
+	protected:
 
 		GameScene* _gameScene;			// reference GameScene to sync with
 		RenderableObject* _foreground;	// foreground sprite (can also be animated)

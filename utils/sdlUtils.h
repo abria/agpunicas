@@ -861,4 +861,93 @@ namespace agp
                 return SDL_SYSTEM_CURSOR_ARROW;     // Default arrow cursor (should not reach here)
         }
     }
+
+    static inline float clamp(float value, float min, float max) {
+        return (value < min) ? min : (value > max) ? max : value;
+    }
+
+    // Function to generate a mask texture with anti-aliased circle using float inputs
+    static inline SDL_Texture* generateMaskTexture(SDL_Renderer* renderer, float centerX, float centerY, float radius, int screenWidth, int screenHeight) 
+    {
+        // Create the texture
+        SDL_Texture* maskTexture = SDL_CreateTexture(
+            renderer,
+            SDL_PIXELFORMAT_RGBA8888,
+            SDL_TEXTUREACCESS_STREAMING,
+            screenWidth,
+            screenHeight
+        );
+
+        if (!maskTexture) 
+        {
+            SDL_Log("Failed to create mask texture: %s", SDL_GetError());
+            return nullptr;
+        }
+
+        // Ensure the texture's blend mode is set to blend
+        SDL_SetTextureBlendMode(maskTexture, SDL_BLENDMODE_BLEND);
+
+        // Lock the texture to access pixel data
+        void* pixels;
+        int pitch;
+        if (SDL_LockTexture(maskTexture, NULL, &pixels, &pitch) != 0) 
+        {
+            SDL_Log("Failed to lock texture: %s", SDL_GetError());
+            SDL_DestroyTexture(maskTexture);
+            return nullptr;
+        }
+
+        // Cast the pixels to a 32-bit integer pointer
+        Uint32* pixelData = static_cast<Uint32*>(pixels);
+        int pixelsPerRow = pitch / 4;
+
+        // Prepare color values
+        SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
+        Uint32 opaqueBlack = SDL_MapRGBA(format, 0, 0, 0, 255);
+
+        // Iterate over each pixel
+        for (int y = 0; y < screenHeight; ++y) 
+        {
+            float py = static_cast<float>(y) + 0.5f; // Pixel center y-coordinate
+            for (int x = 0; x < screenWidth; ++x) 
+            {
+                float px = static_cast<float>(x) + 0.5f; // Pixel center x-coordinate
+
+                float dx = px - centerX;
+                float dy = py - centerY;
+                float distance = sqrtf(dx * dx + dy * dy);
+
+                // Calculate alpha for anti-aliasing
+                float edgeDistance = distance - radius;
+                float alpha;
+                if (edgeDistance <= -0.5f) 
+                {
+                    // Inside the circle: fully transparent
+                    alpha = 0.0f;
+                }
+                else if (edgeDistance >= 0.5f) 
+                {
+                    // Outside the circle: fully opaque
+                    alpha = 255.0f;
+                }
+                else 
+                {
+                    // Edge pixels: interpolate alpha
+                    alpha = clamp((edgeDistance + 0.5f) * 255.0f, 0.0f, 255.0f);
+                }
+
+                Uint8 alphaByte = static_cast<Uint8>(alpha);
+                Uint32 color = SDL_MapRGBA(format, 0, 0, 0, alphaByte);
+                pixelData[y * pixelsPerRow + x] = color;
+            }
+        }
+
+        // Unlock the texture
+        SDL_UnlockTexture(maskTexture);
+
+        // Free the pixel format
+        SDL_FreeFormat(format);
+
+        return maskTexture;
+    }
 }

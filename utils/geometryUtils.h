@@ -50,7 +50,7 @@ namespace agp
 		T dot(const Vec2D& v) const { return this->x * v.x + this->y * v.y; }
 		T cross(const Vec2D& v) const { return this->x * v.y - this->y * v.x; }
 		T distance(const Vec2D& p) const { return std::sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y)); }
-		T angle() const { return std::atan2(y, x); }
+		T angle(bool yUp) const { return std::atan2(yUp ? y : -y, x); }
 
 		// rotation by angle in radians w.r.t. horizontal axis, counterclockwise
 		Vec2D rot(T angle, const Vec2D& center, bool yUp = false) const
@@ -208,7 +208,7 @@ namespace agp
 
 		// constructors
 		Rect() : pos(0, 0), size(0, 0), yUp(false) {}
-		Rect(T x, T y, T width, T height, bool yUpwards=false) : pos(x, y), size(width, height), yUp(yUpwards){}
+		Rect(T x, T y, T width, T height, bool yUpwards = false) : pos(x, y), size(width, height), yUp(yUpwards){}
 		Rect(const Vec2D<T>& v1, const Vec2D<T>& v2, bool yUpwards = false) : pos(v1), size(v2-v1), yUp(yUpwards) {}
 		Rect(const Rect& r) : pos(r.pos), size(r.size), yUp(r.yUp) {}
 
@@ -351,11 +351,37 @@ namespace agp
 		Line(const Line& l) : start(l.start), end(l.end) {}
 
 		// special getters
-		Rect<T> boundingRect() const
+		Rect<T> boundingRect(bool yUp) const
 		{
 			return Rect<T>(
 				{ std::min(start.x, end.x),std::min(start.y, end.y) },
-				{ std::max(start.x, end.x),std::max(start.y, end.y) });
+				{ std::max(start.x, end.x),std::max(start.y, end.y) }, yUp);
+		}
+
+		T distance(const Vec2D<T>& point) const
+		{
+			Vec2D<T> AP(point.x - start.x, point.y - start.y);
+			Vec2D<T> AB(end.x - start.x, end.y - start.y);
+
+			T ab2 = AB.x * AB.x + AB.y * AB.y;          // square of the length of AB
+			T ap_ab = AP.x * AB.x + AP.y * AB.y;        // dot product of AP and AB
+
+			T t = ap_ab / ab2;                          // parameter t of the projection
+
+			// clamp t to the [0,1] range to stay within the segment
+			if (t < T(0)) t = T(0);
+			else if (t > T(1)) t = T(1);
+
+			// find the closest point on the line segment
+			Vec2D<T> closest;
+			closest.x = start.x + AB.x * t;
+			closest.y = start.y + AB.y * t;
+
+			// calculate the distance between the point and the closest point
+			T dx = point.x - closest.x;
+			T dy = point.y - closest.y;
+
+			return std::sqrt(dx * dx + dy * dy);
 		}
 	};
 	typedef Line<float> LineF;
@@ -381,8 +407,26 @@ namespace agp
 			size = { upperEdgeVec.mag(), height };
 			Vec2D<T> normal = upperEdgeVec.perp(yUpwards).norm();
 			center = upperEdge.start + (upperEdgeVec / 2) + (height / 2) * normal;
-			angle = std::atan2(upperEdgeVec.y, upperEdgeVec.x);
+			angle = upperEdgeVec.angle(yUpwards);
+			yUp = yUpwards;
 		}
+		//RotatedRect(const Line<T>& centerLine, T height, bool yUpwards = false)
+		//{
+		//	// Vector representing the line
+		//	Vec2D<T> centerLineVec = centerLine.end - centerLine.start;
+
+		//	// Set the size: width is the length of the line, height is provided
+		//	size = { centerLineVec.mag(), height };
+
+		//	// The center is the midpoint of the line
+		//	center = centerLine.start + (centerLineVec / 2);
+
+		//	// The angle is the orientation of the line
+		//	angle = centerLineVec.angle(yUpwards);
+
+		//	// Store the y-axis direction flag
+		//	yUp = yUpwards;
+		//}
 		RotatedRect(const RotatedRect& r) : center(r.center), size(r.size), angle(r.angle), yUp(r.yUp) {}
 
 		// special getters

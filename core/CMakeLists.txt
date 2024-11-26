@@ -18,7 +18,7 @@ if (WITH_TTF)
     find_package(SDL2_ttf REQUIRED)
 
     if (SDL2_ttf_FOUND)
-		target_link_libraries(agpcore SDL2_ttf::SDL2_ttf-static)
+		target_link_libraries(agpcore SDL2_ttf::SDL2_ttf)
 		add_definitions(-DWITH_TTF)
     else()
         message(FATAL_ERROR "SDL_ttf support is enabled, but SDL2_ttf library was not found.")

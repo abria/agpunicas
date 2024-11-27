@@ -101,7 +101,7 @@ std::list<Object*> Scene::objects(const RectF& cullingRect)
 	std::list<Object*> objectsInRect;
 	for (auto& layer : _sortedObjects)
 		for (auto& obj : layer.second)
-			if (cullingRect.intersects(obj->rect()))
+			if (obj->intersects(cullingRect))
 				objectsInRect.push_back(obj);
 
 	return objectsInRect;

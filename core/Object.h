@@ -55,7 +55,7 @@ class agp::Object
 		virtual void setFreezed(bool on) { _freezed = on; }
 		void toggleFreezed() { _freezed = !_freezed; }
 		virtual bool contains(const Vec2Df& p) { return _rect.contains(p); }
-		virtual bool intersects(const RectF& r) { return _rect.intersects(r); }
+		virtual bool shallowIntersects(const RectF& r) { return _rect.intersects(r); }
 		Scene* scene() const { return _scene; }
 		virtual void setSize(const PointF& newSize) { _rect.size = newSize; }
 

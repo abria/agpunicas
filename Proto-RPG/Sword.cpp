@@ -63,18 +63,15 @@ void Sword::update(float dt)
 		_rect.pos = _link->pos();
 
 	// variable (animated) collider synced with animation
-	defaultCollider();
 	AnimatedSprite* animSprite = dynamic_cast<AnimatedSprite*>(_sprite);
-	// tparam in [0, 1], reaches 1 in the middle of animation and goes back to 0
-	float tparam = 1 - 2 * std::fabs(animSprite->currentTime() - 0.5f);
 	if (_facingDir == Direction::RIGHT)
-		_collider.adjust(0, std::min(0.1f + tparam, 0.9f), std::min(- 2 + tparam * 2, -0.2f), std::max(- tparam - 0.1f, -0.9f));
-	else if(_facingDir == Direction::LEFT)
-		_collider.adjust(std::max(2-tparam * 2, 0.2f), std::min(0.1f + tparam, 0.9f), 0, std::max(-tparam - 0.1f, -0.9f));
+		_collider = RotatedRectF(0.7f, 1, 1.5f, 0.2f, PI / 2 - animSprite->currentTime() * PI);
+	else if (_facingDir == Direction::LEFT)
+		_collider = RotatedRectF(2-0.7f, 1, 1.5f, 0.2f, -PI / 2 + animSprite->currentTime() * PI);
 	else if (_facingDir == Direction::DOWN)
-		_collider.adjust(std::min(0.1f + tparam, 0.9f), 0, std::max(-tparam - 0.1f, -0.9f), std::min(-2 + tparam * 2, -0.2f));
+		_collider = RotatedRectF(0.8f, 0.8f, 1.5f, 0.2f, animSprite->currentTime() * PI);
 	else if (_facingDir == Direction::UP)
-		_collider.adjust(std::min(0.1f + tparam, 0.9f), std::max(2 - tparam * 2, 0.2f), std::max(-tparam - 0.1f, -0.9f), 0);
+		_collider = RotatedRectF(1.2f, 1.2, 1.5f, 0.2f, animSprite->currentTime() * PI);
 
 	if (animSprite->currentTime() > 0.5f && _layer < _link->layer())
 		_scene->changeLayerObject(this, _link->layer() + 1);

@@ -11,8 +11,8 @@
 
 using namespace agp;
 
-Trigger::Trigger(Scene* scene, const RectF& rect, CollidableObject* watched, std::function<void()> task) :
-	CollidableObject(scene, rect, nullptr)
+Trigger::Trigger(Scene* scene, const RotatedRectF& rrect, CollidableObject* watched, std::function<void()> task) :
+	CollidableObject(scene, rrect, nullptr)
 {
 	_task = task;
 	_watched = watched;
@@ -20,7 +20,7 @@ Trigger::Trigger(Scene* scene, const RectF& rect, CollidableObject* watched, std
 }
 
 // extends logic collision (+trigger behavior)
-bool Trigger::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Trigger::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
 {
 	if (with == _watched && begin)
 	{

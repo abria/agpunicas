@@ -25,7 +25,7 @@ class agp::CollidableObject : public MovableObject
 	protected:
 
 		// collisions
-		RectF _collider;					// in object coordinates
+		RotatedRectF _collider;					// in object coordinates
 		bool _collidable;
 		bool _compenetrable;
 		const Color _colliderColor = { 255, 255, 0, 255 };
@@ -43,14 +43,17 @@ class agp::CollidableObject : public MovableObject
 
 	public:
 
-		CollidableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0);
+		CollidableObject(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer = 0);
 		virtual ~CollidableObject() {}
 
 		// getters/setters
-		const RectF& collider() const { return _collider; }
-		RectF sceneCollider() const;
+		const RotatedRectF& collider() const { return _collider; }
+		RotatedRectF sceneCollider() const;
 		bool compenetrable() const { return _compenetrable; }
 		bool collidable() const { return _collidable; }
+
+		// extends intersection (+rotated rect)
+		virtual bool shallowIntersects(const RectF& r) override;
 
 		// extends game logic (+collisions)
 		virtual void update(float dt) override;
@@ -64,7 +67,7 @@ class agp::CollidableObject : public MovableObject
 		// defines logic collision, i.e. what to do when two objects collide
 		// from a game logic perspective (e.g. player dies if hit by enemy)
 		// returns true if logic collision is resolved, false otherwise
-		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir);
+		virtual bool collision(CollidableObject* with, bool begin, const Vec2Df& normal);
 
 		// euclidean distance between colliders
 		virtual float distance(CollidableObject* obj) const;

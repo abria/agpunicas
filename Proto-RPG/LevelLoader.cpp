@@ -20,6 +20,7 @@
 #include "View.h"
 #include "json.hpp"
 #include "Portal.h"
+#include "mathUtils.h"
 
 using namespace agp;
 
@@ -55,21 +56,48 @@ void LevelLoader::loadJson(
 		int category = jObj["category"];
 		std::string name = jObj["name"];
 		
-		// this game only supports AABB rects
-		if (!jObj.contains("rect"))
-			continue;
+		if (jObj.contains("rect") || jObj.contains("rotRect"))
+		{
+			RotatedRectF rrect;
 
-		RectF rect;
-		rect.pos.x = jObj["rect"]["x"];
-		rect.pos.y = jObj["rect"]["y"];
-		rect.size.x = jObj["rect"]["width"];
-		rect.size.y = jObj["rect"]["height"];
-		rect.yUp = jObj["rect"]["yUp"];
+			if (jObj.contains("rect"))
+			{
+				RectF rect;
+				rect.pos.x = jObj["rect"]["x"];
+				rect.pos.y = jObj["rect"]["y"];
+				rect.size.x = jObj["rect"]["width"];
+				rect.size.y = jObj["rect"]["height"];
+				rect.yUp = jObj["rect"]["yUp"];
+				rrect = rect;
+			}
+			else
+			{
+				rrect.center.x = jObj["rotRect"]["cx"];
+				rrect.center.y = jObj["rotRect"]["cy"];
+				rrect.size.x = jObj["rotRect"]["width"];
+				rrect.size.y = jObj["rotRect"]["height"];
+				rrect.angle = deg2rad(float(jObj["rotRect"]["angle"]));
+				rrect.yUp = jObj["rotRect"]["yUp"];
+			}
 
-		if (_categories[category] == "Static")
-			new StaticObject(world, rect, nullptr, 1);
-		else if (_categories[category] == "Portal")
-			portals[name].push_back(new Portal(world, rect));
+			if (_categories[category] == "Static" || _categories[category] == "Bush")
+				new StaticObject(world, rrect, nullptr, 1);
+			else if (_categories[category] == "Portal")
+				portals[name].push_back(new Portal(world, rrect));
+		}
+		else if (jObj.contains("multiline"))
+		{
+			std::vector<nlohmann::json> jsonPoints = jObj["multiline"].get<std::vector<nlohmann::json>>();
+			for (int i = 0; i < jsonPoints.size() - 1; i++)
+			{
+				float x1 = jsonPoints[i]["x"];
+				float y1 = jsonPoints[i]["y"];
+				float x2 = jsonPoints[i + 1]["x"];
+				float y2 = jsonPoints[i + 1]["y"];
+				LineF line(x1, y1, x2, y2);
+				new StaticObject(world, RotatedRectF(line, 0.1f, false), nullptr, 2);
+			}
+		}
 	}
 
 	// connect paired portals
@@ -103,6 +131,8 @@ Scene* LevelLoader::load(const std::string& name)
 		// player
 		Link* player = new Link(world, PointF(140, 179));
 		world->setPlayer(player);
+
+		//new StaticObject(world, RotatedRectF(140, 185, 5, 2, PI/8), spriteLoader->get("linkhouse"), 2);
 
 		// load jObj and convert regions to game objects
 		loadJson(world, std::string(SDL_GetBasePath()) + "EditorScene.json", player);

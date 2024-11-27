@@ -26,7 +26,7 @@ class agp::DynamicObject : public CollidableObject
 
 	public:
 
-		DynamicObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0);
+		DynamicObject(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer = 0);
 		virtual ~DynamicObject() {}
 
 		Direction facingDir() const { return _facingDir; }

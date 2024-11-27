@@ -12,8 +12,8 @@
 
 using namespace agp;
 
-DynamicObject::DynamicObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer) :
-	CollidableObject(scene, rect, sprite, layer)
+DynamicObject::DynamicObject(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer) :
+	CollidableObject(scene, rrect, sprite, layer)
 {
 	// dynamic objects are compenetrable vs. each other by default
 	// (e.g. player vs. spanwable, collectibles vs. enemies, ...)

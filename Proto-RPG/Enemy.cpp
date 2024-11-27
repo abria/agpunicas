@@ -6,14 +6,14 @@
 
 using namespace agp;
 
-Enemy::Enemy(Scene* scene, const RectF& rect, Sprite* sprite, int layer)
-	: DynamicObject(scene, rect, sprite, layer)
+Enemy::Enemy(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer)
+	: DynamicObject(scene, rrect, sprite, layer)
 {
 }
 
-bool Enemy::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Enemy::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
 {
-	DynamicObject::collision(with, begin, fromDir);
+	DynamicObject::collision(with, begin, normal);
 
 	if (with->to<Sword*>())
 		_scene->killObject(this);

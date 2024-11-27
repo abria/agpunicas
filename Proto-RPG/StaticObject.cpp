@@ -12,15 +12,15 @@
 
 using namespace agp;
 
-StaticObject::StaticObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer) :
-	CollidableObject(scene, rect, sprite, layer)
+StaticObject::StaticObject(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer) :
+	CollidableObject(scene, rrect, sprite, layer)
 {	
 
 }
 
-bool StaticObject::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool StaticObject::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
 {
-	_focused = true;
+	//_focused = true;
 	
 	return true;
 }

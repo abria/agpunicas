@@ -20,7 +20,9 @@ using namespace agp;
 Link::Link(Scene* scene, const PointF& pos)
 	: DynamicObject(scene, RectF( pos.x, pos.y, 1, 1.5f ), nullptr)
 {
-	_collider.adjust(0.2f, 0.2f, -0.2f, -0.2f);
+	_collider.size.x -= 0.2f;
+	_collider.size.y = 0.9f;
+	_collider.center.y = 0.8f;
 
 	_facingDir = Direction::DOWN;
 	_walking = false;
@@ -96,4 +98,10 @@ void Link::die()
 void Link::hurt()
 {
 	// to be implemented
+}
+
+void Link::setPos(const PointF& newPos)
+{
+	printf("Link teleported to %s\n", newPos.str().c_str());
+	DynamicObject::setPos(newPos);
 }

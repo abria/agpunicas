@@ -26,12 +26,12 @@ class agp::Portal : public Trigger
 
 	public:
 
-		Portal(Scene* scene, const RectF& rect, Portal* dest = nullptr);
+		Portal(Scene* scene, const RotatedRectF& rrect, Portal* dest = nullptr);
 
 		void setDestination(Portal *dest);
 
 		// extends logic collision (+portal behavior)
-		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, bool begin, const Vec2Df& normal) override;
 		
 		virtual std::string name() override {
 			return strprintf("Portal[%d]", _id);

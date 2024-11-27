@@ -12,8 +12,8 @@
 
 using namespace agp;
 
-Portal::Portal(Scene* scene, const RectF& rect, Portal* dest) :
-	Trigger(scene, rect, dynamic_cast<GameScene*>(scene)->player()->to<CollidableObject*>(), [](){})
+Portal::Portal(Scene* scene, const RotatedRectF& rrect, Portal* dest) :
+	Trigger(scene, rrect, dynamic_cast<GameScene*>(scene)->player()->to<CollidableObject*>(), [](){})
 {
 	_playerArrived = false;
 	setDestination(dest);
@@ -29,7 +29,7 @@ void Portal::setDestination(Portal* dest)
 		};
 }
 
-bool Portal::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Portal::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
 {
 	if (with == _watched && _playerArrived && begin == false)
 		_playerArrived = false;

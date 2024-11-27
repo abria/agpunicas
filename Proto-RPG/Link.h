@@ -47,6 +47,8 @@ class agp::Link : public DynamicObject
 		virtual void die();
 		virtual void hurt();
 
+		virtual void setPos(const PointF& newPos);
+
 		// overrides acceptable collisions
 		virtual bool collidableWith(CollidableObject* obj) override { return obj->collidableWith(this); }
 

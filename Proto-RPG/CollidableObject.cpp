@@ -13,13 +13,16 @@
 #include <algorithm>
 #include "timeUtils.h"
 #include "collisionUtils.h"
+#include "sdlUtils.h"
 #include "GameScene.h"
 
 using namespace agp;
 
-CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer) :
-	MovableObject(scene, rect, sprite, layer)
+CollidableObject::CollidableObject(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer) :
+	MovableObject(scene, rrect.toRect(), sprite, layer)
 {
+	_angle = rad2deg(rrect.angle);
+
 	defaultCollider();
 
 	// default collision: non compenetration
@@ -27,10 +30,17 @@ CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* spri
 	_collidable = true;
 }
 
-// set collider to default (whole rect)
+
 void CollidableObject::defaultCollider()
 {
-	_collider = { 0, 0, _rect.size.x, _rect.size.y };
+	// set collider to default (whole rect)
+	_collider = RectF(0, 0, _rect.size.x, _rect.size.y);
+	_collider.angle = deg2rad(_angle);
+}
+
+bool CollidableObject::shallowIntersects(const RectF& r)
+{
+	return sceneCollider().boundingRect().intersects(r);
 }
 
 void CollidableObject::update(float dt)
@@ -41,7 +51,7 @@ void CollidableObject::update(float dt)
 	resolveCollisions();
 }
 
-RectF CollidableObject::sceneCollider() const
+RotatedRectF CollidableObject::sceneCollider() const
 {
 	return _collider + _rect.pos;
 }
@@ -56,36 +66,40 @@ void CollidableObject::detectCollisions()
 	_collisionAxes.clear();
 	_collisionDepths.clear();
 
-	auto objectsInRect = _scene->objects(_rect);
+	auto objectsInRect = _scene->objects(sceneCollider().boundingRect());
 	for (auto& obj : objectsInRect)
 	{
 		CollidableObject* collObj = obj->to<CollidableObject*>();
 		if (collObj && collObj != this && collObj->collidable() && collidableWith(collObj))
 		{
-			Direction axis;
+			Vec2Df axis;
 			float depth;
-			if (checkCollisionAABB(sceneCollider(), collObj->sceneCollider(), axis, depth))
+			if (checkCollisionSAT(sceneCollider().verticesVec(), collObj->sceneCollider().verticesVec(), axis, depth))
 			{
 				_collisions.push_back(collObj);
-				_collisionAxes.push_back(dir2vec(axis));
+				_collisionAxes.push_back(axis);
 				_collisionDepths.push_back(depth);
 				collision(collObj, true, axis);
-				collObj->collision(this, true, inverse(axis));
+				collObj->collision(this, true, -axis);
 			}
 		}
 	}
 
+	// remove objects marked 'to be killed' from collision list
+	// since they will not be accessible in the next iteration
+	_collisions.erase(std::remove_if(_collisions.begin(), _collisions.end(), [](CollidableObject* obj) { return obj->_killed; }), _collisions.end());
+
 	for(auto collObj : _collisionsPrev)
 		if (std::find(_collisions.begin(), _collisions.end(), collObj) == _collisions.end())
 		{
-			collision(collObj, false, Direction::NONE);
-			collObj->collision(this, false, Direction::NONE);
+			collision(collObj, false, Vec2Df());
+			collObj->collision(this, false, Vec2Df());
 		}
 }
 
-bool CollidableObject::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool CollidableObject::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
 {
-	//printf("%s collided with %s from %s\n", name().c_str(), with->name().c_str(), dir2str(fromDir).c_str());
+	//printf("%s collided with %s from %s\n", name().c_str(), with->name().c_str(), normal.str().c_str());
 	return true; 
 }
 
@@ -96,14 +110,15 @@ void CollidableObject::draw(SDL_Renderer* renderer, Transform camera)
 	GameScene* gameScene = dynamic_cast<GameScene*>(_scene);
 	if (gameScene && gameScene->collidersVisible())
 	{
-		auto vertices = sceneCollider().vertices();
-		SDL_FRect drawRect = RectF(camera(vertices[0]), camera(vertices[2])).toSDLf();
-		SDL_SetRenderDrawColor(renderer, _colliderColor.r, _colliderColor.g, _colliderColor.b, _colliderColor.a);
-		SDL_RenderDrawRectF(renderer, &drawRect);
+		std::array < PointF, 4> drawVertices = sceneCollider().vertices();
+		for (int i = 0; i < 4; i++)
+			drawVertices[i] = camera(drawVertices[i]);
+		
+		DrawOBB(renderer, drawVertices, _colliderColor);
 	}
 }
 
 float CollidableObject::distance(CollidableObject* obj) const
 {
-	return sceneCollider().center().distance(obj->sceneCollider().center());
+	return sceneCollider().center.distance(obj->sceneCollider().center);
 }

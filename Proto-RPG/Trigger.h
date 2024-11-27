@@ -27,7 +27,7 @@ class agp::Trigger : public CollidableObject
 
 	public:
 
-		Trigger(Scene* scene, const RectF& rect, CollidableObject* watched, std::function<void()> task);
+		Trigger(Scene* scene, const RotatedRectF& rrect, CollidableObject* watched, std::function<void()> task);
 
 		virtual void setTask(std::function<void()> newTask) { _task = newTask;}
 
@@ -35,7 +35,7 @@ class agp::Trigger : public CollidableObject
 		virtual void update(float dt) override { RenderableObject::update(dt); }
 
 		// extends logic collision (+trigger behavior)
-		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, bool begin, const Vec2Df& normal) override;
 
 		// implements CollidableObject's abstract method (do nothing)
 		virtual void resolveCollisions() override { }

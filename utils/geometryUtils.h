@@ -428,10 +428,11 @@ namespace agp
 		//	yUp = yUpwards;
 		//}
 		RotatedRect(const RotatedRect& r) : center(r.center), size(r.size), angle(r.angle), yUp(r.yUp) {}
-
+		RotatedRect(const Rect<T>& rect)  : center(rect.pos + rect.size/2),	size(rect.size), angle(0), yUp(rect.yUp) {}
+		
 		// special getters
 		inline std::array < Vec2D<T>, 4> vertices() const
-		{ 
+		{
 			Rect<T> rect(center - size / 2, center + size / 2);
 			std::array < Vec2D<T>, 4> points = rect.vertices();
 			std::array < Vec2D<T>, 4> transformed_points;

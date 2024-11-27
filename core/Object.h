@@ -36,6 +36,7 @@ class agp::Object
 		int _layer;
 		int _id;
 		bool _freezed;	// if false, does not update
+		bool _killed;
 		std::map<std::string, Scheduler> _schedulers;
 
 		friend class Scene;

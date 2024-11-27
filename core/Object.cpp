@@ -21,6 +21,7 @@ Object::Object(Scene* scene, const RectF& rect, int layer)
 	_layer = layer;
 	_id = created++;
 	_freezed = false;
+	_killed = false;
 	_scene->newObject(this);
 }
 

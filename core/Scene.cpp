@@ -42,6 +42,7 @@ void Scene::newObject(Object* obj)
 void Scene::killObject(Object* obj)
 {
 	_deadObjects.insert(obj);
+	obj->_killed = true;
 }
 
 void Scene::changeLayerObject(Object* obj, int newLayer)

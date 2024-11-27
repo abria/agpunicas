@@ -75,6 +75,7 @@ class agp::EditorScene : public UIScene
 		std::string _textInput;
 		std::vector<std::string> _categories;
 		State _state;
+		State _prevState;
 
 		// constants
 		static constexpr int MAX_CATEGORIES = 15;

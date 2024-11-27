@@ -42,6 +42,7 @@ EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
 
 	_currentCell = new EditableObject(this, RectF(0, 0, _gridCellSize, _gridCellSize, _rect.yUp), "", _currentCategory, _categories);
 
+	_state = _prevState = State::DEFAULT;
 	updateState(State::DEFAULT);
 }
 
@@ -104,7 +105,7 @@ void EditorScene::updateState(State newState)
 	_ui->clearHelpboxText();
 	_ui->setCursor((newState == State::DRAW_RECT || newState == State::DRAW_LINE)? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_ARROW);
 	_ui->setEditing(newState == State::RENAME_CATEGORY || newState == State::RENAME_OBJECT);
-	_currentCell->setVisible(newState == State::RENAME_CATEGORY || (newState == State::DRAW_RECT && !_currentObject));
+	_currentCell->setVisible((newState == State::RENAME_CATEGORY && _prevState == State::DRAW_RECT) || (newState == State::DRAW_RECT && !_currentObject));
 	if (_currentObject && _state == State::DRAW_LINE)
 		_currentObject->undoLineLastPoint();
 
@@ -156,7 +157,11 @@ void EditorScene::updateState(State newState)
 			});
 	}
 
-	_state = newState;
+	if (_state != newState)
+	{
+		_prevState = _state;
+		_state = newState;
+	}
 }
 
 void EditorScene::update(float timeToSimulate)
@@ -217,16 +222,16 @@ void EditorScene::event(SDL_Event& evt)
 					for (auto& editObj : _editObjects)
 						editObj->setCategory(editObj->category());
 					_currentCell->setCategory(_currentCategory);
-					_state = State::DRAW_RECT;
+					_state = _prevState;
 				}
 				else if (_state == State::RENAME_OBJECT)
 				{
 					_currentObject->setName(_textInput);
-					_state = State::SELECT;
+					_state = _prevState;
 				}
 			}
 			else if (evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-				_state = _state == State::RENAME_CATEGORY ? _state = State::DRAW_RECT : _state = State::SELECT;
+				_state = _prevState;
 		}
 		updateState(_state);
 		return;
@@ -257,14 +262,14 @@ void EditorScene::event(SDL_Event& evt)
 			Game::instance()->popSceneLater();	// _ui scene
 			Game::instance()->popSceneLater();	// this scene
 		}
-		else if (_state == State::DRAW_RECT && evt.key.keysym.scancode == SDL_SCANCODE_SPACE)
+		else if ((_state == State::DRAW_RECT || _state == State::DRAW_LINE) && evt.key.keysym.scancode == SDL_SCANCODE_SPACE)
 		{
 			_currentCategory = (_currentCategory + 1) % MAX_CATEGORIES;
 			if (_currentObject)
 				_currentObject->setCategory(_currentCategory);
 			_currentCell->setCategory(_currentCategory);
 		}
-		else if (_state == State::DRAW_RECT && evt.key.keysym.scancode == SDL_SCANCODE_R)
+		else if ((_state == State::DRAW_RECT || _state == State::DRAW_LINE) && evt.key.keysym.scancode == SDL_SCANCODE_R)
 		{
 			updateState(State::RENAME_CATEGORY);
 			_textInput = _categories[_currentCategory];

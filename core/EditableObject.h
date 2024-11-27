@@ -82,6 +82,7 @@ class agp::EditableObject : public RenderableObject
 
 		virtual SDL_SystemCursor resizeCursor();
 
+		virtual bool shallowIntersects(const RectF& r) override;
 		virtual bool contains(const Vec2Df& p) override;
 		virtual void setVisible(bool visible) override;
 		virtual void setPos(const PointF& newPos) override;

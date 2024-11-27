@@ -231,6 +231,25 @@ bool EditableObject::contains(const Vec2Df& p)
 	}
 }
 
+bool EditableObject::shallowIntersects(const RectF& r)
+{
+	if (_multiline.size())
+	{
+		for (int i = 0; i < _multiline.size() - 1; i++)
+			if (r.contains(_multiline[i]))
+				return true;
+		return false;
+	}
+	else if (_rotRect.angle == 0)
+		return RenderableObject::shallowIntersects(r);
+	else
+	{
+		RotatedRectF rotRectRadians = _rotRect;
+		rotRectRadians.angle = deg2rad(_rotRect.angle);
+		return rotRectRadians.boundingRect().intersects(r);
+	}
+}
+
 void EditableObject::setVisible(bool visible)
 {
 	RenderableObject::setVisible(visible);

@@ -15,7 +15,7 @@
 using namespace agp;
 
 NPC::NPC(Scene* scene, const PointF& pos)
-	: DynamicObject(scene, RectF(pos.x, pos.y, 1, 1.3f), nullptr)
+	: DynamicObject(scene, RectF(pos.x, pos.y, 1, 1.3f), nullptr, 2)
 {
 	_velMax = { 0, 0 };
 	_sprite = SpriteFactory::instance()->get("npc_example");

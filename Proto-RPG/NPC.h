@@ -7,22 +7,30 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
+#pragma once
+
+#include "DynamicObject.h"
+#include <map>
 #include <string>
 
 namespace agp
 {
-	namespace RPG
-	{
-		// Version components
-		constexpr int VERSION_MAJOR = 1;
-		constexpr int VERSION_MINOR = 7;
-		constexpr int VERSION_PATCH = 0;
-
-		// Function to retrieve the version string
-		inline static std::string VERSION() {
-			return std::to_string(VERSION_MAJOR) + "." +
-				   std::to_string(VERSION_MINOR) + "." +
-				   std::to_string(VERSION_PATCH);
-		}
-	}
+	class NPC;
+	class Sword;
 }
+
+class agp::NPC : public DynamicObject
+{
+	protected:
+
+		// you can put here interaction data
+		// (dialogs, texts, options, actions)
+
+	public:
+
+		NPC(Scene* scene, const PointF& pos);
+
+		virtual void interact();
+
+		virtual std::string name() override { return strprintf("NPC[%d]", _id); }
+};

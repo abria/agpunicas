@@ -71,7 +71,7 @@ void Sword::update(float dt)
 	else if (_facingDir == Direction::DOWN)
 		_collider = RotatedRectF(0.8f, 0.8f, 1.5f, 0.2f, animSprite->currentTime() * PI);
 	else if (_facingDir == Direction::UP)
-		_collider = RotatedRectF(1.2f, 1.2, 1.5f, 0.2f, animSprite->currentTime() * PI);
+		_collider = RotatedRectF(1.2f, 1.2f, 1.5f, 0.2f, animSprite->currentTime() * PI);
 
 	if (animSprite->currentTime() > 0.5f && _layer < _link->layer())
 		_scene->changeLayerObject(this, _link->layer() + 1);

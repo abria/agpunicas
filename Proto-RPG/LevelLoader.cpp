@@ -21,6 +21,7 @@
 #include "json.hpp"
 #include "Portal.h"
 #include "mathUtils.h"
+#include "NPC.h"
 
 using namespace agp;
 
@@ -126,6 +127,7 @@ Scene* LevelLoader::load(const std::string& name)
 		new RenderableObject(world, RectF(-16, -14, 16, 14), spriteLoader->get("linkhouse"), 0);
 
 		// NPCs
+		new NPC(world, PointF(-8, -7));
 		new Soldier(world, PointF(130, 185), RectF(133, 178, 2, 3));
 		
 		// player

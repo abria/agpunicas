@@ -38,9 +38,14 @@ void CollidableObject::defaultCollider()
 	_collider.angle = deg2rad(_angle);
 }
 
-bool CollidableObject::shallowIntersects(const RectF& r)
+bool CollidableObject::intersectsRectShallow(const RectF& r)
 {
 	return sceneCollider().boundingRect().intersects(r);
+}
+
+bool CollidableObject::intersectsLine(const LineF& line, float& tNear)
+{
+	return sceneCollider().intersectsLine(line.start, line.end, tNear);
 }
 
 void CollidableObject::update(float dt)

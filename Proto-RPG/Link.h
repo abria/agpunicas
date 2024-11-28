@@ -47,6 +47,9 @@ class agp::Link : public DynamicObject
 		virtual void die();
 		virtual void hurt();
 
+		// interaction with (raycasted) nearest NPC
+		virtual void interact();
+
 		virtual void setPos(const PointF& newPos);
 
 		// overrides acceptable collisions

@@ -38,6 +38,8 @@ SpriteFactory::SpriteFactory()
 	_spriteSheets["player"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/player_corrected.png", _autoTiles["player"], { 0, 128, 128 }, {0, 64, 64});
 	_spriteSheets["enemies"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/enemies_3.png", _autoTiles["enemies"], { 255, 0, 255 }, { 128, 255, 255 });
 	_spriteSheets["fonts"] = loadTextureConnectedComponents(renderer, std::string(SDL_GetBasePath()) + "sprites/fonts.png", _autoComponents["fonts"], {56, 56, 94});
+	_spriteSheets["npcs_other_worlds"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/npcs_other_worlds.png", { 255, 0, 255 });
+
 	//_spriteSheets["knight"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/knight.png", _autoTiles["knight"], { 0, 128, 128 }, { 0, 255, 0 }, 5, false, false, true);
 
 
@@ -71,6 +73,11 @@ SpriteFactory::SpriteFactory()
 			_autoComponents["fonts"][i].size.y = 15;
 		}
 	}
+}
+
+SpriteFactory::~SpriteFactory()
+{
+	// todo: deallocate all assets
 }
 
 // anchors
@@ -112,6 +119,8 @@ Sprite* SpriteFactory::get(const std::string& id)
 		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0], Direction::LEFT);
 	else if (id == "link_shadow")
 		return new Sprite(_spriteSheets["player"], _autoTiles["player"][6].back(), Direction::UP);
+	else if (id == "npc_example")
+		return new Sprite(_spriteSheets["npcs_other_worlds"], RectI(556, 67, 20, 26));
 
 	// inventory
 	else if (id.compare(0, 15, "inventory_icon_") == 0)

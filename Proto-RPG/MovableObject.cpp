@@ -68,9 +68,9 @@ void MovableObject::update(float dt)
 
 	// apply forces
 	if (_xDir != Direction::NONE)
-		velAdd(dir2vec(_xDir) * _moveForce.x);
+		velAdd(dir2vec(_xDir) * _moveForce.x * dt);
 	if (_yDir != Direction::NONE)
-		velAdd(dir2vec(_yDir) * _moveForce.y);
+		velAdd(dir2vec(_yDir) * _moveForce.y * dt);
 	if (_xDir == Direction::NONE)
 		velAdd({ -_vel.versX() * _frictionForce.x * dt, 0 });
 	if (_yDir == Direction::NONE)

@@ -14,11 +14,12 @@
 #include "Game.h"
 #include "Scene.h"
 #include "Sword.h"
+#include "NPC.h"
 
 using namespace agp;
 
 Link::Link(Scene* scene, const PointF& pos)
-	: DynamicObject(scene, RectF( pos.x, pos.y, 1, 1.5f ), nullptr)
+	: DynamicObject(scene, RectF( pos.x, pos.y, 1, 1.5f ), nullptr, 2)
 {
 	_collider.size.x -= 0.2f;
 	_collider.size.y = 0.9f;
@@ -27,7 +28,6 @@ Link::Link(Scene* scene, const PointF& pos)
 	_facingDir = Direction::DOWN;
 	_walking = false;
 	_attacking = false;
-	_layer = 2;
 	_sword = nullptr;
 
 	// animations
@@ -50,7 +50,7 @@ void Link::update(float dt)
 
 	// state logic
 	_walking = _vel.mag() != 0;
-
+	
 	// animations
 	if(_attacking)
 		setSprite(_sprites[int(_facingDir)]["attack"]);
@@ -98,6 +98,17 @@ void Link::die()
 void Link::hurt()
 {
 	// to be implemented
+}
+
+void Link::interact()
+{
+	auto objects = _scene->raycast({ _rect.center(), _rect.center() + 1 * dir2vec(_facingDir) });
+	for (auto& obj : objects)
+		if (obj->to<NPC*>())
+		{
+			obj->to<NPC*>()->interact();
+			break;
+		}
 }
 
 void Link::setPos(const PointF& newPos)

@@ -38,6 +38,8 @@ class agp::SpriteFactory : public Singleton<SpriteFactory>
 
 	public:
 
+		~SpriteFactory();
+
 		// factory methods
 		Sprite* get(const std::string& id);
 		Sprite* getTextSMB(std::string text, const Vec2Df& size = { 1,1 }, int fillN = 0, char fillChar = ' ', bool enabled = true);

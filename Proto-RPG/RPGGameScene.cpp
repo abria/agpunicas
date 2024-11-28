@@ -58,22 +58,8 @@ void RPGGameScene::event(SDL_Event& evt)
 		Game::instance()->pushScene(Menu::pauseMenu());
 	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_A && !evt.key.repeat)
 		link->attack();
-	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_T && !evt.key.repeat)
-	{
-		// example dialog with options
-		Game::instance()->pushScene(new DialogBox(
-			"The wizard, Agahnim, has done... something to the other missing girls! "
-			"Now only I remain...\n"
-			"Agahnim has seized control of the castle and is now trying to open "
-			"the seven wise men's seal.\n"
-			"I am in the dungeon of the castle.\n"
-			"Would you help me?", 
-			{ 
-				DialogBox::Option("YES", []() {printf("You are a good guy\n"); }),
-				DialogBox::Option("NO", []() {printf("You are a BAD guy\n"); }),
-				DialogBox::Option("MAYBE", []() {printf("Take a final decision\n"); })
-			}));
-	}
+	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_I && !evt.key.repeat)
+		link->interact();
 }
 
 void RPGGameScene::displayGameSceneOnly(bool on) 

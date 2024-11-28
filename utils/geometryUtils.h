@@ -262,6 +262,7 @@ namespace agp
 
 		// operations
 		inline bool isValid() const { return size.x > 0 && size.y > 0; }
+
 		inline bool intersects(const Rect& r) const 
 		{ 
 			if (yUp)
@@ -277,6 +278,51 @@ namespace agp
 					top() < r.bottom() && bottom() > r.top(); 
 			}
 		}
+
+		// Liang-Barsky algorithm for line-rectangle intersection
+		inline bool intersectsLine(const Vec2D<T>& p0, const Vec2D<T>& p1, T& tNear)
+		{
+			T t0 = 0.0;
+			T t1 = 1.0;
+			T dx = p1.x - p0.x;
+			T dy = p1.y - p0.y;
+
+			auto clip = [&](T p, T q) -> bool
+			{
+				if (p == 0.0)
+					return q >= 0.0;
+				T r = q / p;
+				if (p < 0.0) 
+				{
+					if (r > t1) return false;
+					if (r > t0) t0 = r;
+				}
+				else 
+				{
+					if (r < t0) return false;
+					if (r < t1) t1 = r;
+				}
+				return true;
+			};
+
+			// Rectangle boundaries:
+			T xMin = pos.x;
+			T xMax = pos.x + size.x;
+			T yMin = pos.y;
+			T yMax = pos.y + size.y;
+
+			// Clipping against all four edges of the rectangle:
+			if (!clip(-dx, p0.x - xMin)) return false;  // Left edge
+			if (!clip(dx, xMax - p0.x)) return false;   // Right edge
+			if (!clip(-dy, p0.y - yMin)) return false;  // Bottom edge
+			if (!clip(dy, yMax - p0.y)) return false;   // Top edge
+
+			if (t0 > t1) return false;
+
+			tNear = (t0 >= 0.0) ? t0 : t1;
+			return tNear >= 0.0 && tNear <= 1.0;
+		}
+
 		inline bool contains(const Vec2D<T> & p) const
 		{
 			if (yUp)
@@ -284,10 +330,12 @@ namespace agp
 			else
 				return p.x > left() && p.x < right() && p.y > top() && p.y < bottom();
 		}
+
 		Vec2D<T> center() const
 		{
 			return Vec2D<T>(pos.x + size.x / 2, pos.y + size.y / 2);
 		}
+
 		inline Rect united(const Rect& rect) const
 		{
 			if (yUp)
@@ -299,6 +347,7 @@ namespace agp
 					{ std::min(left(), rect.left()), std::min(top(), rect.top()) },
 					{ std::max(right(), rect.right()), std::max(bottom(), rect.bottom()) });
 		}
+
 		inline void adjust(T dx1, T dy1, T dx2, T dy2)
 		{
 			pos.x += dx1;
@@ -306,6 +355,7 @@ namespace agp
 			size.x += dx2 - dx1;
 			size.y += dy2 - dy1;
 		}
+
 		inline void scaleOnCenter(float s)
 		{
 			PointF sizeF(size);
@@ -313,6 +363,7 @@ namespace agp
 			pos = center() - sizeF /2;
 			size = sizeF;
 		}
+
 		float aspectRatio() const
 		{
 			return float(size.x) / float(size.y);
@@ -521,7 +572,24 @@ namespace agp
 			return true;
 		}
 
-		void extendEdgeToPoint(const Vec2D<T>& point, int edgeIndex)
+		inline bool intersectsLine(const Vec2D<T>& p0, const Vec2D<T>& p1, T& tNear)
+		{
+			// Step 1: Transform the line to the local coordinate system of the rotated rectangle
+			T angle = yUp ? -angle : angle; // Adjust for y-axis orientation
+			Vec2D<T> localP0 = p0.rot(-angle, center, yUp);
+			Vec2D<T> localP1 = p1.rot(-angle, center, yUp);
+
+			// Step 2: Define the axis-aligned rectangle in the local system
+			Rect<T> localRect;
+			localRect.pos = { center.x - size.x / 2, center.y - size.y / 2 };
+			localRect.size = size;
+			localRect.yUp = yUp;
+
+			// Step 3: Perform axis-aligned rectangle intersection
+			return localRect.intersectsLine(localP0, localP1, tNear);
+		}
+
+		inline void extendEdgeToPoint(const Vec2D<T>& point, int edgeIndex)
 		{
 			// Step 1: Compute vector from center to point
 			Vec2D<T> v = point - center;

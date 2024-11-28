@@ -20,13 +20,13 @@ namespace agp
 }
 
 // Object (or game object, or entity, or actor) abstract class.
-// Suitable for monolithic class hierarchies in simple platformer games.
+// Suitable for monolithic class hierarchies in simple 2D games.
 // - auto-adds itself to the scene
 // - stores object rect (position and size)
 // - stores schedulers for action scripting
 // - stores object layer in the scene (useful for sorting e.g. for Painter's algorithm)
 // - stores general state flags
-// - offers update and schedule methods
+// - offers update and schedule methods, and simple geometric queries
 class agp::Object
 {
 	protected:
@@ -49,16 +49,20 @@ class agp::Object
 		// getters/setters
 		const RectF& rect() const { return _rect; }
 		virtual void setRect(const RectF& rect) { _rect = rect; }
-		virtual void setPos(const PointF& newPos) { _rect.pos = newPos; }
 		PointF pos() const { return _rect.pos; }
-		int layer() { return _layer; }
-		bool freezed() { return _freezed; }
+		virtual void setPos(const PointF& newPos) { _rect.pos = newPos; }
+		PointF size() const { return _rect.size; }
+		virtual void setSize(const PointF& newSize) { _rect.size = newSize; }
+		int layer() const { return _layer; }
+		bool freezed() const { return _freezed; }
 		virtual void setFreezed(bool on) { _freezed = on; }
 		void toggleFreezed() { _freezed = !_freezed; }
-		virtual bool contains(const Vec2Df& p) { return _rect.contains(p); }
-		virtual bool shallowIntersects(const RectF& r) { return _rect.intersects(r); }
 		Scene* scene() const { return _scene; }
-		virtual void setSize(const PointF& newSize) { _rect.size = newSize; }
+
+		// geometric queries
+		virtual bool contains(const Vec2Df& p) { return _rect.contains(p); }
+		virtual bool intersectsRectShallow(const RectF& r) { return _rect.intersects(r); }
+		virtual bool intersectsLine(const LineF& line, float& tNear) { return _rect.intersectsLine(line.start, line.end, tNear); }
 
 		// core game logic (physics, ...)
 		virtual void update(float dt);
@@ -77,5 +81,4 @@ class agp::Object
 		// debugging
 		int id() const { return _id; }
 		virtual std::string name() { return strprintf("Object[%d]", _id); }
-
 };

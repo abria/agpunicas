@@ -82,10 +82,11 @@ class agp::Scene
 		void changeLayerObject(Object* obj, int newLayer);
 		void refreshObjects();
 
-		// objects selection methods
+		// geometric queries
 		virtual ObjectsList objects();
 		virtual ObjectsList objects(const RectF& cullingRect);
 		virtual ObjectsList objects(const PointF& containPoint);
+		virtual ObjectsList raycast(const LineF& line);
 
 		// render
 		virtual void render();

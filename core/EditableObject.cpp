@@ -231,7 +231,7 @@ bool EditableObject::contains(const Vec2Df& p)
 	}
 }
 
-bool EditableObject::shallowIntersects(const RectF& r)
+bool EditableObject::intersectsRectShallow(const RectF& r)
 {
 	if (_multiline.size())
 	{
@@ -241,7 +241,7 @@ bool EditableObject::shallowIntersects(const RectF& r)
 		return false;
 	}
 	else if (_rotRect.angle == 0)
-		return RenderableObject::shallowIntersects(r);
+		return RenderableObject::intersectsRectShallow(r);
 	else
 	{
 		RotatedRectF rotRectRadians = _rotRect;

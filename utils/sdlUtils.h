@@ -802,12 +802,14 @@ namespace agp
         SDL_Renderer* renderer,
         TTF_Font* font,
         const Color& fontColor,
-        int fontStyle)
+        int fontStyle,
+        int wrapLength = 0)
     {
         TTF_SetFontStyle(font, fontStyle);
         TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
         SDL_Color textColor = { fontColor.r, fontColor.g, fontColor.b, fontColor.a };
-        SDL_Surface* textSurface = TTF_RenderText_Blended(font, text.c_str(), textColor);
+        SDL_Surface* textSurface = nullptr;
+        textSurface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), textColor, wrapLength);
         SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
         SDL_SetTextureScaleMode(textTexture, SDL_ScaleModeBest);
         SDL_FreeSurface(textSurface);

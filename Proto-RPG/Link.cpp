@@ -77,7 +77,7 @@ void Link::attack()
 	{
 		_sprite->reset();
 		if (_sword)
-			_scene->killObject(_sword);
+			_sword->kill();
 	}
 
 	_sword = new Sword(this);
@@ -85,7 +85,7 @@ void Link::attack()
 	schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sprites[int(_facingDir)]["attack"])->duration(), [this]() 
 		{
 			_attacking = false; 
-			_scene->killObject(_sword);
+			_sword->kill();
 			_sword = nullptr;
 		});
 }

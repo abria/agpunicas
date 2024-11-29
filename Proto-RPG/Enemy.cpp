@@ -16,7 +16,7 @@ bool Enemy::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
 	DynamicObject::collision(with, begin, normal);
 
 	if (with->to<Sword*>())
-		_scene->killObject(this);
+		kill();
 
 	return false;
 }

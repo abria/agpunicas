@@ -26,7 +26,7 @@ class agp::Clipper : public RenderableObject
 			: RenderableObject(scene, rect, nullptr, layer){}
 		virtual ~Clipper() {}
 
-		virtual void draw(SDL_Renderer* renderer, Transform camera)
+		virtual void draw(SDL_Renderer* renderer, Transform camera) override
 		{
 			// get renderer size on screen
 			int rendWidth, rendHeight;

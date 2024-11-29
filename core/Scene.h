@@ -40,7 +40,7 @@ class agp::Scene
 
 	protected:
 		
-		ObjectsMap  _sortedObjects;	// objects sorted by ascending z-level
+		ObjectsMap _sortedObjects;	// objects sorted by ascending z-level
 		ObjectsSet _newObjects;		// new objects that need to be added
 		ObjectsSet _deadObjects;	// dead objects that need to be deallocated
 		ObjectsLayersList _changeLayerObjects;	// objects that need to change layer

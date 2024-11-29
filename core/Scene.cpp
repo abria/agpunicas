@@ -75,16 +75,26 @@ void Scene::refreshObjects()
 	}
 	_changeLayerObjects.clear();
 
-	for (auto& obj : _deadObjects)
+	for (auto it = _deadObjects.begin(); it != _deadObjects.end(); )
 	{
+		Object* obj = *it;
+
+		if (obj->_itersFromKilled < 2)
+		{
+			++it; // Move to the next element
+			continue;
+		}
+
 		auto& layer = _sortedObjects[obj->layer()];
 		auto removeIt = std::remove(layer.begin(), layer.end(), obj);
 		if (removeIt == layer.end())
 			std::cerr << "Cannot remove " << obj->name() << " from layer " << obj->layer() << ": object not found\n";
 		layer.erase(removeIt, layer.end());
+
+		// Erase the element from the set and advance the iterator safely
+		it = _deadObjects.erase(it); // 'erase' returns an iterator to the next element
 		delete obj;
 	}
-	_deadObjects.clear();
 }
 
 std::list<Object*> Scene::objects()

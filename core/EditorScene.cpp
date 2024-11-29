@@ -435,7 +435,7 @@ void EditorScene::event(SDL_Event& evt)
 			if (underMouse && evt.button.button == SDL_BUTTON_RIGHT)
 			{
 				_editObjects.erase(std::remove(_editObjects.begin(), _editObjects.end(), underMouse), _editObjects.end());
-				killObject(underMouse);
+				underMouse->kill();
 			}
 			else if (_resizingObject)
 				_isResizing = true;

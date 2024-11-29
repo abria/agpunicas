@@ -22,11 +22,15 @@ Object::Object(Scene* scene, const RectF& rect, int layer)
 	_id = created++;
 	_freezed = false;
 	_killed = false;
+	_itersFromKilled = 0;
 	_scene->newObject(this);
 }
 
 void Object::update(float dt)
 {
+	if (_killed)
+		_itersFromKilled++;
+
 	auto iter = _schedulers.begin();
 	for (; iter != _schedulers.end(); )
 	{

@@ -34,6 +34,7 @@ SpriteFactory::SpriteFactory()
 	_spriteSheets["hud"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/hud.png", { 147, 187, 236 });
 	_spriteSheets["tiles"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/stage_tiles.png", _autoTiles["tiles"], { 27, 89, 153 }, { 147, 187, 236 }, 5, true, false);
 	_spriteSheets["link"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/link.png", _autoTiles["link"], { 0, 128, 128 }, { 0, 64, 64 });
+	_spriteSheets["marco"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/marco.png", _autoTiles["marco"], { 255, 0, 255 }, { 0, 255, 0 });
 }
 
 // anchors
@@ -83,7 +84,7 @@ Sprite* SpriteFactory::get(const std::string& id)
 	else if (id == "mario_run")
 		return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][0].begin() + 2, _autoTiles["mario"][0].begin() + 5 }, 20);
 	else if (id == "box")
-		return new AnimatedSprite(_spriteSheets["tiles"], { _autoTiles["tiles"][3].begin(), _autoTiles["tiles"][3].begin() + 3 }, 5, Direction::NONE, {0, 1, 2, 1, 0});
+		return new AnimatedSprite(_spriteSheets["tiles"], { _autoTiles["tiles"][3].begin(), _autoTiles["tiles"][3].begin() + 3 }, 5, {0, 1, 2, 1, 0});
 	else if (id == "hud_coin")
 	{
 		rects.push_back(moveBy(hud_coin, 0, 0));
@@ -99,7 +100,15 @@ Sprite* SpriteFactory::get(const std::string& id)
 	else if (id == "hammer_brother_throw")
 		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][0].begin() + 23, _autoTiles["enemies"][0].begin() + 25 }, 8);
 	else if (id == "link_sword")
-		return new AnimatedSprite(_spriteSheets["link"], { _autoTiles["link"][9].begin(), _autoTiles["link"][9].begin() + 9 }, 22, Direction::NONE, { 0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8 }, 1);
+		return new AnimatedSprite(_spriteSheets["link"], { _autoTiles["link"][9].begin(), _autoTiles["link"][9].begin() + 9 }, 22, { 0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8 }, 1);
+	else if (id == "marco_stand")
+		return new AnimatedSprite(_spriteSheets["marco"], { _autoTiles["marco"][0].begin(), _autoTiles["marco"][0].begin() + 5 }, 10);
+	else if (id == "marco_walk")
+		return new AnimatedSprite(_spriteSheets["marco"], { _autoTiles["marco"][1].begin(), _autoTiles["marco"][1].begin() + 14 }, 10);
+	else if (id == "marco_jump")
+		return new AnimatedSprite(_spriteSheets["marco"], { _autoTiles["marco"][2].begin(), _autoTiles["marco"][2].begin() + 12 }, 10);
+	else if (id == "marco_attack")
+		return new AnimatedSprite(_spriteSheets["marco"], { _autoTiles["marco"][3].begin(), _autoTiles["marco"][3].begin() + 9 }, 30);
 
 	// tiled sprites
 	if (id.compare(0, 4, "pipe") == 0)

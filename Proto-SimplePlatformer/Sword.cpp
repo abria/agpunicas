@@ -19,6 +19,7 @@ using namespace agp;
 Sword::Sword(Mario* mario)
 	: DynamicObject(mario->scene(), RectF(mario->pos().x, mario->pos().y, 2, 2), nullptr, mario->layer() - 1)
 {
+	_fit = false;
 	_link = mario;
 	_facingDir = _link->facingDir();
 	_yGravityForce = 0;

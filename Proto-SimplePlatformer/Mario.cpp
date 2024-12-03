@@ -20,7 +20,17 @@ using namespace agp;
 Mario::Mario(Scene* scene, const PointF& pos)
 	: DynamicObject(scene, RectF( pos.x + 1 / 16.0f, pos.y, 1, 1 ), nullptr)
 {
-	_collider.adjust(0.2f, 0, -0.2f, -1/16.0f);
+	_metalslugdemo = false;
+
+	if (_metalslugdemo)
+	{
+		_fit = false;
+		_rect.adjust(0, -1, 1, 0);
+		defaultCollider();
+		_collider.adjust(0.6f, 0.2f, -0.6f, 0);
+	}
+	else
+		_collider.adjust(0.2f, 0, -0.2f, -1/16.0f);
 
 	_walking = false;
 	_jumping = false;
@@ -33,13 +43,27 @@ Mario::Mario(Scene* scene, const PointF& pos)
 
 	_xLastNonZeroVel = 0;
 
-	_sprites["stand"] = SpriteFactory::instance()->get("mario_stand");
-	_sprites["walk"] = SpriteFactory::instance()->get("mario_walk");
-	_sprites["run"] = SpriteFactory::instance()->get("mario_run");
-	_sprites["skid"] = SpriteFactory::instance()->get("mario_skid");
-	_sprites["jump"] = SpriteFactory::instance()->get("mario_jump");
-	_sprites["die"] = SpriteFactory::instance()->get("mario_die");
-	_sprites["attack"] = SpriteFactory::instance()->get("mario_attack");
+	if (_metalslugdemo)
+	{
+		_sprites["stand"] = SpriteFactory::instance()->get("marco_stand");
+		_sprites["walk"] = SpriteFactory::instance()->get("marco_walk");
+		_sprites["run"] = SpriteFactory::instance()->get("marco_walk");
+		_sprites["skid"] = SpriteFactory::instance()->get("marco_stand");
+		_sprites["jump"] = SpriteFactory::instance()->get("marco_jump");
+		_sprites["die"] = SpriteFactory::instance()->get("mario_die");
+		_sprites["attack"] = SpriteFactory::instance()->get("marco_attack");
+	}
+	else
+	{
+		_sprites["stand"] = SpriteFactory::instance()->get("mario_stand");
+		_sprites["walk"] = SpriteFactory::instance()->get("mario_walk");
+		_sprites["run"] = SpriteFactory::instance()->get("mario_run");
+		_sprites["skid"] = SpriteFactory::instance()->get("mario_skid");
+		_sprites["jump"] = SpriteFactory::instance()->get("mario_jump");
+		_sprites["die"] = SpriteFactory::instance()->get("mario_die");
+		_sprites["attack"] = SpriteFactory::instance()->get("mario_attack");
+	}
+
 	_sprite = _sprites["stand"];
 }
 
@@ -131,6 +155,17 @@ void Mario::attack()
 		return;
 
 	Audio::instance()->playSound("sword");
+
+	if (_metalslugdemo)
+	{
+		_attacking = true;
+		_sprite = _sprites["attack"];
+		schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sprite)->duration(), [this]()
+			{
+				_attacking = false;
+			});
+		return;
+	}
 
 	if (_attacking)
 	{

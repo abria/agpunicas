@@ -32,6 +32,7 @@ class agp::Mario : public DynamicObject
 		bool _attacking;
 		double _xLastNonZeroVel;
 		Sword* _sword;
+		bool _metalslugdemo;
 		
 		std::map<std::string, Sprite*> _sprites;
 

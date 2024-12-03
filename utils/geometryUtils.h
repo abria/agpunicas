@@ -14,6 +14,7 @@
 #include <cmath>
 #include <functional>
 #include <array>
+#include <limits>
 #include <vector>
 #include "SDL.h"
 
@@ -88,6 +89,10 @@ namespace agp
 		}
 #endif
 
+		// validity
+		static inline Vec2D invalid() { return Vec2D(std::numeric_limits<T>::max(), std::numeric_limits<T>::max()); }
+		inline bool valid() { return *this != invalid(); }
+		
 		// operator overloads
 		Vec2D& operator=(const Vec2D& v) = default;
 		Vec2D  operator +  (const Vec2D& v) const { return Vec2D(this->x + v.x, this->y + v.y); }

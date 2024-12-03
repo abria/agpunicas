@@ -27,6 +27,7 @@ class agp::RenderableObject : public Object
 
 		Color _color;
 		Sprite* _sprite;
+		bool _fit;				// whether sprite has to fit rect or expand
 		bool _visible;			// if false, does not draw
 		bool _focused;			// if true, fills with _focusColor color
 		SDL_RendererFlip _flip;	// horizontal/vertical flipping
@@ -41,7 +42,7 @@ class agp::RenderableObject : public Object
 	public:
 
 		RenderableObject(Scene* scene, const RectF& rect, const Color& color, int layer = 0);
-		RenderableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0);
+		RenderableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0, bool fit = true);
 		virtual ~RenderableObject() {}
 
 		// getters/setters

@@ -35,7 +35,8 @@ void TiledSprite::render(
 	Transform camera,
 	const Point& pixelUnitSize,
 	float angle,
-	SDL_RendererFlip flip)
+	SDL_RendererFlip flip,
+	bool fit)
 {
 	int tiles_count = 0;
 

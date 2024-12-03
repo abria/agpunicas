@@ -15,10 +15,9 @@ AnimatedSprite::AnimatedSprite(
 	SDL_Texture* spritesheet,
 	const std::vector<RectI>& frames,
 	float FPS,
-	Direction keepARdir,
 	const std::vector <int> resampling,
 	int loops)
-	: Sprite(spritesheet, frames[0], keepARdir)
+	: Sprite(spritesheet, frames[0])
 {
 	if (resampling.size())
 		for (auto& i : resampling)

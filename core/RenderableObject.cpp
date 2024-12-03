@@ -17,6 +17,7 @@ RenderableObject::RenderableObject(Scene* scene, const RectF& rect, const Color&
 	: Object(scene, rect, layer)
 {
 	_color = color;
+	_fit = true;
 	_flip = SDL_FLIP_NONE;
 	_angle = 0;
 	_angularVelocity = 0;
@@ -29,10 +30,11 @@ RenderableObject::RenderableObject(Scene* scene, const RectF& rect, const Color&
 	_backgroundColor = { 0,0,0,0 };
 }
 
-RenderableObject::RenderableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer)
+RenderableObject::RenderableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer, bool fit)
 	: Object(scene, rect, layer)
 {
 	_color = { 0,0,0,0 };
+	_fit = fit;
 	_flip = SDL_FLIP_NONE;
 	_angle = 0;
 	_angularVelocity = 0;
@@ -59,7 +61,7 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 	}
 
 	if (_sprite)
-		_sprite->render(renderer, _rect, camera, _scene->pixelUnitSize(), _angle, _flip);
+		_sprite->render(renderer, _rect, camera, _scene->pixelUnitSize(), _angle, _flip, _fit);
 	else
 	{
 		SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);

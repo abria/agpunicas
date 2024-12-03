@@ -67,7 +67,8 @@ void TextSprite::render(
 	Transform camera,
 	const Point& pixelUnitSize,
 	float angle,
-	SDL_RendererFlip flip)
+	SDL_RendererFlip flip,
+    bool fit)
 {
 #ifdef WITH_TTF
 

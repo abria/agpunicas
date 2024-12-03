@@ -24,11 +24,12 @@ class agp::Sprite
 
 		SDL_Texture* _spritesheet;		// spritesheet texture
 		RectI _rect;					// in spritesheets coordinates
-		Direction _expandDir;			// how to expand drawRect if its AR differs from _rect 
-
+		
 	public:
 
-		Sprite(SDL_Texture* spritesheet, const RectI& rect = RectI(), Direction expandDir = Direction::NONE);
+		Sprite(
+			SDL_Texture* spritesheet, 
+			const RectI& rect = RectI());
 		virtual ~Sprite() {}
 		RectI rect() { return _rect; }
 
@@ -39,7 +40,8 @@ class agp::Sprite
 			Transform camera,			// scene2view transform
 			const Point& pixelUnitSize,	// scene unit size in pixels
 			float angle = 0,			// rotation in degrees, clockwise
-			SDL_RendererFlip flip = SDL_FLIP_NONE);
+			SDL_RendererFlip flip = SDL_FLIP_NONE,
+			bool fit = true);			// fit within drawRect or expand
 
 		// update method (for logic, animations)
 		virtual void update(float dt) {};

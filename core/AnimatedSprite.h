@@ -36,7 +36,6 @@ class agp::AnimatedSprite : public Sprite
 			SDL_Texture* spritesheet,
 			const std::vector<RectI>& frames,
 			float FPS,
-			Direction keepARdir = Direction::NONE,
 			const std::vector <int> resampling = std::vector<int>(),
 			int loops = MAXINT);
 

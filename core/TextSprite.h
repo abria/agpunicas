@@ -67,5 +67,6 @@ class agp::TextSprite : public Sprite
 			Transform camera,
 			const Point& pixelUnitSize,
 			float angle = 0,
-			SDL_RendererFlip flip = SDL_FLIP_NONE) override;
+			SDL_RendererFlip flip = SDL_FLIP_NONE,
+			bool fit = true) override;
 };

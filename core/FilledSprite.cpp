@@ -25,7 +25,8 @@ void FilledSprite::render(
 	Transform camera,
 	const Point& pixelUnitSize,
 	float angle,
-	SDL_RendererFlip flip)
+	SDL_RendererFlip flip,
+	bool fit)
 {
 	if (_tileSize.x == 0 || _tileSize.y == 0)
 		_tileSize = _rect.size / pixelUnitSize;

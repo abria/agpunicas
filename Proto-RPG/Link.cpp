@@ -21,6 +21,8 @@ using namespace agp;
 Link::Link(Scene* scene, const PointF& pos)
 	: DynamicObject(scene, RectF( pos.x, pos.y, 1, 1.5f ), nullptr, 2)
 {
+	_fit = false;
+
 	_collider.size.x -= 0.2f;
 	_collider.size.y = 0.9f;
 	_collider.center.y = 0.8f;
@@ -40,7 +42,7 @@ Link::Link(Scene* scene, const PointF& pos)
 	setSprite(_sprites[int(_facingDir)]["stand"]);
 
 	// decorations
-	_shadow = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shadow")), _layer - 1);
+	_shadow = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shadow")), _layer - 1, false);
 }
 
 void Link::update(float dt)

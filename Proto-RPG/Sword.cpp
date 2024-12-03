@@ -18,6 +18,7 @@ using namespace agp;
 Sword::Sword(Link* link)
 	: DynamicObject(link->scene(), RectF(link->pos().x, link->pos().y, 2, 2), nullptr, link->layer() - 1)
 {
+	_fit = false;
 	_link = link;
 	_facingDir = link->facingDir();
 

@@ -110,15 +110,15 @@ Sprite* SpriteFactory::get(const std::string& id)
 	else if (id == "linkhouse")
 		return new Sprite(_spriteSheets["linkhouse"]);
 	else if (id == "link_stand_DOWN")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][0][0], Direction::DOWN);
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][0][0]);
 	else if (id == "link_stand_UP")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][4][0], Direction::UP);
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][4][0]);
 	else if (id == "link_stand_RIGHT")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0], Direction::RIGHT);
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0]);
 	else if (id == "link_stand_LEFT")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0], Direction::LEFT);
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0]);
 	else if (id == "link_shadow")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][6].back(), Direction::UP);
+		return new Sprite(_spriteSheets["player"], _autoTiles["player"][6].back());
 	else if (id == "npc_example")
 		return new Sprite(_spriteSheets["npcs_other_worlds"], RectI(556, 67, 20, 26));
 
@@ -152,25 +152,25 @@ Sprite* SpriteFactory::get(const std::string& id)
 
 	// animated sprites
 	else if (id == "link_walk_DOWN")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][0].begin() + 1, _autoTiles["player"][0].begin() + 8 }, 20, Direction::UP);
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][0].begin() + 1, _autoTiles["player"][0].begin() + 8 }, 20);
 	else if (id == "link_attack_DOWN")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][1].begin(), _autoTiles["player"][1].begin() + 6 }, 44, Direction::UP, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][1].begin(), _autoTiles["player"][1].begin() + 6 }, 44, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
 	else if (id == "link_walk_UP")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][4].begin() + 1, _autoTiles["player"][4].begin() + 8 }, 20, Direction::UP);
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][4].begin() + 1, _autoTiles["player"][4].begin() + 8 }, 20);
 	else if (id == "link_attack_UP")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][5].begin(), _autoTiles["player"][5].begin() + 6 }, 44, Direction::UP, {0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5}, 1);
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][5].begin(), _autoTiles["player"][5].begin() + 6 }, 44, {0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5}, 1);
 	else if (id == "link_walk_RIGHT" || id == "link_walk_LEFT")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][2].begin() + 1, _autoTiles["player"][2].begin() + 8 }, 20, Direction::UP);
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][2].begin() + 1, _autoTiles["player"][2].begin() + 8 }, 20);
 	else if (id == "link_attack_RIGHT" || id == "link_attack_LEFT")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][3].begin(), _autoTiles["player"][3].begin() + 6 }, 44, id == "link_attack_RIGHT" ? Direction::RIGHT : Direction::LEFT, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][3].begin(), _autoTiles["player"][3].begin() + 6 }, 44, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
 	else if (id == "link_sword_RIGHT")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][9].begin(), _autoTiles["player"][9].begin() + 9 }, 44, Direction::NONE, {0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8}, 1);
+		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][9].begin(), _autoTiles["player"][9].begin() + 9 }, 44, {0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8}, 1);
 	else if (id == "soldier_attack_DOWN")
-		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][0].begin(), _autoTiles["enemies"][0].begin() + 4 }, 8, Direction::DOWN);
+		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][0].begin(), _autoTiles["enemies"][0].begin() + 4 }, 8);
 	else if (id == "soldier_attack_RIGHT" || id == "soldier_attack_LEFT")
-		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][2].begin(), _autoTiles["enemies"][2].begin() + 3 }, 6, id == "soldier_attack_RIGHT" ? Direction::RIGHT : Direction::LEFT);
+		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][2].begin(), _autoTiles["enemies"][2].begin() + 3 }, 6);
 	else if (id == "soldier_attack_UP")
-		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][4].begin(), _autoTiles["enemies"][4].begin() + 4 }, 8, Direction::UP);
+		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][4].begin(), _autoTiles["enemies"][4].begin() + 4 }, 8);
 	else if (id == "soldier_DOWN")
 		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][1].begin(), _autoTiles["enemies"][1].begin() + 3 }, 6);
 	else if (id == "soldier_RIGHT" || id == "soldier_LEFT")
@@ -206,9 +206,9 @@ Sprite* SpriteFactory::getChar(char c)
 	else if (c == '.')
 		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][27]);
 	else if (c == ',')
-		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][28], Direction::UP);
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][28]);
 	else if (c == '\'')
-		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][28], Direction::DOWN);
+		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][28]);
 	else if (c == '!')
 		return new Sprite(_spriteSheets["fonts"], _autoComponents["fonts"][44]);
 	else if (c == '?')

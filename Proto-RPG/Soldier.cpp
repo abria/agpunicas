@@ -10,6 +10,7 @@ using namespace agp;
 Soldier::Soldier(Scene* scene, const PointF& pos, const RectF& patrolRect)
 	: Enemy(scene, RectF(pos.x, pos.y, 1.625f, 2), nullptr, 1)
 {
+	_fit = false;
 	_patrolArea = patrolRect;
 	_currentWaypointIndex = 0;
 	_state = State::PATROL;

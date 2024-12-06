@@ -17,6 +17,7 @@
 #include "timeUtils.h"
 #include "stringUtils.h"
 #include "Audio.h"
+#include "OpenGLWindow.h"
 
 using namespace agp;
 
@@ -27,7 +28,13 @@ Game::Game(const std::string& windowTitle, const Point& windowSize, float aspect
 	_running = false;
 	_reset = false;
 	_running = false;
+#ifdef WITH_SHADERS
+	_window = new OpenGLWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
+	_window->init();
+#else
 	_window = new Window(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
+	_window->init();
+#endif
 	_currentFPS = 0;
 }
 

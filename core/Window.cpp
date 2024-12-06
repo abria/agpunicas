@@ -20,30 +20,18 @@ Window::Window(const std::string& title, int width, int height)
 	_renderer = nullptr;
 	_title = title;
 	_color = Color(128, 128, 128);
+	_width = width;
+	_height = height;
 
 	if (SDL_Init(SDL_INIT_VIDEO))
 		throw SDL_GetError();
+}
 
-	_window = SDL_CreateWindow(
-		_title.c_str(),
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
-		width,
-		height,
-		SDL_WINDOW_RESIZABLE
-	);
-	if(!_window)
-		throw SDL_GetError();
-
-	_renderer = SDL_CreateRenderer(
-		_window,
-		-1,
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-	);
-	if(!_renderer)
-		throw SDL_GetError();
-
-	SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+void Window::init()
+{
+	preWindowCreation();
+	initWindow();
+	initRenderer();
 }
 
 Window::~Window()
@@ -52,9 +40,46 @@ Window::~Window()
 	SDL_DestroyWindow(_window);
 }
 
+Uint32 Window::windowFlags()
+{
+	return SDL_WINDOW_RESIZABLE;
+}
+
+void Window::preWindowCreation()
+{
+	// Base class does nothing; subclasses can override
+}
+
+void Window::initWindow()
+{
+	_window = SDL_CreateWindow(
+		_title.c_str(),
+		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED,
+		_width,
+		_height,
+		windowFlags()
+	);
+	if (!_window)
+		throw SDL_GetError();
+}
+
+void Window::initRenderer()
+{
+	_renderer = SDL_CreateRenderer(
+		_window,
+		-1,
+		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+	);
+	if (!_renderer)
+		throw SDL_GetError();
+
+	SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+}
+
 void Window::render(const std::vector<Scene*>& scenes)
 {
-	SDL_SetRenderDrawColor(_renderer, _color.r, _color.b, _color.g, 255);
+	SDL_SetRenderDrawColor(_renderer, _color.r, _color.g, _color.b, 255);
 	SDL_RenderClear(_renderer);
 
 	for(auto scene : scenes)

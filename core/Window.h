@@ -24,17 +24,24 @@ namespace agp
 // - renders the given scenes
 class agp::Window
 {
-	private:
+	protected:
 
 		SDL_Window* _window;		// SDL window handle
 		SDL_Renderer* _renderer;	// SDL renderer handle
 		Color _color;				// window attribute
-		//int _height, _width;		// stored in _renderer
+		int _height, _width;		
 		std::string _title;			// window attribute
+
+		// overridable helper functions
+		virtual Uint32 windowFlags();
+		virtual void preWindowCreation();
+		virtual void initWindow();
+		virtual void initRenderer();
 
 	public:
 
 		Window(const std::string& title, int width, int height);
+		virtual void init();
 		~Window();
 
 		// getter/setters
@@ -42,5 +49,5 @@ class agp::Window
 		void setColor(const Color& c) { _color = c; }
 
 		// render on screen
-		void render(const std::vector<Scene*> & scenes);
+		virtual void render(const std::vector<Scene*> & scenes);
 };

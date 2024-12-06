@@ -580,9 +580,9 @@ namespace agp
 		inline bool intersectsLine(const Vec2D<T>& p0, const Vec2D<T>& p1, T& tNear)
 		{
 			// Step 1: Transform the line to the local coordinate system of the rotated rectangle
-			T angle = yUp ? -angle : angle; // Adjust for y-axis orientation
-			Vec2D<T> localP0 = p0.rot(-angle, center, yUp);
-			Vec2D<T> localP1 = p1.rot(-angle, center, yUp);
+			T anglec = yUp ? -angle : angle; // Adjust for y-axis orientation
+			Vec2D<T> localP0 = p0.rot(-anglec, center, yUp);
+			Vec2D<T> localP1 = p1.rot(-anglec, center, yUp);
 
 			// Step 2: Define the axis-aligned rectangle in the local system
 			Rect<T> localRect;

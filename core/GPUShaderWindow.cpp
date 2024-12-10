@@ -6,7 +6,7 @@
 
 #ifdef WITH_SHADERS
 
-#include "OpenGLWindow.h"
+#include "GPUShaderWindow.h"
 #include "Scene.h"
 #include "stringUtils.h"
 #include <stdexcept>
@@ -43,14 +43,14 @@ void main()
 )glsl";
 
 
-OpenGLWindow::OpenGLWindow(const std::string& title, int width, int height)
+GPUShaderWindow::GPUShaderWindow(const std::string& title, int width, int height)
     : Window(title, width, height), _glContext(nullptr), _targetTexture(nullptr),
     _program(0), _vao(0), _vbo(0)
 {
     // The Window base constructor calls SDL_Init, etc.
 }
 
-OpenGLWindow::~OpenGLWindow()
+GPUShaderWindow::~GPUShaderWindow()
 {
     // Clean up OpenGL resources
     if (_program) glDeleteProgram(_program);
@@ -67,13 +67,13 @@ OpenGLWindow::~OpenGLWindow()
     }
 }
 
-Uint32 OpenGLWindow::windowFlags()
+Uint32 GPUShaderWindow::windowFlags()
 {
     // Enable OpenGL
     return Window::windowFlags() | SDL_WINDOW_OPENGL;
 }
 
-void OpenGLWindow::preWindowCreation()
+void GPUShaderWindow::preWindowCreation()
 {
     // Set OpenGL attributes before window creation
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -84,7 +84,7 @@ void OpenGLWindow::preWindowCreation()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 }
 
-void OpenGLWindow::initWindow()
+void GPUShaderWindow::initWindow()
 {
     // Call base implementation to create the window
     Window::initWindow();
@@ -128,7 +128,7 @@ int findOpenGLRenderDriverIndex()
     return -1; // OpenGL renderer not found
 }
 
-void OpenGLWindow::initRenderer()
+void GPUShaderWindow::initRenderer()
 {
     // Find OpenGL renderer index
     int openglIndex = findOpenGLRenderDriverIndex();
@@ -167,14 +167,14 @@ void OpenGLWindow::initRenderer()
         throw SDL_GetError();
 }
 
-void OpenGLWindow::initOpenGL()
+void GPUShaderWindow::initOpenGL()
 {
     // Basic OpenGL state
     glViewport(0, 0, _width, _height);
     glDisable(GL_DEPTH_TEST);
 }
 
-void OpenGLWindow::createShaderProgram()
+void GPUShaderWindow::createShaderProgram()
 {
     // Utility function to compile a shader
     auto compileShader = [&](const char* src, GLenum type) 
@@ -216,7 +216,7 @@ void OpenGLWindow::createShaderProgram()
     glDeleteShader(fs);
 }
 
-void OpenGLWindow::createFullScreenQuad()
+void GPUShaderWindow::createFullScreenQuad()
 {
     // A simple full-screen quad covering the entire screen
     // Positions (x, y) and texture coords (u, v)
@@ -248,7 +248,7 @@ void OpenGLWindow::createFullScreenQuad()
     glBindVertexArray(0);
 }
 
-void OpenGLWindow::render(const std::vector<Scene*>& scenes)
+void GPUShaderWindow::render(const std::vector<Scene*>& scenes)
 {
     // Render scenes to the target texture
     SDL_SetRenderTarget(_renderer, _targetTexture);
@@ -271,7 +271,6 @@ void OpenGLWindow::render(const std::vector<Scene*>& scenes)
     // Now use OpenGL to draw a fullscreen quad with the texture
     // Bind the SDL texture as an OpenGL texture
     float w, h;
-    GLuint texID;
     if (SDL_GL_BindTexture(_targetTexture, &w, &h) != 0)
         throw ("Failed to bind SDL texture to OpenGL texture");
 

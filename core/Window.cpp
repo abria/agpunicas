@@ -11,6 +11,7 @@
 #include "Window.h"
 #include "View.h"
 #include "Scene.h"
+#include "stringUtils.h"
 
 using namespace agp;
 
@@ -40,14 +41,14 @@ Window::~Window()
 	SDL_DestroyWindow(_window);
 }
 
+Uint32 Window::rendererFlags()
+{
+	return SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+}
+
 Uint32 Window::windowFlags()
 {
 	return SDL_WINDOW_RESIZABLE;
-}
-
-void Window::preWindowCreation()
-{
-	// Base class does nothing; subclasses can override
 }
 
 void Window::initWindow()
@@ -69,12 +70,14 @@ void Window::initRenderer()
 	_renderer = SDL_CreateRenderer(
 		_window,
 		-1,
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+		rendererFlags()
 	);
 	if (!_renderer)
 		throw SDL_GetError();
 
 	SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+
+	resize(_width, _height);
 }
 
 void Window::render(const std::vector<Scene*>& scenes)
@@ -82,8 +85,16 @@ void Window::render(const std::vector<Scene*>& scenes)
 	SDL_SetRenderDrawColor(_renderer, _color.r, _color.g, _color.b, 255);
 	SDL_RenderClear(_renderer);
 
-	for(auto scene : scenes)
+	for (auto scene : scenes)
 		scene->render();
 
 	SDL_RenderPresent(_renderer);
+}
+
+void Window::resize(int newWidth, int newHeight)
+{
+	_width = newWidth;
+	_height = newHeight;
+
+	SDL_SetWindowSize(_window, _width, _height);
 }

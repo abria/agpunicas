@@ -17,24 +17,34 @@
 #include "timeUtils.h"
 #include "stringUtils.h"
 #include "Audio.h"
-#include "OpenGLWindow.h"
+#include "GPUShaderWindow.h"
+#include "CPUShaderWindow.h"
 
 using namespace agp;
 
-Game::Game(const std::string& windowTitle, const Point& windowSize, float aspectRatio)
+Game::Game(
+	const std::string& windowTitle, 
+	const Point& windowSize, 
+	float aspectRatio,
+	Rendering rendering)
 {
 	_aspectRatio = aspectRatio;
 	_scenesToPop = 0;
 	_running = false;
 	_reset = false;
 	_running = false;
+
+	if(rendering == Rendering::SDL)
+		_window = new Window(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
+	else if (rendering == Rendering::SDL_CPU_SHADERS)
+		_window = new CPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
+	else if (rendering == Rendering::SDL_OPENGL_SHADERS)
 #ifdef WITH_SHADERS
-	_window = new OpenGLWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
-	_window->init();
+		_window = new GPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
 #else
-	_window = new Window(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
-	_window->init();
+		throw "GPUShaderWindow not supported, you need to activate WITH_SHADERS at CMake time"
 #endif
+	_window->init();
 	_currentFPS = 0;
 }
 
@@ -101,8 +111,13 @@ void Game::dispatchEvent(SDL_Event& evt)
 {
 	// window events are dispatched to all scenes for their views adjustments
 	if (evt.type == SDL_WINDOWEVENT)
+	{
+		if (evt.window.event == SDL_WINDOWEVENT_RESIZED)
+			_window->resize(evt.window.data1, evt.window.data2);
+
 		for (auto& scene : _scenes)
 			scene->event(evt);
+	}
 
 	// all other events are dispatched from top to down through the scene stack
 	// if a blocking layer is encountered, event propagation stops

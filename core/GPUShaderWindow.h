@@ -17,12 +17,15 @@
 
 namespace agp
 {
-	class OpenGLWindow;
+	class GPUShaderWindow;
 }
 
-class agp::OpenGLWindow : public agp::Window
+// GPUShaderWindow class
+// - adds OpenGL shaders frame post-processing to Window's rendering pipeline
+class agp::GPUShaderWindow : public agp::Window
 {
 	protected:
+
 		SDL_GLContext _glContext;
 		SDL_Texture* _targetTexture; // render-to-texture target
 
@@ -31,6 +34,7 @@ class agp::OpenGLWindow : public agp::Window
 		GLuint _vao;
 		GLuint _vbo;
 
+		// helper functions
 		virtual Uint32 windowFlags() override;
 		virtual void preWindowCreation() override;
 		virtual void initWindow() override;
@@ -40,10 +44,11 @@ class agp::OpenGLWindow : public agp::Window
 		virtual void createFullScreenQuad();
 
 	public:
-		OpenGLWindow(const std::string& title, int width, int height);
-		virtual ~OpenGLWindow();
 
-		// Override render to apply the shader after scene rendering
+		GPUShaderWindow(const std::string& title, int width, int height);
+		virtual ~GPUShaderWindow();
+
+		// override (+GPU shader)
 		virtual void render(const std::vector<Scene*>& scenes) override;
 };
 

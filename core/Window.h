@@ -8,7 +8,6 @@
 // ----------------------------------------------------------------
 
 #pragma once
-#include <vector>
 #include <string>
 #include "SDL.h"
 #include "graphicsUtils.h"
@@ -29,20 +28,23 @@ class agp::Window
 		SDL_Window* _window;		// SDL window handle
 		SDL_Renderer* _renderer;	// SDL renderer handle
 		Color _color;				// window attribute
-		int _height, _width;		
+		int _height, _width;		// window attribute
 		std::string _title;			// window attribute
-
+		
 		// overridable helper functions
 		virtual Uint32 windowFlags();
-		virtual void preWindowCreation();
+		virtual Uint32 rendererFlags();
+		virtual void preWindowCreation() {}
 		virtual void initWindow();
 		virtual void initRenderer();
 
 	public:
 
 		Window(const std::string& title, int width, int height);
-		virtual void init();
 		~Window();
+
+		// init (to be called once after creation)
+		virtual void init();
 
 		// getter/setters
 		SDL_Renderer* renderer() { return _renderer; }
@@ -50,4 +52,7 @@ class agp::Window
 
 		// render on screen
 		virtual void render(const std::vector<Scene*> & scenes);
+
+		// resize
+		virtual void resize(int newWidth, int newHeight);
 };

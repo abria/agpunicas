@@ -30,7 +30,7 @@ class agp::Game : public Singleton<Game>
 
 	public:
 
-		//typedef std::set< Scene*> SceneSet;
+		enum class Rendering { SDL, SDL_CPU_SHADERS, SDL_OPENGL_SHADERS };
 
 	protected:
 
@@ -49,7 +49,11 @@ class agp::Game : public Singleton<Game>
 
 	public: 
 		
-		Game(const std::string& windowTitle = "Game", const Point& windowSize = { 600,600 }, float aspectRatio = -1);
+		Game(
+			const std::string& windowTitle = "Game", 
+			const Point& windowSize = { 600,600 }, 
+			float aspectRatio = -1,
+			Rendering rendering = Rendering::SDL);
 
 		// getters
 		Window* window() { return _window; }

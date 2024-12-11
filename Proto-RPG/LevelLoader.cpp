@@ -22,6 +22,7 @@
 #include "Portal.h"
 #include "mathUtils.h"
 #include "NPC.h"
+#include "Clipper.h"
 
 using namespace agp;
 
@@ -85,6 +86,8 @@ void LevelLoader::loadJson(
 				new StaticObject(world, rrect, nullptr, 1);
 			else if (_categories[category] == "Portal")
 				portals[name].push_back(new Portal(world, rrect));
+			else if (_categories[category] == "Clipper")
+				new Clipper(world, rrect.toRect());
 		}
 		else if (jObj.contains("multiline"))
 		{
@@ -121,10 +124,11 @@ Scene* LevelLoader::load(const std::string& name)
 	if (name == "overworld")
 	{
 		RPGGameScene* world = new RPGGameScene(RectF(0, 0, 256, 256), { 16,16 }, 1 / 100.0f);
+		world->setBackgroundColor({ 128, 128, 128 });
 
 		// backgrounds
-		new RenderableObject(world, RectF(0, 0, 256, 256), spriteLoader->get("overworld"));
-		new RenderableObject(world, RectF(-16, -14, 16, 14), spriteLoader->get("linkhouse"), 0);
+		world->addBackgroundImage(new RenderableObject(world, RectF(0, 0, 256, 256), spriteLoader->get("overworld")));
+		world->addBackgroundImage(new RenderableObject(world, RectF(-16, -14, 16, 14), spriteLoader->get("linkhouse"), 0));
 
 		// NPCs
 		new NPC(world, PointF(-8, -7));
@@ -132,12 +136,16 @@ Scene* LevelLoader::load(const std::string& name)
 		
 		// player
 		Link* player = new Link(world, PointF(140, 179));
+		//Link* player = new Link(world, PointF(138, 189));
 		world->setPlayer(player);
 
 		//new StaticObject(world, RotatedRectF(140, 185, 5, 2, PI/8), spriteLoader->get("linkhouse"), 2);
 
 		// load jObj and convert regions to game objects
 		loadJson(world, std::string(SDL_GetBasePath()) + "EditorScene.json", player);
+
+		// preparar data structures for pathfinding
+		//world->computeGridGraph();
 
 		return world;
 	}

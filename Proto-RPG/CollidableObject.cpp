@@ -38,6 +38,16 @@ void CollidableObject::defaultCollider()
 	_collider.angle = deg2rad(_angle);
 }
 
+bool CollidableObject::intersectsRect(const RectF& r)
+{
+	if (!intersectsRectShallow(r))
+		return false;
+
+	Vec2Df axis;
+	float depth;
+	return checkCollisionSAT(sceneCollider().verticesVec(), r.verticesVec(), axis, depth);
+}
+
 bool CollidableObject::intersectsRectShallow(const RectF& r)
 {
 	return sceneCollider().boundingRect().intersects(r);

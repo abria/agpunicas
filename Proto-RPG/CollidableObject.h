@@ -53,6 +53,7 @@ class agp::CollidableObject : public MovableObject
 		bool collidable() const { return _collidable; }
 
 		// extends intersection (+rotated rect)
+		virtual bool intersectsRect(const RectF& r) override;
 		virtual bool intersectsRectShallow(const RectF& r) override;
 
 		// extends line intersection (+rotated rect)

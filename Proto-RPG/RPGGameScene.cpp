@@ -17,12 +17,19 @@
 #include "RPGGame.h"
 #include "HUD.h"
 #include "DialogBox.h"
+#include "shaderUtils.h"
+#include "CPUShaderWindow.h"
+#include "StaticObject.h"
 
 using namespace agp;
 
 RPGGameScene::RPGGameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
-	: GameScene(rect, pixelUnitSize, dt)
+	: GameScene(rect, pixelUnitSize, dt, true, 1.0f)
 {
+	_transitionEnter = false;
+	_transitionExit = false;
+	_transitionCounter = 0;
+	
 	// SNES aspect ratio
 	_view->setRect(RectF(0, 0, 16, 14));
 }
@@ -67,4 +74,49 @@ void RPGGameScene::displayGameSceneOnly(bool on)
 	GameScene::displayGameSceneOnly(on);
 
 	HUD::instance()->setVisible(!on);
+}
+
+void RPGGameScene::setTransitionEnter(bool active) 
+{ 
+	if (_transitionEnter && !active)
+		_transitionCounter = 0;
+	_transitionEnter = active; 
+}
+
+void RPGGameScene::setTransitionExit(bool active) 
+{ 
+	if (_transitionExit && !active)
+		_transitionCounter = 0;
+	_transitionExit = active; 
+}
+
+void RPGGameScene::update(float timeToSimulate)
+{
+	GameScene::update(timeToSimulate);
+
+	if (_transitionEnter || _transitionExit)
+	{
+		_transitionCounter += timeToSimulate;
+		float progress = (std::min)(_transitionCounter, 1.0f);
+		float radius = _transitionEnter ? 1 - progress : progress;
+		PointF center = view()->mapFromScene(player()->rect().center());
+
+		dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(
+			[center, radius](Uint32* pixels, int width, int height, int pitch)
+			{
+				circleMaskShader(pixels, width, height, pitch, center.x, center.y, radius);
+			});
+	}
+	else
+		dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
+}
+
+bool RPGGameScene::isEmpty(const RectF& rect)
+{
+	for (auto& layer : _sortedObjects)
+		for (auto& obj : layer.second)
+			if (dynamic_cast<StaticObject*>(obj) && obj->intersectsRect(rect))
+				return false;
+
+	return true;
 }

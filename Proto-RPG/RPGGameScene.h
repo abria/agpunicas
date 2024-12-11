@@ -14,6 +14,8 @@ namespace agp
 {
 	class RPGGameScene;
 	class Link;
+	class LevelLoader;
+	class Grid;
 }
 
 // RPGGameScene class
@@ -21,6 +23,11 @@ namespace agp
 class agp::RPGGameScene : public GameScene
 {
 	protected:
+
+		// scene transition
+		bool _transitionEnter;
+		bool _transitionExit;
+		float _transitionCounter;
 
 		// helper functions overrides
 		virtual void updateControls(float timeToSimulate) override;
@@ -30,9 +37,19 @@ class agp::RPGGameScene : public GameScene
 		RPGGameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
 		virtual ~RPGGameScene() {};
 
+		// getters/setters
+		virtual void setTransitionEnter(bool active);
+		virtual void setTransitionExit(bool active);
+
 		// override (+custom game controls)
 		virtual void event(SDL_Event& evt) override;
 
 		// override (+hide HUD)
 		virtual void displayGameSceneOnly(bool on) override;
+
+		// override (+transitions)
+		virtual void update(float timeToSimulate) override;
+
+		// override (+collidable objects only)
+		virtual bool isEmpty(const RectF& rect) override;
 };

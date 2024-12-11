@@ -20,26 +20,33 @@ namespace agp
 // - applies clip rect on the screen to all objects drawn on higher layers
 class agp::Clipper : public RenderableObject
 {
+	protected:
+
+		bool _inverted;			// whether to clip objects inside (default=true)
+								// or outside (=false) the clipping rect
+
 	public:
 
-		Clipper(Scene* scene, const RectF& rect, int layer = 0)
-			: RenderableObject(scene, rect, nullptr, layer){}
+		Clipper(Scene* scene, const RectF& rect, int layer = 1000, bool inverted = true)
+			: RenderableObject(scene, rect, nullptr, layer){
+			_inverted = inverted;
+		}
 		virtual ~Clipper() {}
 
 		virtual void draw(SDL_Renderer* renderer, Transform camera) override
 		{
-			// get renderer size on screen
-			int rendWidth, rendHeight;
-			SDL_GetRendererOutputSize(renderer, &rendWidth, &rendHeight);
+			SDL_Rect drawRect = RectF(camera(_rect.tl()), camera(_rect.br())).toSDL();
+			SDL_RenderSetClipRect(renderer, &drawRect);
 
-			// clipRect in screen coordinates
-			SDL_Rect clipRect = {
-				int(_rect.pos.x * rendWidth),
-				int(_rect.pos.y * rendHeight),
-				int(_rect.size.x * rendWidth),
-				int(_rect.size.y * rendHeight) };
-
-			SDL_RenderSetClipRect(renderer, &clipRect);
+			if (_inverted)
+			{
+				// Choose the background color or whatever fill is needed
+				Color bgColor = _scene->backgroundColor();
+				SDL_SetRenderDrawColor(renderer, bgColor.b, bgColor.g, bgColor.r, 255);
+				SDL_RenderFillRect(renderer, &drawRect);
+				for (auto b : _scene->backgroundImages())
+					b->draw(renderer, camera);
+			}
 		}
 
 		virtual std::string name() override {

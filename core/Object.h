@@ -62,6 +62,7 @@ class agp::Object
 
 		// geometric queries
 		virtual bool contains(const Vec2Df& p) { return _rect.contains(p); }
+		virtual bool intersectsRect(const RectF& r) { return _rect.intersects(r); }
 		virtual bool intersectsRectShallow(const RectF& r) { return _rect.intersects(r); }
 		virtual bool intersectsLine(const LineF& line, float& tNear) { return _rect.intersectsLine(line.start, line.end, tNear); }
 

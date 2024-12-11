@@ -21,6 +21,7 @@ namespace agp
 	class Object;
 	class Scene;
 	class View;
+	class RenderableObject;
 }
 
 // Scene class to be used in a Scene stack
@@ -28,7 +29,7 @@ namespace agp
 //   with interface methods like rendering, logic update, and event processing
 // - contains objects sorted by ascending z-level (painter algorithm)
 // - provides efficient access to objects
-// - provides globale action scheduling
+// - provides global action scheduling
 class agp::Scene
 {
 	public:
@@ -37,6 +38,7 @@ class agp::Scene
 		typedef std::list< Object*> ObjectsList;
 		typedef std::set< Object*> ObjectsSet;
 		typedef std::list< std::pair<int, Object*>> ObjectsLayersList;
+		typedef std::vector < RenderableObject*> Renderables;
 
 	protected:
 		
@@ -47,6 +49,7 @@ class agp::Scene
 		RectF _rect;				// the scene (world) rectangle
 		Point _pixelUnitSize;		// unit size in pixels
 		Color _backgroundColor;		// background color
+		Renderables _backgroundImages; // background images
 		View* _view;				// associated view for rendering
 		bool _visible;				// whether has to be rendered
 		bool _active;				// whether has to be updated
@@ -65,15 +68,17 @@ class agp::Scene
 		void setRect(const RectF& r) { _rect = r; }
 		View* view() { return _view; }
 		const Color& backgroundColor() { return _backgroundColor; }
-		void setBackgroundColor(const Color& c) { _backgroundColor = c; }
+		virtual void setBackgroundColor(const Color& c) { _backgroundColor = c; }
+		Renderables backgroundImages() { return _backgroundImages; }
+		virtual void addBackgroundImage(RenderableObject* img) { _backgroundImages.push_back(img); }
 		bool visible() { return _visible; }
-		void setVisible(bool on) { _visible = on; }
+		virtual void setVisible(bool on) { _visible = on; }
 		bool active() { return _active; }
-		void setActive(bool on) { _active = on; }
+		virtual void setActive(bool on) { _active = on; }
 		bool blocking() { return _blocking; }
-		void setBlocking(bool on) { _blocking = on; }
+		virtual void setBlocking(bool on) { _blocking = on; }
 		bool rectsVisible() const { return _rectsVisible; }
-		void toggleRects() { _rectsVisible = !_rectsVisible; }
+		virtual void toggleRects() { _rectsVisible = !_rectsVisible; }
 		Point pixelUnitSize() { return _pixelUnitSize; }
 
 		// add/remove objects
@@ -87,6 +92,7 @@ class agp::Scene
 		virtual ObjectsList objects(const RectF& cullingRect);
 		virtual ObjectsList objects(const PointF& containPoint);
 		virtual ObjectsList raycast(const LineF& line);
+		virtual bool isEmpty(const RectF& rect);
 
 		// render
 		virtual void render();

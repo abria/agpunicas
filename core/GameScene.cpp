@@ -15,10 +15,11 @@
 #include "OverlayScene.h"
 #include "EditorScene.h"
 #include "EditorUI.h"
+#include "Grid.h"
 
 using namespace agp;
 
-GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
+GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt, bool grid, float gridCellSize)
 	: Scene(rect, pixelUnitSize)
 {
 	_dt = dt;
@@ -35,6 +36,14 @@ GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 	float ar = Game::instance()->aspectRatio();
 	if(ar)
 		_view->setFixedAspectRatio(ar);
+
+	_grid = grid ? new Grid(this, gridCellSize) : nullptr;
+}
+
+GameScene::~GameScene() 
+{
+	if (_grid)
+		delete _grid;
 }
 
 void GameScene::render()

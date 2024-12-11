@@ -246,6 +246,11 @@ namespace agp
 					Vec2D<T>(right(), bottom()),
 					Vec2D<T>(right(), top()) };
 		}
+		inline std::vector < Vec2D<T> > verticesVec() const
+		{
+			std::array < Vec2D<T>, 4> vertices_arr = vertices();
+			return std::vector < Vec2D<T> >(vertices_arr.begin(), vertices_arr.end());
+		}
 
 		// string
 		const std::string str() const { return std::string("R[") + std::to_string(pos.x) + ", " + std::to_string(pos.y) + ", " + std::to_string(size.x) + ", " + std::to_string(size.y) + "]" + "(yUp=" + (yUp ? "true)" : "false)"); }

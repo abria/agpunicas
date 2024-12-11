@@ -155,6 +155,16 @@ agp::Scene::ObjectsList Scene::raycast(const LineF& line)
 	return result;
 }
 
+bool Scene::isEmpty(const RectF& rect)
+{
+	for (auto& layer : _sortedObjects)
+		for (auto& obj : layer.second)
+			if (obj->intersectsRect(rect))
+				return false;
+
+	return true;
+}
+
 void Scene::render()
 {
 	if (_visible && _view)

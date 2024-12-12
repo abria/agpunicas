@@ -67,6 +67,20 @@ void RPGGameScene::event(SDL_Event& evt)
 		link->attack();
 	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_I && !evt.key.repeat)
 		link->interact();
+	else if (evt.key.keysym.scancode == SDL_SCANCODE_L && !evt.key.repeat)
+	{
+		if (evt.type == SDL_KEYDOWN)
+		{
+			PointF center = view()->mapFromScene(player()->rect().center());
+			dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(
+				[center](Uint32* pixels, int width, int height, int pitch)
+				{
+					lightShader(pixels, width, height, pitch, center.x, center.y);
+				});
+		}
+		else if (evt.type == SDL_KEYUP)
+			dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
+	}
 }
 
 void RPGGameScene::displayGameSceneOnly(bool on) 
@@ -79,14 +93,20 @@ void RPGGameScene::displayGameSceneOnly(bool on)
 void RPGGameScene::setTransitionEnter(bool active) 
 { 
 	if (_transitionEnter && !active)
+	{
 		_transitionCounter = 0;
+		dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
+	}
 	_transitionEnter = active; 
 }
 
 void RPGGameScene::setTransitionExit(bool active) 
 { 
 	if (_transitionExit && !active)
+	{
 		_transitionCounter = 0;
+		dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
+	}
 	_transitionExit = active; 
 }
 
@@ -106,9 +126,7 @@ void RPGGameScene::update(float timeToSimulate)
 			{
 				circleMaskShader(pixels, width, height, pitch, center.x, center.y, radius);
 			});
-	}
-	else
-		dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
+	}		
 }
 
 bool RPGGameScene::isEmpty(const RectF& rect)

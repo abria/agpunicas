@@ -18,7 +18,7 @@
 
 using namespace agp;
 
-GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt, bool grid, float gridCellSize)
+GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 	: Scene(rect, pixelUnitSize)
 {
 	_dt = dt;

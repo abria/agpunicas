@@ -56,7 +56,7 @@ class agp::GameScene : public Scene
 
 	public:
 
-		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt, bool grid=false, float gridCellSize=1);
+		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
 		virtual ~GameScene() {}
 
 		Object* player() { return _player; }

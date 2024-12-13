@@ -34,7 +34,7 @@ Game::Game(
 	_reset = false;
 	_running = false;
 
-	if(rendering == Rendering::SDL)
+	if (rendering == Rendering::SDL)
 		_window = new Window(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
 	else if (rendering == Rendering::SDL_CPU_SHADERS)
 		_window = new CPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
@@ -42,7 +42,7 @@ Game::Game(
 #ifdef WITH_SHADERS
 		_window = new GPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
 #else
-		throw "GPUShaderWindow not supported, you need to activate WITH_SHADERS at CMake time"
+		throw "GPUShaderWindow not supported, you need to activate WITH_SHADERS at CMake time";
 #endif
 	_window->init();
 	_currentFPS = 0;

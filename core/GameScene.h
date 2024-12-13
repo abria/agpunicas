@@ -16,7 +16,6 @@ namespace agp
 	class GameScene;
 	class OverlayScene;
 	class RenderableObject;
-	class Grid;
 }
 
 // GameScene (or World) class
@@ -26,7 +25,7 @@ namespace agp
 // - stores the main player and implements basic controls
 class agp::GameScene : public Scene
 {
-	friend class Grid;
+	friend class Pathfinding;
 
 	protected:
 
@@ -49,9 +48,6 @@ class agp::GameScene : public Scene
 		Vec2Df _cameraTranslateVel;
 		float _cameraZoomVel;		// camera zoom velocity (in [0,1] relative scale units)
 
-		// pathfinding
-		Grid* _grid;
-
 		// helper functions
 		virtual void updateOverlayScenes(float timeToSimulate);
 		virtual void updateControls(float timeToSimulate);
@@ -61,7 +57,7 @@ class agp::GameScene : public Scene
 	public:
 
 		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt, bool grid=false, float gridCellSize=1);
-		virtual ~GameScene();
+		virtual ~GameScene() {}
 
 		Object* player() { return _player; }
 		virtual void setPlayer(Object* player) { _player = player; }
@@ -72,7 +68,6 @@ class agp::GameScene : public Scene
 		virtual void addBackgroundScene(OverlayScene* bgScene) { _backgroundScenes.push_back(bgScene); }
 		virtual void addForegroundScene(OverlayScene* fgScene) { _foregroundScenes.push_back(fgScene); }
 		virtual void displayGameSceneOnly(bool on) { _displayGameSceneOnly = on; }
-		Grid* grid() { return _grid; }
 
 		// overrides scene object selection (+octree or +BVH, NOT implemented)
 		//virtual std::list<Object*> objects(const RectF& cullingRect) override;

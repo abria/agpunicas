@@ -290,7 +290,7 @@ namespace agp
 		}
 
 		// Liang-Barsky algorithm for line-rectangle intersection
-		inline bool intersectsLine(const Vec2D<T>& p0, const Vec2D<T>& p1, T& tNear)
+		inline bool intersectsLine(const Vec2D<T>& p0, const Vec2D<T>& p1, T& tNear, T& tFar)
 		{
 			T t0 = 0.0;
 			T t1 = 1.0;
@@ -330,6 +330,7 @@ namespace agp
 			if (t0 > t1) return false;
 
 			tNear = (t0 >= 0.0) ? t0 : t1;
+			tFar = (t0 >= 0.0) ? t1 : t0;
 			return tNear >= 0.0 && tNear <= 1.0;
 		}
 
@@ -596,7 +597,8 @@ namespace agp
 			localRect.yUp = yUp;
 
 			// Step 3: Perform axis-aligned rectangle intersection
-			return localRect.intersectsLine(localP0, localP1, tNear);
+			float tFar;
+			return localRect.intersectsLine(localP0, localP1, tNear, tFar);
 		}
 
 		inline void extendEdgeToPoint(const Vec2D<T>& point, int edgeIndex)

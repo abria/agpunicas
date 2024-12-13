@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Enemy.h"
+#include "Pathfinding.h"
 
 namespace agp
 {
@@ -32,9 +33,11 @@ class agp::Soldier : public Enemy
 		int _currentWaypointIndex;
 		PointF _target;
 		std::map<std::string, Sprite*> _sprites[4];
+		Pathfinding* _pathfinding;
 
 		// finite state machine AI
 		void AI(bool targetReached);
+		void changeState(State newState);
 
 	public:
 
@@ -44,4 +47,6 @@ class agp::Soldier : public Enemy
 		virtual void update(float dt) override;
 
 		virtual std::string name() override { return strprintf("Soldier[%d]", _id); }
+
+		//virtual bool collidableWith(CollidableObject* obj) override { return false; }
 };

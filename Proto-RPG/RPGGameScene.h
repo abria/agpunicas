@@ -15,7 +15,6 @@ namespace agp
 	class RPGGameScene;
 	class Link;
 	class LevelLoader;
-	class Grid;
 }
 
 // RPGGameScene class

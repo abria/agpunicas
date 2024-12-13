@@ -144,9 +144,6 @@ Scene* LevelLoader::load(const std::string& name)
 		// load jObj and convert regions to game objects
 		loadJson(world, std::string(SDL_GetBasePath()) + "EditorScene.json", player);
 
-		// preparar data structures for pathfinding
-		//world->computeGridGraph();
-
 		return world;
 	}
 	else

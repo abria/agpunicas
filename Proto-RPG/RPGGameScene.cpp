@@ -118,13 +118,15 @@ void RPGGameScene::update(float timeToSimulate)
 	{
 		_transitionCounter += timeToSimulate;
 		float progress = (std::min)(_transitionCounter, 1.0f);
-		float radius = _transitionEnter ? 1 - progress : progress;
+		float factor = _transitionEnter ? 1 - progress : progress;
+		//float factor = _transitionEnter ? progress : 1-progress;
 		PointF center = view()->mapFromScene(player()->rect().center());
 
 		dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(
-			[center, radius](Uint32* pixels, int width, int height, int pitch)
+			[center, factor](Uint32* pixels, int width, int height, int pitch)
 			{
-				circleMaskShader(pixels, width, height, pitch, center.x, center.y, radius);
+				//fadingShader(pixels, width, height, pitch, factor);
+				circleMaskShader(pixels, width, height, pitch, center.x, center.y, factor);
 			});
 	}		
 }

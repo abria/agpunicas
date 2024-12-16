@@ -22,7 +22,6 @@ Trigger::Trigger(Scene* scene, const RectF& rect, CollidableObject* watched, std
 // extends logic collision (+trigger behavior)
 bool Trigger::collision(CollidableObject* with, bool begin, Direction fromDir)
 {
-	printf("%s vs. %s: %s\n", name().c_str(), with->name().c_str(), begin ? "BEGIN" : "end");
 	if (with == _watched)
 	{
 		_task();

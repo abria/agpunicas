@@ -66,7 +66,7 @@ Scene* LevelLoader::load(const std::string& name)
 		//new HammerBrother(world, PointF(23, -4));
 
 		// lifts
-		Lift* lift1 = new Lift(world, RectF(7, -2, 3, 0.5f), spriteLoader->get("platform"), false, 10, 10);
+		Lift* lift1 = new Lift(world, RectF(9, -2, 3, 0.5f), spriteLoader->get("platform"), false, 12, 10);
 		Lift* lift2 = new Lift(world, RectF(4, -4, 3, 0.5f), spriteLoader->get("platform"), true, 3, 10);
 
 		// mario

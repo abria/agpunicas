@@ -55,10 +55,10 @@ class agp::MovableObject : public RenderableObject
 		void moveBy(Vec2Df amount) { _rect.pos += amount; }
 
 		// state queries
-		bool skidding() const;
-		bool grounded() const;
-		bool falling() const;
-		bool midair() const;
+		virtual bool skidding() const;
+		virtual bool grounded() const;
+		virtual bool falling() const;
+		virtual bool midair() const;
 
 		// actions
 		virtual void move(Direction dir);

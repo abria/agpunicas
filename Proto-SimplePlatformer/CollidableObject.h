@@ -35,13 +35,17 @@ class agp::CollidableObject : public MovableObject
 		std::vector<Vec2Df> _collisionAxes;
 		std::vector<float> _collisionDepths;
 		std::vector<CollidableObject*> _collisionsPrev;
+		bool _fallingPrev;
 
 		// CCD collision detection/resolution
 		virtual void detectResolveCollisionsCCD(float dt);
 
 		// AABB intersection-based collision detection and resolution
-		virtual void detectCollisions();
-		virtual void resolveCollisions();
+		virtual void detectCollisionsAABB();
+		virtual void resolveCollisionsAABB();
+
+		// decollissions
+		virtual void detectDecollisions();
 
 		// set collider to default (whole rect)
 		void defaultCollider();
@@ -56,6 +60,12 @@ class agp::CollidableObject : public MovableObject
 		RectF sceneCollider() const;
 		bool compenetrable() const { return _compenetrable; }
 		bool collidable() const { return _collidable; }
+		void setCCD(bool active);
+
+		// extends state queries (+CCD off)
+		virtual bool grounded() const;
+		virtual bool falling() const;
+		virtual bool midair() const;
 
 		// extends game logic (+collisions)
 		virtual void update(float dt) override;

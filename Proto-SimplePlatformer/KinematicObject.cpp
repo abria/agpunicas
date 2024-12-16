@@ -25,12 +25,9 @@ void KinematicObject::update(float dt)
 	for (auto obj : _collidingItems)
 	{
 		// object "on" the platform -> object moves along with platform
-		// WARNING: this teleport may cause collisions with other objects to be missed!
+		// NOTE: teleport is OK since we have disabled CCD
 		if (obj.second == Direction::UP)
 			obj.first->moveBy(_vel * dt);
-			// the fix below fixes the compenetration issue due to float precision
-			// but generates spurious state transitions to 'falling' states
-			//obj.first->moveBy(_vel * dt - Vec2Df(0, 0.001f * dt));
 
 		// object hits platform from the bottom -> object pos corrected along y 
 		else if (obj.second == Direction::DOWN)
@@ -45,10 +42,9 @@ void KinematicObject::update(float dt)
 
 bool KinematicObject::collision(CollidableObject* with, bool begin, Direction fromDir)
 {
-	//_focused = true;
-
-	if(!begin)
-		printf("%s vs. %s: %s\n", name().c_str(), with->name().c_str(), begin ? "BEGIN" : "end");
+	// disable CCD when 'with' is on (fromDir == UP) this kinetic object 
+	if(fromDir == Direction::UP || !begin)
+		with->setCCD(!begin);
 
 	DynamicObject* dobj = with->to<DynamicObject*>();
 	if (dobj)

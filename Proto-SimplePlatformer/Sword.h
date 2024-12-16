@@ -32,7 +32,7 @@ class agp::Sword : public DynamicObject
 		virtual void update(float dt) override;
 
 		// extends logic collision (+hurt enemies)
-		virtual bool collision(CollidableObject* with, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
 
 		// extends collision logic (+collision with Enemy only)
 		virtual bool collidableWith(CollidableObject* obj) override;

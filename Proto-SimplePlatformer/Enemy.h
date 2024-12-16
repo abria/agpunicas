@@ -35,7 +35,7 @@ class agp::Enemy : public DynamicObject
 		virtual void smash();					// hit by invincible mario, fireball, shell, or block bump
 
 		// extends logic collision (+smashed, +hurt Mario)
-		virtual bool collision(CollidableObject* with, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
 
 		virtual std::string name() override { return strprintf("Enemy[%d]", _id); }
 };

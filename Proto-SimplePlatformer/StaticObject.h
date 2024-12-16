@@ -34,4 +34,10 @@ class agp::StaticObject : public CollidableObject
 		virtual std::string name() override {
 			return strprintf("StaticObject[%d]", _id);
 		}
+
+		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) {
+			if(!begin)
+				printf("%s vs. %s: %s\n", name().c_str(), with->name().c_str(), begin ? "BEGIN" : "end");
+			return true;
+		}
 };

@@ -43,9 +43,12 @@ void KinematicObject::update(float dt)
 	_collidingItems.clear();
 }
 
-bool KinematicObject::collision(CollidableObject* with, Direction fromDir)
+bool KinematicObject::collision(CollidableObject* with, bool begin, Direction fromDir)
 {
 	//_focused = true;
+
+	if(!begin)
+		printf("%s vs. %s: %s\n", name().c_str(), with->name().c_str(), begin ? "BEGIN" : "end");
 
 	DynamicObject* dobj = with->to<DynamicObject*>();
 	if (dobj)

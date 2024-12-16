@@ -342,7 +342,7 @@ namespace agp
 				return p.x > left() && p.x < right() && p.y > top() && p.y < bottom();
 		}
 
-		Vec2D<T> center() const
+		inline Vec2D<T> center() const
 		{
 			return Vec2D<T>(pos.x + size.x / 2, pos.y + size.y / 2);
 		}
@@ -375,9 +375,32 @@ namespace agp
 			size = sizeF;
 		}
 
-		float aspectRatio() const
+		inline float aspectRatio() const
 		{
 			return float(size.x) / float(size.y);
+		}
+
+		inline bool isSeparatedFrom(const Rect<T>& r, T epsilon = T(1e-5))
+		{
+			// We consider them separated if one rectangle is strictly
+			// to the left, right, above, or below the other with a margin > epsilon.
+			if (yUp)
+			{
+				// In yUp mode, top() > bottom().
+				// Check if a is completely on one side of b with an epsilon gap:
+				return (right() < r.left() - epsilon) || // a is to the left of b
+					(left() > r.right() + epsilon) || // a is to the right of b
+					(top() < r.bottom() - epsilon) || // a is below b in yUp
+					(bottom() > r.top() + epsilon);      // a is above b in yUp
+			}
+			else
+			{
+				// Normal orientation:
+				return (right() < r.left() - epsilon) || // a is to the left of b
+					(left() > r.right() + epsilon) || // a is to the right of b
+					(bottom() < r.top() - epsilon) || // a is below b normally
+					(top() > r.bottom() + epsilon);       // a is above b normally
+			}
 		}
 
 		// conversions

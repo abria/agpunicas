@@ -14,6 +14,8 @@
 #include "timeUtils.h"
 #include "collisionUtils.h"
 #include "GameScene.h"
+#include "DynamicObject.h"
+#include "StaticObject.h"
 
 using namespace agp;
 
@@ -28,7 +30,7 @@ CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* spri
 	_collidable = true;
 
 	// default collision system: Continous Collision Detection (CCD)
-	_CCD = true;
+	_CCD = false;
 }
 
 void CollidableObject::defaultCollider()
@@ -97,15 +99,51 @@ void CollidableObject::detectResolveCollisionsCCD(float dt)
 			return a.second != b.second ? a.second < b.second : distance(a.first) < distance(b.first);
 		});
 
-	// solve the collisions in correct order 
+	// solve the collisions in correct order
+	_collisionsPrev = _collisions;
+	_collisions.clear();
 	for (auto obj : sortedByContactTime)
 		if (DynamicRectVsRect(sceneCollider(), vel() * dt, obj.first->sceneCollider(), cp, cn, ct))
 		{
 			if (!obj.first->compenetrable())
+			{
 				velAdd(-cn * cn.dot(_vel * (1 - ct)));
+				_collisions.push_back(obj.first);
+			}
+			else
+				_collisionsCompenetrables.insert(obj.first);
 
-			obj.first->collision(this, normal2dir(cn));
-			collision(obj.first, inverse(normal2dir(cn)));
+			obj.first->collision(this, true, normal2dir(cn));
+			collision(obj.first, true, inverse(normal2dir(cn)));
+		}
+
+	// detect de-collisions with compenetrables
+	for (auto it = _collisionsCompenetrables.begin(); it != _collisionsCompenetrables.end(); )
+	{
+		// remove objects marked 'to be killed' from collision list
+		// since they will not be accessible in the next iteration
+		if ((*it)->_killed)
+			it = _collisionsCompenetrables.erase(it);
+		else if (sceneCollider().isSeparatedFrom((*it)->sceneCollider(), 0.1f))
+		{
+			collision(*it, false, Direction::NONE);
+			(*it)->collision(this, false, Direction::NONE);
+
+			it = _collisionsCompenetrables.erase(it);
+		}
+		else
+			++it;
+	}
+
+	// detect de-collisions with compenetrables
+	// first remove objects marked 'to be killed' from collision list
+	// since they will not be accessible in the next iteration
+	_collisions.erase(std::remove_if(_collisions.begin(), _collisions.end(), [](CollidableObject* obj) { return obj->_killed; }), _collisions.end());
+	for (auto collObj : _collisionsPrev)
+		if (std::find(_collisions.begin(), _collisions.end(), collObj) == _collisions.end())
+		{
+			collision(collObj, false, Direction::NONE);
+			collObj->collision(this, false, Direction::NONE);
 		}
 }
 
@@ -114,6 +152,7 @@ void CollidableObject::detectCollisions()
 	if (!_collidable)
 		return;
 
+	_collisionsPrev = _collisions;
 	_collisions.clear();
 	_collisionAxes.clear();
 	_collisionDepths.clear();
@@ -131,10 +170,37 @@ void CollidableObject::detectCollisions()
 				_collisions.push_back(collObj);
 				_collisionAxes.push_back(dir2vec(axis));
 				_collisionDepths.push_back(depth);
-				collision(collObj, axis);
-				collObj->collision(this, inverse(axis));
+				collision(collObj, true, axis);
+				collObj->collision(this, true, inverse(axis));
 			}
 		}
+	}
+
+	// remove objects marked 'to be killed' from collision list
+	// since they will not be accessible in the next iteration
+	_collisions.erase(std::remove_if(_collisions.begin(), _collisions.end(), [](CollidableObject* obj) { return obj->_killed; }), _collisions.end());
+
+	for (auto collObj : _collisionsPrev)
+		if (std::find(_collisions.begin(), _collisions.end(), collObj) == _collisions.end())
+		{
+			collision(collObj, false, Direction::NONE);
+			collObj->collision(this, false, Direction::NONE);
+		}
+}
+
+void CollidableObject::resolveCollisions()
+{
+	for (int i = 0; i < _collisions.size(); i++)
+	{
+		DynamicObject* dynObj = _collisions[i]->to<DynamicObject*>();
+		StaticObject* staticObj = _collisions[i]->to<StaticObject*>();
+
+		// Dynamic vs. Static: hard non-compenetration constraint
+		if (staticObj)
+			_rect.pos += -_collisionAxes[i] * _collisionDepths[i];
+		// Dynamic vs. Dynamic: soft non-compenetration constraint
+		else if (dynObj)
+			_rect.pos += -_collisionAxes[i] * _collisionDepths[i] / 10.0f;
 	}
 }
 

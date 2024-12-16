@@ -33,7 +33,7 @@ class agp::Trigger : public CollidableObject
 		virtual void update(float dt) override { RenderableObject::update(dt); }
 
 		// extends logic collision (+trigger behavior)
-		virtual bool collision(CollidableObject* with, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
 
 		virtual std::string name() override {
 			return strprintf("Trigger[%d]", _id);

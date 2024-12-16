@@ -13,7 +13,7 @@ Enemy::Enemy(Scene* scene, const RectF& rect, Sprite* sprite, int layer)
 	_facingDir = Direction::LEFT;
 }
 
-bool Enemy::collision(CollidableObject* with, Direction fromDir)
+bool Enemy::collision(CollidableObject* with, bool begin, Direction fromDir)
 {
 	Mario* mario = dynamic_cast<Mario*>(with);
 

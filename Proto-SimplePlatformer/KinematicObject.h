@@ -34,7 +34,7 @@ class agp::KinematicObject : public CollidableObject
 		virtual void update(float dt) override;
 
 		// extends logic collision (+capturing colliding dynamic objects)
-		virtual bool collision(CollidableObject* with, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
 
 		// accepts only collisions with DynamicObject
 		virtual bool collidableWith(CollidableObject* obj) override;

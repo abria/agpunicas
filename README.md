@@ -111,6 +111,7 @@ For demonstration purposes, a small portion of <i>Legend of Zelda: A Link to the
 - example NPC (soldier with patrolling + chasing script)
 - example import level editor's json
 - example scene transition with circle mask and fading
+- pathfinding with BFS
 
 #### Limitations
 - narrow collision detection phase is based on linear search with view box intersection

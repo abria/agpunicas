@@ -129,7 +129,7 @@ std::list<Object*> Scene::objects(const PointF& containPoint)
 	return objectsSelected;
 }
 
-agp::Scene::ObjectsList Scene::raycast(const LineF& line)
+agp::Scene::ObjectsList Scene::raycast(const LineF& line, std::list<float>* hitTimes)
 {
 	std::vector<std::pair<Object*, float>> hits;
 
@@ -150,9 +150,26 @@ agp::Scene::ObjectsList Scene::raycast(const LineF& line)
 	// extract the Object pointers from the sorted hits:
 	std::list<Object*> result;
 	for (const auto& hit : hits)
+	{
 		result.push_back(hit.first);
+		if (hitTimes)
+			(*hitTimes).push_back(hit.second);
+	}
 
 	return result;
+}
+
+Object* Scene::raycastNearest(const LineF& line, float& tNear)
+{
+	std::list<float> hitTimes;
+	auto objects = raycast(line, &hitTimes);
+	if (objects.size())
+	{
+		tNear = hitTimes.front();
+		return objects.front();
+	}
+	else 
+		return nullptr;
 }
 
 bool Scene::isEmpty(const RectF& rect)

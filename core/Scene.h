@@ -91,7 +91,8 @@ class agp::Scene
 		virtual ObjectsList objects();
 		virtual ObjectsList objects(const RectF& cullingRect);
 		virtual ObjectsList objects(const PointF& containPoint);
-		virtual ObjectsList raycast(const LineF& line);
+		virtual ObjectsList raycast(const LineF& line, std::list<float> *hitTimes = nullptr);
+		virtual Object* raycastNearest(const LineF& line, float& tNear);
 		virtual bool isEmpty(const RectF& rect);
 
 		// render

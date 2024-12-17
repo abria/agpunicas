@@ -11,6 +11,8 @@
 #include "DynamicObject.h"
 #include "Scene.h"
 #include "mathUtils.h"
+#include "timeUtils.h"
+#include "StaticObject.h"
 
 using namespace agp;
 
@@ -31,7 +33,11 @@ Pathfinding::Pathfinding(DynamicObject* actor, float searchExtent, float cellSiz
 
 void Pathfinding::update()
 {
-	// clear visual grid
+	Timer<float> timer;
+
+	bool debug = false;
+
+	// clear visual grid (if any)
 	for (auto r : _visualGrid)
 		r->kill();
 	_visualGrid.clear();
@@ -39,31 +45,67 @@ void Pathfinding::update()
 	// (re)center search area on actor
 	_searchArea = RotatedRectF(_actor->sceneCollider().center, PointF(_searchExtent, _searchExtent), 0).toRect();
 
-	// update free/occupied cells and centers
-	int count_occupied = 0;
-	int count_total = 0;
+	// get actor collider, it will be used to check for free/occupied cells
+	RectF actorRect = _actor->collider().toRect();
+
+	// update free/occupied cells
+	// APPROACH 1 (slower): 1 geometric query for each cell
+	//for (int i = 0; i < _cells.size(); i++)
+	//	for (int j = 0; j < _cells[i].size(); j++)
+	//	{
+	//		_cells[i][j].center.x = _searchArea.pos.x + j * _cellSize + _cellSize / 2;
+	//		_cells[i][j].center.y = _searchArea.pos.y + i * _cellSize + _cellSize / 2;
+	//		_cells[i][j].free = _actor->scene()->isEmpty(actorRect - actorRect.pos + _cells[i][j].center - actorRect.size / 2);
+	//	}
+
+	// update free/occupied cells
+	// APPROACH 2 (faster): only query cells within scene's static objects AABBs
 	for (int i = 0; i < _cells.size(); i++)
 		for (int j = 0; j < _cells[i].size(); j++)
 		{
 			_cells[i][j].center.x = _searchArea.pos.x + j * _cellSize + _cellSize / 2;
 			_cells[i][j].center.y = _searchArea.pos.y + i * _cellSize + _cellSize / 2;
-			RectF collRect = _actor->collider().toRect();
-			_cells[i][j].free = _actor->scene()->isEmpty(collRect - collRect.pos + _cells[i][j].center - collRect.size / 2);
+			_cells[i][j].free = true;
+		}
+	auto allObjects = _actor->scene()->objects();
+	for (auto obj : allObjects)
+		if (obj->to<StaticObject*>())
+		{
+			RectF objAABB = obj->to<StaticObject*>()->sceneCollider().boundingRect();
+			
+			RectF expandedAABB;
+			expandedAABB.pos = objAABB.pos - actorRect.size / 2;
+			expandedAABB.size = objAABB.size + actorRect.size;
+			
+			Point startCell(int((expandedAABB.pos.x - _searchArea.pos.x) * _cellDims.x / _searchArea.size.x), int((expandedAABB.pos.y - _searchArea.pos.y) * _cellDims.y / _searchArea.size.y));
+			Point endCell(int((expandedAABB.br().x - _searchArea.pos.x) * _cellDims.x / _searchArea.size.x), int((expandedAABB.br().y - _searchArea.pos.y) * _cellDims.y / _searchArea.size.y));
+			startCell.x = (std::max)(startCell.x, 0);
+			startCell.y = (std::max)(startCell.y, 0);
+			endCell.x = (std::min)(endCell.x, _cellDims.x - 1);
+			endCell.y = (std::min)(endCell.y, _cellDims.y - 1);
 
-			if (!_cells[i][j].free)
-				count_occupied++;
-			count_total++;
-
-			// display grid
-			/*RenderableObject* rend = new RenderableObject(_actor->scene(),
-				RectF(_searchArea.pos.x + j * _cellSize,
-					_searchArea.pos.y + i * _cellSize, _cellSize, _cellSize),
-				_cells[i][j].free ? Color(0, 255, 0, 128) : Color(255, 0, 0, 128), 5);
-			rend->setBorderColor(Color(0, 0, 0));
-			_visualGrid.push_back(rend);*/
+			for (int i = startCell.y; i <= endCell.y; i++)
+				for (int j = startCell.x; j <= endCell.x; j++)
+					if (_cells[i][j].free)
+						_cells[i][j].free = _actor->scene()->isEmpty(actorRect - actorRect.pos + _cells[i][j].center - actorRect.size / 2);
 		}
 
 	_initialized = true;
+
+	printf("Pathfinding grid generated in %.0f ms\n", timer.elapsed() * 1000);
+
+	// visual grid
+	if (debug)
+		for (int i = 0; i < _cells.size(); i++)
+			for (int j = 0; j < _cells[i].size(); j++)
+			{
+				RenderableObject* rend = new RenderableObject(_actor->scene(),
+					RectF(_searchArea.pos.x + j * _cellSize,
+						_searchArea.pos.y + i * _cellSize, _cellSize, _cellSize),
+					_cells[i][j].free ? Color(0, 255, 0, 90) : Color(255, 0, 0, 90), 5);
+				rend->setBorderColor(Color(0, 0, 0, 90));
+				_visualGrid.push_back(rend);
+			}
 }
 
 Point Pathfinding::nearestReachableCell(const Point& cell, const PointF& target)

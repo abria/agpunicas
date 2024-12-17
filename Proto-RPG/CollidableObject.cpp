@@ -100,10 +100,24 @@ void CollidableObject::detectCollisions()
 		}
 	}
 
-	// remove objects marked 'to be killed' from collision list
+	// first remove objects marked 'to be killed' from collision list
 	// since they will not be accessible in the next iteration
-	_collisions.erase(std::remove_if(_collisions.begin(), _collisions.end(), [](CollidableObject* obj) { return obj->_killed; }), _collisions.end());
+	size_t j = 0;
+	for (size_t i = 0; i < _collisions.size(); ++i)
+	{
+		if (!_collisions[i]->_killed)
+		{
+			_collisions[j] = _collisions[i];
+			_collisionAxes[j] = _collisionAxes[i];
+			_collisionDepths[j] = _collisionDepths[i];
+			j++;
+		}
+	}
+	_collisions.resize(j);
+	_collisionAxes.resize(j);
+	_collisionDepths.resize(j);
 
+	// decollisions = previous collisions that are no more
 	for(auto collObj : _collisionsPrev)
 		if (std::find(_collisions.begin(), _collisions.end(), collObj) == _collisions.end())
 		{

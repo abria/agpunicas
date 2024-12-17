@@ -44,10 +44,9 @@ void Soldier::changeState(State newState)
 		_target = _pathfinding->shortestPathNextTarget(link->rect().center());
 		_velMax = { 3.5f, 3.5f };
 
-		if (_target == PointF::invalid())
+		if (_target == PointF::invalid())	// hope to be luckier next time
 		{
 			changeState(State::SLEEP);
-			_pathfinding->update();	// try to re-build graph
 			return;
 		}
 	}

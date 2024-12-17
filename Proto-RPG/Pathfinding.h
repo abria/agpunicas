@@ -20,7 +20,9 @@ namespace agp
 }
 
 // Pathfinding class
-// - provides basic (nonoptimal) pathfinding via grid-based BFS
+// - provides pathfinding via grid-based BFS
+// - grid covering (virtual) = whole actor scene
+// - grid covering (actual) = searchExtent x searchExtent square centered on actor + real-time updates
 class agp::Pathfinding
 {
 	protected:
@@ -51,6 +53,7 @@ struct agp::Cell
 	Vec2Df center;
 	bool visited;
 	int distance;
+	bool synced;
 
-	Cell() : free(false), center(0, 0), visited(false), distance(std::numeric_limits<int>::max()) {}
+	Cell() : free(false), center(0, 0), visited(false), distance(std::numeric_limits<int>::max()), synced(false){}
 };

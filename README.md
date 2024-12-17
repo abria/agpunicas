@@ -14,6 +14,7 @@ Header-only library for game programming utils, including:
 - math (interpolation, percentiles, etc.)
 - file/folder management (get files in folder, etc.)
 - collision (SAT, Swept AABB vs. AABB, Sweept AABB vs. Line, etc.)
+- cpu shaders (fading, lightning, scene transitions, etc.)
 
 ## Core
 Rendering+audio engine based on SDL, utilized by all game prototypes.
@@ -29,6 +30,7 @@ Rendering+audio engine based on SDL, utilized by all game prototypes.
 - text sprites based on SDL_ttf
 - helper functions for spritesheets (autotiling and connected components extraction)
 - level editor with json persistence (supported geometries: rects, rotated rects, multilines)
+- optional shader window (both CPU and GPU with OpenGL)
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_leveleditor.png">
 
@@ -51,15 +53,14 @@ For demonstration purposes, a small portion of <i>Super Mario Bros</i> (NES) is 
 - collision filters (type-based)
 - configurable linear dynamics with simple friction and skidding
 - static, dynamic, kinematic object categories
-- all collidable objects are informed when collision starts (with normals and metadatas)
+- all collidable objects are informed when collision starts and ends (with normals and metadatas)
 - triggers (a.k.a. sensors)
 - basic UI (HUD, menus)
+- switchable CCD vs. SAT collision detection
 
 #### Limitations
-- no "onCollisionEnd" events
 - no compound colliders (only one collider per object)
 - no slopes
-- teleports break CCD and must be handled carefully
 - narrow collision detection phase is based on linear search with view box intersection
 
 ## Proto-ComplexPlatformer
@@ -103,12 +104,14 @@ For demonstration purposes, a small portion of <i>Legend of Zelda: A Link to the
 - all collidable objects are informed when collision starts (with normals and metadatas) and ends
 - triggers (a.k.a. sensors)
 - advanced UI (HUD + inventory)
-- text dialogs
+- text dialogs (DialogBox)
 - portals for player teleporting
 - example player attack with sword
 - example collider animation (sword)
 - example NPC (soldier with patrolling + chasing script)
 - example import level editor's json
+- example scene transition with circle mask and fading
+- pathfinding with BFS
 
 #### Limitations
-- no scene transitions from indoor to outdoor and viceversa
+- narrow collision detection phase is based on linear search with view box intersection

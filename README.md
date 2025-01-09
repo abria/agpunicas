@@ -2,6 +2,9 @@
 
 A framework for programming 2D videogames with C++/SDL.
 
+> [!IMPORTANT]
+> This is the official repository of the teaching ***Algorithms and Game Programming***, Bachelor Course in _Computer and Telecommunication Engineering_, University of Cassino (Italy). Class drive folder (including lecture slides, exercises, sources) is publicly accessible at [this link](https://drive.google.com/drive/folders/1ARlP7Fms69d1ugg56uRHGKBe1fa8lDLvbw4chpKKLWSxkG7jacrUTUTvk8BbFJAnxseTzYRr?usp=sharing).
+
 <img src="https://github.com/abria/agpunicas/blob/main/cover.png">
 
 

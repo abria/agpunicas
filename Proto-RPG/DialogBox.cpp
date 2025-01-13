@@ -129,7 +129,7 @@ void DialogBox::event(SDL_Event& evt)
 			if (_options.size())
 				_options[_currentOption].action();
 
-			Game::instance()->popScene();
+			Game::instance()->popSceneLater();
 		}
 	}
 }

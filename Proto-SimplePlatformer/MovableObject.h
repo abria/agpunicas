@@ -52,7 +52,7 @@ class agp::MovableObject : public RenderableObject
 		void velAdd(Vec2Df amount);
 		void velClip(float vx, float vy);
 		void setVelY(float vy) { _vel.y = vy; }
-		void moveBy(Vec2Df amount) { _rect.pos += amount; }
+		virtual void moveBy(const Vec2Df& amount) { setPos(pos() + amount); }
 
 		// state queries
 		virtual bool skidding() const;

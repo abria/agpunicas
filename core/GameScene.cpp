@@ -19,7 +19,7 @@
 using namespace agp;
 
 GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
-	: Scene(rect, pixelUnitSize)
+	: Scene(rect, pixelUnitSize), _quadtree(rect.scaleOnCenter(10))
 {
 	_dt = dt;
 	_timeToSimulateAccum = 0;
@@ -35,6 +35,53 @@ GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 	float ar = Game::instance()->aspectRatio();
 	if(ar)
 		_view->setFixedAspectRatio(ar);
+}
+
+void GameScene::newObject(Object* obj)
+{
+	Scene::newObject(obj);
+
+	_quadtree.add(obj);
+}
+
+void GameScene::killObject(Object* obj)
+{
+	Scene::killObject(obj);
+
+	_quadtree.remove(obj);
+}
+
+void GameScene::objectMoved(Object* obj)
+{
+	Scene::objectMoved(obj);
+
+	_quadtree.update(obj);
+}
+
+Objects GameScene::objects()
+{
+	return Scene::objects();
+}
+
+Objects GameScene::objects(const RectF& cullingRect)
+{
+	return _quadtree.queryObjects(cullingRect);
+}
+
+Objects GameScene::objects(const PointF& containPoint)
+{
+	std::vector<Object*> candidates = _quadtree.queryObjects(RotatedRectF(containPoint, { 1,1 }, 0, _rect.yUp).toRect());
+	std::vector<Object*> results;
+	for (auto obj : candidates)
+		if (obj->contains(containPoint))
+			results.push_back(obj);
+
+	return results;
+}
+
+bool GameScene::isEmpty(const RectF& rect)
+{
+	return _quadtree.queryObjects(rect).empty();
 }
 
 void GameScene::render()
@@ -86,10 +133,9 @@ void GameScene::updateWorld(float timeToSimulate)
 	_timeToSimulateAccum += timeToSimulate;
 	while (_timeToSimulateAccum >= _dt)
 	{
-		for (auto& layer : _sortedObjects)
-			for (auto& obj : layer.second)
-				if (!obj->freezed())
-					obj->update(_dt);		// physics, collision, logic, animation
+		for (auto& obj : _objects)
+			if (!obj->freezed())
+				obj->update(_dt);		// physics, collision, logic, animation
 
 		_timeToSimulateAccum -= _dt;
 	}

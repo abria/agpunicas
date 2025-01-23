@@ -19,7 +19,7 @@
 using namespace agp;
 
 CollidableObject::CollidableObject(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer) :
-	MovableObject(scene, rrect.toRect(), sprite, layer)
+	MovableObject(scene, rrect, sprite, layer)
 {
 	_angle = rad2deg(rrect.angle);
 
@@ -33,9 +33,8 @@ CollidableObject::CollidableObject(Scene* scene, const RotatedRectF& rrect, Spri
 
 void CollidableObject::defaultCollider()
 {
-	// set collider to default (whole rect)
-	_collider = RectF(0, 0, _rect.size.x, _rect.size.y);
-	_collider.angle = deg2rad(_angle);
+	// set collider to default (whole rrect)
+	_collider = RotatedRectF(0, 0, _rrect.size.x, _rrect.size.y, _rrect.angle);
 }
 
 bool CollidableObject::intersectsRect(const RectF& r)
@@ -68,7 +67,7 @@ void CollidableObject::update(float dt)
 
 RotatedRectF CollidableObject::sceneCollider() const
 {
-	return _collider + _rect.pos;
+	return _collider + _rrect.center;
 }
 
 void CollidableObject::detectCollisions()

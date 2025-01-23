@@ -33,7 +33,7 @@ void Hammer::update(float dt)
 	Enemy::update(dt);
 
 	if (!_throwing)
-		_rect.pos = _thrower->rect().pos + PointF(2 / 16.0f, 0);
+		setPos(_thrower->rect().pos + PointF(2 / 16.0f, 0));
 }
 
 bool Hammer::collidableWith(CollidableObject* obj)

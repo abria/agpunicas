@@ -29,9 +29,8 @@ Scene::Scene(const RectF& rect, const Point& pixelUnitSize)
 
 Scene::~Scene()
 {
-	for (auto& layer : _sortedObjects)
-		for(auto& obj : layer.second)
-			delete obj;
+	for(auto& obj : _objects)
+		delete obj;
 }
 
 void Scene::newObject(Object* obj)
@@ -45,35 +44,11 @@ void Scene::killObject(Object* obj)
 	obj->_killed = true;
 }
 
-void Scene::changeLayerObject(Object* obj, int newLayer)
-{
-	_changeLayerObjects.push_back(std::pair<int, Object*>(newLayer, obj));
-}
-
 void Scene::refreshObjects()
 {
-	for(auto& obj : _newObjects)
-		_sortedObjects[obj->layer()].emplace_back(obj);
+	for (auto& obj : _newObjects)
+		_objects.emplace_back(obj);
 	_newObjects.clear();
-
-	for (auto& p : _changeLayerObjects)
-	{
-		auto& layer = _sortedObjects[p.second->layer()];
-		auto removeIt = std::remove(layer.begin(), layer.end(), p.second);
-		if (removeIt == layer.end())
-			std::cerr << "Cannot remove " << p.second->name() << " from layer " << p.second->layer() << " when changing layer: object not found\n";
-		layer.erase(removeIt, layer.end());
-
-		if (std::find(_sortedObjects[p.first].begin(), _sortedObjects[p.first].end(), p.second) == _sortedObjects[p.first].end())
-		{
-			_sortedObjects[p.first].emplace_back(p.second);
-			p.second->_layer = p.first;
-		}
-		else
-			std::cerr << "Cannot re-insert " << p.second->name() << " in layer " << p.first << " when changing layer: object already present\n";
-
-	}
-	_changeLayerObjects.clear();
 
 	for (auto it = _deadObjects.begin(); it != _deadObjects.end(); )
 	{
@@ -81,15 +56,17 @@ void Scene::refreshObjects()
 
 		if (obj->_itersFromKilled < 2)
 		{
-			++it; // Move to the next element
+			++it;
 			continue;
 		}
 
-		auto& layer = _sortedObjects[obj->layer()];
-		auto removeIt = std::remove(layer.begin(), layer.end(), obj);
-		if (removeIt == layer.end())
-			std::cerr << "Cannot remove " << obj->name() << " from layer " << obj->layer() << ": object not found\n";
-		layer.erase(removeIt, layer.end());
+		auto jt = std::find(_objects.begin(), _objects.end(), obj);
+		if (jt != _objects.end()) 
+		{
+			size_t idxToRemove = std::distance(_objects.begin(), jt);
+			_objects[idxToRemove] = _objects.back();
+			_objects.pop_back();
+		}
 
 		// Erase the element from the set and advance the iterator safely
 		it = _deadObjects.erase(it); // 'erase' returns an iterator to the next element
@@ -97,39 +74,32 @@ void Scene::refreshObjects()
 	}
 }
 
-std::list<Object*> Scene::objects()
+std::vector<Object*> Scene::objects()
 {
-	std::list<Object*> allObjects;
-	for (auto& layer : _sortedObjects)
-		for (auto& obj : layer.second)
-			allObjects.push_back(obj);
-
-	return allObjects;
+	return _objects;
 }
 
-std::list<Object*> Scene::objects(const RectF& cullingRect)
+Objects Scene::objects(const RectF& cullingRect)
 {
-	std::list<Object*> objectsInRect;
-	for (auto& layer : _sortedObjects)
-		for (auto& obj : layer.second)
-			if (obj->intersectsRectShallow(cullingRect))
-				objectsInRect.push_back(obj);
+	Objects objectsInRect;
+	for (auto& obj : _objects)
+		if (obj->intersectsRectShallow(cullingRect))
+			objectsInRect.push_back(obj);
 
 	return objectsInRect;
 }
 
-std::list<Object*> Scene::objects(const PointF& containPoint)
+Objects Scene::objects(const PointF& containPoint)
 {
-	std::list<Object*> objectsSelected;
-	for (auto& layer : _sortedObjects)
-		for (auto& obj : layer.second)
-			if (obj->contains(containPoint))
-				objectsSelected.push_back(obj);
+	Objects objectsSelected;
+	for (auto& obj : _objects)
+		if (obj->contains(containPoint))
+			objectsSelected.push_back(obj);
 
 	return objectsSelected;
 }
 
-agp::Scene::ObjectsList Scene::raycast(const LineF& line, std::list<float>* hitTimes)
+Objects Scene::raycast(const LineF& line, std::list<float>* hitTimes)
 {
 	std::vector<std::pair<Object*, float>> hits;
 
@@ -148,7 +118,7 @@ agp::Scene::ObjectsList Scene::raycast(const LineF& line, std::list<float>* hitT
 		});
 
 	// extract the Object pointers from the sorted hits:
-	std::list<Object*> result;
+	Objects result;
 	for (const auto& hit : hits)
 	{
 		result.push_back(hit.first);
@@ -174,10 +144,9 @@ Object* Scene::raycastNearest(const LineF& line, float& tNear)
 
 bool Scene::isEmpty(const RectF& rect)
 {
-	for (auto& layer : _sortedObjects)
-		for (auto& obj : layer.second)
-			if (obj->intersectsRect(rect))
-				return false;
+	for (auto& obj : _objects)
+		if (obj->intersectsRect(rect))
+			return false;
 
 	return true;
 }
@@ -215,4 +184,9 @@ void Scene::event(SDL_Event& evt)
 {
 	if (evt.type == SDL_WINDOWEVENT && _view)
 		_view->updateViewport();
+}
+
+void Scene::objectMoved(Object* obj)
+{
+	// nothing to do here
 }

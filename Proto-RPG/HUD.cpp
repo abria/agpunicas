@@ -197,7 +197,6 @@ void HUD::moveItemSelection(int dx, int dy)
 	_currentItemIcon->setSprite(_inventoryItems[_currentItemIndex.y][_currentItemIndex.x]->icon());
 	_currentItemLabel->setSprite(_inventoryItems[_currentItemIndex.y][_currentItemIndex.x]->label());
 	_currentHUDItemIcon->setSprite(_inventoryItems[_currentItemIndex.y][_currentItemIndex.x]->icon());
-
 }
 
 void HUD::event(SDL_Event& evt)

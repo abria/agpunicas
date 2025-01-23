@@ -24,7 +24,6 @@ void UIScene::update(float timeToSimulate)
 	Scene::update(timeToSimulate);
 
 	if (_active)
-		for (auto& layer : _sortedObjects)
-			for (auto& obj : layer.second)
-				obj->update(timeToSimulate);
+		for (auto& obj : _objects)
+			obj->update(timeToSimulate);
 }

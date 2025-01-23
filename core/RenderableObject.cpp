@@ -52,7 +52,7 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 	if (!_visible)
 		return;
 
-	SDL_FRect drawRect = RectF(camera(_rect.tl()), camera(_rect.br())).toSDLf();
+	SDL_FRect drawRect = RectF(camera(rect().tl()), camera(rect().br())).toSDLf();
 
 	if (_backgroundColor.a)
 	{
@@ -61,7 +61,7 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 	}
 
 	if (_sprite)
-		_sprite->render(renderer, _rect, camera, _scene->pixelUnitSize(), _angle, _flip, _fit);
+		_sprite->render(renderer, rect(), camera, _scene->pixelUnitSize(), _angle, _flip, _fit);
 	else
 	{
 		SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);

@@ -130,7 +130,7 @@ void Pathfinding::update()
 				}
 	}
 
-	printf("Pathfinding grid updated in %.0f ms\n", timer.elapsed() * 1000);
+	printf("Pathfinding grid updated in %.3f ms\n", timer.elapsed() * 1000);
 }
 
 Point Pathfinding::nearestReachableCell(const Point& cell, const PointF& target)

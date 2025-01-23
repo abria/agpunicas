@@ -50,8 +50,6 @@ class agp::Link : public DynamicObject
 		// interaction with (raycasted) nearest NPC
 		virtual void interact();
 
-		virtual void setPos(const PointF& newPos) override;
-
 		// overrides acceptable collisions
 		virtual bool collidableWith(CollidableObject* obj) override { return obj->collidableWith(this); }
 

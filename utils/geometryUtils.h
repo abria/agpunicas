@@ -269,6 +269,8 @@ namespace agp
 		Rect& operator += (const T& s) { pos.x += s; pos.y += s; return *this; }
 		Rect& operator -= (const T& s) { pos.x -= s; pos.y -= s; return *this; }
 		Rect& operator *= (const T& s) { size.x *= s; size.y *= s; return *this; }
+		bool operator == (const Rect& r) const { return (this->pos == r.pos && this->size == r.size && this->yUp == r.yUp); }
+		bool operator != (const Rect& r) const { return (this->pos != r.pos || this->size != r.size || this->yUp != r.yUp); }
 
 		// operations
 		inline bool isValid() const { return size.x > 0 && size.y > 0; }
@@ -342,6 +344,13 @@ namespace agp
 				return p.x > left() && p.x < right() && p.y > top() && p.y < bottom();
 		}
 
+		inline bool contains(const Rect<T>& r) const
+		{
+			return 
+				pos.x <= r.pos.x && (r.pos.x + r.size.x) <= (pos.x + size.x) &&
+				pos.y <= r.pos.y && (r.pos.y + r.size.y) <= (pos.y + size.y);
+		}
+
 		inline Vec2D<T> center() const
 		{
 			return Vec2D<T>(pos.x + size.x / 2, pos.y + size.y / 2);
@@ -373,6 +382,17 @@ namespace agp
 			sizeF *= s;
 			pos = center() - sizeF /2;
 			size = sizeF;
+		}
+
+		Rect<T> scaleOnCenter(float s) const
+		{
+			PointF sizeF(size);
+			sizeF *= s;
+			Rect<T> res;
+			res.pos = center() - sizeF / 2;
+			res.size = sizeF;
+			res.yUp = yUp;
+			return res;
 		}
 
 		inline float aspectRatio() const
@@ -435,7 +455,9 @@ namespace agp
 		Line(const Vec2D<T>& p1, const Vec2D<T>& p2) : start(p1), end(p2) {}
 		Line(const Line& l) : start(l.start), end(l.end) {}
 
-		// special getters
+		bool isValid() const { return end != start; }
+
+		// operations
 		Rect<T> boundingRect(bool yUp) const
 		{
 			return Rect<T>(

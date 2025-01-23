@@ -83,8 +83,12 @@ void View::render()
 	SDL_SetRenderDrawColor(renderer, _scene->backgroundColor().r, _scene->backgroundColor().g, _scene->backgroundColor().b, _scene->backgroundColor().a);
 	SDL_RenderFillRect(renderer, &viewport_r);
 
-	// render objects
+	// sort visible objects by z
 	auto objects = _scene->objects(_rect);
+	std::sort(objects.begin(), objects.end(),
+		[](auto* a, auto* b) { return a->layer() < b->layer(); });
+
+	// render objects
 	for (auto& obj : objects)
 	{
 		RenderableObject* robj = obj->to<RenderableObject*>();

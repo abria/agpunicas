@@ -25,7 +25,7 @@ Link::Link(Scene* scene, const PointF& pos)
 
 	_collider.size.x -= 0.2f;
 	_collider.size.y = 0.9f;
-	_collider.center.y = 0.8f;
+	//_collider.center.y = 0.8f;
 
 	_facingDir = Direction::DOWN;
 	_walking = false;
@@ -42,7 +42,7 @@ Link::Link(Scene* scene, const PointF& pos)
 	setSprite(_sprites[int(_facingDir)]["stand"]);
 
 	// decorations
-	_shadow = new RenderableObject(scene, _rect, SpriteFactory::instance()->get(std::string("link_shadow")), _layer - 1, false);
+	_shadow = new RenderableObject(scene, rect(), SpriteFactory::instance()->get(std::string("link_shadow")), _layer - 1, false);
 }
 
 void Link::update(float dt)
@@ -62,7 +62,7 @@ void Link::update(float dt)
 		setSprite(_sprites[int(_facingDir)]["stand"]);
 
 	// decorations
-	_shadow->setPos(_rect.pos +Vec2Df(dir2vec(_facingDir).x * (2.0f / _scene->pixelUnitSize().x), dir2vec(_facingDir).y == 0? 1.0f / _scene->pixelUnitSize().y : 0));
+	_shadow->setPos(rect().pos + Vec2Df(dir2vec(_facingDir).x * (2.0f / _scene->pixelUnitSize().x), dir2vec(_facingDir).y == 0 ? 1.0f / _scene->pixelUnitSize().y : 0));
 
 	// x-mirroring
 	if (_facingDir == Direction::LEFT)
@@ -104,17 +104,11 @@ void Link::hurt()
 
 void Link::interact()
 {
-	auto objects = _scene->raycast({ _rect.center(), _rect.center() + 1 * dir2vec(_facingDir) });
+	auto objects = _scene->raycast({ rect().center(), rect().center() + 1 * dir2vec(_facingDir) });
 	for (auto& obj : objects)
 		if (obj->to<NPC*>())
 		{
 			obj->to<NPC*>()->interact();
 			break;
 		}
-}
-
-void Link::setPos(const PointF& newPos)
-{
-	printf("Link teleported to %s\n", newPos.str().c_str());
-	DynamicObject::setPos(newPos);
 }

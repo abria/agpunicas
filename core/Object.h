@@ -29,10 +29,13 @@ namespace agp
 // - offers update and schedule methods, and simple geometric queries
 class agp::Object
 {
+	private:
+
+		RectF _rect;	// subclasses must use getter/setter
+
 	protected:
 
 		Scene* _scene;
-		RectF _rect;
 		int _layer;
 		int _id;
 		bool _freezed;	// if false, does not update
@@ -49,12 +52,13 @@ class agp::Object
 
 		// getters/setters
 		const RectF& rect() const { return _rect; }
-		virtual void setRect(const RectF& rect) { _rect = rect; }
-		PointF pos() const { return _rect.pos; }
-		virtual void setPos(const PointF& newPos) { _rect.pos = newPos; }
+		virtual void setRect(const RectF& newRect);
+		virtual const PointF& pos() const { return _rect.pos; }
+		virtual void setPos(const PointF& newPos);
 		PointF size() const { return _rect.size; }
 		virtual void setSize(const PointF& newSize) { _rect.size = newSize; }
 		int layer() const { return _layer; }
+		virtual void setLayer(int newLayer) { _layer = newLayer; }
 		bool freezed() const { return _freezed; }
 		virtual void setFreezed(bool on) { _freezed = on; }
 		void toggleFreezed() { _freezed = !_freezed; }

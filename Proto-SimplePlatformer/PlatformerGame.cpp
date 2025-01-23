@@ -9,6 +9,7 @@
 
 #include "PlatformerGame.h"
 #include "PlatformerGameScene.h"
+#include "Scene.h"
 #include "LevelLoader.h"
 #include "HUD.h"
 #include "Menu.h"
@@ -36,7 +37,7 @@ void PlatformerGame::freeze(bool on)
 	PlatformerGameScene* gameScene = dynamic_cast<PlatformerGameScene*>(_scenes[0]);
 	if (gameScene)
 	{
-		auto objects = gameScene->objects();
+		Objects objects = gameScene->objects();
 		for (auto& obj : objects)
 			if (obj != reinterpret_cast<Object*>(gameScene->player()))
 				obj->setFreezed(on);

@@ -26,6 +26,26 @@ Object::Object(Scene* scene, const RectF& rect, int layer)
 	_scene->newObject(this);
 }
 
+void Object::setRect(const RectF& newRect) 
+{ 
+	if (newRect != _rect)
+	{
+		_rect = newRect;
+
+		_scene->objectMoved(this);
+	}
+}
+
+void Object::setPos(const PointF& newPos) 
+{ 
+	if (newPos != _rect.pos)
+	{
+		_rect.pos = newPos;
+
+		_scene->objectMoved(this);
+	}
+}
+
 void Object::update(float dt)
 {
 	if (_killed)

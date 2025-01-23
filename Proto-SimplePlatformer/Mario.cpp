@@ -25,7 +25,9 @@ Mario::Mario(Scene* scene, const PointF& pos)
 	if (_metalslugdemo)
 	{
 		_fit = false;
-		_rect.adjust(0, -1, 1, 0);
+		RectF msRect = rect();
+		msRect.adjust(0, -1, 1, 0);
+		setRect(msRect);
 		defaultCollider();
 		_collider.adjust(0.6f, 0.2f, -0.6f, 0);
 	}

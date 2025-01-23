@@ -10,6 +10,7 @@
 #pragma once
 #include "Scene.h"
 #include "graphicsUtils.h"
+#include "Quadtree.h"
 
 namespace agp
 {
@@ -20,7 +21,7 @@ namespace agp
 
 // GameScene (or World) class
 // - specialized update(dt) to semifixed timestep
-// - may provide more efficient access to game objects (e.g. quadtree)
+// - provides more efficient access to game objects (quadtree)
 // - can/should be subclassed for the specific game to implement 
 // - stores the main player and implements basic controls
 class agp::GameScene : public Scene
@@ -48,6 +49,9 @@ class agp::GameScene : public Scene
 		Vec2Df _cameraTranslateVel;
 		float _cameraZoomVel;		// camera zoom velocity (in [0,1] relative scale units)
 
+		// space partitioning
+		Quadtree _quadtree;
+
 		// helper functions
 		virtual void updateOverlayScenes(float timeToSimulate);
 		virtual void updateControls(float timeToSimulate);
@@ -69,15 +73,25 @@ class agp::GameScene : public Scene
 		virtual void addForegroundScene(OverlayScene* fgScene) { _foregroundScenes.push_back(fgScene); }
 		virtual void displayGameSceneOnly(bool on) { _displayGameSceneOnly = on; }
 
-		// overrides scene object selection (+octree or +BVH, NOT implemented)
-		//virtual std::list<Object*> objects(const RectF& cullingRect) override;
+		// override add/remove objects (+quadtree)
+		virtual void newObject(Object* obj) override;
+		virtual void killObject(Object* obj) override;
 
-		// overrides Scene's render (+overlay scenes)
+		// override geometric queries (+quadtree)
+		virtual Objects objects() override;
+		virtual Objects objects(const RectF& cullingRect) override;
+		virtual Objects objects(const PointF& containPoint) override;
+		virtual bool isEmpty(const RectF& rect) override;
+
+		// override render (+overlay scenes)
 		virtual void render() override;
 
 		// implements game scene update logic (+overlay, controls, +integration, +camera)
 		virtual void update(float timeToSimulate) override;
 
-		// extends event handler (+camera translate/zoom)
+		// override event handler (+camera translate/zoom)
 		virtual void event(SDL_Event& evt) override;
+
+		// override object move event (+quadtree)
+		virtual void objectMoved(Object* obj) override;
 };

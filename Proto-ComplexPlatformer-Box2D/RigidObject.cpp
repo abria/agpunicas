@@ -38,7 +38,7 @@ void RigidObject::update(float dt)
 	b2Vec2 pos = b2Body_GetPosition(_bodyId);
 	_obb.center = { pos.x, pos.y };
 	_obb.angle = b2Rot_GetAngle(b2Body_GetRotation(_bodyId));
-	_rect = _obb.toRect();
+	setRect(_obb.toRect());
 	_angle = rad2deg(_obb.angle);
 }
 

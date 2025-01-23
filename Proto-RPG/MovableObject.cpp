@@ -8,16 +8,19 @@
 // ----------------------------------------------------------------
 
 #include "MovableObject.h"
+#include "Scene.h"
 
 using namespace agp;
 
-MovableObject::MovableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer) :
-	RenderableObject(scene, rect, sprite, layer)
+MovableObject::MovableObject(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer) :
+	RenderableObject(scene, rrect.boundingRect(), sprite, layer)
 {
 	// default movement (stand)
 	_xDir = Direction::NONE;
 	_yDir = Direction::NONE;
 	_vel = _velPrev = { 0, 0 };
+
+	_rrect = rrect;
 
 	defaultPhysics();
 }
@@ -77,5 +80,13 @@ void MovableObject::update(float dt)
 		velAdd({ 0, -_vel.versY() * _frictionForce.y * dt });
 
 	// move
-	_rect.pos += _vel * dt;
+	setPos(pos() + _vel * dt);
+}
+
+void MovableObject::setPos(const PointF& newPos)
+{
+	PointF delta = newPos - pos();
+	//RenderableObject::setPos(newPos);
+	_rrect.center += delta;
+	RenderableObject::setRect(_rrect.boundingRect());
 }

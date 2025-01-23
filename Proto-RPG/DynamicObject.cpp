@@ -43,9 +43,9 @@ void DynamicObject::resolveCollisions()
 
 		// Dynamic vs. Static: hard non-compenetration constraint
 		if (staticObj)
-			_rect.pos += -_collisionAxes[i] * _collisionDepths[i];
+			setPos(pos() - _collisionAxes[i] * _collisionDepths[i]);
 		// Dynamic vs. Dynamic: soft non-compenetration constraint
 		else if (dynObj)
-			_rect.pos += -_collisionAxes[i] * _collisionDepths[i] / 10.0f;
+			setPos(pos() -_collisionAxes[i] * _collisionDepths[i] / 10.0f);
 	}
 }

@@ -113,5 +113,5 @@ void MovableObject::update(float dt)
 		velAdd(Vec2Df(-_vel.versX() * _xSkiddingForce * dt, 0));
 
 	// move
-	_rect.pos += _vel * dt;
+	setPos(pos() + _vel * dt);
 }

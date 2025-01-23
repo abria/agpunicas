@@ -18,16 +18,16 @@
 
 using namespace agp;
 
-EditableObject::EditableObject(Scene* scene, const RectF& rect, const std::string& name, int category, std::vector<std::string>& categories)
-	: RenderableObject(scene, rect, nullptr, 1), _categories(categories)
+EditableObject::EditableObject(Scene* scene, const RectF& r, const std::string& name, int category, std::vector<std::string>& categories)
+	: RenderableObject(scene, r, nullptr, 1), _categories(categories)
 {
 	_category = category;
 	_name = name;
 	_selected = false;
-	_rotRect.center = _rect.center();
-	_rotRect.size = _rect.size;
+	_rotRect.center = rect().center();
+	_rotRect.size = rect().size;
 	_rotRect.angle = 0;
-	_rotRect.yUp = _rect.yUp;
+	_rotRect.yUp = rect().yUp;
 	_resizingEdgeIndex = -1;
 
 	init();
@@ -39,10 +39,10 @@ EditableObject::EditableObject(Scene* scene, const LineF& line, const std::strin
 	_category = category;
 	_name = name;
 	_selected = false;
-	_rotRect.center = _rect.center();
-	_rotRect.size = _rect.size;
+	_rotRect.center = rect().center();
+	_rotRect.size = rect().size;
 	_rotRect.angle = 0;
-	_rotRect.yUp = _rect.yUp;
+	_rotRect.yUp = rect().yUp;
 	_resizingEdgeIndex = -1;
 	_multiline.push_back(line.start);
 	_multiline.push_back(line.end);
@@ -58,15 +58,11 @@ EditableObject::EditableObject(Scene* scene, const nlohmann::json& j, std::vecto
 
 	if (j.contains("rect"))
 	{
-		_rect.pos.x = j["rect"]["x"];
-		_rect.pos.y = j["rect"]["y"];
-		_rect.size.x = j["rect"]["width"];
-		_rect.size.y = j["rect"]["height"];
-		_rect.yUp = j["rect"]["yUp"];
-		_rotRect.center = _rect.center();
-		_rotRect.size = _rect.size;
+		setRect(RectF(j["rect"]["x"], j["rect"]["y"], j["rect"]["width"], j["rect"]["height"], j["rect"]["yUp"]));
+		_rotRect.center = rect().center();
+		_rotRect.size = rect().size;
 		_rotRect.angle = 0;
-		_rotRect.yUp = _rect.yUp;
+		_rotRect.yUp = rect().yUp;
 	}
 	else if (j.contains("rotRect"))
 	{
@@ -76,7 +72,7 @@ EditableObject::EditableObject(Scene* scene, const nlohmann::json& j, std::vecto
 		_rotRect.size.y = j["rotRect"]["height"];
 		_rotRect.angle = j["rotRect"]["angle"];
 		_rotRect.yUp = j["rotRect"]["yUp"];
-		_rect = _rotRect.toRect();
+		setRect(_rotRect.toRect());
 	}
 	else if (j.contains("multiline"))
 	{
@@ -84,11 +80,11 @@ EditableObject::EditableObject(Scene* scene, const nlohmann::json& j, std::vecto
 		for (auto& jline : jlines)
 			_multiline.push_back(PointF(jline["x"], jline["y"]));
 
-		_rect = LineF(_multiline[0], _multiline[1]).boundingRect(_scene->rect().yUp);
-		_rotRect.center = _rect.center();
-		_rotRect.size = _rect.size;
+		setRect(LineF(_multiline[0], _multiline[1]).boundingRect(_scene->rect().yUp));
+		_rotRect.center = rect().center();
+		_rotRect.size = rect().size;
 		_rotRect.angle = 0;
-		_rotRect.yUp = _rect.yUp;
+		_rotRect.yUp = rect().yUp;
 		_resizingEdgeIndex = -1;
 	}
 
@@ -129,11 +125,11 @@ nlohmann::ordered_json EditableObject::toJson()
 	}
 	else
 	{
-		j["rect"]["x"] = _rect.pos.x;
-		j["rect"]["y"] = _rect.pos.y;
-		j["rect"]["width"] = _rect.size.x;
-		j["rect"]["height"] = _rect.size.y;
-		j["rect"]["yUp"] = _rect.yUp;
+		j["rect"]["x"] = rect().pos.x;
+		j["rect"]["y"] = rect().pos.y;
+		j["rect"]["width"] = rect().size.x;
+		j["rect"]["height"] = rect().size.y;
+		j["rect"]["yUp"] = rect().yUp;
 	}
 
 	return j;
@@ -147,14 +143,14 @@ void EditableObject::init()
 
 	_renderedName = new RenderableObject(
 		_scene,
-		_rect,
+		rect(),
 		new TextSprite(_name, "Lucida", col.brighter(), { NAME_MARGIN_X, 0.0f }, { 0, NAME_MAX_HEIGHT },
 			isLine() ? TextSprite::VAlign::BOTTOM : TextSprite::VAlign::CENTER, TextSprite::HAlign::CENTER), 2);
 	_renderedName->setAngle(-_rotRect.angle);
 
 	_renderedCategory = new RenderableObject(
 		_scene,
-		_rect,
+		rect(),
 		new TextSprite(_categories[_category], "Lucida", col.brighter(), {0.0f, CATEGORY_MARGIN_Y}, { 0, CATEGORY_MAX_HEIGHT },
 			TextSprite::VAlign::TOP, TextSprite::HAlign::CENTER, TextSprite::Style::ITALIC), 2);
 	_renderedCategory->setAngle(-_rotRect.angle);
@@ -265,7 +261,7 @@ void EditableObject::setPos(const PointF& newPos)
 	RenderableObject::setPos(newPos);
 	_renderedName->setPos(newPos);
 	_renderedCategory->setPos(newPos);
-	_rotRect.center = _rect.center();
+	_rotRect.center = rect().center();
 }
 
 void EditableObject::setSize(const PointF& newSize)
@@ -274,11 +270,11 @@ void EditableObject::setSize(const PointF& newSize)
 		return;
 
 	RenderableObject::setSize(newSize);
-	_renderedName->setRect(_rect);
-	_renderedCategory->setRect(_rect);
+	_renderedName->setRect(rect());
+	_renderedCategory->setRect(rect());
 
-	_rotRect.center = _rect.center();
-	_rotRect.size = _rect.size;
+	_rotRect.center = rect().center();
+	_rotRect.size = rect().size;
 }
 
 bool EditableObject::resizableAt(const PointF& point)
@@ -294,7 +290,7 @@ bool EditableObject::resizableAt(const PointF& point)
 		_resizingEdgeIndex = closestEdgeIndex(rotRectRadians.vertices(), point, minDist);
 	}
 	else
-		_resizingEdgeIndex = closestEdgeIndex(_rect.vertices(), point, minDist);
+		_resizingEdgeIndex = closestEdgeIndex(rect().vertices(), point, minDist);
 
 	return minDist < RESIZING_HOOK_DISTANCE;
 }
@@ -313,7 +309,7 @@ SDL_SystemCursor EditableObject::resizeCursor()
 	}
 	else
 	{
-		auto vertices = _rect.vertices();
+		auto vertices = rect().vertices();
 		return getPerpendicularCursor(vertices[_resizingEdgeIndex], vertices[(_resizingEdgeIndex + 1) % 4], _rotRect.yUp);
 	}
 
@@ -332,14 +328,14 @@ void EditableObject::resize(const PointF& point)
 		rotRectRadians.extendEdgeToPoint(point, _resizingEdgeIndex);
 		_rotRect = rotRectRadians;
 		_rotRect.angle = rad2deg(_rotRect.angle);
-		_rect = _rotRect.toRect();
-		setSize(_rect.size);
+		setRect(_rotRect.toRect());
+		setSize(rect().size);
 	}
 	else
 	{
 		_rotRect.extendEdgeToPoint(point, _resizingEdgeIndex);
-		_rect = _rotRect.toRect();
-		setSize(_rect.size);
+		setRect(_rotRect.toRect());
+		setSize(rect().size);
 	}
 }
 
@@ -379,8 +375,8 @@ void EditableObject::updateLineRect()
 	_rotRect.angle = rad2deg(_rotRect.angle);
 	_renderedName->setAngle(-_rotRect.angle);
 	_renderedCategory->setAngle(-_rotRect.angle);
-	_rect = _rotRect.toRect();
-	setSize(_rect.size);
+	setRect(_rotRect.toRect());
+	setSize(rect().size);
 }
 
 void EditableObject::undoLineLastPoint()

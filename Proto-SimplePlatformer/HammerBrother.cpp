@@ -34,7 +34,7 @@ HammerBrother::HammerBrother(Scene* scene, const PointF& pos)
 		{
 			if (rand() % 5 > 0 && !_dying)
 			{
-				new Hammer(_scene, _rect.tl(), this);
+				new Hammer(_scene, rect().tl(), this);
 				_throwing = true;
 				schedule("throwing_off", 0.5f, [this]() {_throwing = false; });
 			}
@@ -51,7 +51,7 @@ HammerBrother::HammerBrother(Scene* scene, const PointF& pos)
 					_collidable = false; 
 					schedule("collidable_on", 0.5f, [this]() {_collidable = true; });
 				}
-				else if (_rect.bottom() < 0)	// 50% probability small jump (if feasible)
+				else if (rect().bottom() < 0)	// 50% probability small jump (if feasible)
 				{
 					velAdd(Vec2Df(0, -5));
 					_collidable = false;
@@ -80,7 +80,7 @@ void HammerBrother::update(float dt)
 	//return;
 
 	// state changes logic
-	if(mario->rect().center().x > _rect.center().x)
+	if(mario->rect().center().x > rect().center().x)
 		_facingDir = Direction::RIGHT;
 	else
 		_facingDir = Direction::LEFT;
@@ -88,9 +88,9 @@ void HammerBrother::update(float dt)
 	// horizontal movement
 	if (_chasing)
 		_xDir = _facingDir;
-	else if (_rect.center().x >= _pivot.x + _halfRangeX)
+	else if (rect().center().x >= _pivot.x + _halfRangeX)
 		_xDir = Direction::LEFT;
-	else if(_rect.center().x <= _pivot.x - _halfRangeX)
+	else if(rect().center().x <= _pivot.x - _halfRangeX)
 		_xDir = Direction::RIGHT;
 
 	// animations

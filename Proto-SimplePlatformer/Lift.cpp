@@ -7,8 +7,8 @@ Lift::Lift(Scene* scene, const RectF& rect, Sprite* sprite, bool vertical, float
 {
 	_compenetrable = false;
 	_vertical = vertical;
-	_r0 = (_vertical ? _rect.pos.y : _rect.pos.x) - range / 2.0f;
-	_r1 = (_vertical ? _rect.pos.y : _rect.pos.x) + range / 2.0f;
+	_r0 = (_vertical ? pos().y : pos().x) - range / 2.0f;
+	_r1 = (_vertical ? pos().y : pos().x) + range / 2.0f;
 
 	if (_vertical)
 	{
@@ -30,16 +30,16 @@ void Lift::update(float dt)
 {
 	if (_vertical)
 	{
-		if (_rect.pos.y < _r0)
+		if (pos().y < _r0)
 			_yGravityForce = 3.f;
-		else if (_rect.pos.y > _r1)
+		else if (pos().y > _r1)
 			_yGravityForce = -3.f;
 	}
 	else
 	{
-		if (_rect.pos.x < _r0)
+		if (pos().x < _r0)
 			move(Direction::RIGHT);
-		else if (_rect.pos.x > _r1)
+		else if (pos().x > _r1)
 			move(Direction::LEFT);
 	}
 

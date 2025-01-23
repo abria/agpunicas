@@ -46,9 +46,9 @@ void Sword::update(float dt)
 
 	// correct position based on Link
 	if (_facingDir == Direction::RIGHT)
-		_rect.pos = _link->pos() + PointF{ -2 / 16.0f, -7 / 16.0f };
+		setPos(_link->pos() + PointF{-2 / 16.0f, -7 / 16.0f});
 	else if (_facingDir == Direction::LEFT)
-		_rect.pos = _link->pos() + PointF{ -14 / 16.0f, -7 / 16.0f };
+		setPos(_link->pos() + PointF{ -14 / 16.0f, -7 / 16.0f });
 
 	// variable (animated) collider synced with animation
 	defaultCollider();

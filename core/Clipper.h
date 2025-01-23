@@ -35,7 +35,7 @@ class agp::Clipper : public RenderableObject
 
 		virtual void draw(SDL_Renderer* renderer, Transform camera) override
 		{
-			SDL_Rect drawRect = RectF(camera(_rect.tl()), camera(_rect.br())).toSDL();
+			SDL_Rect drawRect = RectF(camera(rect().tl()), camera(rect().br())).toSDL();
 			SDL_RenderSetClipRect(renderer, &drawRect);
 
 			if (_inverted)

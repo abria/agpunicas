@@ -23,8 +23,7 @@ using namespace agp;
 CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer) :
 	MovableObject(scene, rect, sprite, layer)
 {
-	// default collider: object rect
-	_collider = { 0, 0, _rect.size.x, _rect.size.y };
+	defaultCollider();
 
 	// default collision: non compenetration
 	_compenetrable = false;
@@ -38,7 +37,7 @@ CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* spri
 
 void CollidableObject::defaultCollider()
 {
-	_collider = { 0, 0, _rect.size.x, _rect.size.y };
+	_collider = { 0, 0, rect().size.x, rect().size.y};
 }
 
 void CollidableObject::setCCD(bool active)
@@ -85,13 +84,13 @@ void CollidableObject::update(float dt)
 	if (_CCD)
 	{
 		// undo move since collision detection is based on CCD
-		_rect.pos -= _vel * dt;
+		setPos(pos() - _vel * dt);
 
 		// detect and resolve collisions by updating velocities
 		detectResolveCollisionsCCD(dt);
 
 		// move with updated velocity
-		_rect.pos += _vel * dt;
+		setPos(pos() + _vel * dt);
 	}
 	else
 	{
@@ -102,7 +101,7 @@ void CollidableObject::update(float dt)
 
 RectF CollidableObject::sceneCollider() const
 {
-	return _collider + _rect.pos;
+	return _collider + rect().pos;
 }
 
 void CollidableObject::detectDecollisions()
@@ -140,18 +139,18 @@ void CollidableObject::detectResolveCollisionsCCD(float dt)
 
 	// NARROW collision detection
 	// simulate next iteration pos to get objects within united bounding rect
-	PointF curPos = _rect.pos;
+	PointF curPos = pos();
 	RectF curRect = sceneCollider();
-	_rect.pos += _vel * dt;
-	std::list<CollidableObject*> likely_collisions;
-	std::list<Object*> items_in_rect = _scene->objects(sceneCollider().united(curRect));
+	setPos(pos() + _vel * dt);
+	std::vector<CollidableObject*> likely_collisions;
+	Objects items_in_rect = _scene->objects(sceneCollider().united(curRect));
 	for (auto item : items_in_rect)
 	{
 		CollidableObject* obj = item->to<CollidableObject*>();
 		if (obj && obj != this && obj->collidable() && collidableWith(obj))
 			likely_collisions.push_back(obj);
 	}
-	_rect.pos = curPos;	// restore current pos
+	setPos(curPos);	// restore current pos
 
 	// sort collisions in ascending order of contact time
 	Vec2Df cp, cn;
@@ -173,7 +172,7 @@ void CollidableObject::detectResolveCollisionsCCD(float dt)
 	_collisions.clear();
 	_collisionAxes.clear();
 	_collisionDepths.clear();
-	for (auto obj : sortedByContactTime)
+	for (auto& obj : sortedByContactTime)
 		if (DynamicRectVsRect(sceneCollider(), vel() * dt, obj.first->sceneCollider(), cp, cn, ct))
 		{
 			if (!obj.first->compenetrable())
@@ -254,10 +253,10 @@ void CollidableObject::resolveCollisionsAABB()
 
 		// Dynamic vs. Static or Kinematic: hard non-compenetration constraint
 		if (staticObj || kinObj)
-			_rect.pos += -_collisionAxes[i] * _collisionDepths[i];
+			setPos(pos() -_collisionAxes[i] * _collisionDepths[i]);
 		// Dynamic vs. Dynamic: soft non-compenetration constraint
 		else if (dynObj)
-			_rect.pos += -_collisionAxes[i] * _collisionDepths[i] / 10.0f;
+			setPos(pos() -_collisionAxes[i] * _collisionDepths[i] / 10.0f);
 	}
 }
 

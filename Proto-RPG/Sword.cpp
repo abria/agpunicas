@@ -53,29 +53,29 @@ void Sword::update(float dt)
 
 	// correct position based on Link
 	if (_facingDir == Direction::RIGHT)
-		_rect.pos = _link->pos() + PointF{ 5 / 16.0f, -3 / 16.0f };
+		setPos(_link->pos() + PointF{ 5 / 16.0f, -3 / 16.0f });
 	else if (_facingDir == Direction::LEFT)
-		_rect.pos = _link->pos() + PointF{ -21 / 16.0f, -3 / 16.0f };
+		setPos(_link->pos() + PointF{ -21 / 16.0f, -3 / 16.0f });
 	else if (_facingDir == Direction::UP)
-		_rect.pos = _link->pos() + PointF{ -11 / 16.0f, -16 / 16.0f };
+		setPos(_link->pos() + PointF{ -11 / 16.0f, -16 / 16.0f });
 	else if (_facingDir == Direction::DOWN)
-		_rect.pos = _link->pos() + PointF{ -5 / 16.0f, 8 / 16.0f };
+		setPos(_link->pos() + PointF{ -5 / 16.0f, 8 / 16.0f });
 	else
-		_rect.pos = _link->pos();
+		setPos(_link->pos());
 
 	// variable (animated) collider synced with animation
 	AnimatedSprite* animSprite = dynamic_cast<AnimatedSprite*>(_sprite);
 	if (_facingDir == Direction::RIGHT)
-		_collider = RotatedRectF(0.7f, 1, 1.5f, 0.2f, PI / 2 - animSprite->currentTime() * PI);
+		_collider = RotatedRectF(0, 0, 1.5f, 0.2f, PI / 2 - animSprite->currentTime() * PI);
 	else if (_facingDir == Direction::LEFT)
-		_collider = RotatedRectF(2-0.7f, 1, 1.5f, 0.2f, -PI / 2 + animSprite->currentTime() * PI);
+		_collider = RotatedRectF(0, 0, 1.5f, 0.2f, -PI / 2 + animSprite->currentTime() * PI);
 	else if (_facingDir == Direction::DOWN)
-		_collider = RotatedRectF(0.8f, 0.8f, 1.5f, 0.2f, animSprite->currentTime() * PI);
+		_collider = RotatedRectF(0, 0, 1.5f, 0.2f, animSprite->currentTime() * PI);
 	else if (_facingDir == Direction::UP)
-		_collider = RotatedRectF(1.2f, 1.2f, 1.5f, 0.2f, animSprite->currentTime() * PI);
+		_collider = RotatedRectF(0, 0, 1.5f, 0.2f, animSprite->currentTime() * PI);
 
 	if (animSprite->currentTime() > 0.5f && _layer < _link->layer())
-		_scene->changeLayerObject(this, _link->layer() + 1);
+		_link->setLayer(_link->layer() + 1);
 
 	DynamicObject::update(dt);
 }

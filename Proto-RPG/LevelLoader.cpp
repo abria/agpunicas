@@ -99,7 +99,8 @@ void LevelLoader::loadJson(
 				float x2 = jsonPoints[i + 1]["x"];
 				float y2 = jsonPoints[i + 1]["y"];
 				LineF line(x1, y1, x2, y2);
-				new StaticObject(world, RotatedRectF(line, 0.1f, false), nullptr, 2);
+				if(line.isValid())
+					new StaticObject(world, RotatedRectF(line, 0.1f, false), nullptr, 2);
 			}
 		}
 	}
@@ -138,6 +139,8 @@ Scene* LevelLoader::load(const std::string& name)
 		Link* player = new Link(world, PointF(140, 179));
 		//Link* player = new Link(world, PointF(138, 189));
 		world->setPlayer(player);
+
+		//new StaticObject(world, RectF(137, 171, 2.5, 6), nullptr, 5);
 
 		//new StaticObject(world, RotatedRectF(140, 185, 5, 2, PI/8), spriteLoader->get("linkhouse"), 2);
 

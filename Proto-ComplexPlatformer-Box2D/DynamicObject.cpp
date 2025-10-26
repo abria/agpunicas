@@ -17,8 +17,8 @@ DynamicObject::DynamicObject(GameScene* scene, const RotatedRectF& obb, Sprite* 
 	RigidObject(scene, obb, sprite, b2BodyType::b2_dynamicBody, layer)
 {
 	_xDir = Direction::RIGHT;
-	_xMoveForce = 50;
-	_yJumpImpulse = 50;
+	_xMoveForce = 20;
+	_yJumpImpulse = 30;
 	_xVelMax = 1;
 	_yVelMax = 5;
 }
@@ -27,13 +27,13 @@ void DynamicObject::update(float dt)
 {
 	RigidObject::update(dt);
 
-	// clip velocity
-	b2Vec2 vel = b2Body_GetLinearVelocity(_bodyId);
-	vel.x = std::max(vel.x, -_xVelMax);
-	vel.x = std::min(vel.x, _xVelMax);
-	vel.y = std::max(vel.y, -_yVelMax);
-	vel.y = std::min(vel.y, _yVelMax);
-	b2Body_SetLinearVelocity(_bodyId, vel);
+	//// clip velocity
+	//b2Vec2 vel = b2Body_GetLinearVelocity(_bodyId);
+	//vel.x = std::max(vel.x, -_xVelMax);
+	//vel.x = std::min(vel.x, _xVelMax);
+	//vel.y = std::max(vel.y, -_yVelMax);
+	//vel.y = std::min(vel.y, _yVelMax);
+	//b2Body_SetLinearVelocity(_bodyId, vel);
 }
 
 void DynamicObject::collision(RigidObject* with, bool begin, const Vec2Df& normal, b2ShapeId& shapeA, b2ShapeId& shapeB)
@@ -61,8 +61,11 @@ void DynamicObject::move(Direction dir)
 
 void DynamicObject::jump()
 {
-	if(onGround())
+	if (onGround())
+	{
+		printf("apply jump impulse %f\n", _yJumpImpulse);
 		b2Body_ApplyLinearImpulseToCenter(_bodyId, { 0, _yJumpImpulse }, true);
+	}
 }
 
 bool DynamicObject::skidding() const

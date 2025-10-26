@@ -27,13 +27,14 @@ Player::Player(GameScene* scene, PointF pos)
 	shapeDef.density = 1;
 	shapeDef.friction = 0.2f;
 	shapeDef.restitution = 0.0;
+	shapeDef.enableContactEvents = true;
 	shapeDef.filter.categoryBits = uint64_t(CollisionCategory::Player);
 	shapeDef.filter.maskBits = uint64_t(CollisionCategory::Enemy) | uint64_t(CollisionCategory::Static) | uint64_t(CollisionCategory::Kinematic);
 	b2CreateCapsuleShape(_bodyId, &shapeDef, &capsule);
 
 	_xVelMax = 5;
 	_yVelMax = 10;
-	_xDashForce = 3000;
+	_xDashForce = 50;
 	_running = false;
 	_dashing = false;
 

@@ -63,6 +63,7 @@ class agp::Object
 		virtual void setFreezed(bool on) { _freezed = on; }
 		void toggleFreezed() { _freezed = !_freezed; }
 		Scene* scene() const { return _scene; }
+		bool killed() const { return _killed; }
 
 		// geometric queries
 		virtual bool contains(const Vec2Df& p) { return _rect.contains(p); }

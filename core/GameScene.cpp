@@ -15,11 +15,12 @@
 #include "OverlayScene.h"
 #include "EditorScene.h"
 #include "EditorUI.h"
+#include "timeUtils.h"
 
 using namespace agp;
 
 GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
-	: Scene(rect, pixelUnitSize), _quadtree(rect.scaleOnCenter(10))
+	: Scene(rect, pixelUnitSize), _quadtree(rect)
 {
 	_dt = dt;
 	_timeToSimulateAccum = 0;
@@ -30,6 +31,8 @@ GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 	_cameraManual = false;
 	_cameraFollowsPlayer = true;
 	_displayGameSceneOnly = false;
+	_autoKillWhenOutsideScene = true;
+	_useQuadtree = false;
 
 	_view = new View(this, _rect);
 	float ar = Game::instance()->aspectRatio();
@@ -41,21 +44,37 @@ void GameScene::newObject(Object* obj)
 {
 	Scene::newObject(obj);
 
-	_quadtree.add(obj);
+	if(_useQuadtree)
+		_quadtree.add(obj);
 }
 
 void GameScene::killObject(Object* obj)
 {
 	Scene::killObject(obj);
 
-	_quadtree.remove(obj);
+	if (_useQuadtree)
+		_quadtree.remove(obj);
 }
 
 void GameScene::objectMoved(Object* obj)
 {
 	Scene::objectMoved(obj);
 
-	_quadtree.update(obj);
+	if (obj->killed())
+		return;
+
+	if (!_rect.contains(obj->rect())) 
+	{
+		if(_autoKillWhenOutsideScene && obj != _player)
+			killObject(obj);   
+		return;
+	}
+
+	static Profiler quadtreeUpdateProfiler("quadtree update", 5000);
+	quadtreeUpdateProfiler.begin();
+	if (_useQuadtree)
+		_quadtree.update(obj);
+	quadtreeUpdateProfiler.end();
 }
 
 Objects GameScene::objects()
@@ -65,7 +84,10 @@ Objects GameScene::objects()
 
 Objects GameScene::objects(const RectF& cullingRect)
 {
-	return _quadtree.queryObjects(cullingRect);
+	if (_useQuadtree)
+		return _quadtree.queryObjects(cullingRect);
+	else
+		return Scene::objects(cullingRect);
 }
 
 Objects GameScene::objects(const PointF& containPoint)
@@ -81,7 +103,10 @@ Objects GameScene::objects(const PointF& containPoint)
 
 bool GameScene::isEmpty(const RectF& rect)
 {
-	return _quadtree.queryObjects(rect).empty();
+	if (_useQuadtree)
+		return _quadtree.queryObjects(rect).empty();
+	else
+		return Scene::isEmpty(rect);
 }
 
 void GameScene::render()
@@ -129,6 +154,9 @@ void GameScene::updateControls(float timeToSimulate)
 
 void GameScene::updateWorld(float timeToSimulate)
 {
+	static Profiler updateWorldProfiler("updateWorld", 5000);
+	updateWorldProfiler.begin();
+
 	// semi-fixed timestep
 	_timeToSimulateAccum += timeToSimulate;
 	while (_timeToSimulateAccum >= _dt)
@@ -139,6 +167,9 @@ void GameScene::updateWorld(float timeToSimulate)
 
 		_timeToSimulateAccum -= _dt;
 	}
+
+
+	updateWorldProfiler.end();
 }
 
 void GameScene::updateCamera(float timeToSimulate)

@@ -32,6 +32,7 @@ class agp::Quadtree
         // parameters
         static constexpr int MAX_OBJECTS_PER_NODE = 16;
         static constexpr int MAX_DEPTH = 8;
+        static constexpr bool VERBOSE = false;
 
         // inner classes/structs
         struct Node;
@@ -47,7 +48,6 @@ class agp::Quadtree
         int getObjectQuadrant(const RectF& quadRect, const RectF& objRect) const;
         void add(Node* node, std::size_t depth, const RectF& nodeRect, Object* obj);
         void split(Node* node, const RectF& nodeRect);
-        //bool remove(Node* node, const RectF& nodeRect, Object* obj);
         void nodeAddObject(Node* node, Object* obj);
         void nodeRemoveObject(Node* node, Object* obj);
         bool tryMerge(Node* node);

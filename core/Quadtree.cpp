@@ -36,6 +36,13 @@ Quadtree::Quadtree(const RectF& rect) :
 
 void Quadtree::add(Object* obj)
 {
+    if (!_rect.contains(obj->rect()))
+    {
+        if (VERBOSE)
+            std::cerr << strprintf("Quadtree::add: quadtree rect (%s) does not fully contain object (%s) rect (%s)", _rect.str().c_str(), obj->name().c_str(), obj->rect().str().c_str());
+        return;
+    }
+
     add(_root, 0, _rect, obj);
 }
 
@@ -48,6 +55,13 @@ void Quadtree::remove(Object* obj)
 
 void Quadtree::update(Object* obj)
 {
+    if (_objectToNode.find(obj->id()) == _objectToNode.end())
+    {
+        if(VERBOSE)
+            std::cerr << "Quadtree::update: trying to update an object [" << obj->name() << ", rect = " << obj->rect().str() << "] that is not present in the quadtree\n";
+        return;
+    }
+
     remove(obj);
     add(obj);
 }
@@ -164,47 +178,16 @@ void Quadtree::split(Node* node, const RectF& nodeRect)
     node->objects = std::move(newObjects);
 }
 
-//bool Quadtree::remove(Node* node, const RectF& nodeRect, Object* obj)
-//{
-//    if (!node)
-//        throw "Quadtree::remove: invalid node pointer";
-//
-//    if (!nodeRect.contains(obj->rect()))
-//        throw strprintf("Quadtree::remove: nodeRect (%s) does not fully contain object rect (%s)", nodeRect.str().c_str(), obj->rect().str().c_str());
-//
-//    if (isLeaf(node))
-//    {
-//        nodeRemoveObject(node, obj);
-//        return true;
-//    }
-//    else
-//    {
-//        // remove the value in a child if the value is entirely contained in it
-//        auto i = getObjectQuadrant(nodeRect, obj->rect());
-//        if (i != -1 && remove(node->children[i].get(), indexToQuadrant(nodeRect, i), obj))
-//            return tryMerge(node);
-//        // otherwise, remove the value from the current node
-//        else
-//            nodeRemoveObject(node, obj);
-//
-//        return false;
-//    }
-//}
-
 void Quadtree::nodeAddObject(Node* node, Object* obj)
 {
     auto it = std::find_if(std::begin(node->objects), std::end(node->objects),
         [this, &obj](const auto& rhs) { return obj->id() == rhs->id(); });
 
-    if (it != std::end(node->objects))
+    if (it != std::end(node->objects) && VERBOSE)
         std::cerr << "Quadtree::nodeAddObject: trying to add an object already present in the node\n";
     else
     {
-        //printf("Quadtree::nodeAddObject: add %s\n", obj->name().c_str());
-
-
         node->objects.push_back(obj);
-
         _objectToNode[obj->id()] = node;
     }
 }
@@ -214,11 +197,10 @@ void Quadtree::nodeRemoveObject(Node* node, Object* obj)
     auto it = std::find_if(std::begin(node->objects), std::end(node->objects),
         [this, &obj](const auto& rhs) { return obj->id() == rhs->id(); });
     
-    if (it == std::end(node->objects))
-        std::cerr << "Quadtree::nodeRemoveObject: trying to remove a value that is not present in the node\n";
+    if (it == std::end(node->objects) && VERBOSE)
+        std::cerr << "Quadtree::nodeRemoveObject: trying to remove an object that is not present in the node\n";
     else
     {
-       // printf("Quadtree::nodeRemoveObject: remove %s\n", obj->name().c_str());
         // swap with the last element and pop back
         *it = std::move(node->objects.back());
         node->objects.pop_back();
@@ -263,10 +245,17 @@ bool Quadtree::tryMerge(Node* node)
 void Quadtree::query(Node* node, const RectF& nodeRect, const RectF& queryRect, std::vector<Object*>& objects) const
 {
     if (!node)
-        throw "Quadtree::query: invalid node pointer";
+    {
+        std::cerr << "Quadtree::query: invalid node pointer\n";
+        return;
+    }
 
     if (!queryRect.intersects(nodeRect))
-        throw strprintf("Quadtree::query: queryRect (%s) does not intersect nodeRect (%s)", queryRect.str().c_str(), nodeRect.str().c_str());
+    {
+        if(VERBOSE)
+            std::cerr << strprintf("Quadtree::query: queryRect (%s) does not intersect nodeRect (%s)\n", queryRect.str().c_str(), nodeRect.str().c_str());
+        return;
+    }
 
     for (const auto& value : node->objects)
     {

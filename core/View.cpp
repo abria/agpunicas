@@ -84,7 +84,10 @@ void View::render()
 	SDL_RenderFillRect(renderer, &viewport_r);
 
 	// sort visible objects by z
+	static Profiler viewRectProfiler("view rect object selection", 5000);
+	viewRectProfiler.begin();
 	auto objects = _scene->objects(_rect);
+	viewRectProfiler.end();
 	std::sort(objects.begin(), objects.end(),
 		[](auto* a, auto* b) { return a->layer() < b->layer(); });
 

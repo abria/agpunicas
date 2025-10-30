@@ -44,6 +44,9 @@ class agp::GameScene : public Scene
 		std::vector < OverlayScene*> _backgroundScenes;
 		std::vector < OverlayScene*> _foregroundScenes;
 		bool _displayGameSceneOnly;
+
+		// scene control
+		bool _autoKillWhenOutsideScene;
 	
 		// camera controls
 		Vec2Df _cameraTranslateVel;
@@ -51,6 +54,7 @@ class agp::GameScene : public Scene
 
 		// space partitioning
 		Quadtree _quadtree;
+		bool _useQuadtree;
 
 		// helper functions
 		virtual void updateOverlayScenes(float timeToSimulate);
@@ -72,6 +76,8 @@ class agp::GameScene : public Scene
 		virtual void addBackgroundScene(OverlayScene* bgScene) { _backgroundScenes.push_back(bgScene); }
 		virtual void addForegroundScene(OverlayScene* fgScene) { _foregroundScenes.push_back(fgScene); }
 		virtual void displayGameSceneOnly(bool on) { _displayGameSceneOnly = on; }
+		virtual void setAutoKillWhenOutsideScene(bool on) { _autoKillWhenOutsideScene = on; }
+		virtual void setUseQuadtree(bool on) { _useQuadtree = on; }
 
 		// override add/remove objects (+quadtree)
 		virtual void newObject(Object* obj) override;

@@ -11,11 +11,12 @@
 
 using namespace agp;
 
-EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui)
+EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui, const std::string& jsonPath)
 	: UIScene(gameScene->rect(), gameScene->pixelUnitSize())
 {
 	_ui = ui;
 	_gameScene = gameScene;
+	_jsonPath = jsonPath;
 	_gameRect = _gameScene->view()->rect();
 	_gameScene->displayGameSceneOnly(true);
 	_currentCategory = 0;
@@ -65,7 +66,7 @@ void EditorScene::generateGrid()
 
 void EditorScene::fromJson()
 {
-	std::ifstream f(std::string(SDL_GetBasePath()) + DEFAULT_SAVE_FILENAME);
+	std::ifstream f(_jsonPath);
 	if (!f.is_open())
 		return;
 
@@ -82,7 +83,7 @@ void EditorScene::fromJson()
 
 void EditorScene::toJson()
 {
-	std::ofstream f(std::string(SDL_GetBasePath()) + DEFAULT_SAVE_FILENAME);
+	std::ofstream f(_jsonPath);
 	if (!f.is_open())
 		return;
 
@@ -150,7 +151,7 @@ void EditorScene::updateState(State newState)
 	}
 	else if (newState == State::SAVING)
 	{
-		_ui->setHelpboxText(0, strprintf("Saved to %s", DEFAULT_SAVE_FILENAME.c_str()));
+		_ui->setHelpboxText(0, strprintf("Saved to %s", _jsonPath.c_str()));
 		schedule("default_state", 2, [this]() 
 			{
 				updateState(State::DEFAULT);

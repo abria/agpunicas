@@ -76,11 +76,11 @@ class agp::EditorScene : public UIScene
 		std::vector<std::string> _categories;
 		State _state;
 		State _prevState;
+		std::string _jsonPath;
 
 		// constants
 		static constexpr int MAX_CATEGORIES = 15;
 		const Color GRID_COLOR = { 100,100,100 };
-		const std::string DEFAULT_SAVE_FILENAME = "EditorScene.json";
 
 		// helper functions
 		void fromJson();
@@ -92,7 +92,7 @@ class agp::EditorScene : public UIScene
 
 	public:
 
-		EditorScene(GameScene* gameScene, EditorUI* ui);
+		EditorScene(GameScene* gameScene, EditorUI* ui, const std::string& jsonPath);
 		virtual ~EditorScene() {};
 
 		void toggleSnapGrid() { _snapGrid = !_snapGrid; }

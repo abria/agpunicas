@@ -56,6 +56,9 @@ class agp::GameScene : public Scene
 		Quadtree _quadtree;
 		bool _useQuadtree;
 
+		// level editor (json) file
+		std::string _jsonPath;
+
 		// helper functions
 		virtual void updateOverlayScenes(float timeToSimulate);
 		virtual void updateControls(float timeToSimulate);
@@ -78,6 +81,7 @@ class agp::GameScene : public Scene
 		virtual void displayGameSceneOnly(bool on) { _displayGameSceneOnly = on; }
 		virtual void setAutoKillWhenOutsideScene(bool on) { _autoKillWhenOutsideScene = on; }
 		virtual void setUseQuadtree(bool on) { _useQuadtree = on; }
+		virtual void setJsonPath(const std::string& newPath) { _jsonPath = newPath; }
 
 		// override add/remove objects (+quadtree)
 		virtual void newObject(Object* obj) override;

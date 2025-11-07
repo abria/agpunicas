@@ -33,6 +33,7 @@ GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 	_displayGameSceneOnly = false;
 	_autoKillWhenOutsideScene = true;
 	_useQuadtree = false;
+	_jsonPath = std::string(SDL_GetBasePath()) + "/EditorScene.json";
 
 	_view = new View(this, _rect);
 	float ar = Game::instance()->aspectRatio();
@@ -232,7 +233,7 @@ void GameScene::event(SDL_Event& evt)
 	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_E && !evt.key.repeat)
 	{
 		EditorUI* editorUI = new EditorUI();
-		EditorScene* editorScene = new EditorScene(this, editorUI);
+		EditorScene* editorScene = new EditorScene(this, editorUI, _jsonPath);
 		Game::instance()->pushScene(editorScene);
 		Game::instance()->pushScene(editorUI);
 	}

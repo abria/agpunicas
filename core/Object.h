@@ -41,6 +41,7 @@ class agp::Object
 		bool _freezed;	// if false, does not update
 		bool _killed;
 		int _itersFromKilled;
+		float _timeElapsed;		// internal usage to keep track of elapsed time
 		std::map<std::string, Scheduler> _schedulers;
 
 		friend class Scene;

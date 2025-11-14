@@ -29,6 +29,7 @@ class agp::AnimatedSprite : public Sprite
 		int _loops;
 		int _loopsStored;
 		bool _paused;
+		bool _ended;
 
 	public:
 
@@ -39,11 +40,13 @@ class agp::AnimatedSprite : public Sprite
 			const std::vector <int> resampling = std::vector<int>(),
 			int loops = MAXINT);
 
+		bool ended() const { return _ended; }
 		float FPS() const { return _FPS; }
 		void setFPS(float fps) { _FPS = fps; }
 		float duration() const { return _frames.size() / _FPS; }
 		float currentTime() const { return _frameIterator / _frames.size(); }
 		void setPaused(bool paused) { _paused = paused; }
+
 
 		// extends update method (+animations)
 		virtual void update(float dt) override;

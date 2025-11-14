@@ -30,6 +30,7 @@ AnimatedSprite::AnimatedSprite(
 	_FPS = FPS;
 	_frameIterator = 0;
 	_paused = false;
+	_ended = false;
 }
 
 void AnimatedSprite::update(float dt)
@@ -52,7 +53,10 @@ void AnimatedSprite::update(float dt)
 
 	// animation ended: set last frame
 	if (_loops <= 0)
+	{
 		_rect = _frames.back();
+		_ended = true;
+	}
 	// set current spritesheet rect
 	else
 		_rect = _frames[static_cast<int>(_frameIterator)];
@@ -61,6 +65,7 @@ void AnimatedSprite::update(float dt)
 // extends reset method (+ restart frameIterator )
 void AnimatedSprite::reset()
 {
+	_ended = false;
 	_frameIterator = 0;
 	_loops = _loopsStored;
 }

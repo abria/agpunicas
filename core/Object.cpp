@@ -24,6 +24,7 @@ Object::Object(Scene* scene, const RectF& rect, int layer)
 	_killed = false;
 	_itersFromKilled = 0;
 	_scene->newObject(this);
+	_timeElapsed = 0;
 }
 
 void Object::setRect(const RectF& newRect) 
@@ -48,6 +49,8 @@ void Object::setPos(const PointF& newPos)
 
 void Object::update(float dt)
 {
+	_timeElapsed += dt;
+
 	if (_killed)
 		_itersFromKilled++;
 

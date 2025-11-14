@@ -28,6 +28,7 @@ RenderableObject::RenderableObject(Scene* scene, const RectF& rect, const Color&
 	_borderColor = { 0, 0, 0, 0 };
 	_borderThickness = 0;
 	_backgroundColor = { 0,0,0,0 };
+	_flashingFreq = 0;
 }
 
 RenderableObject::RenderableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer, bool fit)
@@ -45,12 +46,22 @@ RenderableObject::RenderableObject(Scene* scene, const RectF& rect, Sprite* spri
 	_borderColor = { 0, 0, 0, 0 };
 	_borderThickness = 0;
 	_backgroundColor = { 0,0,0,0 };
+	_flashingFreq = 0;
 }
 
 void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 {
 	if (!_visible)
 		return;
+
+	if (_flashingFreq > 0)
+	{
+		float period = 1.0f / _flashingFreq;
+		float phase = std::fmod(_timeElapsed, period);
+
+		if (phase > period * 0.5f)
+			return;
+	}
 
 	SDL_FRect drawRect = RectF(camera(rect().tl()), camera(rect().br())).toSDLf();
 

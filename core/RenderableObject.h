@@ -27,9 +27,10 @@ class agp::RenderableObject : public Object
 
 		Color _color;
 		Sprite* _sprite;
-		bool _fit;				// whether sprite has to fit rect or expand
+		bool _fit;				// whether the sprite has to fit draw rect or draw rect has to expand to contain the sprite
 		bool _visible;			// if false, does not draw
 		bool _focused;			// if true, fills with _focusColor color
+		int _flashingFreq;		// visible-invisible transitions per second, 0 = disabled (default)
 		SDL_RendererFlip _flip;	// horizontal/vertical flipping
 		float _angle;			// degrees, clockwise
 		float _angularVelocity;	// degrees/s, clockwise
@@ -54,6 +55,7 @@ class agp::RenderableObject : public Object
 		void setBorderThickness(float thickness) { _borderThickness = thickness; }
 		void setAngle(float newAngle) { _angle = newAngle; }
 		virtual void setVisible(bool visible) { _visible = visible; }
+		virtual void setFlashingFrequency(int hz) { _flashingFreq = hz; }
 		bool visible() { return _visible; }
 		Sprite* sprite() { return _sprite; }
 		virtual void setSprite(Sprite* sprite, bool deallocateSprite = false, bool resetOnChange = true);

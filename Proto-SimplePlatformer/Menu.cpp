@@ -123,7 +123,7 @@ Menu* Menu::mainMenu()
 	menu->addItem("New Game", []() 
 	{
 		Game::instance()->popSceneLater();
-		Audio::instance()->playMusic("overworld");
+		//Audio::instance()->playMusic("overworld");
 	});
 	menu->addItem("Options", [menu]()
 	{

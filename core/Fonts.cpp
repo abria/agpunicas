@@ -20,12 +20,12 @@ Fonts::Fonts()
 	if (TTF_Init())
 		throw SDL_GetError();
 
-	auto fontFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "fonts");
+	auto fontFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/fonts");
 	for (auto& f : fontFiles)
 	{
 		std::string name = getFileName(f, false);
 
-		TTF_Font* font = TTF_OpenFont((std::string(SDL_GetBasePath()) + "fonts/" + f).c_str(), pointSize);
+		TTF_Font* font = TTF_OpenFont((std::string(SDL_GetBasePath()) + "assets/fonts/" + f).c_str(), pointSize);
 		if (!font)
 			std::cerr << TTF_GetError() << "\n";
 		else

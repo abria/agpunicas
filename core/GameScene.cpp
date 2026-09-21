@@ -71,11 +71,11 @@ void GameScene::objectMoved(Object* obj)
 		return;
 	}
 
-	static Profiler quadtreeUpdateProfiler("quadtree update", 5000);
+	/*static Profiler quadtreeUpdateProfiler("quadtree update", 5000);
 	quadtreeUpdateProfiler.begin();
 	if (_useQuadtree)
 		_quadtree.update(obj);
-	quadtreeUpdateProfiler.end();
+	quadtreeUpdateProfiler.end();*/
 }
 
 Objects GameScene::objects()
@@ -155,8 +155,8 @@ void GameScene::updateControls(float timeToSimulate)
 
 void GameScene::updateWorld(float timeToSimulate)
 {
-	static Profiler updateWorldProfiler("updateWorld", 5000);
-	updateWorldProfiler.begin();
+	/*static Profiler updateWorldProfiler("updateWorld", 5000);
+	updateWorldProfiler.begin();*/
 
 	// semi-fixed timestep
 	_timeToSimulateAccum += timeToSimulate;
@@ -170,7 +170,7 @@ void GameScene::updateWorld(float timeToSimulate)
 	}
 
 
-	updateWorldProfiler.end();
+	//updateWorldProfiler.end();
 }
 
 void GameScene::updateCamera(float timeToSimulate)

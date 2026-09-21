@@ -19,7 +19,7 @@
 using namespace agp;
 
 Link::Link(Scene* scene, const PointF& pos)
-	: DynamicObject(scene, RectF( pos.x, pos.y, 1, 1.5f ), nullptr, 2)
+	: DynamicObject(scene, RectF( pos.x, pos.y, 1, 1.5f ), nullptr, 3)
 {
 	_fit = false;
 

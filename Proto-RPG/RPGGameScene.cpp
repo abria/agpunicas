@@ -29,6 +29,9 @@ RPGGameScene::RPGGameScene(const RectF& rect, const Point& pixelUnitSize, float 
 	_transitionEnter = false;
 	_transitionExit = false;
 	_transitionCounter = 0;
+
+	_useQuadtree = true;
+	_autoKillWhenOutsideScene = false;
 	
 	// SNES aspect ratio
 	_view->setRect(RectF(0, 0, 16, 14));

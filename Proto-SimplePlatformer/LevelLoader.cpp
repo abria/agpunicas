@@ -64,8 +64,8 @@ Scene* LevelLoader::load(const std::string& name)
 		}*/
 		new HammerBrother(world, PointF(21, 0));
 		new HammerBrother(world, PointF(23, -4));
-		for(int i=0; i<1000; i++)
-			new HammerBrother(world, PointF(20 + rand()%100, 0));
+		//for(int i=0; i<1000; i++)
+		//	new HammerBrother(world, PointF(20 + rand()%100, 0));
 
 		// lifts
 		Lift* lift1 = new Lift(world, RectF(9, -2, 3, 0.5f), spriteLoader->get("platform"), false, 12, 10);

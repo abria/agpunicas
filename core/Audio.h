@@ -9,9 +9,10 @@
 
 #pragma once
 
-#include "SDL_mixer.h"
+#include <SDL3_mixer/SDL_mixer.h>
 #include <map>
 #include <string>
+#include <vector>
 #include "Singleton.h"
 
 namespace agp
@@ -28,8 +29,12 @@ class agp::Audio : public Singleton<Audio>
 
 	private:
 
-		std::map< std::string, Mix_Chunk*> _sounds;
-		std::map< std::string, Mix_Music*> _musics;
+		MIX_Mixer* _mixer;
+		MIX_Track* _musicTrack;
+		std::map< std::string, MIX_Audio*> _sounds;
+		std::map< std::string, MIX_Audio*> _musics;
+		std::map< std::string, std::vector<MIX_Track*> > _soundTracks;
+		std::map< std::string, float > _soundGains;
 
 		// constructor accessible only to Singleton (thanks to friend declaration)
 		Audio();
@@ -39,7 +44,11 @@ class agp::Audio : public Singleton<Audio>
 		~Audio();
 
 		// controls
-		void playSound(const std::string & id, int loops = 0);
+		void playSound(const std::string & id, int loops = 0, bool forceReplay = false);
+		void stopSound(const std::string& id);
+		void pauseAllLoopingSounds();
+		void resumeAllLoopingSounds();
+
 		void playMusic(const std::string& id, int loops = -1);
 		void resumeMusic();
 		void pauseMusic();

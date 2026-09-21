@@ -9,7 +9,7 @@
 
 #ifdef WITH_TTF
 #include "Fonts.h"
-#include "SDL.h"
+#include <SDL3/SDL.h>
 #include "fileUtils.h"
 #include <iostream>
 
@@ -17,7 +17,7 @@ using namespace agp;
 
 Fonts::Fonts()
 {
-	if (TTF_Init())
+	if (!TTF_Init())
 		throw SDL_GetError();
 
 	auto fontFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/fonts");
@@ -27,7 +27,7 @@ Fonts::Fonts()
 
 		TTF_Font* font = TTF_OpenFont((std::string(SDL_GetBasePath()) + "assets/fonts/" + f).c_str(), pointSize);
 		if (!font)
-			std::cerr << TTF_GetError() << "\n";
+			std::cerr << SDL_GetError() << "\n";
 		else
 			_fonts[name] = font;
 	}

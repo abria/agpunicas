@@ -40,7 +40,7 @@ Rendering+audio engine based on SDL, utilized by all game prototypes.
 #### Class Diagram
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Core.png">
 
-## Proto-SimplePlatformer
+## CustomPlatformer
 Game prototype for simple 2D platformers with SDL and custom physics engine.
 For demonstration purposes, a small portion of <i>Super Mario Bros</i> (NES) is implemented.
 
@@ -66,7 +66,7 @@ For demonstration purposes, a small portion of <i>Super Mario Bros</i> (NES) is 
 - no slopes
 - narrow collision detection phase is based on linear search with view box intersection
 
-## Proto-ComplexPlatformer
+## Box2DPlatformer
 Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_ComplexPlatformer.png">
@@ -92,7 +92,7 @@ Game prototype for complex 2D platformers with SDL and Box2D physics engine.
 - player not steady on moving platforms (can be fixed with force compensation like for slopes)
 - no joint examples (see Box2D docs)
 
-## Proto-RPG
+## ActionRPG
 Game prototype for RPG/action games with SDL and Box2D physics engine.
 For demonstration purposes, a small portion of <i>Legend of Zelda: A Link to the Past</i> (NES) is implemented.
 

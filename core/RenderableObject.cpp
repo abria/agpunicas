@@ -68,7 +68,7 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 	if (_backgroundColor.a)
 	{
 		SDL_SetRenderDrawColor(renderer, _backgroundColor.r, _backgroundColor.g, _backgroundColor.b, _backgroundColor.a);
-		SDL_RenderFillRectF(renderer, &drawRect);
+		SDL_RenderFillRect(renderer, &drawRect);
 	}
 
 	if (_sprite)
@@ -76,13 +76,13 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 	else
 	{
 		SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
-		SDL_RenderFillRectF(renderer, &drawRect);
+		SDL_RenderFillRect(renderer, &drawRect);
 	}
 
 	if (_scene->rectsVisible())
 	{
 		SDL_SetRenderDrawColor(renderer, _rectColor.r, _rectColor.g, _rectColor.b, _rectColor.a);
-		SDL_RenderDrawRectF(renderer, &drawRect);
+		SDL_RenderRect(renderer, &drawRect);
 	}
 
 	if (_borderColor.a)
@@ -92,13 +92,13 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 		if (_borderThickness)
 			DrawThickRect(renderer, drawRect, _borderThickness);
 		else
-			SDL_RenderDrawRectF(renderer, &drawRect);
+			SDL_RenderRect(renderer, &drawRect);
 	}
 
 	if (_focused)
 	{
 		SDL_SetRenderDrawColor(renderer, _focusColor.r, _focusColor.g, _focusColor.b, _focusColor.a);
-		SDL_RenderFillRectF(renderer, &drawRect); 
+		SDL_RenderFillRect(renderer, &drawRect); 
 		_focused = false;
 	}
 }

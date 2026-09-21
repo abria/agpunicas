@@ -18,7 +18,12 @@ Sprite::Sprite(SDL_Texture* spritesheet, const RectI& rect)
 	_rect = rect;
 
 	if (!_rect.isValid())
-		SDL_QueryTexture(spritesheet, nullptr, nullptr, &_rect.size.x, &_rect.size.y);
+	{
+		float w, h;
+		SDL_GetTextureSize(spritesheet, &w, &h);
+		_rect.size.x = int(w);
+		_rect.size.y = int(h);
+	}
 }
 
 void Sprite::render(
@@ -27,10 +32,10 @@ void Sprite::render(
 	Transform camera, 
 	const Point& pixelUnitSize, 
 	float angle,
-	SDL_RendererFlip flip,
+	SDL_FlipMode flip,
 	bool fit)
 {
-	SDL_Rect srcRect = _rect.toSDL();
+	SDL_FRect srcRect = _rect.toSDLf();
 	SDL_FRect drawRect_sdl;
 
 	// expand
@@ -58,5 +63,5 @@ void Sprite::render(
 	else 
 		drawRect_sdl = RectF(camera(drawRect.tl()), camera(drawRect.br())).toSDLf();
 
-	SDL_RenderCopyExF(renderer, _spritesheet, &srcRect, &drawRect_sdl, -angle, 0, flip);
+	SDL_RenderTextureRotated(renderer, _spritesheet, &srcRect, &drawRect_sdl, -angle, nullptr, flip);
 }

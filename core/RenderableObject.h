@@ -12,6 +12,7 @@
 #include "Object.h"
 #include "Sprite.h"
 
+
 namespace agp
 {
 	class Scene;
@@ -31,7 +32,7 @@ class agp::RenderableObject : public Object
 		bool _visible;			// if false, does not draw
 		bool _focused;			// if true, fills with _focusColor color
 		int _flashingFreq;		// visible-invisible transitions per second, 0 = disabled (default)
-		SDL_RendererFlip _flip;	// horizontal/vertical flipping
+		SDL_FlipMode _flip;	// horizontal/vertical flipping
 		float _angle;			// degrees, clockwise
 		float _angularVelocity;	// degrees/s, clockwise
 		Color _focusColor;
@@ -47,8 +48,9 @@ class agp::RenderableObject : public Object
 		virtual ~RenderableObject() {}
 
 		// getters/setters
-		const Color& color() { return _color; }
-		const Color& backgroundColor() { return _backgroundColor; }
+		const Color& color() const { return _color; }
+		const Color& backgroundColor() const { return _backgroundColor; }
+		int flashingFrequency() const { return _flashingFreq; }
 		void setColor(const Color& newColor) { _color = newColor; }
 		void setBackgroundColor(const Color& newColor) { _backgroundColor = newColor; }
 		void setBorderColor(const Color& borderColor) { _borderColor = borderColor; }

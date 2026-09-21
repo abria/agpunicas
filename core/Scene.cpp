@@ -182,7 +182,7 @@ void Scene::schedule(const std::string& id, float delaySeconds, std::function<vo
 
 void Scene::event(SDL_Event& evt)
 {
-	if (evt.type == SDL_WINDOWEVENT && _view)
+	if (evt.type >= SDL_EVENT_WINDOW_FIRST && evt.type <= SDL_EVENT_WINDOW_LAST && _view)
 		_view->updateViewport();
 }
 

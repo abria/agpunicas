@@ -53,4 +53,17 @@ class agp::AnimatedSprite : public Sprite
 
 		// extends reset method (+restart frameIterator )
 		virtual void reset() override;
+    
+  public:
+    
+
+    void setFrame(int frameIndex)
+    {
+        // Verifica che l'indice sia valido usando il vettore "_frames"
+        if (frameIndex >= 0 && frameIndex < (int)_frames.size())
+        {
+            // Imposta l'iteratore del frame usando "_frameIterator"
+            _frameIterator = (float)frameIndex;
+        }
+    }
 };

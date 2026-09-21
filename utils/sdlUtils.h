@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "SDL.h"
-#include "SDL_image.h"
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include "geometryUtils.h"
 #include "mathUtils.h"
 #include "fileUtils.h"
@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <iostream>
 #ifdef WITH_TTF
-    #include "SDL_ttf.h"
+    #include <SDL3_ttf/SDL_ttf.h>
 #endif
 
 namespace agp
@@ -28,19 +28,19 @@ namespace agp
     {
         // Top side
         SDL_FRect top = { rect.x, rect.y, rect.w, thickness };
-        SDL_RenderFillRectF(renderer, &top);
+        SDL_RenderFillRect(renderer, &top);
 
         // Bottom side
         SDL_FRect bottom = { rect.x, rect.y + rect.h - thickness, rect.w, thickness };
-        SDL_RenderFillRectF(renderer, &bottom);
+        SDL_RenderFillRect(renderer, &bottom);
 
         // Left side
         SDL_FRect left = { rect.x, rect.y + thickness, thickness, rect.h - 2 * thickness };
-        SDL_RenderFillRectF(renderer, &left);
+        SDL_RenderFillRect(renderer, &left);
 
         // Right side
         SDL_FRect right = { rect.x + rect.w - thickness, rect.y + thickness, thickness, rect.h - 2 * thickness };
-        SDL_RenderFillRectF(renderer, &right);
+        SDL_RenderFillRect(renderer, &right);
     }
 
     static inline void DrawCircle(SDL_Renderer* renderer, const PointF& center, float radius, const Color& color, int nSegments = 100, float angleStart = 0, float angleEnd = 2 * PI)
@@ -56,7 +56,7 @@ namespace agp
             SDL_FPoint b = { center.x + radius * cosf(angleNext),  center.y + radius * sinf(angleNext) };
 
             SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-            SDL_RenderDrawLineF(renderer, a.x, a.y, b.x, b.y);
+            SDL_RenderLine(renderer, a.x, a.y, b.x, b.y);
         }
     }
 
@@ -74,8 +74,8 @@ namespace agp
         SDL_FPoint aDown = { centerDown.x + radius * cosf(PI + angle), centerDown.y + radius * sinf(PI + angle) };
 
         SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-        SDL_RenderDrawLineF(renderer, aUp.x, aUp.y, aDown.x, aDown.y);
-        SDL_RenderDrawLineF(renderer, bUp.x, bUp.y, bDown.x, bDown.y);
+        SDL_RenderLine(renderer, aUp.x, aUp.y, aDown.x, aDown.y);
+        SDL_RenderLine(renderer, bUp.x, bUp.y, bDown.x, bDown.y);
     }
 
     static inline void DrawOBB(SDL_Renderer* renderer, const RotatedRectF& obb, const Color& color)
@@ -86,7 +86,7 @@ namespace agp
             SDL_FPoint a = vertices[k].toSDLf();
             SDL_FPoint b = vertices[(k + 1) % 4].toSDLf();
             SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-            SDL_RenderDrawLineF(renderer, a.x, a.y, b.x, b.y);
+            SDL_RenderLine(renderer, a.x, a.y, b.x, b.y);
         }
     }
 
@@ -97,7 +97,7 @@ namespace agp
             SDL_FPoint a = obb[k].toSDLf();
             SDL_FPoint b = obb[(k + 1) % 4].toSDLf();
             SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-            SDL_RenderDrawLineF(renderer, a.x, a.y, b.x, b.y);
+            SDL_RenderLine(renderer, a.x, a.y, b.x, b.y);
         }
     }
 
@@ -146,7 +146,7 @@ namespace agp
             {
                 vertices[vertexCount].position.x = quad[j].x;
                 vertices[vertexCount].position.y = quad[j].y;
-                vertices[vertexCount].color = { color.r, color.g, color.b, color.a };
+                vertices[vertexCount].color = { color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f };
                 vertexCount++;
             }
 
@@ -172,11 +172,11 @@ namespace agp
             SDL_vertices[i] =
         {
             SDL_FPoint{obb[i].x,obb[i].y},
-            SDL_Color {color.r, color.g, color.b, color.a},
+            SDL_FColor {color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f},
             SDL_FPoint {0}
         };
         std::array< int, 6> SDL_indices = { 0, 1, 2, 2, 3, 0 };
-        SDL_RenderGeometry(renderer, nullptr, &SDL_vertices[0], 6, &SDL_indices[0], 6);
+        SDL_RenderGeometry(renderer, nullptr, &SDL_vertices[0], 4, &SDL_indices[0], 6);
     }
 
     // load image from file into texture
@@ -192,13 +192,14 @@ namespace agp
 
         // set transparent color
         if (mask.a)
-            SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, mask.r, mask.g, mask.b));
+            SDL_SetSurfaceColorKey(surf, true, SDL_MapSurfaceRGB(surf, mask.r, mask.g, mask.b));
 
         // create texture from surf
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
-        SDL_FreeSurface(surf);
+        SDL_DestroySurface(surf);
         if (!tex)
             throw strprintf("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
+        SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
 
         return tex;
     }
@@ -230,7 +231,7 @@ namespace agp
 
             // set transparent color
             if (mask.a)
-                SDL_SetColorKey(surf, SDL_TRUE, SDL_MapRGB(surf->format, mask.r, mask.g, mask.b));
+                SDL_SetSurfaceColorKey(surf, true, SDL_MapSurfaceRGB(surf, mask.r, mask.g, mask.b));
 
             // set image dimensions based on the first image
             if (k == 0)
@@ -242,7 +243,7 @@ namespace agp
             else if (surf->w != image_width || surf->h != image_height)
             {
                 printf("loadTextureSequence(): Image %s size (%d, %d) does not match expected size (%d, %d), SKIPPED\n", filepath.c_str(), surf->w, surf->h, image_width, image_height);
-                SDL_FreeSurface(surf);
+                SDL_DestroySurface(surf);
                 continue;
             }
 
@@ -253,12 +254,14 @@ namespace agp
             throw strprintf("loadTextureSequence(): No images loaded.\n");
 
         // retrieve renderer's maximum texture size
-        SDL_RendererInfo info;
-        SDL_GetRendererInfo(renderer, &info);
-        int max_texture_width = info.max_texture_width;
-        int max_texture_height = info.max_texture_height;
+        SDL_PropertiesID props = SDL_GetRendererProperties(renderer);
+        int max_texture_width = int(SDL_GetNumberProperty(props, SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, 0));
+        int max_texture_height = max_texture_width;
         if (!max_texture_width || !max_texture_height)
-            throw strprintf("loadTextureSequence(): Cannot retrieve renderer max texture size.\n");
+        {
+            max_texture_width = image_width * int(surfaces.size());
+            max_texture_height = image_height * int(surfaces.size());
+        }
 
         // calculate the number of images per row and the total number of rows
         int images_per_row = max_texture_width / image_width;
@@ -276,8 +279,7 @@ namespace agp
             total_width = image_width * total_images;
 
         // Create a big surf to hold all images in a grid
-        SDL_Surface* big_surface = SDL_CreateRGBSurface(0, total_width, total_height, surfaces[0]->format->BitsPerPixel,
-            surfaces[0]->format->Rmask, surfaces[0]->format->Gmask, surfaces[0]->format->Bmask, surfaces[0]->format->Amask);
+        SDL_Surface* big_surface = SDL_CreateSurface(total_width, total_height, surfaces[0]->format);
         if (!big_surface)
             throw strprintf("Failed to create big surf: %s", SDL_GetError());
 
@@ -294,20 +296,21 @@ namespace agp
             rect.adjust(adjustPos.x, adjustPos.y, adjustSize.x, adjustSize.y);
             rects.push_back(rect);
 
-            SDL_FreeSurface(surfaces[i]);
+            SDL_DestroySurface(surfaces[i]);
         }
         surfaces.clear();
 
         // set transparent color
         if (mask.a)
-            SDL_SetColorKey(big_surface, SDL_TRUE, SDL_MapRGB(big_surface->format, mask.r, mask.g, mask.b));
+            SDL_SetSurfaceColorKey(big_surface, true, SDL_MapSurfaceRGB(big_surface, mask.r, mask.g, mask.b));
 
         // create a texture from the big surf
         SDL_Texture* result = SDL_CreateTextureFromSurface(renderer, big_surface);
         if (!result)
             throw strprintf("Failed to convert big surf to big texture for %s: %s", folderPath.c_str(), SDL_GetError());
+        SDL_SetTextureScaleMode(result, SDL_SCALEMODE_NEAREST);
 
-        SDL_FreeSurface(big_surface);
+        SDL_DestroySurface(big_surface);
 
         return result;
     }
@@ -316,28 +319,39 @@ namespace agp
     static inline SDL_Texture* loadTextureAutoDetect(
         SDL_Renderer* renderer,
         const std::string& filepath,
-        std::vector< std::vector < RectI > >& rects,
-        const Color& backgroundMask,
-        const Color& spriteMask,
-        int yDistanceThreshold = 5,
-        bool detectCornerWithBackgroundOnly = false,
-        bool alignYCenters = true,
+        std::vector< std::vector < RectI > >& rects,// output: detected sprite rectangles grouped by rows 
+        const Color& backgroundMask,                // color considered as background/empty area in the spritesheet
+        const Color& spriteMask,                    // color used to mark sprite pixels and as transparency key
+        int yDistanceThreshold = 5,                 // max vertical distance to consider sprites as belonging to the same row
+        bool detectCornerWithBackgroundOnly = false,// if true, detect sprite corners by any non-background pixel
+        bool alignYCenters = true,                  // if true, group rects by comparing their vertical centers instead of top edges
         bool verbose = false)
     {
         SDL_Surface* surf = IMG_Load(filepath.c_str());
         if (!surf)
             throw strprintf("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
 
-        SDL_PixelFormat* format = surf->format;
+        const SDL_PixelFormatDetails* format = SDL_GetPixelFormatDetails(surf->format);
 
-        if (format->BytesPerPixel != 3 && format->BytesPerPixel != 4)
+        if (format->bytes_per_pixel != 3 && format->bytes_per_pixel != 4)
             throw strprintf("Unsupported image format in %s. Only 24-bit and 32-bit images are supported.", filepath.c_str());
+
+        if (verbose)
+        {
+            printf("\n\nImage loaded from %s\n", filepath.c_str());
+            printf("   format->bytes_per_pixel = %d\n", format->bytes_per_pixel);
+            printf("   format->bits_per_pixel = %d\n", format->bits_per_pixel);
+            printf("   format->format = %d\n", format->format);
+            printf("   format->SDL_PIXELFORMAT_ABGR8888 = %s\n", format->format == SDL_PIXELFORMAT_ABGR8888 ? "YES" : "no");
+            printf("   format->SDL_PIXELFORMAT_BGRA8888 = %s\n", format->format == SDL_PIXELFORMAT_BGRA8888 ? "YES" : "no");
+            
+        }
 
         // Helper function to get pixel color
         auto getPixelColor = [format](Uint8* pixelPtr) -> Color
         {
             Uint32 pixelValue;
-            if (format->BytesPerPixel == 3)
+            if (format->bytes_per_pixel == 3)
             {
                 // For 24-bit images, read 3 bytes
                 if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
@@ -345,7 +359,7 @@ namespace agp
                 else
                     pixelValue = pixelPtr[0] | pixelPtr[1] << 8 | pixelPtr[2] << 16;
             }
-            else // format->BytesPerPixel == 4
+            else // format->bytes_per_pixel == 4
             {
                 pixelValue = *(Uint32*)pixelPtr;
             }
@@ -356,14 +370,14 @@ namespace agp
             Uint8 a = format->Amask ? (pixelValue & format->Amask) >> format->Ashift : 255;
 
             // Adjust component sizes if necessary
-            if (format->Rloss)
-                r = (r << format->Rloss) + (r >> (8 - (format->Rloss)));
-            if (format->Gloss)
-                g = (g << format->Gloss) + (g >> (8 - (format->Gloss)));
-            if (format->Bloss)
-                b = (b << format->Bloss) + (b >> (8 - (format->Bloss)));
-            if (format->Aloss)
-                a = (a << format->Aloss) + (a >> (8 - (format->Aloss)));
+            if ((8 - format->Rbits))
+                r = (r << (8 - format->Rbits)) + (r >> (8 - (8 - format->Rbits)));
+            if ((8 - format->Gbits))
+                g = (g << (8 - format->Gbits)) + (g >> (8 - (8 - format->Gbits)));
+            if ((8 - format->Bbits))
+                b = (b << (8 - format->Bbits)) + (b >> (8 - (8 - format->Bbits)));
+            if ((8 - format->Abits))
+                a = (a << (8 - format->Abits)) + (a >> (8 - (8 - format->Abits)));
 
             return Color(r, g, b, a);
         };
@@ -372,12 +386,12 @@ namespace agp
         auto setPixelColor = [format](Uint8* pixelPtr, const Color& color)
         {
             Uint32 pixelValue =
-                ((color.r >> format->Rloss) << format->Rshift) |
-                ((color.g >> format->Gloss) << format->Gshift) |
-                ((color.b >> format->Bloss) << format->Bshift) |
-                (format->Amask ? ((color.a >> format->Aloss) << format->Ashift) : 0);
+                ((color.r >> (8 - format->Rbits)) << format->Rshift) |
+                ((color.g >> (8 - format->Gbits)) << format->Gshift) |
+                ((color.b >> (8 - format->Bbits)) << format->Bshift) |
+                (format->Amask ? ((color.a >> (8 - format->Abits)) << format->Ashift) : 0);
 
-            if (format->BytesPerPixel == 3)
+            if (format->bytes_per_pixel == 3)
             {
                 if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
                 {
@@ -392,7 +406,7 @@ namespace agp
                     pixelPtr[2] = (pixelValue >> 16) & 0xFF;
                 }
             }
-            else // format->BytesPerPixel == 4
+            else // format->bytes_per_pixel == 4
             {
                 *(Uint32*)pixelPtr = pixelValue;
             }
@@ -405,7 +419,7 @@ namespace agp
         int width = surf->w;
         int height = surf->h;
         int pitch = surf->pitch; // Number of bytes in a row (may include padding)
-        Uint8 bpp = format->BytesPerPixel;
+        Uint8 bpp = format->bytes_per_pixel;
 
         for (int y = 0; y < height; y++)
         {
@@ -453,7 +467,7 @@ namespace agp
         if (allRects.empty())
         {
             SDL_UnlockSurface(surf);
-            SDL_FreeSurface(surf);
+            SDL_DestroySurface(surf);
             throw strprintf("Unable to extract auto tiles from texture file %s", filepath.c_str());
         }
 
@@ -502,17 +516,18 @@ namespace agp
 
         // Set transparent color
         Uint32 spriteMaskPixelValue =
-            ((spriteMask.r >> format->Rloss) << format->Rshift) |
-            ((spriteMask.g >> format->Gloss) << format->Gshift) |
-            ((spriteMask.b >> format->Bloss) << format->Bshift);
+            ((spriteMask.r >> (8 - format->Rbits)) << format->Rshift) |
+            ((spriteMask.g >> (8 - format->Gbits)) << format->Gshift) |
+            ((spriteMask.b >> (8 - format->Bbits)) << format->Bshift);
 
-        SDL_SetColorKey(surf, SDL_TRUE, spriteMaskPixelValue);
+        SDL_SetSurfaceColorKey(surf, true, spriteMaskPixelValue);
 
         // Create texture from surface
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
-        SDL_FreeSurface(surf);
+        SDL_DestroySurface(surf);
         if (!tex)
             throw strprintf("Failed to convert surface to texture for %s: %s", filepath.c_str(), SDL_GetError());
+        SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
 
         return tex;
     }
@@ -564,10 +579,10 @@ namespace agp
     static inline SDL_Texture* loadTextureConnectedComponents(
         SDL_Renderer* renderer,
         const std::string& filepath,
-        std::vector< RectI >& rects,
-        const Color& backgroundMask,
-        int yDistanceThreshold = 5,
-        bool alignYCenters = true,
+        std::vector< RectI >& rects,    // output: bounding boxes of detected connected components (sprites)
+        const Color& backgroundMask,    // color considered as background to separate foreground components
+        int yDistanceThreshold = 5,     // max vertical distance to consider components as belonging to the same row
+        bool alignYCenters = true,      // if true, group rects by comparing their vertical centers instead of top edges
         bool verbose = false)
     {
         // load image
@@ -581,7 +596,9 @@ namespace agp
         int height = surface->h;
         int pitch = surface->pitch;
         Uint8* pixels = (Uint8*)surface->pixels;
-        int BytesPerPixel = surface->format->BytesPerPixel;
+        const SDL_PixelFormatDetails* format = SDL_GetPixelFormatDetails(surface->format);
+        SDL_Palette* palette = SDL_GetSurfacePalette(surface);
+        int BytesPerPixel = format->bytes_per_pixel;
 
         // check format
         if (BytesPerPixel < 3 || BytesPerPixel > 4)
@@ -606,7 +623,7 @@ namespace agp
 
                 Uint32 pixelValue = 0;
                 memcpy(&pixelValue, pixel, BytesPerPixel);
-                SDL_GetRGB(pixelValue, surface->format, &r, &g, &b);
+                SDL_GetRGB(pixelValue, format, palette, &r, &g, &b);
 
                 // determine if the pixel is foreground or background
                 bool isForeground = (r != backgroundMask.r && g != backgroundMask.g && b != backgroundMask.b);
@@ -649,7 +666,7 @@ namespace agp
 
                         Uint32 neighborPixelValue = 0;
                         memcpy(&neighborPixelValue, neighborPixel, BytesPerPixel);
-                        SDL_GetRGB(neighborPixelValue, surface->format, &nr, &ng, &nb);
+                        SDL_GetRGB(neighborPixelValue, format, palette, &nr, &ng, &nb);
 
                         bool neighborIsForeground = (nr != backgroundMask.r && ng != backgroundMask.g && nb != backgroundMask.b);
 
@@ -714,7 +731,7 @@ namespace agp
 
                 Uint32 pixelValue = 0;
                 memcpy(&pixelValue, pixel, BytesPerPixel);
-                SDL_GetRGB(pixelValue, surface->format, &r, &g, &b);
+                SDL_GetRGB(pixelValue, format, palette, &r, &g, &b);
 
                 bool isForeground = (r != backgroundMask.r && g != backgroundMask.g && b != backgroundMask.b);
 
@@ -777,7 +794,7 @@ namespace agp
 
         if (verbose)
         {
-            printf("Extracted %llu components\n", rects.size());
+            printf("Extracted %zu components\n", rects.size());
             for (int i = 0; i < rects.size(); i++)
                 printf("%d: %s\n", i, rects[i].str().c_str());
         }
@@ -785,13 +802,14 @@ namespace agp
         SDL_UnlockSurface(surface);
 
         // set transparent color
-        SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, backgroundMask.r, backgroundMask.g, backgroundMask.b));
+        SDL_SetSurfaceColorKey(surface, true, SDL_MapSurfaceRGB(surface, backgroundMask.r, backgroundMask.g, backgroundMask.b));
 
         // create texture from surf
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_FreeSurface(surface);
+        SDL_DestroySurface(surface);
         if (!tex)
             throw strprintf("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
+        SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
 
         return tex;
     }
@@ -809,10 +827,10 @@ namespace agp
         TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
         SDL_Color textColor = { fontColor.r, fontColor.g, fontColor.b, fontColor.a };
         SDL_Surface* textSurface = nullptr;
-        textSurface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), textColor, wrapLength);
+        textSurface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), text.size(), textColor, wrapLength);
         SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        SDL_SetTextureScaleMode(textTexture, SDL_ScaleModeBest);
-        SDL_FreeSurface(textSurface);
+        SDL_SetTextureScaleMode(textTexture, SDL_SCALEMODE_LINEAR);
+        SDL_DestroySurface(textSurface);
 
         return textTexture;
     }
@@ -830,7 +848,7 @@ namespace agp
             dy = -dy;
 
         // Compute the angle of the segment in degrees
-        float theta = std::atan2(dy, dx) * 180.0f / static_cast<float>(M_PI);
+        float theta = std::atan2(dy, dx) * 180.0f / std::acos(-1.0f);
 
         // Compute the angle perpendicular to the segment
         float theta_perp = theta + 90.0f;
@@ -849,18 +867,18 @@ namespace agp
         {
             case 0: // 0 degrees (East)
             case 4: // 180 degrees (West)
-                return SDL_SYSTEM_CURSOR_SIZEWE;    // East-West cursor
+                return SDL_SYSTEM_CURSOR_EW_RESIZE;    // East-West cursor
             case 1: // 45 degrees (Northeast)
             case 5: // 225 degrees (Southwest)
-                return SDL_SYSTEM_CURSOR_SIZENESW;  // Northeast-Southwest cursor
+                return SDL_SYSTEM_CURSOR_NESW_RESIZE;  // Northeast-Southwest cursor
             case 2: // 90 degrees (North)
             case 6: // 270 degrees (South)
-                return SDL_SYSTEM_CURSOR_SIZENS;    // North-South cursor
+                return SDL_SYSTEM_CURSOR_NS_RESIZE;    // North-South cursor
             case 3: // 135 degrees (Northwest)
             case 7: // 315 degrees (Southeast)
-                return SDL_SYSTEM_CURSOR_SIZENWSE;  // Northwest-Southeast cursor
+                return SDL_SYSTEM_CURSOR_NWSE_RESIZE;  // Northwest-Southeast cursor
             default:
-                return SDL_SYSTEM_CURSOR_ARROW;     // Default arrow cursor (should not reach here)
+                return SDL_SYSTEM_CURSOR_DEFAULT;     // Default arrow cursor (should not reach here)
         }
     }
 }

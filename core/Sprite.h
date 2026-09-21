@@ -8,7 +8,7 @@
 // ----------------------------------------------------------------
 
 #pragma once
-#include "SDL.h"
+#include <SDL3/SDL.h>
 #include "geometryUtils.h"
 
 namespace agp
@@ -40,7 +40,7 @@ class agp::Sprite
 			Transform camera,			// scene2view transform
 			const Point& pixelUnitSize,	// scene unit size in pixels
 			float angle = 0,			// rotation in degrees, clockwise
-			SDL_RendererFlip flip = SDL_FLIP_NONE,
+			SDL_FlipMode flip = SDL_FLIP_NONE,
 			bool fit = true);			// fit within drawRect or expand
 
 		// update method (for logic, animations)

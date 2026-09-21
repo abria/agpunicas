@@ -16,7 +16,7 @@
 #include <array>
 #include <limits>
 #include <vector>
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 #ifdef BOX2D_UTILS
 #include "box2d/box2d.h"
@@ -291,6 +291,35 @@ namespace agp
 			}
 		}
 
+		// return the intersection rectangle (invalid if no intersection)
+		inline Rect<T> intersection(const Rect<T>& r) const
+		{
+			// compute overlap bounds
+			T ix1 = std::max(left(), r.left());
+			T iy1 = yUp ? std::max(bottom(), r.bottom())
+				: std::max(top(), r.top());
+
+			T ix2 = std::min(right(), r.right());
+			T iy2 = yUp ? std::min(top(), r.top())
+				: std::min(bottom(), r.bottom());
+
+			// check empty
+			if (ix2 <= ix1 || iy2 <= iy1)
+				return Rect<T>(0, 0, 0, 0, yUp);   // invalid
+
+			// build intersection rect
+			if (yUp)
+			{
+				// bottom-left is (ix1, iy1), size is (ix2-ix1, iy2-iy1)
+				return Rect<T>(ix1, iy1, ix2 - ix1, iy2 - iy1, true);
+			}
+			else
+			{
+				// top-left is (ix1, iy1)
+				return Rect<T>(ix1, iy1, ix2 - ix1, iy2 - iy1, false);
+			}
+		}
+
 		// Liang-Barsky algorithm for line-rectangle intersection
 		inline bool intersectsLine(const Vec2D<T>& p0, const Vec2D<T>& p1, T& tNear, T& tFar)
 		{
@@ -354,6 +383,14 @@ namespace agp
 		inline Vec2D<T> center() const
 		{
 			return Vec2D<T>(pos.x + size.x / 2, pos.y + size.y / 2);
+		}
+
+		inline Rect<T> centerOn(const Vec2D<T>& p) const
+		{
+			Rect<T> r(*this);
+			r.pos.x = p.x - r.size.x / T(2);
+			r.pos.y = p.y - r.size.y / T(2);
+			return r;
 		}
 
 		inline Rect united(const Rect& rect) const

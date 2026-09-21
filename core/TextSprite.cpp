@@ -67,7 +67,7 @@ void TextSprite::render(
 	Transform camera,
 	const Point& pixelUnitSize,
 	float angle,
-	SDL_RendererFlip flip,
+	SDL_FlipMode flip,
     bool fit)
 {
 #ifdef WITH_TTF
@@ -79,7 +79,10 @@ void TextSprite::render(
         if (_spritesheet)
             SDL_DestroyTexture(_spritesheet);
         _spritesheet = generateText(_text, renderer, Fonts::instance()->font(_fontName), _fontColor, int(_fontStyle));
-        SDL_QueryTexture(_spritesheet, nullptr, nullptr, &_rect.size.x, &_rect.size.y);
+        float w, h;
+		SDL_GetTextureSize(_spritesheet, &w, &h);
+		_rect.size.x = int(w);
+		_rect.size.y = int(h);
         _regenerateTexture = false;
     }
 
@@ -142,7 +145,7 @@ void TextSprite::render(
         correctedDrawRectAR.pos.y = correctedDrawRect.pos.y;
 
     // apply camera transform to corrected draw rect
-    SDL_Rect srcRect = _rect.toSDL();
+    SDL_FRect srcRect = _rect.toSDLf();
     SDL_FRect drawRect_sdl = RectF(camera(correctedDrawRectAR.tl()), camera(correctedDrawRectAR.br())).toSDLf();
 
     // calculate the rotation center relative to transformed drawRect
@@ -152,7 +155,7 @@ void TextSprite::render(
     rotationCenter.x = drawRectCenterScreen.x - drawRect_sdl.x;
     rotationCenter.y = drawRectCenterScreen.y - drawRect_sdl.y;
 
-    SDL_RenderCopyExF(renderer, _spritesheet, &srcRect, &drawRect_sdl, angle, &rotationCenter, SDL_FLIP_NONE);
+    SDL_RenderTextureRotated(renderer, _spritesheet, &srcRect, &drawRect_sdl, angle, &rotationCenter, SDL_FLIP_NONE);
 #else
     if (_regenerateTexture)
     {

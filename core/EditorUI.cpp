@@ -45,14 +45,14 @@ EditorUI::EditorUI()
 
 EditorUI::~EditorUI()
 {
-	SDL_FreeCursor(_cursor);
+	SDL_DestroyCursor(_cursor);
 	_cursor = nullptr;
 }
 
 void EditorUI::setCursor(SDL_SystemCursor cursor)
 {
 	if (_cursor)
-		SDL_FreeCursor(_cursor);
+		SDL_DestroyCursor(_cursor);
 
 	_cursor = SDL_CreateSystemCursor(cursor);
 	SDL_SetCursor(_cursor);
@@ -138,7 +138,7 @@ void EditorUI::event(SDL_Event& evt)
 {
 	UIScene::event(evt);
 
-	if (evt.type == SDL_MOUSEMOTION)
+	if (evt.type == SDL_EVENT_MOUSE_MOTION)
 	{
 		PointF _mousePointCurr(float(evt.button.x), float(evt.button.y));
 		_mousePointCurr = _view->mapToScene(_mousePointCurr);

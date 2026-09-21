@@ -42,6 +42,8 @@ class agp::Game : public Singleton<Game>
 		bool _running;
 		bool _reset;
 		int _currentFPS;
+		int _timeScaleIndex;				// to speedup or slowdown game speed
+		std::vector<float> _timeScales;
 
 		// helper functions
 		virtual void destroy();

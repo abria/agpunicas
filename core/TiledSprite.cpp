@@ -35,7 +35,7 @@ void TiledSprite::render(
 	Transform camera,
 	const Point& pixelUnitSize,
 	float angle,
-	SDL_RendererFlip flip,
+	SDL_FlipMode flip,
 	bool fit)
 {
 	int tiles_count = 0;
@@ -49,10 +49,10 @@ void TiledSprite::render(
 	for (float y = drawRect.pos.y; y < drawRect.pos.y + drawRect.size.y; y += _tileSize.y)
 		for (float x = drawRect.pos.x; x < drawRect.pos.x + drawRect.size.x && tiles_count < _tiles.size(); x += _tileSize.x)
 		{
-			SDL_Rect frameRectTile = _tiles[tiles_count++].toSDL();
+			SDL_FRect frameRectTile = _tiles[tiles_count++].toSDLf();
 
 			RectF tileRect({ x,y }, { x + _tileSize.x,y + _tileSize.y }, drawRect.yUp);
 			SDL_FRect drawRectTile = RectF(camera(tileRect.tl()), camera(tileRect.br())).toSDLf();
-			SDL_RenderCopyExF(renderer, _spritesheet, &frameRectTile, &drawRectTile, 0, 0, flip);
+			SDL_RenderTextureRotated(renderer, _spritesheet, &frameRectTile, &drawRectTile, 0, nullptr, flip);
 		}
 }

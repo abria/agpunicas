@@ -13,7 +13,7 @@
 #include <map>
 #include <string>
 #include "Singleton.h"
-#include "SDL_ttf.h"
+#include <SDL3_ttf/SDL_ttf.h>
 
 namespace agp
 {

@@ -33,6 +33,8 @@ Game::Game(
 	_running = false;
 	_reset = false;
 	_running = false;
+	_timeScaleIndex = 4;
+	_timeScales = { 0.05f, 0.1f, 0.2f, 0.5f, 1.0f, 2.0f, 4.0f, 10.0f, 20.0f };
 
 	if (rendering == Rendering::SDL)
 		_window = new Window(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
@@ -62,7 +64,7 @@ void Game::run()
 		float frameTime = frameTimer.restart();
 		for (int i = int(_scenes.size()) - 1; i >= 0; i--)
 		{
-			_scenes[i]->update(frameTime);
+			_scenes[i]->update(frameTime *_timeScales[_timeScaleIndex]);
 			if (_scenes[i]->blocking())
 				break;
 		}
@@ -109,14 +111,32 @@ void Game::processEvents()
 
 void Game::dispatchEvent(SDL_Event& evt)
 {
+	// detect CTRL and SHIFT modifiers
+	const bool* keyboardState = SDL_GetKeyboardState(0);
+	bool ctrlPressed = keyboardState[SDL_SCANCODE_LCTRL] || keyboardState[SDL_SCANCODE_RCTRL];
+	bool shiftPressed = keyboardState[SDL_SCANCODE_LSHIFT] || keyboardState[SDL_SCANCODE_RSHIFT];
+
+
 	// window events are dispatched to all scenes for their views adjustments
-	if (evt.type == SDL_WINDOWEVENT)
+	if (evt.type >= SDL_EVENT_WINDOW_FIRST && evt.type <= SDL_EVENT_WINDOW_LAST)
 	{
-		if (evt.window.event == SDL_WINDOWEVENT_RESIZED)
+		if (evt.type == SDL_EVENT_WINDOW_RESIZED)
 			_window->resize(evt.window.data1, evt.window.data2);
 
 		for (auto& scene : _scenes)
 			scene->event(evt);
+	}
+
+	// game speed regulation events
+	else if (ctrlPressed && shiftPressed && evt.type == SDL_EVENT_KEY_DOWN && evt.key.scancode == SDL_SCANCODE_UP && !evt.key.repeat)
+	{
+		_timeScaleIndex = std::min(_timeScaleIndex + 1, int(_timeScales.size()) - 1);
+		printf("Game speed %.2f\n", _timeScales[_timeScaleIndex]);
+	}
+	else if (ctrlPressed && shiftPressed && evt.type == SDL_EVENT_KEY_DOWN && evt.key.scancode == SDL_SCANCODE_DOWN && !evt.key.repeat)
+	{
+		_timeScaleIndex = std::max(_timeScaleIndex - 1, 0);
+		printf("Game speed %.2f\n", _timeScales[_timeScaleIndex]);
 	}
 
 	// all other events are dispatched from top to down through the scene stack

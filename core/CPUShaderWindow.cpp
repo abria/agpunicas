@@ -31,11 +31,17 @@ CPUShaderWindow::~CPUShaderWindow()
 
 Uint32 CPUShaderWindow::rendererFlags()
 {
-	return Window::rendererFlags() | SDL_RENDERER_TARGETTEXTURE;
+	return Window::rendererFlags();
 }
 
 void CPUShaderWindow::render(const std::vector<Scene*>& scenes)
 {
+	if (!_shader)
+	{
+		Window::render(scenes);
+		return;
+	}
+
 	// render to target texture first
 	SDL_SetRenderTarget(_renderer, _targetTexture);
 	SDL_SetRenderDrawColor(_renderer, _color.r, _color.g, _color.b, 255);
@@ -44,20 +50,30 @@ void CPUShaderWindow::render(const std::vector<Scene*>& scenes)
 		scene->render();
 
 	// read pixels from target texture (GPU) into CPU buffer
-	if (SDL_RenderReadPixels(_renderer, NULL, SDL_PIXELFORMAT_RGBA8888, _CPUBuffer.data(), _width * 4) != 0)
+	SDL_Surface* pixels = SDL_RenderReadPixels(_renderer, NULL);
+	if (!pixels)
 		throw SDL_GetError();
+	if (pixels->format != SDL_PIXELFORMAT_RGBA8888)
+	{
+		SDL_Surface* converted = SDL_ConvertSurface(pixels, SDL_PIXELFORMAT_RGBA8888);
+		SDL_DestroySurface(pixels);
+		if (!converted)
+			throw SDL_GetError();
+		pixels = converted;
+	}
 
 	// apply post-processing on CPU buffer
 	if (_shader)
-		_shader(reinterpret_cast<Uint32*>(_CPUBuffer.data()), _width, _height, _width * 4);
+		_shader(static_cast<Uint32*>(pixels->pixels), pixels->w, pixels->h, pixels->pitch);
 
 	// update the streaming texture (GPU) with processed data (CPU)
-	SDL_UpdateTexture(_GPUBuffer, NULL, _CPUBuffer.data(), _width * 4);
+	SDL_UpdateTexture(_GPUBuffer, NULL, pixels->pixels, pixels->pitch);
+	SDL_DestroySurface(pixels);
 
 	// render the processed texture to the window:
 	SDL_SetRenderTarget(_renderer, nullptr);
 	SDL_RenderClear(_renderer);
-	SDL_RenderCopy(_renderer, _GPUBuffer, NULL, NULL);
+	SDL_RenderTexture(_renderer, _GPUBuffer, NULL, NULL);
 	SDL_RenderPresent(_renderer);
 }
 

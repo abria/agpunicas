@@ -28,6 +28,10 @@ namespace agp
         int rowPixels = pitch / 4;
 
         radius *= std::min(width, height);
+        float innerRadius = (std::max)(radius - 0.5f, 0.0f);
+        float outerRadius = radius + 0.5f;
+        float innerRadiusSquared = innerRadius * innerRadius;
+        float outerRadiusSquared = outerRadius * outerRadius;
 
         for (int y = 0; y < height; ++y)
         {
@@ -38,7 +42,18 @@ namespace agp
 
                 float dx = px - centerX;
                 float dy = py - centerY;
-                float distance = std::sqrt(dx * dx + dy * dy);
+                float distanceSquared = dx * dx + dy * dy;
+                if (radius > 0.5f && distanceSquared <= innerRadiusSquared)
+                {
+                    pixels[y * rowPixels + x] = (pixels[y * rowPixels + x] & 0xFFFFFF00) | 0x000000FF;
+                    continue;
+                }
+                if (distanceSquared >= outerRadiusSquared)
+                {
+                    pixels[y * rowPixels + x] = 0x000000FF;
+                    continue;
+                }
+                float distance = std::sqrt(distanceSquared);
 
                 float edgeDistance = distance - radius;
                 float factor;

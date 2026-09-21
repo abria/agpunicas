@@ -24,7 +24,7 @@ Window::Window(const std::string& title, int width, int height)
 	_width = width;
 	_height = height;
 
-	if (SDL_Init(SDL_INIT_VIDEO))
+	if (!SDL_Init(SDL_INIT_VIDEO))
 		throw SDL_GetError();
 }
 
@@ -43,7 +43,7 @@ Window::~Window()
 
 Uint32 Window::rendererFlags()
 {
-	return SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+	return 0;
 }
 
 Uint32 Window::windowFlags()
@@ -55,25 +55,24 @@ void Window::initWindow()
 {
 	_window = SDL_CreateWindow(
 		_title.c_str(),
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
 		_width,
 		_height,
 		windowFlags()
 	);
 	if (!_window)
 		throw SDL_GetError();
+	SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 void Window::initRenderer()
 {
 	_renderer = SDL_CreateRenderer(
 		_window,
-		-1,
-		rendererFlags()
+		nullptr
 	);
 	if (!_renderer)
 		throw SDL_GetError();
+	SDL_SetRenderVSync(_renderer, 1);
 
 	SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
 

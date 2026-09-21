@@ -298,7 +298,7 @@ bool EditableObject::resizableAt(const PointF& point)
 SDL_SystemCursor EditableObject::resizeCursor()
 {
 	if (_multiline.size())
-		return SDL_SYSTEM_CURSOR_ARROW;
+		return SDL_SYSTEM_CURSOR_DEFAULT;
 
 	if (_rotRect.angle)
 	{
@@ -313,7 +313,7 @@ SDL_SystemCursor EditableObject::resizeCursor()
 		return getPerpendicularCursor(vertices[_resizingEdgeIndex], vertices[(_resizingEdgeIndex + 1) % 4], _rotRect.yUp);
 	}
 
-	return SDL_SYSTEM_CURSOR_SIZENESW;
+	return SDL_SYSTEM_CURSOR_NESW_RESIZE;
 }
 
 void EditableObject::resize(const PointF& point)

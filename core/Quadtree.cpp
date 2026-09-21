@@ -49,8 +49,9 @@ void Quadtree::add(Object* obj)
 void Quadtree::remove(Object* obj)
 {
     //remove(_root, _rect, obj);
-    if (_objectToNode.find(obj->id()) != _objectToNode.end())
-        nodeRemoveObject(_objectToNode[obj->id()], obj);
+    auto it = _objectToNode.find(obj->id());
+    if (it != _objectToNode.end())
+        nodeRemoveObject(it->second, obj);
 }
 
 void Quadtree::update(Object* obj)
@@ -59,6 +60,7 @@ void Quadtree::update(Object* obj)
     {
         if(VERBOSE)
             std::cerr << "Quadtree::update: trying to update an object [" << obj->name() << ", rect = " << obj->rect().str() << "] that is not present in the quadtree\n";
+        add(obj);
         return;
     }
 
@@ -183,13 +185,15 @@ void Quadtree::nodeAddObject(Node* node, Object* obj)
     auto it = std::find_if(std::begin(node->objects), std::end(node->objects),
         [this, &obj](const auto& rhs) { return obj->id() == rhs->id(); });
 
-    if (it != std::end(node->objects) && VERBOSE)
-        std::cerr << "Quadtree::nodeAddObject: trying to add an object already present in the node\n";
-    else
+    if (it != std::end(node->objects))
     {
-        node->objects.push_back(obj);
-        _objectToNode[obj->id()] = node;
+        if (VERBOSE)
+            std::cerr << "Quadtree::nodeAddObject: trying to add an object already present in the node\n";
+        return;
     }
+
+    node->objects.push_back(obj);
+    _objectToNode[obj->id()] = node;
 }
 
 void Quadtree::nodeRemoveObject(Node* node, Object* obj)
@@ -197,16 +201,18 @@ void Quadtree::nodeRemoveObject(Node* node, Object* obj)
     auto it = std::find_if(std::begin(node->objects), std::end(node->objects),
         [this, &obj](const auto& rhs) { return obj->id() == rhs->id(); });
     
-    if (it == std::end(node->objects) && VERBOSE)
-        std::cerr << "Quadtree::nodeRemoveObject: trying to remove an object that is not present in the node\n";
-    else
+    if (it == std::end(node->objects))
     {
-        // swap with the last element and pop back
-        *it = std::move(node->objects.back());
-        node->objects.pop_back();
-
-        _objectToNode.erase(obj->id());
+        if (VERBOSE)
+            std::cerr << "Quadtree::nodeRemoveObject: trying to remove an object that is not present in the node\n";
+        return;
     }
+
+    // swap with the last element and pop back
+    *it = std::move(node->objects.back());
+    node->objects.pop_back();
+
+    _objectToNode.erase(obj->id());
 }
 
 bool Quadtree::tryMerge(Node* node)

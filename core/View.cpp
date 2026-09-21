@@ -7,7 +7,7 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 #include "View.h"
 #include "Window.h"
 #include "Game.h"
@@ -75,13 +75,14 @@ void View::render()
 	SDL_Rect viewport_r = _viewportAbs.toSDL();
 	SDL_Rect cliprect_r = _clipRectAbs.toSDL();
 	if(_clipRectAbs.isValid())
-		SDL_RenderSetClipRect(renderer, &cliprect_r);
+		SDL_SetRenderClipRect(renderer, &cliprect_r);
 	else
-		SDL_RenderSetClipRect(renderer, &viewport_r);
+		SDL_SetRenderClipRect(renderer, &viewport_r);
 
 	// viewport background
 	SDL_SetRenderDrawColor(renderer, _scene->backgroundColor().r, _scene->backgroundColor().g, _scene->backgroundColor().b, _scene->backgroundColor().a);
-	SDL_RenderFillRect(renderer, &viewport_r);
+	SDL_FRect viewport_fr = _viewportAbs.toSDLf();
+	SDL_RenderFillRect(renderer, &viewport_fr);
 
 	// sort visible objects by z
 	/*static Profiler viewRectProfiler("view rect object selection", 5000);
@@ -106,7 +107,7 @@ void View::updateViewport()
 
 	// get renderer size on screen
 	int rendWidth, rendHeight;
-	SDL_GetRendererOutputSize(renderer, &rendWidth, &rendHeight);
+	SDL_GetCurrentRenderOutputSize(renderer, &rendWidth, &rendHeight);
 
 	// update viewport absolute coordinates
 	_viewportAbs = RectF(

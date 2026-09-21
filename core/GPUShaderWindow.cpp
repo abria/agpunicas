@@ -116,13 +116,10 @@ int findOpenGLRenderDriverIndex()
     int numDrivers = SDL_GetNumRenderDrivers();
     for (int i = 0; i < numDrivers; ++i)
     {
-        SDL_RendererInfo info;
-        if (SDL_GetRenderDriverInfo(i, &info) == 0)
+        const char* name = SDL_GetRenderDriver(i);
+        if (name && strcmp(name, "opengl") == 0)
         {
-            if (strcmp(info.name, "opengl") == 0)
-            {
-                return i;
-            }
+            return i;
         }
     }
     return -1; // OpenGL renderer not found
@@ -139,16 +136,16 @@ void GPUShaderWindow::initRenderer()
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
     _renderer = SDL_CreateRenderer(
         _window,
-        openglIndex,
-        SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE
+        "opengl"
     );
     if (!_renderer)
         throw(strprintf("Failed to create SDL Renderer: %s)", SDL_GetError()));
+    SDL_SetRenderVSync(_renderer, 1);
 
     // Verify renderer info
-    SDL_RendererInfo rendererInfo;
-    if (SDL_GetRendererInfo(_renderer, &rendererInfo) == 0)
-        std::cout << "Renderer Name: " << rendererInfo.name << std::endl;
+    const char* rendererName = SDL_GetRendererName(_renderer);
+    if (rendererName)
+        std::cout << "Renderer Name: " << rendererName << std::endl;
     else
         std::cerr << "Failed to get renderer info: " << SDL_GetError() << std::endl;
 
@@ -271,7 +268,7 @@ void GPUShaderWindow::render(const std::vector<Scene*>& scenes)
     // Now use OpenGL to draw a fullscreen quad with the texture
     // Bind the SDL texture as an OpenGL texture
     float w, h;
-    if (SDL_GL_BindTexture(_targetTexture, &w, &h) != 0)
+    if (!SDL_GL_BindTexture(_targetTexture, &w, &h))
         throw ("Failed to bind SDL texture to OpenGL texture");
 
     // Render the quad

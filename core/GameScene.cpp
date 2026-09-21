@@ -20,7 +20,7 @@
 using namespace agp;
 
 GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
-	: Scene(rect, pixelUnitSize), _quadtree(rect)
+	: Scene(rect, pixelUnitSize), _quadtree(rect.scaleOnCenter(10))
 {
 	_dt = dt;
 	_timeToSimulateAccum = 0;
@@ -64,10 +64,9 @@ void GameScene::objectMoved(Object* obj)
 	if (obj->killed())
 		return;
 
-	if (!_rect.contains(obj->rect())) 
+	if (!_rect.contains(obj->rect()) && _autoKillWhenOutsideScene && obj != _player)
 	{
-		if(_autoKillWhenOutsideScene && obj != _player)
-			killObject(obj);   
+		killObject(obj);
 		return;
 	}
 
@@ -76,6 +75,8 @@ void GameScene::objectMoved(Object* obj)
 	if (_useQuadtree)
 		_quadtree.update(obj);
 	quadtreeUpdateProfiler.end();*/
+	if (_useQuadtree)
+		_quadtree.update(obj);
 }
 
 Objects GameScene::objects()
@@ -93,6 +94,9 @@ Objects GameScene::objects(const RectF& cullingRect)
 
 Objects GameScene::objects(const PointF& containPoint)
 {
+	if (!_useQuadtree)
+		return Scene::objects(containPoint);
+
 	std::vector<Object*> candidates = _quadtree.queryObjects(RotatedRectF(containPoint, { 1,1 }, 0, _rect.yUp).toRect());
 	std::vector<Object*> results;
 	for (auto obj : candidates)
@@ -175,7 +179,7 @@ void GameScene::updateWorld(float timeToSimulate)
 
 void GameScene::updateCamera(float timeToSimulate)
 {
-	const Uint8* keyboard = SDL_GetKeyboardState(0);
+	const bool* keyboard = SDL_GetKeyboardState(0);
 
 	Direction xDir = Direction::NONE;
 	Direction yDir = Direction::NONE;
@@ -206,7 +210,7 @@ void GameScene::event(SDL_Event& evt)
 	Scene::event(evt);
 
 	// window resize events may affect overlay scenes
-	if (evt.type == SDL_WINDOWEVENT)
+	if (evt.type >= SDL_EVENT_WINDOW_FIRST && evt.type <= SDL_EVENT_WINDOW_LAST)
 	{
 		for (auto& bgScene : _backgroundScenes)
 			bgScene->event(evt);
@@ -215,13 +219,13 @@ void GameScene::event(SDL_Event& evt)
 	}
 
 	// visual controls
-	if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_C && !evt.key.repeat)
+	if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.scancode == SDL_SCANCODE_C && !evt.key.repeat)
 		toggleColliders();
-	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_R && !evt.key.repeat)
+	else if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.scancode == SDL_SCANCODE_R && !evt.key.repeat)
 		toggleRects();
-	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_M && !evt.key.repeat)
+	else if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.scancode == SDL_SCANCODE_M && !evt.key.repeat)
 		toggleCameraManual();
-	else if (evt.type == SDL_MOUSEWHEEL && _cameraManual)
+	else if (evt.type == SDL_EVENT_MOUSE_WHEEL && _cameraManual)
 	{
 		if (evt.wheel.y > 0)
 			_view->scale(1 - _cameraZoomVel);
@@ -230,7 +234,7 @@ void GameScene::event(SDL_Event& evt)
 	}
 
 	// open editor
-	else if (evt.type == SDL_KEYDOWN && evt.key.keysym.scancode == SDL_SCANCODE_E && !evt.key.repeat)
+	else if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.scancode == SDL_SCANCODE_E && !evt.key.repeat)
 	{
 		EditorUI* editorUI = new EditorUI();
 		EditorScene* editorScene = new EditorScene(this, editorUI, _jsonPath);

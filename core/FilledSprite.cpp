@@ -25,13 +25,13 @@ void FilledSprite::render(
 	Transform camera,
 	const Point& pixelUnitSize,
 	float angle,
-	SDL_RendererFlip flip,
+	SDL_FlipMode flip,
 	bool fit)
 {
 	if (_tileSize.x == 0 || _tileSize.y == 0)
 		_tileSize = _rect.size / pixelUnitSize;
 
-	SDL_Rect srcRect = _rect.toSDL();
+	SDL_FRect srcRect = _rect.toSDLf();
 
 	if (angle)
 	{
@@ -44,6 +44,6 @@ void FilledSprite::render(
 		{
 			RectF tileRect({ x,y }, { x + _tileSize.x,y + _tileSize.y }, drawRect.yUp);
 			SDL_FRect drawRectTile = RectF(camera(tileRect.tl()), camera(tileRect.br())).toSDLf();
-			SDL_RenderCopyExF(renderer, _spritesheet, &srcRect, &drawRectTile, 0, 0, flip);
+			SDL_RenderTextureRotated(renderer, _spritesheet, &srcRect, &drawRectTile, 0, nullptr, flip);
 		}
 }

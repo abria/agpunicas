@@ -104,14 +104,14 @@ void EditorScene::toJson()
 void EditorScene::updateState(State newState)
 {
 	_ui->clearHelpboxText();
-	_ui->setCursor((newState == State::DRAW_RECT || newState == State::DRAW_LINE)? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_ARROW);
+	_ui->setCursor((newState == State::DRAW_RECT || newState == State::DRAW_LINE)? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_DEFAULT);
 	_ui->setEditing(newState == State::RENAME_CATEGORY || newState == State::RENAME_OBJECT);
 	_currentCell->setVisible((newState == State::RENAME_CATEGORY && _prevState == State::DRAW_RECT) || (newState == State::DRAW_RECT && !_currentObject));
 	if (_currentObject && _state == State::DRAW_LINE)
 		_currentObject->undoLineLastPoint();
 
 	if(newState != State::RENAME_CATEGORY && newState != State::RENAME_OBJECT)
-		SDL_StopTextInput();
+		SDL_StopTextInput(Game::instance()->window()->renderer() ? SDL_GetRenderWindow(Game::instance()->window()->renderer()) : nullptr);
 
 	if (newState == State::DEFAULT)
 	{
@@ -198,7 +198,7 @@ void EditorScene::event(SDL_Event& evt)
 	UIScene::event(evt);
 
 	// detect CTRL and SHIFT modifiers
-	const Uint8* keyboardState = SDL_GetKeyboardState(0);
+	const bool* keyboardState = SDL_GetKeyboardState(0);
 	bool ctrlPressed = keyboardState[SDL_SCANCODE_LCTRL] || keyboardState[SDL_SCANCODE_RCTRL];
 	bool shiftPressed = keyboardState[SDL_SCANCODE_LSHIFT] || keyboardState[SDL_SCANCODE_RSHIFT];
 
@@ -209,13 +209,13 @@ void EditorScene::event(SDL_Event& evt)
 	// text inputting
 	if (_state == State::RENAME_CATEGORY || _state == State::RENAME_OBJECT)
 	{
-		if (evt.type == SDL_TEXTINPUT)
+		if (evt.type == SDL_EVENT_TEXT_INPUT)
 			_textInput += evt.text.text;
-		else if (evt.type == SDL_KEYDOWN) 
+		else if (evt.type == SDL_EVENT_KEY_DOWN) 
 		{
-			if (evt.key.keysym.scancode == SDL_SCANCODE_BACKSPACE && !_textInput.empty())
+			if (evt.key.scancode == SDL_SCANCODE_BACKSPACE && !_textInput.empty())
 				_textInput.pop_back();
-			else if (evt.key.keysym.scancode == SDL_SCANCODE_RETURN)
+			else if (evt.key.scancode == SDL_SCANCODE_RETURN)
 			{
 				if (_state == State::RENAME_CATEGORY)
 				{
@@ -231,7 +231,7 @@ void EditorScene::event(SDL_Event& evt)
 					_state = _prevState;
 				}
 			}
-			else if (evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+			else if (evt.key.scancode == SDL_SCANCODE_ESCAPE)
 				_state = _prevState;
 		}
 		updateState(_state);
@@ -239,9 +239,9 @@ void EditorScene::event(SDL_Event& evt)
 	}
 
 	// key events
-	if (evt.type == SDL_KEYDOWN && !evt.key.repeat)
+	if (evt.type == SDL_EVENT_KEY_DOWN && !evt.key.repeat)
 	{
-		if (evt.key.keysym.scancode == SDL_SCANCODE_S)
+		if (evt.key.scancode == SDL_SCANCODE_S)
 		{
 			if(ctrlPressed)
 			{
@@ -251,11 +251,11 @@ void EditorScene::event(SDL_Event& evt)
 			else
 				toggleSnapGrid();
 		}
-		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_R)
+		else if (_state == State::DEFAULT && evt.key.scancode == SDL_SCANCODE_R)
 			updateState(State::DRAW_RECT);
-		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_L)
+		else if (_state == State::DEFAULT && evt.key.scancode == SDL_SCANCODE_L)
 			updateState(State::DRAW_LINE);
-		else if (_state == State::DEFAULT && evt.key.keysym.scancode == SDL_SCANCODE_Q)
+		else if (_state == State::DEFAULT && evt.key.scancode == SDL_SCANCODE_Q)
 		{
 			toJson();
 			_gameScene->view()->setRect(_gameRect);
@@ -263,37 +263,37 @@ void EditorScene::event(SDL_Event& evt)
 			Game::instance()->popSceneLater();	// _ui scene
 			Game::instance()->popSceneLater();	// this scene
 		}
-		else if ((_state == State::DRAW_RECT || _state == State::DRAW_LINE) && evt.key.keysym.scancode == SDL_SCANCODE_SPACE)
+		else if ((_state == State::DRAW_RECT || _state == State::DRAW_LINE) && evt.key.scancode == SDL_SCANCODE_SPACE)
 		{
 			_currentCategory = (_currentCategory + 1) % MAX_CATEGORIES;
 			if (_currentObject)
 				_currentObject->setCategory(_currentCategory);
 			_currentCell->setCategory(_currentCategory);
 		}
-		else if ((_state == State::DRAW_RECT || _state == State::DRAW_LINE) && evt.key.keysym.scancode == SDL_SCANCODE_R)
+		else if ((_state == State::DRAW_RECT || _state == State::DRAW_LINE) && evt.key.scancode == SDL_SCANCODE_R)
 		{
 			updateState(State::RENAME_CATEGORY);
 			_textInput = _categories[_currentCategory];
-			SDL_StartTextInput();
-			SDL_FlushEvent(SDL_TEXTINPUT);     // flush pending text input events
+			SDL_StartTextInput(Game::instance()->window()->renderer() ? SDL_GetRenderWindow(Game::instance()->window()->renderer()) : nullptr);
+			SDL_FlushEvent(SDL_EVENT_TEXT_INPUT);     // flush pending text input events
 		}
-		else if (_state == State::SELECT && evt.key.keysym.scancode == SDL_SCANCODE_R)
+		else if (_state == State::SELECT && evt.key.scancode == SDL_SCANCODE_R)
 		{
 			updateState(State::RENAME_OBJECT);
 			_textInput = _currentObject->editName();
-			SDL_StartTextInput();
-			SDL_FlushEvent(SDL_TEXTINPUT);     // flush pending text input events
+			SDL_StartTextInput(Game::instance()->window()->renderer() ? SDL_GetRenderWindow(Game::instance()->window()->renderer()) : nullptr);
+			SDL_FlushEvent(SDL_EVENT_TEXT_INPUT);     // flush pending text input events
 		}
-		else if (evt.key.keysym.scancode == SDL_SCANCODE_G)
+		else if (evt.key.scancode == SDL_SCANCODE_G)
 			toggleGrid();
-		else if (evt.key.keysym.scancode == SDL_SCANCODE_H)
+		else if (evt.key.scancode == SDL_SCANCODE_H)
 			_ui->toggleAutohide();
-		else if (evt.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+		else if (evt.key.scancode == SDL_SCANCODE_ESCAPE)
 			updateState(State::DEFAULT);
 	}
 
 	// mouse motion
-	if (evt.type == SDL_MOUSEMOTION)
+	if (evt.type == SDL_EVENT_MOUSE_MOTION)
 	{
 		// mouse tracking
 		_mouseCoordsF = PointF(float(evt.button.x), float(evt.button.y));
@@ -326,7 +326,7 @@ void EditorScene::event(SDL_Event& evt)
 				_isDragging = true;
 				_dragStartMousePosition = _mouseCoordsF;
 				_dragStartObjectPosition = _draggedObject->pos();
-				_ui->setCursor(SDL_SYSTEM_CURSOR_SIZEALL);
+				_ui->setCursor(SDL_SYSTEM_CURSOR_MOVE);
 			}
 		}
 		// drop
@@ -371,7 +371,7 @@ void EditorScene::event(SDL_Event& evt)
 	}
 
 	// mouse scroll
-	if (evt.type == SDL_MOUSEWHEEL)
+	if (evt.type == SDL_EVENT_MOUSE_WHEEL)
 	{
 		if (_state == State::SELECT)
 		{
@@ -401,7 +401,7 @@ void EditorScene::event(SDL_Event& evt)
 	}
 
 	// mouse buttons
-	else if (evt.button.type == SDL_MOUSEBUTTONDOWN)
+	else if (evt.button.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
 	{
 		if (_state == State::DRAW_RECT && evt.button.button == SDL_BUTTON_LEFT)
 		{
@@ -464,21 +464,21 @@ void EditorScene::event(SDL_Event& evt)
 		{
 			_isPanning = true;
 			_lastMousePositionPanning = PointF(float(evt.button.x), float(evt.button.y));
-			_ui->setCursor(SDL_SYSTEM_CURSOR_HAND);
+			_ui->setCursor(SDL_SYSTEM_CURSOR_POINTER);
 		}
 	}
-	else if (evt.type == SDL_MOUSEBUTTONUP)
+	else if (evt.type == SDL_EVENT_MOUSE_BUTTON_UP)
 	{
 		if (evt.button.button == SDL_BUTTON_MIDDLE)
 		{
 			_isPanning = false;
-			_ui->setCursor(SDL_SYSTEM_CURSOR_ARROW);
+			_ui->setCursor(SDL_SYSTEM_CURSOR_DEFAULT);
 		}
 		else if (_draggedObject && evt.button.button == SDL_BUTTON_LEFT)
 		{
 			_isDragging = false;
 			_draggedObject = nullptr;
-			_ui->setCursor(SDL_SYSTEM_CURSOR_ARROW);
+			_ui->setCursor(SDL_SYSTEM_CURSOR_DEFAULT);
 		}
 		else if (_resizingObject && evt.button.button == SDL_BUTTON_LEFT)
 		{
@@ -517,7 +517,7 @@ void EditorScene::checkResizing()
 	}
 	else if (_resizingObject)
 	{
-		_ui->setCursor(SDL_SYSTEM_CURSOR_ARROW);
+		_ui->setCursor(SDL_SYSTEM_CURSOR_DEFAULT);
 		_resizingObject = nullptr;
 	}
 }

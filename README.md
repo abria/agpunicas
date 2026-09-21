@@ -3,7 +3,7 @@
 Un framework per programmare videogiochi 2D in C++ con SDL.
 
 > [!IMPORTANT]
-> Questo è il repository ufficiale dell'insegnamento di ***Algoritmi e Programmazione dei Videogiochi*** del corso di laurea in _Ingegneria Informatica e delle Telecomunicazioni_ dell'Universita di Cassino. La cartella Drive del corso, che include slide, esercizi e codice sorgente, e pubblicamente accessibile a [questo indirizzo](https://drive.google.com/drive/folders/1ARlP7Fms69d1ugg56uRHGKBe1fa8lDLvbw4chpKKLWSxkG7jacrUTUTvk8BbFJAnxseTzYRr?usp=sharing).
+> Questo è il repository ufficiale dell'insegnamento di ***Algoritmi e Programmazione dei Videogiochi*** del corso di laurea in _Ingegneria Informatica e delle Telecomunicazioni_ dell'Universita di Cassino. La cartella Drive del corso, che include slide, esercizi e codice sorgente, è pubblicamente accessibile a [questo indirizzo](https://drive.google.com/drive/folders/1ARlP7Fms69d1ugg56uRHGKBe1fa8lDLvbw4chpKKLWSxkG7jacrUTUTvk8BbFJAnxseTzYRr?usp=sharing).
 
 <img src="https://github.com/abria/agpunicas/blob/main/cover.png">
 

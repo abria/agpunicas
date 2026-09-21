@@ -1,15 +1,15 @@
-# Algoritmi e Programmazione dei Videogiochi @ Universita di Cassino
+# Algoritmi e Programmazione dei Videogiochi @ Università di Cassino
 
 Un framework per programmare videogiochi 2D in C++ con SDL.
 
 > [!IMPORTANT]
-> Questo è il repository ufficiale dell'insegnamento di ***Algoritmi e Programmazione dei Videogiochi*** del corso di laurea in _Ingegneria Informatica e delle Telecomunicazioni_ dell'Universita di Cassino. La cartella Drive del corso, che include slide, esercizi e codice sorgente, è pubblicamente accessibile a [questo indirizzo](https://drive.google.com/drive/folders/1ARlP7Fms69d1ugg56uRHGKBe1fa8lDLvbw4chpKKLWSxkG7jacrUTUTvk8BbFJAnxseTzYRr?usp=sharing).
+> Questo è il repository ufficiale dell'insegnamento di ***Algoritmi e Programmazione dei Videogiochi*** del corso di laurea in _Ingegneria Informatica e delle Telecomunicazioni_ dell'Università di Cassino. La cartella Drive del corso, che include slide, esercizi e codice sorgente, è pubblicamente accessibile a [questo indirizzo](https://drive.google.com/drive/folders/1ARlP7Fms69d1ugg56uRHGKBe1fa8lDLvbw4chpKKLWSxkG7jacrUTUTvk8BbFJAnxseTzYRr?usp=sharing).
 
 <img src="https://github.com/abria/agpunicas/blob/main/cover.png">
 
 
 ## utils
-Libreria header-only di utilita per la programmazione di videogiochi, che include:
+Libreria header-only di utilità per la programmazione di videogiochi, che include:
 - geometria (forme geometriche di base e vettori 2D)
 - tempo (timer, FPS, profiler)
 - manipolazione di stringhe
@@ -49,7 +49,7 @@ A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> 
 #### Diagramma delle classi
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_CustomPlatformer.png">
 
-#### Funzionalita
+#### Funzionalità
 - rilevamento continuo delle collisioni (CCD) con Swept AABB
 - collider AABB
 - risoluzione delle collisioni con scorrimento priva di compenetrazioni
@@ -62,7 +62,7 @@ A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> 
 - selezione tra rilevamento delle collisioni CCD e SAT
 
 #### Limitazioni
-- nessun collider composto: ogni oggetto puo avere un solo collider
+- nessun collider composto: ogni oggetto può avere un solo collider
 - nessuna pendenza
 - fase stretta del rilevamento delle collisioni basata su ricerca lineare con intersezione rispetto al riquadro della vista
 
@@ -74,7 +74,7 @@ Prototipo per platform 2D complessi basato su SDL e sul motore fisico Box2D.
 #### Diagramma delle classi
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Box2DPlatformer.png">
 
-#### Funzionalita
+#### Funzionalità
 - fisica, rilevamento e risoluzione delle collisioni gestiti da Box2D
 - collider composti
 - categorie di oggetti statici, dinamici e cinematici
@@ -89,7 +89,7 @@ Prototipo per platform 2D complessi basato su SDL e sul motore fisico Box2D.
 
 #### Limitazioni
 - nessun proiettile, comunque implementabile tramite Box2D
-- il giocatore non resta stabile sulle piattaforme mobili; il problema puo essere corretto compensando le forze come sulle pendenze
+- il giocatore non resta stabile sulle piattaforme mobili; il problema può essere corretto compensando le forze come sulle pendenze
 - nessun esempio di giunto; consultare la documentazione di Box2D
 
 ## ActionRPG
@@ -101,7 +101,7 @@ A scopo dimostrativo implementa una piccola porzione di <i>Legend of Zelda: A Li
 #### Diagramma delle classi
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_ActionRPG.png">
 
-#### Funzionalita
+#### Funzionalità
 - rilevamento e risoluzione delle collisioni OBB
 - categorie di oggetti statici e dinamici
 - notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati

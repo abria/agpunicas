@@ -1,6 +1,6 @@
 # Algoritmi e Programmazione dei Videogiochi @ Università di Cassino
 
-Un framework per programmare videogiochi 2D in C++ con SDL.
+Un framework per programmare videogiochi 2D in C++ con SDL3.
 
 > [!IMPORTANT]
 > Questo è il repository ufficiale dell'insegnamento di ***Algoritmi e Programmazione dei Videogiochi*** del corso di laurea in _Ingegneria Informatica e delle Telecomunicazioni_ dell'Università di Cassino. La cartella Drive del corso, che include slide, esercizi e codice sorgente, è pubblicamente accessibile a [questo indirizzo](https://drive.google.com/drive/folders/1ARlP7Fms69d1ugg56uRHGKBe1fa8lDLvbw4chpKKLWSxkG7jacrUTUTvk8BbFJAnxseTzYRr?usp=sharing).
@@ -21,15 +21,15 @@ Libreria header-only di utilità per la programmazione di videogiochi, che inclu
 
 ## Core
 Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gioco.
-- game loop con timestep semi-fisso
+- game loop con semi-fixed timestep
 - framework Scene/View/Window con adattamento automatico alla risoluzione dello schermo e scene sovrapposte
 - separazione tra scene dell'interfaccia e scene di gioco
 - modello base degli oggetti con metodi per posizionamento, rendering, aggiornamento e scheduling
 - raycasting
-- sistema di sprite (animazioni, tassellazione e riempimento) con blitting GPU dalle spritesheet
+- sistema di sprite (`AnimatedSprite`, `TiledSprite`, `FilledSprite`) con blitting GPU dalle spritesheet
 - camera manuale o agganciata al giocatore
 - sistema audio con suoni e musiche riproducibili, sospendibili e ripristinabili
-- parallasse e sovrapposizione di scene
+- parallax e overlay di scena
 - sprite testuali basati su SDL_ttf
 - funzioni di supporto per le spritesheet (autotiling ed estrazione delle componenti connesse)
 - editor dei livelli con persistenza JSON (geometrie supportate: rettangoli, rettangoli ruotati e spezzate)
@@ -50,21 +50,21 @@ A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> 
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_CustomPlatformer.png">
 
 #### Funzionalità
-- rilevamento continuo delle collisioni (CCD) con Swept AABB
+- continuous collision detection (CCD) con Swept AABB
 - collider AABB
-- risoluzione delle collisioni con scorrimento priva di compenetrazioni
+- collision response con sliding e correzione delle compenetrazioni
 - filtri di collisione basati sul tipo
 - dinamica lineare configurabile con attrito e slittamento semplici
 - categorie di oggetti statici, dinamici e cinematici
 - notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati
 - trigger, detti anche sensori
 - interfaccia di base (HUD e menu)
-- selezione tra rilevamento delle collisioni CCD e SAT
+- selezione tra CCD e collision detection discreta AABB
 
 #### Limitazioni
 - nessun collider composto: ogni oggetto può avere un solo collider
 - nessuna pendenza
-- fase stretta del rilevamento delle collisioni basata su ricerca lineare con intersezione rispetto al riquadro della vista
+- broad phase basata sulla scansione lineare degli oggetti; narrow phase con test Swept AABB o AABB
 
 ## Box2DPlatformer
 Prototipo per platform 2D complessi basato su SDL e sul motore fisico Box2D.
@@ -75,22 +75,21 @@ Prototipo per platform 2D complessi basato su SDL e sul motore fisico Box2D.
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Box2DPlatformer.png">
 
 #### Funzionalità
-- fisica, rilevamento e risoluzione delle collisioni gestiti da Box2D
-- collider composti
-- categorie di oggetti statici, dinamici e cinematici
+- simulazione del world, collision detection e collision response gestite da Box2D 3.x
+- body con shape composte
+- body statici, dinamici e cinematici
 - notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati
-- trigger, detti anche sensori
+- trigger tramite sensor shape
 - interfaccia di base (HUD e menu)
-- esempi di parallasse e scene sovrapposte
-- esempio di fisica del giocatore con camminata, salto, scatto e compensazione della forza tangenziale sulle pendenze
+- esempi di parallax e overlay di scena
+- esempio di fisica del player con camminata, salto, dash e compensazione della forza tangenziale sulle pendenze
 - esempio di oggetto cinematico composto (ingranaggio)
-- esempio di oggetto dinamico (cassa)
+- esempi di oggetti dinamici (cassa e proiettile `Fire`)
 - esempio di nemico
 
 #### Limitazioni
-- nessun proiettile, comunque implementabile tramite Box2D
 - il giocatore non resta stabile sulle piattaforme mobili; il problema può essere corretto compensando le forze come sulle pendenze
-- nessun esempio di giunto; consultare la documentazione di Box2D
+- nessun esempio di joint; consultare la documentazione di Box2D
 
 ## ActionRPG
 Prototipo per giochi di ruolo d'azione basato su SDL e su un sistema di collisioni personalizzato.
@@ -102,7 +101,7 @@ A scopo dimostrativo implementa una piccola porzione di <i>Legend of Zelda: A Li
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_ActionRPG.png">
 
 #### Funzionalità
-- rilevamento e risoluzione delle collisioni OBB
+- collision detection e collision response basate su OBB
 - categorie di oggetti statici e dinamici
 - notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati
 - trigger, detti anche sensori
@@ -117,4 +116,4 @@ A scopo dimostrativo implementa una piccola porzione di <i>Legend of Zelda: A Li
 - pathfinding tramite BFS
 
 #### Limitazioni
-- fase stretta del rilevamento delle collisioni basata su ricerca lineare con intersezione rispetto al riquadro della vista
+- collision detection discreta: la narrow phase usa SAT su OBB, senza CCD per oggetti molto veloci

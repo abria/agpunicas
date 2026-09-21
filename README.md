@@ -1,120 +1,120 @@
-# Algorithms and Game Programming @ University of Cassino
+# Algoritmi e Programmazione dei Videogiochi @ Universita di Cassino
 
-A framework for programming 2D videogames with C++/SDL.
+Un framework per programmare videogiochi 2D in C++ con SDL.
 
 > [!IMPORTANT]
-> This is the official repository of the teaching ***Algorithms and Game Programming***, Bachelor Course in _Computer and Telecommunication Engineering_, University of Cassino (Italy). Class drive folder (including lecture slides, exercises, sources) is publicly accessible at [this link](https://drive.google.com/drive/folders/1ARlP7Fms69d1ugg56uRHGKBe1fa8lDLvbw4chpKKLWSxkG7jacrUTUTvk8BbFJAnxseTzYRr?usp=sharing).
+> Questo e il repository ufficiale dell'insegnamento di ***Algoritmi e Programmazione dei Videogiochi*** del corso di laurea in _Ingegneria Informatica e delle Telecomunicazioni_ dell'Universita di Cassino. La cartella Drive del corso, che include slide, esercizi e codice sorgente, e pubblicamente accessibile a [questo indirizzo](https://drive.google.com/drive/folders/1ARlP7Fms69d1ugg56uRHGKBe1fa8lDLvbw4chpKKLWSxkG7jacrUTUTvk8BbFJAnxseTzYRr?usp=sharing).
 
 <img src="https://github.com/abria/agpunicas/blob/main/cover.png">
 
 
 ## utils
-Header-only library for game programming utils, including:
-- geometry (basic shape primitives and 2D vectors)
-- time (timer, FPS, profiler)
-- string manipulation
-- SDL (complex shapes drawing and image mosaicing)
-- math (interpolation, percentiles, etc.)
-- file/folder management (get files in folder, etc.)
-- collision (SAT, Swept AABB vs. AABB, Sweept AABB vs. Line, etc.)
-- cpu shaders (fading, lightning, scene transitions, etc.)
+Libreria header-only di utilita per la programmazione di videogiochi, che include:
+- geometria (forme geometriche di base e vettori 2D)
+- tempo (timer, FPS, profiler)
+- manipolazione di stringhe
+- SDL (disegno di forme complesse e composizione di immagini)
+- matematica (interpolazione, percentili, ecc.)
+- gestione di file e cartelle (elenco dei file in una cartella, ecc.)
+- collisioni (SAT, Swept AABB contro AABB, Swept AABB contro segmenti, ecc.)
+- shader CPU (dissolvenze, illuminazione, transizioni di scena, ecc.)
 
 ## Core
-Rendering+audio engine based on SDL, utilized by all game prototypes.
-- game loop with semi-fixed timestep
-- Scene/View/Window framework with automatic scaling to screen resolution and scene layering
-- separation between UI scenes and game scenes
-- basic object model with positioning, rendering, updating, and scheduling methods
+Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gioco.
+- game loop con timestep semi-fisso
+- framework Scene/View/Window con adattamento automatico alla risoluzione dello schermo e scene sovrapposte
+- separazione tra scene dell'interfaccia e scene di gioco
+- modello base degli oggetti con metodi per posizionamento, rendering, aggiornamento e scheduling
 - raycasting
-- sprite system (animations, tiling, filling) with on-the-fly GPU blitting from spritesheets
-- camera (both manual and follows-the-player)
-- audio system with playable/resumable sounds and musics
-- parallax and overlay scenes layering
-- text sprites based on SDL_ttf
-- helper functions for spritesheets (autotiling and connected components extraction)
-- level editor with json persistence (supported geometries: rects, rotated rects, multilines)
-- optional shader window (both CPU and GPU with OpenGL)
+- sistema di sprite (animazioni, tassellazione e riempimento) con blitting GPU dalle spritesheet
+- camera manuale o agganciata al giocatore
+- sistema audio con suoni e musiche riproducibili, sospendibili e ripristinabili
+- parallasse e sovrapposizione di scene
+- sprite testuali basati su SDL_ttf
+- funzioni di supporto per le spritesheet (autotiling ed estrazione delle componenti connesse)
+- editor dei livelli con persistenza JSON (geometrie supportate: rettangoli, rettangoli ruotati e spezzate)
+- finestra opzionale con shader CPU o GPU tramite OpenGL
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_leveleditor.png">
 
-#### Class Diagram
+#### Diagramma delle classi
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Core.png">
 
 ## CustomPlatformer
-Game prototype for simple 2D platformers with SDL and custom physics engine.
-For demonstration purposes, a small portion of <i>Super Mario Bros</i> (NES) is implemented.
+Prototipo per semplici platform 2D basato su SDL e su un motore fisico personalizzato.
+A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> (NES).
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros.png">
 
-#### Class Diagram
-<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_SimplePlatformer.png">
+#### Diagramma delle classi
+<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_CustomPlatformer.png">
 
-#### Features
-- Swept AABB Continous Collision Detection (CCD)
-- AABB colliders
-- bug-free sliding collision resolution
-- collision filters (type-based)
-- configurable linear dynamics with simple friction and skidding
-- static, dynamic, kinematic object categories
-- all collidable objects are informed when collision starts and ends (with normals and metadatas)
-- triggers (a.k.a. sensors)
-- basic UI (HUD, menus)
-- switchable CCD vs. SAT collision detection
+#### Funzionalita
+- rilevamento continuo delle collisioni (CCD) con Swept AABB
+- collider AABB
+- risoluzione delle collisioni con scorrimento priva di compenetrazioni
+- filtri di collisione basati sul tipo
+- dinamica lineare configurabile con attrito e slittamento semplici
+- categorie di oggetti statici, dinamici e cinematici
+- notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati
+- trigger, detti anche sensori
+- interfaccia di base (HUD e menu)
+- selezione tra rilevamento delle collisioni CCD e SAT
 
-#### Limitations
-- no compound colliders (only one collider per object)
-- no slopes
-- narrow collision detection phase is based on linear search with view box intersection
+#### Limitazioni
+- nessun collider composto: ogni oggetto puo avere un solo collider
+- nessuna pendenza
+- fase stretta del rilevamento delle collisioni basata su ricerca lineare con intersezione rispetto al riquadro della vista
 
 ## Box2DPlatformer
-Game prototype for complex 2D platformers with SDL and Box2D physics engine.
+Prototipo per platform 2D complessi basato su SDL e sul motore fisico Box2D.
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_ComplexPlatformer.png">
+<img src="https://github.com/abria/agpunicas/blob/main/demo_Box2DPlatformer.png">
 
-#### Class Diagram
-<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_ComplexPlatformer.png">
+#### Diagramma delle classi
+<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Box2DPlatformer.png">
 
-#### Features
-- Box2D powered physics and collision detection/resolution
-- compound colliders
-- static, dynamic, kinematic object categories
-- all collidable objects are informed when collision starts and ends (with normals and metadatas)
-- triggers (a.k.a. sensors)
-- basic UI (HUD, menus)
-- example parallax and overlay scenes
-- example player physics with walking, jumping, dashing and tangent force compensation on slopes
-- example compound kinematic object (gear)
-- example dynamic object (box)
-- example enemy
+#### Funzionalita
+- fisica, rilevamento e risoluzione delle collisioni gestiti da Box2D
+- collider composti
+- categorie di oggetti statici, dinamici e cinematici
+- notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati
+- trigger, detti anche sensori
+- interfaccia di base (HUD e menu)
+- esempi di parallasse e scene sovrapposte
+- esempio di fisica del giocatore con camminata, salto, scatto e compensazione della forza tangenziale sulle pendenze
+- esempio di oggetto cinematico composto (ingranaggio)
+- esempio di oggetto dinamico (cassa)
+- esempio di nemico
 
-#### Limitations
-- no bullets (can be implemented using Box2D)
-- player not steady on moving platforms (can be fixed with force compensation like for slopes)
-- no joint examples (see Box2D docs)
+#### Limitazioni
+- nessun proiettile, comunque implementabile tramite Box2D
+- il giocatore non resta stabile sulle piattaforme mobili; il problema puo essere corretto compensando le forze come sulle pendenze
+- nessun esempio di giunto; consultare la documentazione di Box2D
 
 ## ActionRPG
-Game prototype for RPG/action games with SDL and Box2D physics engine.
-For demonstration purposes, a small portion of <i>Legend of Zelda: A Link to the Past</i> (NES) is implemented.
+Prototipo per giochi di ruolo d'azione basato su SDL e su un sistema di collisioni personalizzato.
+A scopo dimostrativo implementa una piccola porzione di <i>Legend of Zelda: A Link to the Past</i> (NES).
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_RPG.png">
+<img src="https://github.com/abria/agpunicas/blob/main/demo_ActionRPG.png">
 
-#### Class Diagram
-<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_RPG.png">
+#### Diagramma delle classi
+<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_ActionRPG.png">
 
-#### Features
-- OBB collision detection/resolution
-- static and dynamic object categories
-- all collidable objects are informed when collision starts (with normals and metadatas) and ends
-- triggers (a.k.a. sensors)
-- advanced UI (HUD + inventory)
-- text dialogs (DialogBox)
-- portals for player teleporting
-- example player attack with sword
-- example collider animation (sword)
-- example NPC (soldier with patrolling + chasing script)
-- example import level editor's json
-- example scene transition with circle mask and fading
-- pathfinding with BFS
+#### Funzionalita
+- rilevamento e risoluzione delle collisioni OBB
+- categorie di oggetti statici e dinamici
+- notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati
+- trigger, detti anche sensori
+- interfaccia avanzata (HUD e inventario)
+- dialoghi testuali (`DialogBox`)
+- portali per il teletrasporto del giocatore
+- esempio di attacco del giocatore con la spada
+- esempio di animazione di un collider (spada)
+- esempio di NPC (soldato con pattugliamento e inseguimento)
+- esempio di importazione del JSON prodotto dall'editor dei livelli
+- esempio di transizione di scena con maschera circolare e dissolvenza
+- pathfinding tramite BFS
 
-#### Limitations
-- narrow collision detection phase is based on linear search with view box intersection
+#### Limitazioni
+- fase stretta del rilevamento delle collisioni basata su ricerca lineare con intersezione rispetto al riquadro della vista

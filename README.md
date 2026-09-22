@@ -1,4 +1,4 @@
-# Algoritmi e Programmazione dei Videogiochi @ Università di Cassino
+# Algoritmi e Programmazione dei Videogiochi @ Unicas
 
 Un framework per programmare videogiochi 2D in C++ con SDL3.
 

@@ -111,6 +111,12 @@ void Game::processEvents()
 
 void Game::dispatchEvent(SDL_Event& evt)
 {
+	if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.scancode == SDL_SCANCODE_ESCAPE)
+	{
+		quit();
+		return;
+	}
+
 	// detect CTRL and SHIFT modifiers
 	const bool* keyboardState = SDL_GetKeyboardState(0);
 	bool ctrlPressed = keyboardState[SDL_SCANCODE_LCTRL] || keyboardState[SDL_SCANCODE_RCTRL];

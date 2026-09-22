@@ -44,9 +44,9 @@ void DynamicObject::collision(RigidObject* with, bool begin, const Vec2Df& norma
 	KinematicObject* kinematicObj = dynamic_cast<KinematicObject*>(with);
 
 	if ((staticObj || kinematicObj) && begin && normal.y < 0)
-		_contactsWithGround.insert(with);
-	if ((staticObj || kinematicObj) && !begin)
-		_contactsWithGround.erase(with);
+		_contactsWithGround.insert(b2StoreShapeId(shapeB));
+	if (!begin)
+		_contactsWithGround.erase(b2StoreShapeId(shapeB));
 }
 
 void DynamicObject::move(Direction dir)

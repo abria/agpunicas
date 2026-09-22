@@ -30,6 +30,7 @@ class agp::ComplexPlatformerGameScene : public GameScene
 		virtual void updateControls(float timeToSimulate) override;
 		virtual void updateCamera(float timeToSimulate) override;
 		virtual void updateWorld(float timeToSimulate) override;
+		virtual bool shouldAutoKillOutsideScene(Object* obj) const override;
 
 	public:
 

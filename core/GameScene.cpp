@@ -64,7 +64,7 @@ void GameScene::objectMoved(Object* obj)
 	if (obj->killed())
 		return;
 
-	if (!_rect.contains(obj->rect()) && _autoKillWhenOutsideScene && obj != _player)
+	if (shouldAutoKillOutsideScene(obj) && _autoKillWhenOutsideScene && obj != _player)
 	{
 		killObject(obj);
 		return;
@@ -77,6 +77,11 @@ void GameScene::objectMoved(Object* obj)
 	quadtreeUpdateProfiler.end();*/
 	if (_useQuadtree)
 		_quadtree.update(obj);
+}
+
+bool GameScene::shouldAutoKillOutsideScene(Object* obj) const
+{
+	return !_rect.contains(obj->rect());
 }
 
 Objects GameScene::objects()

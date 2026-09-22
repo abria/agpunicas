@@ -64,6 +64,7 @@ class agp::GameScene : public Scene
 		virtual void updateControls(float timeToSimulate);
 		virtual void updateWorld(float timeToSimulate);
 		virtual void updateCamera(float timeToSimulate);
+		virtual bool shouldAutoKillOutsideScene(Object* obj) const;
 
 	public:
 

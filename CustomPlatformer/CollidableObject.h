@@ -63,9 +63,9 @@ class agp::CollidableObject : public MovableObject
 		void setCCD(bool active);
 
 		// extends state queries (+CCD off)
-		virtual bool grounded() const;
-		virtual bool falling() const;
-		virtual bool midair() const;
+		virtual bool grounded() const override;
+		virtual bool falling() const override;
+		virtual bool midair() const override;
 
 		// extends game logic (+collisions)
 		virtual void update(float dt) override;

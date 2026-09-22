@@ -30,7 +30,7 @@ class agp::DynamicObject : public RigidObject
 		float _xVelMax;				// maximum horizontal velocity (scene units / s)
 		float _yVelMax;				// maximum vertical velocity
 		Direction _xDir;			// commanded horizontal movement
-		std::set<RigidObject*> _contactsWithGround;	// for ground detection
+		std::set<uint64_t> _contactsWithGround;	// for ground detection
 
 	public:
 

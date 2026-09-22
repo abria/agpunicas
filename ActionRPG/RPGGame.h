@@ -30,4 +30,5 @@ class agp::RPGGame : public Game
 		HUD* hud() { return _hud; }
 
 		virtual void init() override;
+		virtual void dispatchEvent(SDL_Event& evt) override;
 };

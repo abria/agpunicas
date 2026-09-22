@@ -30,6 +30,7 @@ class agp::PlatformerGame : public Game
 		HUD* hud() { return _hud; }
 
 		virtual void init() override;
+		virtual void dispatchEvent(SDL_Event& evt) override;
 
 		void freeze(bool on);
 		void gameover();

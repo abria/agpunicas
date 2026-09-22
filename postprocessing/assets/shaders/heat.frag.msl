@@ -1,0 +1,35 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct type_EffectParams
+{
+    float4 effect;
+};
+
+struct main0_out
+{
+    float4 out_var_SV_Target [[color(0)]];
+};
+
+struct main0_in
+{
+    float4 in_var_COLOR0 [[user(locn0)]];
+    float2 in_var_TEXCOORD0 [[user(locn1)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant type_EffectParams& EffectParams [[buffer(0)]], texture2d<float> sceneTexture [[texture(0)]], sampler sceneSampler [[sampler(0)]])
+{
+    main0_out out = {};
+    float2 _60 = in.in_var_TEXCOORD0 * EffectParams.effect.yz;
+    float _61 = _60.y;
+    float _67 = _60.x;
+    float2 _99 = fast::clamp(in.in_var_TEXCOORD0 + float2((sin(((_61 * 0.05200000107288360595703125) - (EffectParams.effect.x * 4.30000019073486328125)) + (sin((_67 * 0.017999999225139617919921875) + EffectParams.effect.x) * 2.0)) + (0.5 * sin((_61 * 0.100000001490116119384765625) + (EffectParams.effect.x * 6.099999904632568359375)))) * (((1.0 - (in.in_var_TEXCOORD0.y * 0.449999988079071044921875)) * 5.0) / EffectParams.effect.y), (sin((_67 * 0.02500000037252902984619140625) - (EffectParams.effect.x * 2.0)) * 1.5) / EffectParams.effect.z), float2(0.0), float2(1.0));
+    float2 _103 = float2(1.2000000476837158203125 / EffectParams.effect.y, 0.0);
+    float4 _113 = sceneTexture.sample(sceneSampler, _99) * in.in_var_COLOR0;
+    float3 _124 = fast::clamp(float3(sceneTexture.sample(sceneSampler, fast::clamp(_99 + _103, float2(0.0), float2(1.0))).x, _113.y, sceneTexture.sample(sceneSampler, fast::clamp(_99 - _103, float2(0.0), float2(1.0))).z) * float3(1.08000004291534423828125, 0.9700000286102294921875, 0.87999999523162841796875), float3(0.0), float3(1.0));
+    out.out_var_SV_Target = float4(_124.x, _124.y, _124.z, _113.w);
+    return out;
+}
+

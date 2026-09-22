@@ -16,6 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB sources *.h *.hpp *.cpp *.c)
 
 # libraries
+set(WITH_SHADERS ON CACHE BOOL "Enable shaders support" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../core ${CMAKE_CURRENT_BINARY_DIR}/core_build)
 find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
 find_package(SDL3_image REQUIRED)
@@ -24,6 +25,7 @@ find_package(SDL3_mixer REQUIRED)
 # utils (header-only) library
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../postprocessing)
 
 # create exe and link
 add_executable(${project_name} ${sources})
@@ -36,3 +38,7 @@ add_custom_command(TARGET ${project_name} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fonts $<TARGET_FILE_DIR:${project_name}>/assets/fonts
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:${project_name}>/shaders
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/editor/EditorScene.json $<TARGET_FILE_DIR:${project_name}>/EditorScene.json)
+
+add_custom_target(copy_shaders ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../postprocessing/assets/shaders $<TARGET_FILE_DIR:${project_name}>/assets/shaders
+    DEPENDS ${project_name})

@@ -16,20 +16,31 @@
 #include "Audio.h"
 #include "SpriteFactory.h"
 #include "UIScene.h"
+#include "GPUShaderWindow.h"
+#include "DemoShaders.h"
 
 using namespace agp;
 
-PlatformerGame::PlatformerGame() : Game("CustomPlatformer", { 600,600 }, 16/14.0f)
+PlatformerGame::PlatformerGame() : Game("CustomPlatformer", { 600,600 }, 16/14.0f, Rendering::SDL_GPU_SHADERS)
 {
 	_hud = nullptr;
 }
 
 void PlatformerGame::init()
 {
+	DemoShaders::load(static_cast<GPUShaderWindow*>(window()));
+
 	pushScene(LevelLoader::instance()->load("overworld"));
 	_hud = new HUD();
 	pushScene(_hud);
 	pushScene(Menu::mainMenu());
+}
+
+void PlatformerGame::dispatchEvent(SDL_Event& evt)
+{
+	if (DemoShaders::toggle(static_cast<GPUShaderWindow*>(window()), evt))
+		return;
+	Game::dispatchEvent(evt);
 }
 
 void PlatformerGame::freeze(bool on)

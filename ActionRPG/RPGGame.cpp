@@ -11,18 +11,30 @@
 #include "LevelLoader.h"
 #include "HUD.h"
 #include "Menu.h"
+#include "GPUShaderWindow.h"
+#include "DemoShaders.h"
 
 using namespace agp;
 
-RPGGame::RPGGame() : Game("ActionRPG", { 500,500 }, 256.0f/224, Game::Rendering::SDL_CPU_SHADERS)
+RPGGame::RPGGame() : Game("ActionRPG", { 500,500 }, 256.0f/224, Game::Rendering::SDL_GPU_SHADERS)
 {
 	_hud = nullptr;
 }
 
 void RPGGame::init()
 {
+	auto* shaderWindow = static_cast<GPUShaderWindow*>(window());
+	shaderWindow->setShader(nullptr);
+	DemoShaders::load(shaderWindow);
 	pushScene(LevelLoader::instance()->load("overworld"));
 	_hud = HUD::instance();
 	pushScene(_hud);
 	pushScene(Menu::mainMenu());
+}
+
+void RPGGame::dispatchEvent(SDL_Event& evt)
+{
+	if (DemoShaders::toggle(static_cast<GPUShaderWindow*>(window()), evt))
+		return;
+	Game::dispatchEvent(evt);
 }

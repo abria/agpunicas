@@ -40,7 +40,7 @@ Game::Game(
 		_window = new Window(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
 	else if (rendering == Rendering::SDL_CPU_SHADERS)
 		_window = new CPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
-	else if (rendering == Rendering::SDL_OPENGL_SHADERS)
+	else if (rendering == Rendering::SDL_GPU_SHADERS)
 #ifdef WITH_SHADERS
 		_window = new GPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
 #else

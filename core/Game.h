@@ -30,7 +30,7 @@ class agp::Game : public Singleton<Game>
 
 	public:
 
-		enum class Rendering { SDL, SDL_CPU_SHADERS, SDL_OPENGL_SHADERS };
+		enum class Rendering { SDL, SDL_CPU_SHADERS, SDL_GPU_SHADERS };
 
 	protected:
 

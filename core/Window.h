@@ -41,7 +41,7 @@ class agp::Window
 	public:
 
 		Window(const std::string& title, int width, int height);
-		~Window();
+		virtual ~Window();
 
 		// init (to be called once after creation)
 		virtual void init();

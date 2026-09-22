@@ -18,7 +18,7 @@
 #include "HUD.h"
 #include "DialogBox.h"
 #include "shaderUtils.h"
-#include "CPUShaderWindow.h"
+#include "GPUShaderWindow.h"
 #include "StaticObject.h"
 
 using namespace agp;
@@ -75,14 +75,14 @@ void RPGGameScene::event(SDL_Event& evt)
 		if (evt.type == SDL_EVENT_KEY_DOWN)
 		{
 			PointF center = view()->mapFromScene(player()->rect().center());
-			dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(
+			dynamic_cast<GPUShaderWindow*>(Game::instance()->window())->setShader(
 				[center](Uint32* pixels, int width, int height, int pitch)
 				{
 					lightShader(pixels, width, height, pitch, center.x, center.y);
 				});
 		}
 		else if (evt.type == SDL_EVENT_KEY_UP)
-			dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
+			dynamic_cast<GPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
 	}
 }
 
@@ -98,7 +98,7 @@ void RPGGameScene::setTransitionEnter(bool active)
 	if (_transitionEnter && !active)
 	{
 		_transitionCounter = 0;
-		dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
+		dynamic_cast<GPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
 	}
 	_transitionEnter = active; 
 }
@@ -108,7 +108,7 @@ void RPGGameScene::setTransitionExit(bool active)
 	if (_transitionExit && !active)
 	{
 		_transitionCounter = 0;
-		dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
+		dynamic_cast<GPUShaderWindow*>(Game::instance()->window())->setShader(nullptr);
 	}
 	_transitionExit = active; 
 }
@@ -125,7 +125,7 @@ void RPGGameScene::update(float timeToSimulate)
 		//float factor = _transitionEnter ? progress : 1-progress;
 		PointF center = view()->mapFromScene(player()->rect().center());
 
-		dynamic_cast<CPUShaderWindow*>(Game::instance()->window())->setShader(
+		dynamic_cast<GPUShaderWindow*>(Game::instance()->window())->setShader(
 			[center, factor](Uint32* pixels, int width, int height, int pitch)
 			{
 				//fadingShader(pixels, width, height, pitch, factor);

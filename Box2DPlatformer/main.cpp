@@ -7,6 +7,7 @@
 #include "ComplexPlatformerGame.h"
 #include "core_version.h"
 #include "version.h"
+#include <exception>
 
 #ifdef WITH_TTF
 #include "Fonts.h"
@@ -31,13 +32,20 @@ int main(int argc, char *argv[])
 		agp::Game::instance()->init();
 		agp::Game::instance()->run();
 	}
+    catch (const std::exception& err)
+    {
+        printf("ERROR: %s\n", err.what());
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Box2DPlatformer", err.what(), nullptr);
+    }
     catch (const char* errMsg)
     {
         printf("ERROR: %s\n", errMsg);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Box2DPlatformer", errMsg, nullptr);
     }
     catch (std::string errMsg)
     {
         printf("ERROR: %s\n", errMsg.c_str());
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Box2DPlatformer", errMsg.c_str(), nullptr);
     }
 
     return EXIT_SUCCESS;

@@ -16,6 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB sources *.h *.hpp *.cpp *.c)
 
 # libraries
+set(WITH_SHADERS ON CACHE BOOL "Enable shaders support" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../core ${CMAKE_CURRENT_BINARY_DIR}/core_build)
 find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
 find_package(SDL3_image REQUIRED)
@@ -28,6 +29,7 @@ add_definitions(-DBOX2D_UTILS)
 # utils (header-only) library
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../utils)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../postprocessing)
 
 # create exe and link
 add_executable(${project_name} ${sources})
@@ -37,3 +39,7 @@ add_custom_command(TARGET ${project_name} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/sprites $<TARGET_FILE_DIR:${project_name}>/sprites
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/sounds $<TARGET_FILE_DIR:${project_name}>/assets/sounds
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fonts $<TARGET_FILE_DIR:${project_name}>/assets/fonts)
+
+add_custom_target(copy_shaders ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../postprocessing/assets/shaders $<TARGET_FILE_DIR:${project_name}>/assets/shaders
+    DEPENDS ${project_name})

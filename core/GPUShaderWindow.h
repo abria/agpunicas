@@ -11,9 +11,10 @@
 
 #pragma once
 #include "Window.h"
+#include "CPUShaderWindow.h"
+#include <map>
 #include <string>
 #include <vector>
-#include <GL/glew.h> // or glad, depending on your setup
 
 namespace agp
 {
@@ -21,32 +22,42 @@ namespace agp
 }
 
 // GPUShaderWindow class
-// - adds OpenGL shaders frame post-processing to Window's rendering pipeline
+// - adds GPU fragment shaders frame post-processing to Window's rendering pipeline
 class agp::GPUShaderWindow : public agp::Window
 {
 	protected:
 
-		SDL_GLContext _glContext;
-		SDL_Texture* _targetTexture; // render-to-texture target
+		struct ShaderPass
+		{
+			SDL_GPUShader* shader = nullptr;
+			SDL_GPURenderState* state = nullptr;
+		};
 
-		// OpenGL shader program and quad resources
-		GLuint _program;
-		GLuint _vao;
-		GLuint _vbo;
+		SDL_GPUDevice* _device;
+		SDL_Texture* _sceneTarget;
+		SDL_Texture* _effectTarget;
+		SDL_Texture* _cpuResult;
+		int _targetWidth;
+		int _targetHeight;
+		Uint64 _startTime;
+		std::map<std::string, ShaderPass> _shaders;
+		std::vector<std::string> _activeShaders;
+		CPUShader _cpuShader;
 
 		// helper functions
-		virtual Uint32 windowFlags() override;
-		virtual void preWindowCreation() override;
-		virtual void initWindow() override;
 		virtual void initRenderer() override;
-		virtual void initOpenGL();
-		virtual void createShaderProgram();
-		virtual void createFullScreenQuad();
+		void ensureTargets();
 
 	public:
 
 		GPUShaderWindow(const std::string& title, int width, int height);
 		virtual ~GPUShaderWindow();
+
+		void loadShader(const std::string& name, const std::string& assetPath);
+		void applyShader(const std::string& name);
+		void removeShader(const std::string& name);
+		bool shaderActive(const std::string& name) const;
+		void setShader(CPUShader shader) { _cpuShader = shader; }
 
 		// override (+GPU shader)
 		virtual void render(const std::vector<Scene*>& scenes) override;

@@ -8,304 +8,260 @@
 
 #include "GPUShaderWindow.h"
 #include "Scene.h"
-#include "stringUtils.h"
+#include <algorithm>
+#include <cstring>
 #include <stdexcept>
-#include <iostream>
 
 using namespace agp;
 
-static const char* vertexShaderSource = R"glsl(
-#version 330 core
-layout (location = 0) in vec2 aPos;
-layout (location = 1) in vec2 aTexCoord;
-
-out vec2 vTexCoord;
-
-void main()
-{
-    vTexCoord = aTexCoord;
-    gl_Position = vec4(aPos, 0.0, 1.0);
-}
-)glsl";
-
-static const char* fragmentShaderSource = R"glsl(
-#version 330 core
-in vec2 vTexCoord;
-out vec4 FragColor;
-
-uniform sampler2D uTexture;
-
-void main()
-{
-    // Neutral shader: just sample from the input texture
-    FragColor = texture(uTexture, vTexCoord);
-}
-)glsl";
-
-
 GPUShaderWindow::GPUShaderWindow(const std::string& title, int width, int height)
-    : Window(title, width, height), _glContext(nullptr), _targetTexture(nullptr),
-    _program(0), _vao(0), _vbo(0)
+    : Window(title, width, height), _device(nullptr), _sceneTarget(nullptr),
+      _effectTarget(nullptr), _cpuResult(nullptr), _targetWidth(0), _targetHeight(0), _startTime(0)
 {
-    // The Window base constructor calls SDL_Init, etc.
 }
 
 GPUShaderWindow::~GPUShaderWindow()
 {
-    // Clean up OpenGL resources
-    if (_program) glDeleteProgram(_program);
-    if (_vbo) glDeleteBuffers(1, &_vbo);
-    if (_vao) glDeleteVertexArrays(1, &_vao);
-
-    // Destroy target texture
-    if (_targetTexture) SDL_DestroyTexture(_targetTexture);
-
-    if (_glContext)
+    for (auto& pair : _shaders)
     {
-        SDL_GL_MakeCurrent(_window, NULL);
-        SDL_GL_DeleteContext(_glContext);
+        SDL_DestroyGPURenderState(pair.second.state);
+        SDL_ReleaseGPUShader(_device, pair.second.shader);
     }
-}
-
-Uint32 GPUShaderWindow::windowFlags()
-{
-    // Enable OpenGL
-    return Window::windowFlags() | SDL_WINDOW_OPENGL;
-}
-
-void GPUShaderWindow::preWindowCreation()
-{
-    // Set OpenGL attributes before window creation
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-    // Possibly set double buffering
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-}
-
-void GPUShaderWindow::initWindow()
-{
-    // Call base implementation to create the window
-    Window::initWindow();
-
-    // Create the OpenGL context
-    _glContext = SDL_GL_CreateContext(_window);
-    if (!_glContext)
-        throw SDL_GetError();
-
-    // Initialize GLEW or GLAD
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK)
-        throw ("Failed to initialize GLEW");
-
-    printf("GL_VERSION: %s\n", glGetString(GL_VERSION));
-    printf("GL_SHADING_LANGUAGE_VERSION: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-    // V-Sync
-    SDL_GL_SetSwapInterval(1);
-
-    initOpenGL();
-    createShaderProgram();
-    createFullScreenQuad();
-}
-
-// Function to find the index of the OpenGL render driver
-int findOpenGLRenderDriverIndex()
-{
-    int numDrivers = SDL_GetNumRenderDrivers();
-    for (int i = 0; i < numDrivers; ++i)
-    {
-        const char* name = SDL_GetRenderDriver(i);
-        if (name && strcmp(name, "opengl") == 0)
-        {
-            return i;
-        }
-    }
-    return -1; // OpenGL renderer not found
+    SDL_DestroyTexture(_effectTarget);
+    SDL_DestroyTexture(_sceneTarget);
+    SDL_DestroyTexture(_cpuResult);
 }
 
 void GPUShaderWindow::initRenderer()
 {
-    // Find OpenGL renderer index
-    int openglIndex = findOpenGLRenderDriverIndex();
-    if (openglIndex == -1)
-        throw("OpenGL renderer not found!");
-
-    // Create renderer with OpenGL backend
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-    _renderer = SDL_CreateRenderer(
-        _window,
-        "opengl"
-    );
+    _renderer = SDL_CreateGPURenderer(nullptr, _window);
     if (!_renderer)
-        throw(strprintf("Failed to create SDL Renderer: %s)", SDL_GetError()));
-    SDL_SetRenderVSync(_renderer, 1);
-
-    // Verify renderer info
-    const char* rendererName = SDL_GetRendererName(_renderer);
-    if (rendererName)
-        std::cout << "Renderer Name: " << rendererName << std::endl;
-    else
-        std::cerr << "Failed to get renderer info: " << SDL_GetError() << std::endl;
-
-    SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
-
-    // Create a target texture to render scenes into
-    _targetTexture = SDL_CreateTexture(
-        _renderer,
-        SDL_PIXELFORMAT_RGBA8888,
-        SDL_TEXTUREACCESS_TARGET,
-        _width,
-        _height
-    );
-
-    if (!_targetTexture)
-        throw SDL_GetError();
-}
-
-void GPUShaderWindow::initOpenGL()
-{
-    // Basic OpenGL state
-    glViewport(0, 0, _width, _height);
-    glDisable(GL_DEPTH_TEST);
-}
-
-void GPUShaderWindow::createShaderProgram()
-{
-    // Utility function to compile a shader
-    auto compileShader = [&](const char* src, GLenum type) 
     {
-        GLuint shader = glCreateShader(type);
-        glShaderSource(shader, 1, &src, nullptr);
-        glCompileShader(shader);
-        int success;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            char infoLog[512];
-            glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-            std::string err = std::string("Shader compilation error: ") + infoLog;
-            throw (err);
-        }
-        return shader;
-    };
-
-    GLuint vs = compileShader(vertexShaderSource, GL_VERTEX_SHADER);
-    GLuint fs = compileShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
-
-    _program = glCreateProgram();
-    glAttachShader(_program, vs);
-    glAttachShader(_program, fs);
-    glLinkProgram(_program);
-
-    int success;
-    glGetProgramiv(_program, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        char infoLog[512];
-        glGetProgramInfoLog(_program, 512, nullptr, infoLog);
-        std::string err = std::string("Program link error: ") + infoLog;
-        throw (err);
+        SDL_LogWarn(SDL_LOG_CATEGORY_RENDER, "SDL_GPU unavailable (%s); shaders disabled", SDL_GetError());
+        Window::initRenderer();
+        return;
     }
 
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+    _device = SDL_GetGPURendererDevice(_renderer);
+    if (!_device || !SDL_SetRenderVSync(_renderer, 1) ||
+        !SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND))
+        throw std::runtime_error(SDL_GetError());
+
+    _startTime = SDL_GetTicksNS();
+    resize(_width, _height);
 }
 
-void GPUShaderWindow::createFullScreenQuad()
+void GPUShaderWindow::loadShader(const std::string& name, const std::string& assetPath)
 {
-    // A simple full-screen quad covering the entire screen
-    // Positions (x, y) and texture coords (u, v)
-    float quadVertices[] = {
-        //  Positions    Texcoords
-        -1.0f,  1.0f,   0.0f, 0.0f,
-        -1.0f, -1.0f,   0.0f, 1.0f,
-         1.0f,  1.0f,   1.0f, 0.0f,
+    if (!_device)
+        return;
 
-        -1.0f, -1.0f,   0.0f, 1.0f,
-         1.0f, -1.0f,   1.0f, 1.0f,
-         1.0f,  1.0f,   1.0f, 0.0f
+    if (_shaders.count(name))
+        return;
+
+    struct ShaderFormat
+    {
+        SDL_GPUShaderFormat format;
+        const char* extension;
+        const char* entrypoint;
+        bool text;
+    };
+    const ShaderFormat formats[] = {
+        { SDL_GPU_SHADERFORMAT_SPIRV, ".spv", "main", false },
+        { SDL_GPU_SHADERFORMAT_DXIL, ".dxil", "main", false },
+        { SDL_GPU_SHADERFORMAT_MSL, ".msl", "main0", true }
     };
 
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    const char* basePath = SDL_GetBasePath();
+    if (!basePath)
+        throw std::runtime_error(SDL_GetError());
 
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+    SDL_GPUShaderFormat supported = SDL_GetGPUShaderFormats(_device);
+    for (const auto& candidate : formats)
+    {
+        if (!(supported & candidate.format))
+            continue;
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+        std::string path = std::string(basePath) + assetPath + candidate.extension;
+        size_t size = 0;
+        void* file = SDL_LoadFile(path.c_str(), &size);
+        if (!file)
+            continue;
 
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+        std::vector<Uint8> code(size + (candidate.text ? 1 : 0));
+        std::memcpy(code.data(), file, size);
+        SDL_free(file);
+        if (candidate.text)
+            code[size] = 0;
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+        SDL_GPUShaderCreateInfo info{};
+        info.code = code.data();
+        info.code_size = code.size();
+        info.entrypoint = candidate.entrypoint;
+        info.format = candidate.format;
+        info.stage = SDL_GPU_SHADERSTAGE_FRAGMENT;
+        info.num_samplers = 1;
+        info.num_uniform_buffers = 1;
+
+        SDL_GPUShader* shader = SDL_CreateGPUShader(_device, &info);
+        if (!shader)
+            throw std::runtime_error("Cannot load shader " + path + ": " + SDL_GetError());
+
+        SDL_GPURenderStateCreateInfo stateInfo{};
+        stateInfo.fragment_shader = shader;
+        SDL_GPURenderState* state = SDL_CreateGPURenderState(_renderer, &stateInfo);
+        if (!state)
+        {
+            std::string error = SDL_GetError();
+            SDL_ReleaseGPUShader(_device, shader);
+            throw std::runtime_error("Cannot create shader state " + path + ": " + error);
+        }
+
+        _shaders.emplace(name, ShaderPass{ shader, state });
+        return;
+    }
+
+    throw std::runtime_error("No compatible shader asset found for " + assetPath);
+}
+
+void GPUShaderWindow::applyShader(const std::string& name)
+{
+    if (!_device)
+        return;
+
+    if (!_shaders.count(name))
+        throw std::invalid_argument("Shader not loaded: " + name);
+    if (!shaderActive(name))
+        _activeShaders.push_back(name);
+}
+
+void GPUShaderWindow::removeShader(const std::string& name)
+{
+    _activeShaders.erase(std::remove(_activeShaders.begin(), _activeShaders.end(), name),
+                         _activeShaders.end());
+}
+
+bool GPUShaderWindow::shaderActive(const std::string& name) const
+{
+    return std::find(_activeShaders.begin(), _activeShaders.end(), name) != _activeShaders.end();
+}
+
+void GPUShaderWindow::ensureTargets()
+{
+    int width = 0;
+    int height = 0;
+    if (!SDL_GetCurrentRenderOutputSize(_renderer, &width, &height))
+        throw std::runtime_error(SDL_GetError());
+    if (width == _targetWidth && height == _targetHeight)
+        return;
+
+    SDL_DestroyTexture(_effectTarget);
+    SDL_DestroyTexture(_sceneTarget);
+    SDL_DestroyTexture(_cpuResult);
+    _effectTarget = nullptr;
+    _sceneTarget = nullptr;
+    _cpuResult = nullptr;
+
+    _sceneTarget = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888,
+                                     SDL_TEXTUREACCESS_TARGET, width, height);
+    _effectTarget = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888,
+                                      SDL_TEXTUREACCESS_TARGET, width, height);
+    _cpuResult = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888,
+                                   SDL_TEXTUREACCESS_STREAMING, width, height);
+    if (!_sceneTarget || !_effectTarget || !_cpuResult ||
+        !SDL_SetTextureBlendMode(_sceneTarget, SDL_BLENDMODE_NONE) ||
+        !SDL_SetTextureBlendMode(_effectTarget, SDL_BLENDMODE_NONE) ||
+        !SDL_SetTextureBlendMode(_cpuResult, SDL_BLENDMODE_NONE))
+        throw std::runtime_error(SDL_GetError());
+
+    _targetWidth = width;
+    _targetHeight = height;
 }
 
 void GPUShaderWindow::render(const std::vector<Scene*>& scenes)
 {
-    // Render scenes to the target texture
-    SDL_SetRenderTarget(_renderer, _targetTexture);
+    if (_activeShaders.empty() && !_cpuShader)
+    {
+        Window::render(scenes);
+        return;
+    }
+
+    ensureTargets();
+    if (!SDL_SetRenderTarget(_renderer, _sceneTarget) ||
+        !SDL_SetRenderClipRect(_renderer, nullptr) ||
+        !SDL_SetRenderViewport(_renderer, nullptr))
+        throw std::runtime_error(SDL_GetError());
+
     SDL_SetRenderDrawColor(_renderer, _color.r, _color.g, _color.b, 255);
     SDL_RenderClear(_renderer);
-
-    //// Test: draw a red rect in the target texture
-    //SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
-    //SDL_Rect testRect = { 50, 50, 100, 100 };
-    //SDL_RenderFillRect(_renderer, &testRect);
     for (auto scene : scenes)
         scene->render();
 
-    // Make sure all rendering commands are done
-    SDL_RenderFlush(_renderer);
+    SDL_Texture* source = _sceneTarget;
+    if (_cpuShader)
+    {
+        SDL_Surface* pixels = SDL_RenderReadPixels(_renderer, nullptr);
+        if (!pixels)
+            throw std::runtime_error(SDL_GetError());
+        if (pixels->format != SDL_PIXELFORMAT_RGBA8888)
+        {
+            SDL_Surface* converted = SDL_ConvertSurface(pixels, SDL_PIXELFORMAT_RGBA8888);
+            SDL_DestroySurface(pixels);
+            pixels = converted;
+            if (!pixels)
+                throw std::runtime_error(SDL_GetError());
+        }
 
-    // Switch back to default render target
-    SDL_SetRenderTarget(_renderer, nullptr);
-
-    // Now use OpenGL to draw a fullscreen quad with the texture
-    // Bind the SDL texture as an OpenGL texture
-    float w, h;
-    if (!SDL_GL_BindTexture(_targetTexture, &w, &h))
-        throw ("Failed to bind SDL texture to OpenGL texture");
-
-    // Render the quad
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-    SDL_GL_MakeCurrent(_window, _glContext);
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        std::cerr << "Clearing previous error: " << err << "\n";
+        _cpuShader(static_cast<Uint32*>(pixels->pixels), pixels->w, pixels->h, pixels->pitch);
+        bool updated = SDL_UpdateTexture(_cpuResult, nullptr, pixels->pixels, pixels->pitch);
+        SDL_DestroySurface(pixels);
+        if (!updated)
+            throw std::runtime_error(SDL_GetError());
+        source = _cpuResult;
     }
-    glUseProgram(_program);
-    err = glGetError();
-    if (err != GL_NO_ERROR)
-        throw(strprintf("OpenGL error: %d", err));
 
-    // The texture is bound by SDL_GL_BindTexture(), which should give us an active texture
-    // Typically it binds to GL_TEXTURE_2D at texture unit 0.
-    glActiveTexture(GL_TEXTURE0);
-    // SDL_GL_BindTexture doesn't return the texture ID directly, but it sets the bound texture.
-    // We assume here that the texture is now bound to GL_TEXTURE_2D.
-    // If needed, we can query the texture handle through other means, but generally it's handled internally.
-
-    // Set our uniform
-    GLint loc = glGetUniformLocation(_program, "uTexture");
-    if (loc == -1) {
-        throw ("Could not find uniform uTexture in shader");
+    if (_activeShaders.empty())
+    {
+        if (!SDL_SetRenderTarget(_renderer, nullptr) ||
+            !SDL_SetRenderClipRect(_renderer, nullptr) ||
+            !SDL_SetRenderViewport(_renderer, nullptr) ||
+            !SDL_RenderTexture(_renderer, source, nullptr, nullptr) ||
+            !SDL_RenderPresent(_renderer))
+            throw std::runtime_error(SDL_GetError());
+        return;
     }
-    glUniform1i(loc, 0);
 
-    glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    for (size_t i = 0; i < _activeShaders.size(); ++i)
+    {
+        bool last = i + 1 == _activeShaders.size();
+        SDL_Texture* target = last ? nullptr :
+            (source == _sceneTarget ? _effectTarget : _sceneTarget);
+        if (!SDL_SetRenderTarget(_renderer, target) ||
+            !SDL_SetRenderClipRect(_renderer, nullptr) ||
+            !SDL_SetRenderViewport(_renderer, nullptr))
+            throw std::runtime_error(SDL_GetError());
 
-    // Unbind the texture from OpenGL
-    SDL_GL_UnbindTexture(_targetTexture);
+        SDL_SetRenderDrawColor(_renderer, _color.r, _color.g, _color.b, 255);
+        SDL_RenderClear(_renderer);
 
-    // Swap the window buffers to present the final image
-    SDL_GL_SwapWindow(_window);
+        ShaderPass& pass = _shaders.at(_activeShaders[i]);
+        float uniforms[4] = {
+            float(SDL_GetTicksNS() - _startTime) / 1000000000.0f,
+            float(_targetWidth), float(_targetHeight), 1.0f
+        };
+        if (!SDL_SetGPURenderStateFragmentUniforms(pass.state, 0, uniforms, sizeof(uniforms)) ||
+            !SDL_SetGPURenderState(_renderer, pass.state))
+            throw std::runtime_error(SDL_GetError());
+
+        bool rendered = SDL_RenderTexture(_renderer, source, nullptr, nullptr);
+        SDL_SetGPURenderState(_renderer, nullptr);
+        if (!rendered)
+            throw std::runtime_error(SDL_GetError());
+        source = target;
+    }
+
+    if (!SDL_RenderPresent(_renderer))
+        throw std::runtime_error(SDL_GetError());
 }
 
 #endif

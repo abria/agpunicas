@@ -60,6 +60,8 @@ void Game::run()
 	while (_running)
 	{
 		processEvents();
+		if (!_running)
+			break;
 
 		float frameTime = frameTimer.restart();
 		for (int i = int(_scenes.size()) - 1; i >= 0; i--)
@@ -111,6 +113,12 @@ void Game::processEvents()
 
 void Game::dispatchEvent(SDL_Event& evt)
 {
+	if (evt.type == SDL_EVENT_QUIT || evt.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
+	{
+		quit();
+		return;
+	}
+
 	if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.scancode == SDL_SCANCODE_ESCAPE)
 	{
 		quit();

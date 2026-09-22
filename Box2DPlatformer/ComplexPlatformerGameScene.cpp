@@ -151,7 +151,7 @@ void ComplexPlatformerGameScene::updateWorld(float timeToSimulate)
 		auto allObjects = objects();
 		for (auto& obj : allObjects)
 			if (!obj->freezed())
-				obj->update(timeToSimulate);
+				obj->update(_dt);
 	}
 }
 

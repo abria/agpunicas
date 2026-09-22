@@ -31,6 +31,11 @@ Soldier::Soldier(Scene* scene, const PointF& pos, const RectF& patrolRect)
 	_pathfinding = new Pathfinding(this, 50, 0.5);
 }
 
+Soldier::~Soldier()
+{
+	delete _pathfinding;
+}
+
 void Soldier::changeState(State newState)
 {
 	if (newState == State::PATROL)

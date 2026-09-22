@@ -69,7 +69,7 @@ class agp::GameScene : public Scene
 	public:
 
 		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
-		virtual ~GameScene() {}
+		virtual ~GameScene();
 
 		Object* player() { return _player; }
 		virtual void setPlayer(Object* player) { _player = player; }

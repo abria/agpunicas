@@ -31,6 +31,9 @@ Scene::~Scene()
 {
 	for(auto& obj : _objects)
 		delete obj;
+	for (auto& obj : _newObjects)
+		delete obj;
+	delete _view;
 }
 
 void Scene::newObject(Object* obj)

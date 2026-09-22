@@ -26,12 +26,23 @@ struct Quadtree::Node
         for (int i = 0; i < 4; i++)
             children[i] = nullptr;
     }
+
+    ~Node()
+    {
+        for (auto child : children)
+            delete child;
+    }
 };
 
 Quadtree::Quadtree(const RectF& rect) :
     _rect(rect)
 {
     _root = new Node();
+}
+
+Quadtree::~Quadtree()
+{
+    delete _root;
 }
 
 void Quadtree::add(Object* obj)

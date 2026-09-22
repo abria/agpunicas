@@ -42,6 +42,7 @@ class agp::Soldier : public Enemy
 	public:
 
 		Soldier(Scene* scene, const PointF& pos, const RectF& patrolRect);
+		virtual ~Soldier();
 
 		// extends game logic (+Soldier logic)
 		virtual void update(float dt) override;

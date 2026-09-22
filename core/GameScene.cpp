@@ -41,6 +41,14 @@ GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 		_view->setFixedAspectRatio(ar);
 }
 
+GameScene::~GameScene()
+{
+	for (auto& scene : _backgroundScenes)
+		delete scene;
+	for (auto& scene : _foregroundScenes)
+		delete scene;
+}
+
 void GameScene::newObject(Object* obj)
 {
 	Scene::newObject(obj);

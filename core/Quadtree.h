@@ -58,6 +58,7 @@ class agp::Quadtree
     public:
 
         Quadtree(const RectF& rect);
+        ~Quadtree();
         RectF rect() const { return _rect; }
 
         void add(Object* obj);

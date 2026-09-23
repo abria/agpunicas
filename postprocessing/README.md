@@ -4,7 +4,7 @@ Le tre demo caricano gli stessi dieci fragment shader dalla cartella `assets/sha
 
 | Tasto | Shader | Risultato |
 | --- | --- | --- |
-| `1` | `rain` | Pioggia animata e scena più cupa |
+| `1` | `rain` | Pioggia animata, scena più cupa e lampi di luce fredda pseudo-casuali |
 | `2` | `fog` | Nebbia densa, stratificata e mobile |
 | `3` | `crt` | Curvatura, scanline e maschera RGB |
 | `4` | `pixelate` | Mosaicatura, palette ridotta e dithering |

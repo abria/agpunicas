@@ -1,4 +1,4 @@
-# Algoritmi e Programmazione dei Videogiochi @ Unicas
+# Algoritmi e Programmazione dei Videogiochi @ Università di Cassino
 
 Un framework per programmare videogiochi 2D in C++ con SDL3.
 
@@ -33,7 +33,7 @@ Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gi
 - sprite testuali basati su SDL_ttf
 - funzioni di supporto per le spritesheet (autotiling ed estrazione delle componenti connesse)
 - editor dei livelli con persistenza JSON (geometrie supportate: rettangoli, rettangoli ruotati e spezzate)
-- finestra opzionale con shader CPU o GPU tramite OpenGL
+- finestra opzionale con shader CPU o post-processing GPU tramite SDL_GPU; le tre demo condividono dieci effetti attivabili con i tasti `1`-`9` e `0`
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_leveleditor.png">
 

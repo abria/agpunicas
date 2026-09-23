@@ -3,10 +3,12 @@ Texture2D sceneTexture : register(t0, space2);
 SamplerState sceneSampler : register(s0, space2);
 struct PSInput { float4 color : COLOR0; float2 uv : TEXCOORD0; };
 
+// Repeatable pseudo-random choice for each row and time step.
 float hash(float2 p) { return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453); }
 
 float4 main(PSInput input) : SV_Target
 {
+    // Move selected horizontal strips, then offset the RGB channels.
     float frame = floor(effect.x * 9.0);
     float row = floor(input.uv.y * effect.z / 18.0);
     float tear = step(0.58, hash(float2(row, frame)));

@@ -5,12 +5,14 @@ struct PSInput { float4 color : COLOR0; float2 uv : TEXCOORD0; };
 
 float4 main(PSInput input) : SV_Target
 {
+    // Bend texture coordinates to imitate a curved CRT screen.
     float2 centered = input.uv * 2.0 - 1.0;
     float2 warped = centered * (1.0 + 0.075 * dot(centered, centered));
     float2 uv = warped * 0.5 + 0.5;
     if (any(uv < 0.0) || any(uv > 1.0))
         return float4(0.01, 0.01, 0.015, 1.0);
 
+    // Shift color channels, then add scanlines, an RGB mask, and a vignette.
     float offset = 1.2 / effect.y;
     float red = sceneTexture.Sample(sceneSampler, uv + float2(offset, 0.0)).r;
     float green = sceneTexture.Sample(sceneSampler, uv).g;

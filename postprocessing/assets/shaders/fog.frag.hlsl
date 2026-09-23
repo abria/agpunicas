@@ -12,11 +12,13 @@ struct PSInput
     float2 uv : TEXCOORD0;
 };
 
+// A repeatable pseudo-random value for each 2D grid point.
 float hash(float2 p)
 {
     return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
 }
 
+// Smoothly interpolate the random values at the four cell corners.
 float noise(float2 p)
 {
     float2 cell = floor(p);
@@ -28,6 +30,7 @@ float noise(float2 p)
 
 float4 main(PSInput input) : SV_Target
 {
+    // Two noise layers drift at different speeds to form moving clouds.
     float aspect = effect.y / effect.z;
     float2 position = float2(input.uv.x * aspect, input.uv.y);
     float2 drift = float2(effect.x * 0.24, effect.x * 0.07);

@@ -1,5 +1,7 @@
 #version 330 core
 
+// Legacy OpenGL circular mask; it is not loaded by the current SDL_GPU pipeline.
+
 out vec4 FragColor;
 
 in vec2 TexCoord;
@@ -11,6 +13,7 @@ uniform vec2 resolution;
 
 void main()
 {
+    // Convert normalized UVs to pixels before comparing with the player's radius.
     vec2 fragCoord = TexCoord * resolution;
     float distance = length(fragCoord - playerPosition);
 

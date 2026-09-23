@@ -10,7 +10,7 @@ namespace agp
 		{
 			static const char* const shaders[] = {
 				"rain", "fog", "crt", "pixelate", "neon",
-				"heat", "nightvision", "glitch", "bloom", "vortex"
+				"heat", "nightvision", "glitch", "bloom", "grayscale"
 			};
 			return shaders;
 		}

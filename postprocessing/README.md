@@ -13,7 +13,9 @@ Le tre demo caricano gli stessi dieci fragment shader dalla cartella `assets/sha
 | `7` | `nightvision` | Visione notturna con grana e vignettatura |
 | `8` | `glitch` | Distorsioni orizzontali e separazione dei canali |
 | `9` | `bloom` | Alone luminoso sulle zone chiare |
-| `0` | `vortex` | Torsione radiale animata |
+| `0` | `grayscale` | Scala di grigi basata sulla luminosità percepita |
+
+Per iniziare a leggere gli shader, `grayscale.frag.hlsl` è il più semplice: campiona il frame, calcola la luminosità dai canali RGB e restituisce il colore in scala di grigi.
 
 Ogni effetto ha un sorgente `.frag.hlsl` e tre versioni già compilate: `.msl` per Metal, `.dxil` per Direct3D 12 e `.spv` per Vulkan. CMake copia questi file a ogni build, ma non compila automaticamente l'HLSL: dopo aver modificato un sorgente, rigenerare i tre formati con `shadercross`:
 

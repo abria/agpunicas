@@ -12,11 +12,13 @@ struct PSInput
     float2 uv : TEXCOORD0;
 };
 
+// Repeatable pseudo-random value for a column, drop, or lightning cycle.
 float hash(float2 p)
 {
     return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
 }
 
+// Draw short slanted streaks that move down separate columns.
 float rainLayer(float2 pixel, float time, float spacing, float speed, float slant)
 {
     float columnPosition = (pixel.x + pixel.y * slant) / spacing;
@@ -37,6 +39,7 @@ float4 main(PSInput input) : SV_Target
     rain += rainLayer(pixel + float2(43.0, 71.0), effect.x, 17.0, 345.0, 0.14) * 0.72;
     rain += rainLayer(pixel + float2(119.0, 27.0), effect.x, 27.0, 245.0, 0.10) * 0.42;
 
+    // Each five-second cycle can contain one brief, sometimes double, flash.
     float cycle = floor(effect.x / 5.0);
     float localTime = effect.x - cycle * 5.0;
     float strikeTime = 0.6 + hash(float2(cycle, 19.0)) * 3.3;

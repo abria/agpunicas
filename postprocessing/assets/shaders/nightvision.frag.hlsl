@@ -5,8 +5,10 @@ struct PSInput { float4 color : COLOR0; float2 uv : TEXCOORD0; };
 
 float4 main(PSInput input) : SV_Target
 {
+    // Turn RGB into brightness before tinting it green.
     float4 scene = sceneTexture.Sample(sceneSampler, input.uv) * input.color;
     float luma = dot(scene.rgb, float3(0.299, 0.587, 0.114));
+    // Animated grain, scanlines, and darkened corners mimic a camera signal.
     float noise = frac(sin(dot(floor(input.uv * effect.yz) + effect.x * 17.0,
                                float2(12.9898, 78.233))) * 43758.5453) - 0.5;
     float2 center = input.uv * 2.0 - 1.0;

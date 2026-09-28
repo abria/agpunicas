@@ -12,6 +12,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include "geometryUtils.h"
+#include "graphicsUtils.h"
 #include "mathUtils.h"
 #include "fileUtils.h"
 #include <vector>

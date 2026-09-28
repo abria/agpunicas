@@ -55,100 +55,128 @@ namespace agp
 		return true;
 	}
 
-	// SAT Polygon vs. Polygon collision detection
-	// for better performance, replace std::vector with static std::array[MAX_DIM]
+	// SAT Polygon vs. Polygon collision detection with precomputed unit axes
+	// polygon containers can be std::vector or std::array; touching counts as contact
+	template <class PolygonA, class PolygonB, class Axes>
 	static inline bool checkCollisionSAT(
-		const std::vector < Vec2Df >& polyA,
-		const std::vector < Vec2Df >& polyB,
-		Vec2Df &collisionAxis,
-		float &collisionDepth)
+		const PolygonA& polyA,
+		const PolygonB& polyB,
+		const Axes& axes,
+		Vec2Df& collisionAxis,
+		float& collisionDepth)
 	{
-		// by default, we hypothesize there is an intersection
-		// if at least one test passes, we declare no intersection
-		bool intersects = true;
+		if (polyA.size() < 3 || polyB.size() < 3)
+			return false;
 
-		// test A vs. B
-		for (int i = 0; i < polyA.size() && intersects; i++)
+		collisionDepth = inf<float>();
+		for (const Vec2Df& axis : axes)
 		{
-			Vec2Df normal = (polyA[(i + 1) % polyA.size()] - polyA[i]).perp(); //.norm() is neglected to save computation
+			float minA = polyA[0].dot(axis), maxA = minA;
+			float minB = polyB[0].dot(axis), maxB = minB;
+			for (const Vec2Df& v : polyA)
+			{
+				const float projection = v.dot(axis);
+				minA = std::min(minA, projection);
+				maxA = std::max(maxA, projection);
+			}
+			for (const Vec2Df& v : polyB)
+			{
+				const float projection = v.dot(axis);
+				minB = std::min(minB, projection);
+				maxB = std::max(maxB, projection);
+			}
+			if (maxA < minB || maxB < minA)
+				return false;
 
-			bool edgeTestPassed = true;
-			for (int j = 0; j < polyB.size(); j++)
-				if ((polyB[j] - polyA[i]).dot(normal) < 0)
-					edgeTestPassed = false;
-
-			if (edgeTestPassed)
-				intersects = false;
+			const float depth = std::min(maxA - minB, maxB - minA);
+			if (depth < collisionDepth)
+			{
+				collisionDepth = depth;
+				collisionAxis = axis;
+			}
 		}
 
-		// test B vs. A
-		for (int i = 0; i < polyB.size() && intersects; i++)
-		{
-			Vec2Df normal = (polyB[(i + 1) % polyB.size()] - polyB[i]).perp(); //.norm() is neglected to save computation
-
-			bool edgeTestPassed = true;
-			for (int j = 0; j < polyA.size(); j++)
-				if ((polyA[j] - polyB[i]).dot(normal) < 0)
-					edgeTestPassed = false;
-
-			if (edgeTestPassed)
-				intersects = false;
-		}
-
-		// if intersects, compute collision direction and depth
-		if (intersects)
-		{
-			std::vector<Vec2Df> normals(polyA.size() + polyB.size());
-			Vec2Df centerA, centerB;
-			for (int i = 0; i < polyA.size(); i++)
-			{
-				normals[i] = (polyA[(i + 1) % polyA.size()] - polyA[i]).perp().norm(); //.norm() is necessary since we are measuring projections
-				centerA += polyA[i];
-			}
-			centerA /= float(polyA.size());
-			for (int i = 0; i < polyB.size(); i++)
-			{
-				normals[i + polyA.size()] = (polyB[(i + 1) % polyB.size()] - polyB[i]).perp().norm(); //.norm() is necessary since we are measuring projections
-				centerB += polyB[i];
-			}
-			centerB /= float(polyB.size());
-
-			collisionDepth = inf<float>();
-			for (auto& normal : normals)
-			{
-				float minA = inf<float>();
-				float maxA = -inf<float>();
-				for (auto& vertex : polyA)
-				{
-					float proj = vertex.dot(normal);
-					minA = std::min(minA, proj);
-					maxA = std::max(maxA, proj);
-				}
-				float minB = inf<float>();
-				float maxB = -inf<float>();
-				for (auto& vertex : polyB)
-				{
-					float proj = vertex.dot(normal);
-					minB = std::min(minB, proj);
-					maxB = std::max(maxB, proj);
-				}
-
-				float axisDepth = (std::min(maxB - minA, maxA - minB));
-				if (axisDepth < collisionDepth)
-				{
-					collisionDepth = axisDepth;
-					collisionAxis = normal;
-				}
-			}
-
-			// invert collisionAxis if not already going from A to B
-			if ((centerB - centerA).dot(collisionAxis) < 0)
-				collisionAxis = -collisionAxis;
-		}
-
-		return intersects;
+		// invert collisionAxis if not already going from A to B
+		Vec2Df centerA, centerB;
+		for (const Vec2Df& v : polyA) centerA += v;
+		for (const Vec2Df& v : polyB) centerB += v;
+		centerA /= float(polyA.size());
+		centerB /= float(polyB.size());
+		if ((centerB - centerA).dot(collisionAxis) < 0)
+			collisionAxis = -collisionAxis;
+		return true;
 	}
 
+	// SAT Polygon vs. Polygon collision detection
+	// build axes from polygon edges; keep the nonzero-overlap test of this overload
+	static inline bool checkCollisionSAT(
+		const std::vector<Vec2Df>& polyA,
+		const std::vector<Vec2Df>& polyB,
+		Vec2Df& collisionAxis,
+		float& collisionDepth)
+	{
+		std::vector<Vec2Df> axes;
+		const std::vector<Vec2Df>* polygons[] = { &polyA, &polyB };
+		for (const auto* poly : polygons)
+			for (std::size_t i = 0; i < poly->size(); i++)
+			{
+				const Vec2Df edge = (*poly)[(i + 1) % poly->size()] - (*poly)[i];
+				if (edge.mag2() > 0)
+					axes.push_back(edge.perp().norm());
+			}
+		if (axes.empty())
+			return false;
+		return checkCollisionSAT(polyA, polyB, axes, collisionAxis, collisionDepth) && collisionDepth > 0;
+	}
+
+	// collision data for a single representative contact
+	struct CollisionContact
+	{
+		Vec2Df normal;	// unit vector from A to B
+		Vec2Df point;	// contact point in scene coordinates
+		float depth = 0;
+	};
+
+	// closest point on a line segment
+	static inline Vec2Df closestPointOnSegment(const Vec2Df& p, const Vec2Df& a, const Vec2Df& b)
+	{
+		const Vec2Df ab = b - a;
+		if (ab.mag2() == 0)
+			return a;
+		const float t = std::max(0.0f, std::min(1.0f, (p - a).dot(ab) / ab.mag2()));
+		return a + ab * t;
+	}
+
+	// OBB contact point from closest vertex-edge pairs
+	// if two points have the same distance, use their midpoint
+	static inline Vec2Df findContactPoint(
+		const std::array<Vec2Df, 4>& polyA,
+		const std::array<Vec2Df, 4>& polyB)
+	{
+		float minDistance = std::numeric_limits<float>::max();
+		Vec2Df p1, p2;
+		const std::array<Vec2Df, 4>* polygons[] = { &polyA, &polyB };
+		for (int side = 0; side < 2; side++)
+		{
+			const auto& vertices = *polygons[side];
+			const auto& edges = *polygons[1 - side];
+			for (Vec2Df p : vertices)
+				for (int j = 0; j < 4; j++)
+				{
+					const Vec2Df q = closestPointOnSegment(p, edges[j], edges[(j + 1) % 4]);
+					const float distance = (p - q).mag2();
+					if (distance < minDistance - 0.001f)
+					{
+						minDistance = distance;
+						p1 = p2 = q;
+					}
+					else if (std::abs(distance - minDistance) <= 0.001f &&
+						(q - p1).mag2() > (p2 - p1).mag2())
+						p2 = q;
+				}
+		}
+		return (p1 + p2) * 0.5f;
+	}
 
 	// Swept (CCD) Point vs. AABB collision detection
 	static inline bool PointVsRect(

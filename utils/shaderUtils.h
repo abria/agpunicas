@@ -9,6 +9,10 @@
 
 #pragma once
 
+#include <SDL3/SDL.h>
+#include <algorithm>
+#include <cmath>
+
 namespace agp
 {
     static inline float clamp(float value, float min, float max) {

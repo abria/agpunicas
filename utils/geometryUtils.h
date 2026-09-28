@@ -495,7 +495,7 @@ namespace agp
 		bool isValid() const { return end != start; }
 
 		// operations
-		Rect<T> boundingRect(bool yUp) const
+		Rect<T> boundingRect(bool yUp = false) const
 		{
 			return Rect<T>(
 				{ std::min(start.x, end.x),std::min(start.y, end.y) },

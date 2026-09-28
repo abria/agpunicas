@@ -43,3 +43,8 @@ add_custom_command(TARGET ${project_name} POST_BUILD
 add_custom_target(copy_shaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../postprocessing/assets/shaders $<TARGET_FILE_DIR:${project_name}>/assets/shaders
     DEPENDS ${project_name})
+
+# level data can change without recompiling the game
+add_custom_target(copy_levels ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/levels $<TARGET_FILE_DIR:${project_name}>/levels
+    DEPENDS ${project_name})

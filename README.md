@@ -33,6 +33,7 @@ Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gi
 - sprite testuali basati su SDL_ttf
 - funzioni di supporto per le spritesheet (autotiling ed estrazione delle componenti connesse)
 - editor dei livelli con persistenza JSON (geometrie supportate: rettangoli, rettangoli ruotati e spezzate)
+- caricamento condiviso dei livelli JSON tramite `LevelData`, con validazione e conservazione delle proprietà specifiche dei giochi nell'editor ([formato e utilizzo](core/levels.md))
 - finestra opzionale con shader CPU o post-processing GPU tramite SDL_GPU; le tre demo condividono dieci effetti attivabili con i tasti `1`-`9` e `0`
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_leveleditor.png">
@@ -60,6 +61,7 @@ A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> 
 - trigger, detti anche sensori
 - interfaccia di base (HUD e menu)
 - selezione tra CCD e collision detection discreta AABB
+- livello caricato da `levels/overworld.json`, inclusi nemici, piattaforme mobili e trigger
 
 #### Limitazioni
 - nessun collider composto: ogni oggetto può avere un solo collider
@@ -86,6 +88,7 @@ Prototipo per platform 2D complessi basato su SDL e sul motore fisico Box2D.
 - esempio di oggetto cinematico composto (ingranaggio)
 - esempi di oggetti dinamici (cassa e proiettile `Fire`)
 - esempio di nemico
+- livello caricato da `levels/level0.json`, inclusi terreno, ingranaggi, player e sfondi
 
 #### Limitazioni
 - il giocatore non resta stabile sulle piattaforme mobili; il problema può essere corretto compensando le forze come sulle pendenze

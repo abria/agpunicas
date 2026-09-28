@@ -8,15 +8,17 @@
 // ----------------------------------------------------------------
 
 #include "LevelLoader.h"
+#include "LevelData.h"
 #include "SpriteFactory.h"
-#include "RenderableObject.h"
 #include "StaticObject.h"
 #include "PlatformerGameScene.h"
 #include "Mario.h"
 #include "HammerBrother.h"
 #include "Lift.h"
 #include "Trigger.h"
-#include <iostream>
+#include <map>
+#include <memory>
+#include <stdexcept>
 
 using namespace agp;
 
@@ -27,66 +29,99 @@ LevelLoader::LevelLoader()
 
 Scene* LevelLoader::load(const std::string& name)
 {
-	SpriteFactory* spriteLoader = SpriteFactory::instance();
+	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
+	LevelData level(path);
+	auto world = std::make_unique<PlatformerGameScene>(level.sceneRect(), level.pixelUnitSize(), level.timeStep());
+	level.configure(world.get());
+	std::map<std::string, Object*> objectsById;
 
-	if (name == "overworld")
+	auto sprite = [](const std::string& id) -> Sprite*
 	{
-		PlatformerGameScene* world = new PlatformerGameScene(RectF(0, -20, 224, 50), { 16,16 }, 1 / 100.0f);
-		world->setBackgroundColor(Color(92, 148, 252));
+		if (id.empty())
+			return nullptr;
+		Sprite* result = SpriteFactory::instance()->get(id);
+		if (!result)
+			throw std::runtime_error("Unknown sprite: " + id);
+		return result;
+	};
 
-		// terrain
-		new StaticObject(world, RectF(0, 1, 68, 2),  spriteLoader->get("terrain"));
-		// boxes
-		new StaticObject(world, RectF(16, -3, 1, 1), spriteLoader->get("box"));
-		new StaticObject(world, RectF(21, -3, 1, 1), spriteLoader->get("box"));
-		new StaticObject(world, RectF(22, -7, 1, 1), spriteLoader->get("box"));
-		new StaticObject(world, RectF(23, -3, 1, 1), spriteLoader->get("box"));
-		// bricks
-		new StaticObject(world, RectF(20, -3, 1, 1), spriteLoader->get("brick"));
-		new StaticObject(world, RectF(22, -3, 1, 1), spriteLoader->get("brick"));
-		new StaticObject(world, RectF(24, -3, 1, 1), spriteLoader->get("brick"));
-		// pipes
-		new StaticObject(world, RectF(28, -1, 2, 4), spriteLoader->get("pipe3"), -1);
-		new StaticObject(world, RectF(38, -2, 2, 5), spriteLoader->get("pipe4"), -1);
-		new StaticObject(world, RectF(46, -3, 2, 6), spriteLoader->get("pipe5"), -1);
-		new StaticObject(world, RectF(57, -3, 2, 6), spriteLoader->get("pipe5"), -1);
-		new StaticObject(world, RectF(70, -3, 2, 11), spriteLoader->get("pipe10"), -1);
-		new StaticObject(world, RectF(74, -5, 2, 13), spriteLoader->get("pipe12"), -1);
-		new StaticObject(world, RectF(78, -7, 2, 15), spriteLoader->get("pipe14"), -1);
+	for (const auto& object : level.objects())
+	{
+		std::string category = level.category(object);
+		if (category == "Trigger")
+			continue;
 
-		//new RenderableObject(world, RectF(0, -5, 30, 20), Color(0, 0, 0, 255), 2);
+		RotatedRectF geometry = LevelData::rotRect(object);
+		if (geometry.angle != 0)
+			throw std::runtime_error("CustomPlatformer requires axis-aligned rectangles");
+		RectF rect = geometry.toRect();
+		int layer = object.value("layer", 0);
+		Object* created = nullptr;
 
-		// hammer brother debug
-		/*for (int i = 0; i < 8; i++)
+		if (category == "Static")
+			created = new StaticObject(world.get(), rect, sprite(object.value("sprite", "")), layer);
+		else if (category == "HammerBrother")
+			// constructor uses a sprite-specific spawn offset
+			created = new HammerBrother(world.get(), rect.pos + PointF(-1 / 16.0f, 1));
+		else if (category == "Lift")
 		{
-			new StaticObject(world, RectF(7 + i, -3, 1, 1), spriteLoader->get("brick"));
-			new StaticObject(world, RectF(7 + i, -7, 1, 1), spriteLoader->get("brick"));
-		}*/
-		new HammerBrother(world, PointF(21, 0));
-		new HammerBrother(world, PointF(23, -4));
-		//for(int i=0; i<1000; i++)
-		//	new HammerBrother(world, PointF(20 + rand()%100, 0));
+			float range = object.value("range", 3.0f);
+			if (!std::isfinite(range) || range <= 0)
+				throw std::runtime_error("Lift range must be positive");
+			created = new Lift(world.get(), rect, sprite(object.value("sprite", "platform")),
+				object.value("vertical", true), range, layer);
+		}
+		else if (category == "Mario")
+		{
+			if (world->player())
+				throw std::runtime_error("A level must contain exactly one Mario");
+			created = new Mario(world.get(), rect.pos - PointF(1 / 16.0f, 0));
+			world->setPlayer(created);
+		}
+		else
+			throw std::runtime_error("Unknown CustomPlatformer category: " + category);
 
-		// lifts
-		Lift* lift1 = new Lift(world, RectF(9, -2, 3, 0.5f), spriteLoader->get("platform"), false, 12, 10);
-		Lift* lift2 = new Lift(world, RectF(4, -4, 3, 0.5f), spriteLoader->get("platform"), true, 3, 10);
-
-		// mario
-		Mario* mario = new Mario(world, PointF(2.5, 0));
-		world->setPlayer(mario);
-
-		// trigger example
-		new Trigger(world, RectF(1, -12, 0.5, 13), mario, [lift1, lift2]()
-			{
-				lift1->toggleFreezed();
-				lift2->toggleFreezed();
-			});
-
-		return world;
+		created->setLayer(layer);
+		std::string id = object.value("id", "");
+		if (!id.empty() && !objectsById.emplace(id, created).second)
+			throw std::runtime_error("Duplicate object id: " + id);
 	}
-	else
+
+	if (!world->player())
+		throw std::runtime_error("A level must contain exactly one Mario");
+
+	// resolve trigger references after all game objects have been created
+	for (const auto& object : level.objects())
 	{
-		std::cerr << "Unrecognized game scene name \"" << name << "\"\n";
-		return nullptr;
+		if (level.category(object) != "Trigger")
+			continue;
+		if (object.at("action") != "toggleFreezed")
+			throw std::runtime_error("Unknown trigger action");
+		std::string watchedName = object.at("watched");
+		auto watchedIt = objectsById.find(watchedName);
+		CollidableObject* watched = watchedIt == objectsById.end() ? nullptr : dynamic_cast<CollidableObject*>(watchedIt->second);
+		if (!watched)
+			throw std::runtime_error("Unknown trigger watched object: " + watchedName);
+		const auto& targetNames = object.at("targets");
+		if (!targetNames.is_array() || targetNames.empty())
+			throw std::runtime_error("A trigger needs at least one target");
+		std::vector<Object*> targets;
+		for (const auto& targetName : targetNames)
+		{
+			auto target = objectsById.find(targetName.get<std::string>());
+			if (target == objectsById.end())
+				throw std::runtime_error("Unknown trigger target: " + targetName.get<std::string>());
+			targets.push_back(target->second);
+		}
+		RotatedRectF geometry = LevelData::rotRect(object);
+		if (geometry.angle != 0)
+			throw std::runtime_error("CustomPlatformer requires axis-aligned rectangles");
+		new Trigger(world.get(), geometry.toRect(), watched, [targets]()
+			{
+				for (auto* target : targets)
+					target->toggleFreezed();
+			});
 	}
+
+	return world.release();
 }

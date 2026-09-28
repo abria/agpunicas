@@ -8,6 +8,8 @@
 // ----------------------------------------------------------------
 
 #include "LevelLoader.h"
+#include "LevelData.h"
+#include "mathUtils.h"
 #include "SpriteFactory.h"
 #include "RenderableObject.h"
 #include "ComplexPlatformerGameScene.h"
@@ -15,11 +17,11 @@
 #include "StaticObject.h"
 #include "Terrain.h"
 #include "Player.h"
-#include "mathUtils.h"
 #include "Gear.h"
 #include "Box.h"
 #include "Slime.h"
-#include <iostream>
+#include <memory>
+#include <stdexcept>
 
 using namespace agp;
 
@@ -36,46 +38,93 @@ LevelLoader::LevelLoader()
 
 Scene* LevelLoader::load(const std::string& name)
 {
-	SpriteFactory* spriteLoader = SpriteFactory::instance();
-	
-	ComplexPlatformerGameScene* world = nullptr;
+	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
+	LevelData level(path);
+	auto world = std::make_unique<ComplexPlatformerGameScene>(level.sceneRect(), level.pixelUnitSize(), level.timeStep());
+	level.configure(world.get());
 
-	if (name == "level0")
+	auto sprite = [](const std::string& id) -> Sprite*
 	{
-		world = new ComplexPlatformerGameScene(RectF(0, 0, 96, 13, true), {32, 32}, 1 / 100.0f);
+		if (id.empty())
+			return nullptr;
+		Sprite* result = SpriteFactory::instance()->get(id);
+		if (!result)
+			throw std::runtime_error("Unknown sprite: " + id);
+		return result;
+	};
 
-		// game foreground
-		new RenderableObject(world, world->rect(), spriteLoader->get("fg_ground"), -1);
-
-		// terrain
-		Terrain::TerrainSequence(world, { 0, 3.3f },
-			{
-				{9, 0}, {4, 2}, {2, 0}, {4, -2}, {13, 0}, {4, -2},
-				{2, 0}, {10, 5}, {14.5f, 0}, {4, -2}, {3, 0}, {2, 1},
-				{1.5f, 0}, {1.5f, 1}, {2, 0}, {4, -2}, {15.5f, 0}, {20, 0}
-			});
-
-
-		// dynamic objects
-		//new Box(world, RotatedRectF({ 5, 10 }, { 1,1 }, 0, true));
-		//new Slime(world, { 10, 15 });
-
-		// kinematic objects
-		new Gear(world, RotatedRectF({ 90, 2 }, { 15, 15 }, 0, true), spriteLoader->get("gear"), -1);
-		new Gear(world, RotatedRectF({ 103, 2 }, { 15, 15 }, 0, true), spriteLoader->get("gear"), 1);
-
-		// player
-		world->setPlayer(new Player(world, { 3, 10 }));
-		
-		// decorative backgrounds and foregrounds
-		world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_sky")));
-        world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_houses"), { 0.2f, 1 }, true));
-        world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_grass"), { 0.4f, 1 }, true));
-		world->addForegroundScene(new OverlayScene(world, spriteLoader->get("rain")));
-        world->addForegroundScene(new OverlayScene(world, spriteLoader->get("fg_fog"), { 1.2f, 1 }, true));
+	// world images are not editable regions
+	for (const auto& object : level.json().value("backgroundImages", nlohmann::ordered_json::array()))
+	{
+		RotatedRectF geometry = LevelData::rotRect(object);
+		auto image = new RenderableObject(world.get(), geometry.toRect(), sprite(object.at("sprite")), object.value("layer", -1));
+		image->setAngle(rad2deg(geometry.angle));
+		world->addBackgroundImage(image);
 	}
-	else
-		std::cerr << "Unrecognized game scene name \"" << name << "\"\n";
 
-	return world;
+	for (const auto& object : level.objects())
+	{
+		std::string category = level.category(object);
+		int layer = object.value("layer", 0);
+		if (category == "Terrain")
+		{
+			auto points = LevelData::multiline(object.at("multiline"));
+			for (size_t i = 1; i < points.size(); i++)
+			{
+				LineF line(points[i - 1], points[i]);
+				if (line.isValid())
+					new Terrain(world.get(), line, sprite(object.value("sprite", "")), layer);
+			}
+			continue;
+		}
+
+		RotatedRectF geometry = LevelData::rotRect(object);
+		Object* created = nullptr;
+		if (category == "Renderable")
+		{
+			auto rendered = new RenderableObject(world.get(), geometry.toRect(), sprite(object.value("sprite", "")), layer);
+			rendered->setAngle(rad2deg(geometry.angle));
+			created = rendered;
+		}
+		else if (category == "Static")
+			created = new StaticObject(world.get(), geometry, sprite(object.value("sprite", "")), layer);
+		else if (category == "Gear")
+			created = new Gear(world.get(), geometry, sprite(object.value("sprite", "gear")), layer);
+		else if (category == "Box")
+			created = new Box(world.get(), geometry);
+		else if (category == "Slime")
+			created = new Slime(world.get(), geometry.center);
+		else if (category == "Player")
+		{
+			if (world->player())
+				throw std::runtime_error("A level must contain exactly one Player");
+			created = new Player(world.get(), geometry.center);
+			world->setPlayer(created);
+		}
+		else
+			throw std::runtime_error("Unknown Box2DPlatformer category: " + category);
+		created->setLayer(layer);
+	}
+
+	if (!world->player())
+		throw std::runtime_error("A level must contain exactly one Player");
+
+	// decorative backgrounds and foregrounds, in drawing order
+	for (const auto& object : level.json().value("overlays", nlohmann::ordered_json::array()))
+	{
+		std::string placement = object.at("placement");
+		if (placement != "background" && placement != "foreground")
+			throw std::runtime_error("Unknown overlay placement: " + placement);
+		PointF parallax;
+		if (object.contains("parallax"))
+			parallax = { object.at("parallax").at("x"), object.at("parallax").at("y") };
+		bool seamless = object.value("seamless", false);
+		auto overlay = new OverlayScene(world.get(), sprite(object.at("sprite")), parallax, seamless);
+		if (placement == "background")
+			world->addBackgroundScene(overlay);
+		else
+			world->addForegroundScene(overlay);
+	}
+
+	return world.release();
 }

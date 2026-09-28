@@ -16,7 +16,6 @@ namespace agp
 	class Scene;
 	class LevelLoader;
 	class RPGGameScene;
-	class Link;
 }
 
 // LevelLoader (singleton)
@@ -30,8 +29,7 @@ class agp::LevelLoader
 
 		void loadJson(
 			RPGGameScene* world, 
-			const std::string& jsonPath,
-			Link* link);
+			const std::string& jsonPath);
 
 	public:
 

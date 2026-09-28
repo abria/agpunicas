@@ -1,6 +1,6 @@
 #include "EditorScene.h"
 #include <fstream>
-#include "json.hpp"
+#include "LevelData.h"
 #include "View.h"
 #include "Window.h"
 #include "EditableObject.h"
@@ -66,39 +66,32 @@ void EditorScene::generateGrid()
 
 void EditorScene::fromJson()
 {
-	std::ifstream f(_jsonPath);
-	if (!f.is_open())
+	// a new editor document may not exist yet
+	std::ifstream file(_jsonPath);
+	if (!file.is_open())
 		return;
+	file.close();
 
-	nlohmann::json j = nlohmann::json::parse(f);
-
-	_categories = j["categories"].get<std::vector<std::string>>();
-
-	std::vector<nlohmann::json> jsonObjects = j["objects"].get<std::vector<nlohmann::json>>();
-	for (auto& json : jsonObjects)
+	LevelData level(_jsonPath);
+	_json = level.json();
+	_categories = _json.at("categories").get<std::vector<std::string>>();
+	for (const auto& json : level.objects())
 		_editObjects.push_back(new EditableObject(this, json, _categories));
-
-	f.close();
 }
 
 void EditorScene::toJson()
 {
-	std::ofstream f(_jsonPath);
-	if (!f.is_open())
-		return;
-
-	nlohmann::ordered_json j;
+	nlohmann::ordered_json j = _json.is_object() ? _json : nlohmann::ordered_json::object();
 	j["core_version"] = agp::core::VERSION();
-
 	j["categories"] = _categories;
 
-	std::vector <nlohmann::ordered_json> jsonObjects;
+	std::vector<nlohmann::ordered_json> jsonObjects;
 	for (auto& obj : _editObjects)
 		jsonObjects.push_back(obj->toJson());
 	j["objects"] = jsonObjects;
-	
-	f << j.dump(3);
-	f.close();
+
+	LevelData::save(_jsonPath, j);
+	_json = j;
 }
 
 void EditorScene::updateState(State newState)
@@ -121,6 +114,14 @@ void EditorScene::updateState(State newState)
 		if (_currentObject)
 			_currentObject->setSelected(false);
 		_currentObject = nullptr;
+
+		// stop mouse tools
+		_isDragging = false;
+		_draggedObject = nullptr;
+		_isResizing = false;
+		_resizingObject = nullptr;
+		_isPanning = false;
+		_panningDelta = PointF(0, 0);
 	}
 	else if (newState == State::DRAW_RECT)
 	{
@@ -265,7 +266,7 @@ void EditorScene::event(SDL_Event& evt)
 		}
 		else if ((_state == State::DRAW_RECT || _state == State::DRAW_LINE) && evt.key.scancode == SDL_SCANCODE_SPACE)
 		{
-			_currentCategory = (_currentCategory + 1) % MAX_CATEGORIES;
+			_currentCategory = (_currentCategory + 1) % _categories.size();
 			if (_currentObject)
 				_currentObject->setCategory(_currentCategory);
 			_currentCell->setCategory(_currentCategory);

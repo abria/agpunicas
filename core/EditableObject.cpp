@@ -8,6 +8,7 @@
 // ----------------------------------------------------------------
 
 #include "EditableObject.h"
+#include "LevelData.h"
 #include "Scene.h"
 #include "graphicsUtils.h"
 #include "sdlUtils.h"
@@ -50,57 +51,47 @@ EditableObject::EditableObject(Scene* scene, const LineF& line, const std::strin
 	init();
 }
 
-EditableObject::EditableObject(Scene* scene, const nlohmann::json& j, std::vector<std::string>& categories)
+EditableObject::EditableObject(Scene* scene, const nlohmann::ordered_json& j, std::vector<std::string>& categories)
 	: RenderableObject(scene, RectF(), nullptr, 1), _categories(categories)
 {
-	_category = j["category"];
-	_name = j["name"];
-
-	if (j.contains("rect"))
-	{
-		setRect(RectF(j["rect"]["x"], j["rect"]["y"], j["rect"]["width"], j["rect"]["height"], j["rect"]["yUp"]));
-		_rotRect.center = rect().center();
-		_rotRect.size = rect().size;
-		_rotRect.angle = 0;
-		_rotRect.yUp = rect().yUp;
-	}
-	else if (j.contains("rotRect"))
-	{
-		_rotRect.center.x = j["rotRect"]["cx"];
-		_rotRect.center.y = j["rotRect"]["cy"];
-		_rotRect.size.x = j["rotRect"]["width"];
-		_rotRect.size.y = j["rotRect"]["height"];
-		_rotRect.angle = j["rotRect"]["angle"];
-		_rotRect.yUp = j["rotRect"]["yUp"];
-		setRect(_rotRect.toRect());
-	}
-	else if (j.contains("multiline"))
-	{
-		std::vector<nlohmann::json> jlines = j["multiline"].get<std::vector<nlohmann::json>>();
-		for (auto& jline : jlines)
-			_multiline.push_back(PointF(jline["x"], jline["y"]));
-
-		setRect(LineF(_multiline[0], _multiline[1]).boundingRect(_scene->rect().yUp));
-		_rotRect.center = rect().center();
-		_rotRect.size = rect().size;
-		_rotRect.angle = 0;
-		_rotRect.yUp = rect().yUp;
-		_resizingEdgeIndex = -1;
-	}
-
+	_json = j;
+	_category = j.at("category");
+	_name = j.value("name", "");
 	_selected = false;
+	_resizingEdgeIndex = -1;
+
+	if (j.contains("multiline"))
+	{
+		_multiline = LevelData::multiline(j.at("multiline"));
+		setRect(LineF(_multiline[0], _multiline[1]).boundingRect(_scene->rect().yUp));
+		_rotRect = rect();
+	}
+	else
+	{
+		_rotRect = LevelData::rotRect(j);
+		setRect(_rotRect.toRect());
+		// editor rotations are stored in degrees
+		_rotRect.angle = j.contains("rotRect") ? j.at("rotRect").at("angle").get<float>() : 0;
+	}
 
 	init();
 
-	if(_multiline.size())
+	if (_multiline.size())
 		updateLineRect();
 }
 
 nlohmann::ordered_json EditableObject::toJson()
 {
-	nlohmann::ordered_json j;
+	nlohmann::ordered_json j = _json.is_object() ? _json : nlohmann::ordered_json::object();
+	// geometry may change type after editing
+	j.erase("rect");
+	j.erase("rotRect");
+	j.erase("multiline");
 	j["category"] = _category;
-	j["name"] = _name;
+	if (_name.empty())
+		j.erase("name");
+	else
+		j["name"] = _name;
 
 	if (_multiline.size())
 	{
@@ -147,6 +138,7 @@ void EditableObject::init()
 		new TextSprite(_name, "Lucida", col.brighter(), { NAME_MARGIN_X, 0.0f }, { 0, NAME_MAX_HEIGHT },
 			isLine() ? TextSprite::VAlign::BOTTOM : TextSprite::VAlign::CENTER, TextSprite::HAlign::CENTER), 2);
 	_renderedName->setAngle(-_rotRect.angle);
+	_renderedName->setVisible(!_name.empty());
 
 	_renderedCategory = new RenderableObject(
 		_scene,
@@ -156,8 +148,11 @@ void EditableObject::init()
 	_renderedCategory->setAngle(-_rotRect.angle);
 }
 
-EditableObject::~EditableObject()
+void EditableObject::kill()
 {
+	if (_killed)
+		return;
+	Object::kill();
 	if (_renderedName)
 		_renderedName->kill();
 	if (_renderedCategory)
@@ -181,6 +176,7 @@ void EditableObject::setName(const std::string& name)
 { 
 	_name = name;
 	dynamic_cast<TextSprite*>(_renderedName->sprite())->setText(_name);
+	_renderedName->setVisible(_visible && !_name.empty());
 }
 
 void EditableObject::setFocused(bool on)
@@ -249,7 +245,7 @@ bool EditableObject::intersectsRectShallow(const RectF& r)
 void EditableObject::setVisible(bool visible)
 {
 	RenderableObject::setVisible(visible);
-	_renderedName->setVisible(visible);
+	_renderedName->setVisible(visible && !_name.empty());
 	_renderedCategory->setVisible(visible);
 }
 

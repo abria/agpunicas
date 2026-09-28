@@ -16,9 +16,10 @@
 #include "Trigger.h"
 #include "Soldier.h"
 #include <iostream>
-#include <fstream>
+#include <memory>
+#include <stdexcept>
 #include "View.h"
-#include "json.hpp"
+#include "LevelData.h"
 #include "Portal.h"
 #include "mathUtils.h"
 #include "NPC.h"
@@ -39,67 +40,41 @@ LevelLoader::LevelLoader()
 
 void LevelLoader::loadJson(
 	RPGGameScene* world, 
-	const std::string& jsonPath,
-	Link* link)
+	const std::string& jsonPath)
 {
-	std::ifstream f(jsonPath);
-	if (!f.is_open())
-		return;
+	LevelData level(jsonPath);
+	level.configure(world);
 
-	nlohmann::json jRoot = nlohmann::json::parse(f);
-	std::vector <std::string> _categories = jRoot["categories"].get<std::vector<std::string>>();
-	std::vector<nlohmann::json> jsonObjects = jRoot["objects"].get<std::vector<nlohmann::json>>();
-	
 	// portals with matching names = portals to be connected
 	std::map<std::string, std::vector<Portal*>> portals;
 
-	for (auto& jObj : jsonObjects)
+	for (const auto& jObj : level.objects())
 	{
-		int category = jObj["category"];
-		std::string name = jObj["name"];
+		std::string category = level.category(jObj);
 		
 		if (jObj.contains("rect") || jObj.contains("rotRect"))
 		{
-			RotatedRectF rrect;
+			RotatedRectF rrect = LevelData::rotRect(jObj);
 
-			if (jObj.contains("rect"))
-			{
-				RectF rect;
-				rect.pos.x = jObj["rect"]["x"];
-				rect.pos.y = jObj["rect"]["y"];
-				rect.size.x = jObj["rect"]["width"];
-				rect.size.y = jObj["rect"]["height"];
-				rect.yUp = jObj["rect"]["yUp"];
-				rrect = rect;
-			}
-			else
-			{
-				rrect.center.x = jObj["rotRect"]["cx"];
-				rrect.center.y = jObj["rotRect"]["cy"];
-				rrect.size.x = jObj["rotRect"]["width"];
-				rrect.size.y = jObj["rotRect"]["height"];
-				rrect.angle = deg2rad(float(jObj["rotRect"]["angle"]));
-				rrect.yUp = jObj["rotRect"]["yUp"];
-			}
-
-			if (_categories[category] == "Static" || _categories[category] == "Bush")
+			if (category == "Static" || category == "Bush")
 				new StaticObject(world, rrect, nullptr, 1);
-			else if (_categories[category] == "Portal")
+			else if (category == "Portal")
+			{
+				std::string name = jObj.value("name", "");
+				if (name.empty())
+					throw std::runtime_error("A Portal needs a name to identify its destination");
 				portals[name].push_back(new Portal(world, rrect));
-			else if (_categories[category] == "Clipper")
+			}
+			else if (category == "Clipper")
 				new Clipper(world, rrect.toRect());
 		}
 		else if (jObj.contains("multiline"))
 		{
-			std::vector<nlohmann::json> jsonPoints = jObj["multiline"].get<std::vector<nlohmann::json>>();
-			for (int i = 0; i < jsonPoints.size() - 1; i++)
+			auto points = LevelData::multiline(jObj.at("multiline"));
+			for (size_t i = 1; i < points.size(); i++)
 			{
-				float x1 = jsonPoints[i]["x"];
-				float y1 = jsonPoints[i]["y"];
-				float x2 = jsonPoints[i + 1]["x"];
-				float y2 = jsonPoints[i + 1]["y"];
-				LineF line(x1, y1, x2, y2);
-				if(line.isValid())
+				LineF line(points[i - 1], points[i]);
+				if (line.isValid())
 					new StaticObject(world, RotatedRectF(line, 0.1f, false), nullptr, 2);
 			}
 		}
@@ -115,7 +90,6 @@ void LevelLoader::loadJson(
 		else
 			std::cerr << "Found " << pair.second.size() << " portals with name " << pair.first << ": expected 2\n";
 
-	f.close();
 }
 
 Scene* LevelLoader::load(const std::string& name)
@@ -124,30 +98,30 @@ Scene* LevelLoader::load(const std::string& name)
 
 	if (name == "overworld")
 	{
-		RPGGameScene* world = new RPGGameScene(RectF(0, 0, 256, 256), { 16,16 }, 1 / 100.0f);
+		auto world = std::make_unique<RPGGameScene>(RectF(0, 0, 256, 256), Point(16, 16), 1 / 100.0f);
 		world->setBackgroundColor({ 128, 128, 128 });
 
 		// backgrounds
-		world->addBackgroundImage(new RenderableObject(world, RectF(0, 0, 256, 256), spriteLoader->get("overworld")));
-		world->addBackgroundImage(new RenderableObject(world, RectF(-16, -14, 16, 14), spriteLoader->get("linkhouse"), 0));
+		world->addBackgroundImage(new RenderableObject(world.get(), RectF(0, 0, 256, 256), spriteLoader->get("overworld")));
+		world->addBackgroundImage(new RenderableObject(world.get(), RectF(-16, -14, 16, 14), spriteLoader->get("linkhouse"), 0));
 
 		// NPCs
-		new NPC(world, PointF(-8, -7));
-		new Soldier(world, PointF(130, 185), RectF(133, 178, 2, 3));
+		new NPC(world.get(), PointF(-8, -7));
+		new Soldier(world.get(), PointF(130, 185), RectF(133, 178, 2, 3));
 		
 		// player
-		Link* player = new Link(world, PointF(140, 179));
-		//Link* player = new Link(world, PointF(138, 189));
+		Link* player = new Link(world.get(), PointF(140, 179));
+		//Link* player = new Link(world.get(), PointF(138, 189));
 		world->setPlayer(player);
 
-		//new StaticObject(world, RectF(137, 171, 2.5, 6), nullptr, 5);
+		//new StaticObject(world.get(), RectF(137, 171, 2.5, 6), nullptr, 5);
 
-		//new StaticObject(world, RotatedRectF(140, 185, 5, 2, PI/8), spriteLoader->get("linkhouse"), 2);
+		//new StaticObject(world.get(), RotatedRectF(140, 185, 5, 2, PI/8), spriteLoader->get("linkhouse"), 2);
 
 		// load jObj and convert regions to game objects
-		loadJson(world, std::string(SDL_GetBasePath()) + "EditorScene.json", player);
+		loadJson(world.get(), std::string(SDL_GetBasePath()) + "EditorScene.json");
 
-		return world;
+		return world.release();
 	}
 	else
 	{

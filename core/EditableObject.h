@@ -28,6 +28,7 @@ class agp::EditableObject : public RenderableObject
 {
 	protected:
 
+		nlohmann::ordered_json _json;	// preserves game-specific properties
 		std::string _name;
 		int _category;
 		bool _selected;
@@ -62,8 +63,11 @@ class agp::EditableObject : public RenderableObject
 
 		EditableObject(Scene* scene, const RectF& rect, const std::string& name, int category, std::vector<std::string>& categories);
 		EditableObject(Scene* scene, const LineF& line, const std::string& name, int category, std::vector<std::string>& categories);
-		EditableObject(Scene* scene, const nlohmann::json& fromJson, std::vector<std::string>& categories);
-		virtual ~EditableObject();
+		EditableObject(Scene* scene, const nlohmann::ordered_json& fromJson, std::vector<std::string>& categories);
+		virtual ~EditableObject() {};
+
+		// removes labels together with the editable object
+		virtual void kill() override;
 
 		int category() const { return _category; }
 		virtual void setCategory(int newCategory);

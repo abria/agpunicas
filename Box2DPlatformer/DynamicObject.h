@@ -25,7 +25,7 @@ class agp::DynamicObject : public RigidObject
 {
 	protected:
 
-		float _xMoveForce;			// horizontal move (frame-by-frame) force
+		float _xMoveForce;			// horizontal move force
 		float _yJumpImpulse;		// jump impulse
 		float _xVelMax;				// maximum horizontal velocity (scene units / s)
 		float _yVelMax;				// maximum vertical velocity

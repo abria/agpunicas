@@ -26,8 +26,10 @@ class agp::ComplexPlatformerGameScene : public GameScene
 		int _subStepCount = 4;		// Box2D physics substep
 		b2WorldId _worldId;			// Box2D world handle
 
+		// player controls (physics step)
+		void updatePhysicsControls();
+
 		// helper functions overrides
-		virtual void updateControls(float timeToSimulate) override;
 		virtual void updateCamera(float timeToSimulate) override;
 		virtual void updateWorld(float timeToSimulate) override;
 		virtual bool shouldAutoKillOutsideScene(Object* obj) const override;

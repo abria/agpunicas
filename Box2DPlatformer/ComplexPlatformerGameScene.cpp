@@ -48,7 +48,7 @@ bool ComplexPlatformerGameScene::shouldAutoKillOutsideScene(Object* obj) const
 	return rect.left() < _rect.left() || rect.bottom() < _rect.bottom();
 }
 
-void ComplexPlatformerGameScene::updateControls(float timeToSimulate)
+void ComplexPlatformerGameScene::updatePhysicsControls()
 {
 	if (_cameraManual)
 		return;
@@ -85,6 +85,9 @@ void ComplexPlatformerGameScene::updateWorld(float timeToSimulate)
 	_timeToSimulateAccum += timeToSimulate;
 	while (_timeToSimulateAccum >= _dt)
 	{
+		// controls (forces are cleared after each physics step)
+		updatePhysicsControls();
+
 		// Box2D physics
 		b2World_Step(_worldId, _dt, _subStepCount);
 		_timeToSimulateAccum -= _dt;

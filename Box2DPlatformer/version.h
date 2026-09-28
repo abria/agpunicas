@@ -11,12 +11,12 @@
 
 namespace agp
 {
-	namespace ComplexPlatformer
+	namespace Box2DPlatformer
 	{
 		// Version components
 		constexpr int VERSION_MAJOR = 1;
 		constexpr int VERSION_MINOR = 8;
-		constexpr int VERSION_PATCH = 1;
+		constexpr int VERSION_PATCH = 3;
 
 		// Function to retrieve the version string
 		inline static std::string VERSION() {

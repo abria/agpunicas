@@ -4,8 +4,7 @@
       "Static",
       "HammerBrother",
       "Lift",
-      "Mario",
-      "Trigger"
+      "Mario"
    ],
    "scene": {
       "rect": {
@@ -236,11 +235,9 @@
             "height": 0.5,
             "yUp": false
          },
-         "sprite": "platform",
          "vertical": false,
          "range": 12,
-         "layer": 10,
-         "id": "lift1"
+         "layer": 10
       },
       {
          "category": 2,
@@ -251,11 +248,9 @@
             "height": 0.5,
             "yUp": false
          },
-         "sprite": "platform",
          "vertical": true,
          "range": 3,
-         "layer": 10,
-         "id": "lift2"
+         "layer": 10
       },
       {
          "category": 3,
@@ -265,24 +260,7 @@
             "width": 1,
             "height": 1,
             "yUp": false
-         },
-         "id": "mario"
-      },
-      {
-         "category": 4,
-         "rect": {
-            "x": 1,
-            "y": -12,
-            "width": 0.5,
-            "height": 13,
-            "yUp": false
-         },
-         "action": "toggleFreezed",
-         "watched": "mario",
-         "targets": [
-            "lift1",
-            "lift2"
-         ]
+         }
       }
    ]
 }

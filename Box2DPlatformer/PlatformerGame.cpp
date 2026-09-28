@@ -7,7 +7,7 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
-#include "ComplexPlatformerGame.h"
+#include "PlatformerGame.h"
 #include "LevelLoader.h"
 #include "HUD.h"
 #include "Menu.h"
@@ -16,12 +16,12 @@
 
 using namespace agp;
 
-ComplexPlatformerGame::ComplexPlatformerGame() : Game("Box2DPlatformer", { 600,600 }, 1.846f, Rendering::SDL_GPU_SHADERS)
+PlatformerGame::PlatformerGame() : Game("Box2DPlatformer", { 600,600 }, 1.846f, Rendering::SDL_GPU_SHADERS)
 {
 	_hud = nullptr;
 }
 
-void ComplexPlatformerGame::init()
+void PlatformerGame::init()
 {
 	DemoShaders::load(static_cast<GPUShaderWindow*>(window()));
 	pushScene(LevelLoader::instance()->load("level0"));
@@ -30,7 +30,7 @@ void ComplexPlatformerGame::init()
 	pushScene(Menu::mainMenu());
 }
 
-void ComplexPlatformerGame::dispatchEvent(SDL_Event& evt)
+void PlatformerGame::dispatchEvent(SDL_Event& evt)
 {
 	if (DemoShaders::toggle(static_cast<GPUShaderWindow*>(window()), evt))
 		return;

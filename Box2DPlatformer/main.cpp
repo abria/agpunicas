@@ -4,7 +4,7 @@
 #include "Audio.h"
 #include "Singleton.h"
 #include "Game.h"
-#include "ComplexPlatformerGame.h"
+#include "PlatformerGame.h"
 #include "core_version.h"
 #include "version.h"
 #include <exception>
@@ -15,12 +15,12 @@
 
 int main(int argc, char *argv[])
 {
-    printf("Box2DPlatformer v%s\n", agp::ComplexPlatformer::VERSION().c_str());
+    printf("Box2DPlatformer v%s\n", agp::Box2DPlatformer::VERSION().c_str());
     printf("Core v%s\n\n", agp::core::VERSION().c_str());
 
 	try
 	{
-		agp::Game::setInstance(new agp::ComplexPlatformerGame());
+		agp::Game::setInstance(new agp::PlatformerGame());
 		agp::SpriteFactory::instance();
 		agp::LevelLoader::instance();
 		agp::Audio::instance();

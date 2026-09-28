@@ -8,12 +8,13 @@
 // ----------------------------------------------------------------
 
 #include "Gear.h"
+#include "SpriteFactory.h"
 #include "mathUtils.h"
 
 using namespace agp;
 
-Gear::Gear(GameScene* scene, const RotatedRectF& obb, Sprite* sprite, int layer) :
-	KinematicObject(scene, obb, sprite, layer)
+Gear::Gear(GameScene* scene, const RotatedRectF& obb, int layer) :
+	KinematicObject(scene, obb, SpriteFactory::instance()->get("gear"), layer)
 {
 	b2Circle circle;
 	circle.center = { 0,0 };

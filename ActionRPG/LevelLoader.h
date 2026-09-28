@@ -15,6 +15,7 @@ namespace agp
 {
 	class Scene;
 	class LevelLoader;
+	class LevelData;
 	class RPGGameScene;
 }
 
@@ -28,8 +29,8 @@ class agp::LevelLoader
 		LevelLoader();
 
 		void loadJson(
-			RPGGameScene* world, 
-			const std::string& jsonPath);
+			RPGGameScene* world,
+			const LevelData& level);
 
 	public:
 

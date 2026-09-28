@@ -7,7 +7,7 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
-#include "ComplexPlatformerGameScene.h"
+#include "PlatformerGameScene.h"
 #include "RenderableObject.h"
 #include "View.h"
 #include "SpriteFactory.h"
@@ -21,7 +21,7 @@
 
 using namespace agp;
 
-ComplexPlatformerGameScene::ComplexPlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
+PlatformerGameScene::PlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
 	: GameScene(rect, pixelUnitSize, dt)
 {
 	// box2D world init
@@ -36,19 +36,19 @@ ComplexPlatformerGameScene::ComplexPlatformerGameScene(const RectF& rect, const 
 	_view->setRect(RectF(0, 0, 24, 13, true));
 }
 
-ComplexPlatformerGameScene::~ComplexPlatformerGameScene()
+PlatformerGameScene::~PlatformerGameScene()
 {
 	if (b2World_IsValid(_worldId))
 		b2DestroyWorld(_worldId);
 }
 
-bool ComplexPlatformerGameScene::shouldAutoKillOutsideScene(Object* obj) const
+bool PlatformerGameScene::shouldAutoKillOutsideScene(Object* obj) const
 {
 	const RectF& rect = obj->rect();
 	return rect.left() < _rect.left() || rect.bottom() < _rect.bottom();
 }
 
-void ComplexPlatformerGameScene::updatePhysicsControls()
+void PlatformerGameScene::updatePhysicsControls()
 {
 	if (_cameraManual)
 		return;
@@ -68,7 +68,7 @@ void ComplexPlatformerGameScene::updatePhysicsControls()
 	player->setRunning(keyboard[SDL_SCANCODE_Z]);
 }
 
-void ComplexPlatformerGameScene::updateCamera(float timeToSimulate)
+void PlatformerGameScene::updateCamera(float timeToSimulate)
 {
 	if (_cameraManual)
 	{
@@ -79,7 +79,7 @@ void ComplexPlatformerGameScene::updateCamera(float timeToSimulate)
 	_view->setX(std::max(_view->rect().pos.x, _player->rect().pos.x - 11));
 }
 
-void ComplexPlatformerGameScene::updateWorld(float timeToSimulate)
+void PlatformerGameScene::updateWorld(float timeToSimulate)
 {
 	// semi-fixed time step
 	_timeToSimulateAccum += timeToSimulate;
@@ -158,7 +158,7 @@ void ComplexPlatformerGameScene::updateWorld(float timeToSimulate)
 	}
 }
 
-void ComplexPlatformerGameScene::event(SDL_Event& evt)
+void PlatformerGameScene::event(SDL_Event& evt)
 {
 	GameScene::event(evt);
 

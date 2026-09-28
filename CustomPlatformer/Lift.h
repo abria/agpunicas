@@ -16,7 +16,7 @@ class agp::Lift : public KinematicObject
 
 	public:
 
-		Lift(Scene* scene, const RectF& rect, Sprite* sprite, bool vertical, float range, int layer = 0);
+		Lift(Scene* scene, const RectF& rect, bool vertical, float range, int layer = 0);
 
 		virtual void update(float dt) override;
 

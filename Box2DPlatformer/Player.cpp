@@ -10,7 +10,7 @@
 #include "Player.h"
 #include "KinematicObject.h"
 #include "Terrain.h"
-#include "ComplexPlatformerGameScene.h"
+#include "PlatformerGameScene.h"
 #include "SpriteFactory.h"
 #include "AnimatedSprite.h"
 #include "Fire.h"
@@ -103,7 +103,7 @@ void Player::update(float dt)
 	if (onGround())
 	{
 		b2RayResult raycast = b2World_CastRayClosest(
-			dynamic_cast<ComplexPlatformerGameScene*>(_scene)->worldId(),
+			dynamic_cast<PlatformerGameScene*>(_scene)->worldId(),
 			{ _obb.center.x, _obb.center.y },
 			{ 0, -_obb.size.y / 2 - 1 }, b2DefaultQueryFilter());
 
@@ -117,7 +117,7 @@ void Player::update(float dt)
 		if (terrain && terrain->slope())
 		{
 			Vec2Df tangent = terrain->normal().perp().norm();
-			b2Vec2 b2gravity = b2World_GetGravity(dynamic_cast<ComplexPlatformerGameScene*>(_scene)->worldId());
+			b2Vec2 b2gravity = b2World_GetGravity(dynamic_cast<PlatformerGameScene*>(_scene)->worldId());
 			float gravity = Vec2Df(b2gravity.x, b2gravity.y).mag();
 			float mass = b2Body_GetMass(_bodyId);
 			float gravityForce = mass * gravity;

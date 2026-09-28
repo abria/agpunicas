@@ -16,6 +16,8 @@ namespace agp
 {
 	class Scene;
 	class LevelLoader;
+	class LevelData;
+	class PlatformerGameScene;
 }
 
 // LevelLoader (singleton)
@@ -26,6 +28,10 @@ class agp::LevelLoader
 
 		// constructor inaccesible due to singleton
 		LevelLoader();
+
+		void loadJson(
+			PlatformerGameScene* world,
+			const LevelData& level);
 
 	public:
 

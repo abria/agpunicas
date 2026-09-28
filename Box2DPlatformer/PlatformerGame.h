@@ -14,13 +14,13 @@
 
 namespace agp
 {
-	class ComplexPlatformerGame;
+	class PlatformerGame;
 	class HUD;
 }
 
-// ComplexPlatformerGame
-// - customizes parent's class Game to adapt to complex platformer games
-class agp::ComplexPlatformerGame : public Game
+// PlatformerGame
+// - customizes parent's class Game to adapt to Box2D platformer games
+class agp::PlatformerGame : public Game
 { 
 	protected:
 
@@ -28,7 +28,7 @@ class agp::ComplexPlatformerGame : public Game
 
 	public: 
 		
-		ComplexPlatformerGame();
+		PlatformerGame();
 		HUD* hud() { return _hud; }
 
 		virtual void init() override;

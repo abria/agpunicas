@@ -13,13 +13,13 @@
 
 namespace agp
 {
-	class ComplexPlatformerGameScene;
+	class PlatformerGameScene;
 	class Player;
 }
 
-// ComplexPlatformerGameScene class
-// - customizes parent's class Game to adapt to complex platformer games
-class agp::ComplexPlatformerGameScene : public GameScene
+// PlatformerGameScene class
+// - customizes parent's class Game to adapt to Box2D platformer games
+class agp::PlatformerGameScene : public GameScene
 {
 	protected:
 
@@ -36,8 +36,8 @@ class agp::ComplexPlatformerGameScene : public GameScene
 
 	public:
 
-		ComplexPlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
-		virtual ~ComplexPlatformerGameScene();
+		PlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
+		virtual ~PlatformerGameScene();
 
 		// getters / setters
 		b2WorldId worldId() { return _worldId; }

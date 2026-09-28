@@ -61,7 +61,7 @@ A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> 
 - trigger, detti anche sensori
 - interfaccia di base (HUD e menu)
 - selezione tra CCD e collision detection discreta AABB
-- livello caricato da `levels/overworld.json`, inclusi nemici, piattaforme mobili e trigger
+- livello caricato da `levels/overworld.json`, inclusi nemici e piattaforme mobili; esempio di trigger collegato direttamente in C++
 
 #### Limitazioni
 - nessun collider composto: ogni oggetto può avere un solo collider

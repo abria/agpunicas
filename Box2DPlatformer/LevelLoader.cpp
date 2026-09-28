@@ -12,7 +12,7 @@
 #include "mathUtils.h"
 #include "SpriteFactory.h"
 #include "RenderableObject.h"
-#include "ComplexPlatformerGameScene.h"
+#include "PlatformerGameScene.h"
 #include "OverlayScene.h"
 #include "StaticObject.h"
 #include "Terrain.h"
@@ -20,7 +20,6 @@
 #include "Gear.h"
 #include "Box.h"
 #include "Slime.h"
-#include <memory>
 #include <stdexcept>
 
 using namespace agp;
@@ -36,28 +35,22 @@ LevelLoader::LevelLoader()
 	// e.g. load level maps from disk
 }
 
-Scene* LevelLoader::load(const std::string& name)
+void LevelLoader::loadJson(
+	PlatformerGameScene* world,
+	const LevelData& level)
 {
-	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
-	LevelData level(path);
-	auto world = std::make_unique<ComplexPlatformerGameScene>(level.sceneRect(), level.pixelUnitSize(), level.timeStep());
-	level.configure(world.get());
-
-	auto sprite = [](const std::string& id) -> Sprite*
-	{
-		if (id.empty())
-			return nullptr;
-		Sprite* result = SpriteFactory::instance()->get(id);
-		if (!result)
-			throw std::runtime_error("Unknown sprite: " + id);
-		return result;
-	};
+	SpriteFactory* spriteLoader = SpriteFactory::instance();
+	level.configure(world);
 
 	// world images are not editable regions
 	for (const auto& object : level.json().value("backgroundImages", nlohmann::ordered_json::array()))
 	{
 		RotatedRectF geometry = LevelData::rotRect(object);
-		auto image = new RenderableObject(world.get(), geometry.toRect(), sprite(object.at("sprite")), object.value("layer", -1));
+		std::string spriteName = object.at("sprite");
+		Sprite* sprite = spriteLoader->get(spriteName);
+		if (!sprite)
+			throw std::runtime_error("Unknown sprite: " + spriteName);
+		RenderableObject* image = new RenderableObject(world, geometry.toRect(), sprite, object.value("layer", -1));
 		image->setAngle(rad2deg(geometry.angle));
 		world->addBackgroundImage(image);
 	}
@@ -68,37 +61,51 @@ Scene* LevelLoader::load(const std::string& name)
 		int layer = object.value("layer", 0);
 		if (category == "Terrain")
 		{
-			auto points = LevelData::multiline(object.at("multiline"));
+			std::vector<PointF> points = LevelData::multiline(object.at("multiline"));
 			for (size_t i = 1; i < points.size(); i++)
 			{
 				LineF line(points[i - 1], points[i]);
 				if (line.isValid())
-					new Terrain(world.get(), line, sprite(object.value("sprite", "")), layer);
+				{
+					Terrain* terrain = new Terrain(world, line);
+					terrain->setLayer(layer);
+				}
 			}
 			continue;
 		}
 
 		RotatedRectF geometry = LevelData::rotRect(object);
 		Object* created = nullptr;
-		if (category == "Renderable")
+		if (category == "Renderable" || category == "Static")
 		{
-			auto rendered = new RenderableObject(world.get(), geometry.toRect(), sprite(object.value("sprite", "")), layer);
-			rendered->setAngle(rad2deg(geometry.angle));
-			created = rendered;
+			Sprite* sprite = nullptr;
+			std::string spriteName = object.value("sprite", "");
+			if (!spriteName.empty())
+			{
+				sprite = spriteLoader->get(spriteName);
+				if (!sprite)
+					throw std::runtime_error("Unknown sprite: " + spriteName);
+			}
+			if (category == "Static")
+				created = new StaticObject(world, geometry, sprite, layer);
+			else
+			{
+				RenderableObject* rendered = new RenderableObject(world, geometry.toRect(), sprite, layer);
+				rendered->setAngle(rad2deg(geometry.angle));
+				created = rendered;
+			}
 		}
-		else if (category == "Static")
-			created = new StaticObject(world.get(), geometry, sprite(object.value("sprite", "")), layer);
 		else if (category == "Gear")
-			created = new Gear(world.get(), geometry, sprite(object.value("sprite", "gear")), layer);
+			created = new Gear(world, geometry, layer);
 		else if (category == "Box")
-			created = new Box(world.get(), geometry);
+			created = new Box(world, geometry);
 		else if (category == "Slime")
-			created = new Slime(world.get(), geometry.center);
+			created = new Slime(world, geometry.center);
 		else if (category == "Player")
 		{
 			if (world->player())
 				throw std::runtime_error("A level must contain exactly one Player");
-			created = new Player(world.get(), geometry.center);
+			created = new Player(world, geometry.center);
 			world->setPlayer(created);
 		}
 		else
@@ -119,12 +126,31 @@ Scene* LevelLoader::load(const std::string& name)
 		if (object.contains("parallax"))
 			parallax = { object.at("parallax").at("x"), object.at("parallax").at("y") };
 		bool seamless = object.value("seamless", false);
-		auto overlay = new OverlayScene(world.get(), sprite(object.at("sprite")), parallax, seamless);
+		std::string spriteName = object.at("sprite");
+		Sprite* sprite = spriteLoader->get(spriteName);
+		if (!sprite)
+			throw std::runtime_error("Unknown sprite: " + spriteName);
+		OverlayScene* overlay = new OverlayScene(world, sprite, parallax, seamless);
 		if (placement == "background")
 			world->addBackgroundScene(overlay);
 		else
 			world->addForegroundScene(overlay);
 	}
+}
 
-	return world.release();
+Scene* LevelLoader::load(const std::string& name)
+{
+	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
+	LevelData level(path);
+	PlatformerGameScene* world = new PlatformerGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep());
+	try
+	{
+		loadJson(world, level);
+	}
+	catch (...)
+	{
+		delete world;
+		throw;
+	}
+	return world;
 }

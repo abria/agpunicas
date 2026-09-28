@@ -16,7 +16,6 @@
 #include "Trigger.h"
 #include "Soldier.h"
 #include <iostream>
-#include <memory>
 #include <stdexcept>
 #include "View.h"
 #include "LevelData.h"
@@ -39,10 +38,9 @@ LevelLoader::LevelLoader()
 }
 
 void LevelLoader::loadJson(
-	RPGGameScene* world, 
-	const std::string& jsonPath)
+	RPGGameScene* world,
+	const LevelData& level)
 {
-	LevelData level(jsonPath);
 	level.configure(world);
 
 	// portals with matching names = portals to be connected
@@ -98,30 +96,39 @@ Scene* LevelLoader::load(const std::string& name)
 
 	if (name == "overworld")
 	{
-		auto world = std::make_unique<RPGGameScene>(RectF(0, 0, 256, 256), Point(16, 16), 1 / 100.0f);
-		world->setBackgroundColor({ 128, 128, 128 });
+		LevelData level(std::string(SDL_GetBasePath()) + "EditorScene.json");
+		RPGGameScene* world = new RPGGameScene(RectF(0, 0, 256, 256), Point(16, 16), 1 / 100.0f);
+		try
+		{
+			world->setBackgroundColor({ 128, 128, 128 });
 
-		// backgrounds
-		world->addBackgroundImage(new RenderableObject(world.get(), RectF(0, 0, 256, 256), spriteLoader->get("overworld")));
-		world->addBackgroundImage(new RenderableObject(world.get(), RectF(-16, -14, 16, 14), spriteLoader->get("linkhouse"), 0));
+			// backgrounds
+			world->addBackgroundImage(new RenderableObject(world, RectF(0, 0, 256, 256), spriteLoader->get("overworld")));
+			world->addBackgroundImage(new RenderableObject(world, RectF(-16, -14, 16, 14), spriteLoader->get("linkhouse"), 0));
 
-		// NPCs
-		new NPC(world.get(), PointF(-8, -7));
-		new Soldier(world.get(), PointF(130, 185), RectF(133, 178, 2, 3));
-		
-		// player
-		Link* player = new Link(world.get(), PointF(140, 179));
-		//Link* player = new Link(world.get(), PointF(138, 189));
-		world->setPlayer(player);
+			// NPCs
+			new NPC(world, PointF(-8, -7));
+			new Soldier(world, PointF(130, 185), RectF(133, 178, 2, 3));
 
-		//new StaticObject(world.get(), RectF(137, 171, 2.5, 6), nullptr, 5);
+			// player
+			Link* player = new Link(world, PointF(140, 179));
+			//Link* player = new Link(world, PointF(138, 189));
+			world->setPlayer(player);
 
-		//new StaticObject(world.get(), RotatedRectF(140, 185, 5, 2, PI/8), spriteLoader->get("linkhouse"), 2);
+			//new StaticObject(world, RectF(137, 171, 2.5, 6), nullptr, 5);
 
-		// load jObj and convert regions to game objects
-		loadJson(world.get(), std::string(SDL_GetBasePath()) + "EditorScene.json");
+			//new StaticObject(world, RotatedRectF(140, 185, 5, 2, PI/8), spriteLoader->get("linkhouse"), 2);
 
-		return world.release();
+			// load jObj and convert regions to game objects
+			loadJson(world, level);
+		}
+		catch (...)
+		{
+			delete world;
+			throw;
+		}
+
+		return world;
 	}
 	else
 	{

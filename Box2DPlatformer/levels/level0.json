@@ -135,7 +135,6 @@
             "angle": 0,
             "yUp": true
          },
-         "sprite": "gear",
          "layer": -1
       },
       {
@@ -148,7 +147,6 @@
             "angle": 0,
             "yUp": true
          },
-         "sprite": "gear",
          "layer": 1
       },
       {

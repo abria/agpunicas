@@ -8,7 +8,7 @@
 // ----------------------------------------------------------------
 
 #include "RigidObject.h"
-#include "ComplexPlatformerGameScene.h"
+#include "PlatformerGameScene.h"
 #include "sdlUtils.h"
 #include "View.h"
 
@@ -27,7 +27,7 @@ RigidObject::RigidObject(GameScene* scene, const RotatedRectF& obb, Sprite* spri
 	bodyDef.motionLocks.angularZ = false;
 	bodyDef.userData = this;
 	bodyDef.type = type;
-	_bodyId = b2CreateBody(dynamic_cast<ComplexPlatformerGameScene*>(scene)->worldId(), &bodyDef);
+	_bodyId = b2CreateBody(dynamic_cast<PlatformerGameScene*>(scene)->worldId(), &bodyDef);
 }
 
 void RigidObject::update(float dt)

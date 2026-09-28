@@ -25,7 +25,7 @@ class agp::Gear : public KinematicObject
 
 	public:
 
-		Gear(GameScene* scene, const RotatedRectF& obb, Sprite* sprite, int layer = 0);
+		Gear(GameScene* scene, const RotatedRectF& obb, int layer = 0);
 		virtual ~Gear() {}
 
 		virtual std::string name() override {

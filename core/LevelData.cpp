@@ -106,28 +106,25 @@ void LevelData::validate(const nlohmann::ordered_json& json)
 		}
 	}
 
-	if (json.contains("scene"))
+	const auto& scene = json.at("scene");
+	rect(scene.at("rect"));
+	const auto& unit = scene.at("pixelUnitSize");
+	if (!unit.at("x").is_number_integer() || !unit.at("y").is_number_integer() ||
+		unit.at("x").get<int>() <= 0 || unit.at("y").get<int>() <= 0)
+		throw std::runtime_error("pixelUnitSize must contain positive integers");
+	float dt = scene.at("dt");
+	if (!std::isfinite(dt) || dt <= 0)
+		throw std::runtime_error("dt must be positive");
+	if (scene.contains("view"))
+		rect(scene.at("view"));
+	if (scene.contains("backgroundColor"))
 	{
-		const auto& scene = json.at("scene");
-		rect(scene.at("rect"));
-		const auto& unit = scene.at("pixelUnitSize");
-		if (!unit.at("x").is_number_integer() || !unit.at("y").is_number_integer() ||
-			unit.at("x").get<int>() <= 0 || unit.at("y").get<int>() <= 0)
-			throw std::runtime_error("pixelUnitSize must contain positive integers");
-		float dt = scene.at("dt");
-		if (!std::isfinite(dt) || dt <= 0)
-			throw std::runtime_error("dt must be positive");
-		if (scene.contains("view"))
-			rect(scene.at("view"));
-		if (scene.contains("backgroundColor"))
-		{
-			const auto& color = scene.at("backgroundColor");
-			if (!color.is_array() || color.size() != 4)
-				throw std::runtime_error("backgroundColor must contain RGBA components");
-			for (const auto& component : color)
-				if (!component.is_number_integer() || component.get<int>() < 0 || component.get<int>() > 255)
-					throw std::runtime_error("color components must be integers in [0,255]");
-		}
+		const auto& color = scene.at("backgroundColor");
+		if (!color.is_array() || color.size() != 4)
+			throw std::runtime_error("backgroundColor must contain RGBA components");
+		for (const auto& component : color)
+			if (!component.is_number_integer() || component.get<int>() < 0 || component.get<int>() > 255)
+				throw std::runtime_error("color components must be integers in [0,255]");
 	}
 }
 
@@ -155,8 +152,6 @@ float LevelData::timeStep() const
 void LevelData::configure(GameScene* scene) const
 {
 	scene->setJsonPath(_path);
-	if (!_json.contains("scene"))
-		return;
 	const auto& settings = _json.at("scene");
 	if (settings.contains("view"))
 		scene->view()->setRect(rect(settings.at("view")));

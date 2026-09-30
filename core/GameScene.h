@@ -71,6 +71,7 @@ class agp::GameScene : public Scene
 		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
 		virtual ~GameScene();
 
+		float timeStep() const { return _dt; }
 		Object* player() { return _player; }
 		virtual void setPlayer(Object* player) { _player = player; }
 		bool collidersVisible() const { return _collidersVisible; }

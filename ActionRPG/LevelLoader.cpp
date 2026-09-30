@@ -13,11 +13,9 @@
 #include "StaticObject.h"
 #include "RPGGameScene.h"
 #include "Link.h"
-#include "Trigger.h"
 #include "Soldier.h"
 #include <iostream>
 #include <stdexcept>
-#include "View.h"
 #include "LevelData.h"
 #include "Portal.h"
 #include "mathUtils.h"
@@ -41,7 +39,32 @@ void LevelLoader::loadJson(
 	RPGGameScene* world,
 	const LevelData& level)
 {
+	SpriteFactory* spriteLoader = SpriteFactory::instance();
 	level.configure(world);
+
+	// world images are not editable regions
+	for (const auto& object : level.json().value("backgroundImages", nlohmann::ordered_json::array()))
+	{
+		RotatedRectF geometry = LevelData::rotRect(object);
+		std::string spriteName = object.at("sprite");
+		Sprite* sprite = spriteLoader->get(spriteName);
+		if (!sprite)
+			throw std::runtime_error("Unknown sprite: " + spriteName);
+		RenderableObject* image = new RenderableObject(world, geometry.toRect(), sprite, object.value("layer", -1));
+		image->setAngle(rad2deg(geometry.angle));
+		world->addBackgroundImage(image);
+	}
+
+	// portals need the player, regardless of json object order
+	for (const auto& object : level.objects())
+		if (level.category(object) == "Link")
+		{
+			if (world->player())
+				throw std::runtime_error("A level must contain exactly one Link");
+			world->setPlayer(new Link(world, LevelData::rotRect(object).toRect().pos));
+		}
+	if (!world->player())
+		throw std::runtime_error("A level must contain exactly one Link");
 
 	// portals with matching names = portals to be connected
 	std::map<std::string, std::vector<Portal*>> portals;
@@ -49,12 +72,18 @@ void LevelLoader::loadJson(
 	for (const auto& jObj : level.objects())
 	{
 		std::string category = level.category(jObj);
+		if (category == "Link")
+			continue;
 		
 		if (jObj.contains("rect") || jObj.contains("rotRect"))
 		{
 			RotatedRectF rrect = LevelData::rotRect(jObj);
 
-			if (category == "Static" || category == "Bush")
+			if (category == "NPC")
+				new NPC(world, rrect.toRect().pos);
+			else if (category == "Soldier")
+				new Soldier(world, rrect.toRect().pos, LevelData::rect(jObj.at("patrolRect")));
+			else if (category == "Static" || category == "Bush")
 				new StaticObject(world, rrect, nullptr, 1);
 			else if (category == "Portal")
 			{
@@ -92,47 +121,17 @@ void LevelLoader::loadJson(
 
 Scene* LevelLoader::load(const std::string& name)
 {
-	SpriteFactory* spriteLoader = SpriteFactory::instance();
-
-	if (name == "overworld")
+	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
+	LevelData level(path);
+	RPGGameScene* world = new RPGGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep());
+	try
 	{
-		LevelData level(std::string(SDL_GetBasePath()) + "EditorScene.json");
-		RPGGameScene* world = new RPGGameScene(RectF(0, 0, 256, 256), Point(16, 16), 1 / 100.0f);
-		try
-		{
-			world->setBackgroundColor({ 128, 128, 128 });
-
-			// backgrounds
-			world->addBackgroundImage(new RenderableObject(world, RectF(0, 0, 256, 256), spriteLoader->get("overworld")));
-			world->addBackgroundImage(new RenderableObject(world, RectF(-16, -14, 16, 14), spriteLoader->get("linkhouse"), 0));
-
-			// NPCs
-			new NPC(world, PointF(-8, -7));
-			new Soldier(world, PointF(130, 185), RectF(133, 178, 2, 3));
-
-			// player
-			Link* player = new Link(world, PointF(140, 179));
-			//Link* player = new Link(world, PointF(138, 189));
-			world->setPlayer(player);
-
-			//new StaticObject(world, RectF(137, 171, 2.5, 6), nullptr, 5);
-
-			//new StaticObject(world, RotatedRectF(140, 185, 5, 2, PI/8), spriteLoader->get("linkhouse"), 2);
-
-			// load jObj and convert regions to game objects
-			loadJson(world, level);
-		}
-		catch (...)
-		{
-			delete world;
-			throw;
-		}
-
-		return world;
+		loadJson(world, level);
 	}
-	else
+	catch (...)
 	{
-		std::cerr << "Unrecognized game scene name \"" << name << "\"\n";
-		return nullptr;
+		delete world;
+		throw;
 	}
+	return world;
 }

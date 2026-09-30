@@ -44,5 +44,5 @@ add_custom_target(copy_shaders ALL
 
 # level data can change without recompiling the game
 add_custom_target(copy_levels ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/editor/EditorScene.json $<TARGET_FILE_DIR:${project_name}>/EditorScene.json
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/levels $<TARGET_FILE_DIR:${project_name}>/levels
     DEPENDS ${project_name})

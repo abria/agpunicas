@@ -114,7 +114,7 @@ A scopo dimostrativo implementa una piccola porzione di <i>Legend of Zelda: A Li
 - esempio di attacco del giocatore con la spada
 - esempio di animazione di un collider (spada)
 - esempio di NPC (soldato con pattugliamento e inseguimento)
-- esempio di importazione del JSON prodotto dall'editor dei livelli
+- livello caricato da `levels/overworld.json`, inclusi scena, sfondi, personaggi, collider e portali
 - esempio di transizione di scena con maschera circolare e dissolvenza
 - pathfinding tramite BFS
 

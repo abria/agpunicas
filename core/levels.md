@@ -6,15 +6,15 @@ I livelli inclusi sono:
 
 - `CustomPlatformer/levels/overworld.json`
 - `Box2DPlatformer/levels/level0.json`
-- `ActionRPG/editor/EditorScene.json` (formato precedente, ancora supportato)
+- `ActionRPG/levels/overworld.json`
 
-CustomPlatformer e Box2DPlatformer caricano `levels/<name>.json` dalla cartella dell'eseguibile. Nuovi file possono essere caricati passando il loro nome a `LevelLoader::load()`. ActionRPG mantiene il suo livello e il percorso `EditorScene.json`.
+Tutti e tre i prototipi caricano `levels/<name>.json` dalla cartella dell'eseguibile e usano lo stesso formato: `scene`, `categories` e `objects`. Nuovi file possono essere caricati passando il loro nome a `LevelLoader::load()`. Cambiano le categorie e le proprietà specifiche del gioco, non la struttura del documento.
 
 ## Documento e geometrie
 
 ```json
 {
-   "core_version": "3.7.1",
+   "core_version": "3.7.3",
    "categories": ["Static", "Mario"],
    "scene": {
       "rect": {"x": 0, "y": -20, "width": 224, "height": 50, "yUp": false},
@@ -38,7 +38,7 @@ CustomPlatformer e Box2DPlatformer caricano `levels/<name>.json` dalla cartella 
 }
 ```
 
-`scene` è richiesto dai due platformer. Nei documenti precedenti di ActionRPG può essere assente. `backgroundColor` (RGBA) e `view` sono opzionali. `dt` è il passo fisico in secondi.
+`scene` è obbligatorio in tutti e tre i prototipi e contiene `rect`, `pixelUnitSize` e `dt`. `backgroundColor` (RGBA) e `view` sono opzionali. `dt` è il passo fisico in secondi.
 
 Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 
@@ -56,21 +56,30 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 | CustomPlatformer / `HammerBrother` | Rettangolo del personaggio | `layer`; la posizione viene convertita nello spawn atteso dal costruttore |
 | CustomPlatformer / `Lift` | Rettangolo allineato agli assi | `vertical` (default true), `range` (default 3), `layer`; il costruttore richiede lo sprite `platform` |
 | CustomPlatformer / `Mario` | Rettangolo del personaggio | `layer`; deve essere presente esattamente un Mario |
-| Box2DPlatformer / `Renderable` | `rect` o `rotRect` | `sprite`, `layer`; decorazione senza fisica |
+| Box2DPlatformer / `Renderable` | `rect` o `rotRect` | `sprite` opzionale, `layer`; decorazione senza fisica |
 | Box2DPlatformer / `Terrain` | `multiline` | `layer`; un collider per segmento, la grafica del terreno è in `backgroundImages` |
 | Box2DPlatformer / `Static` | `rect` o `rotRect` | `sprite` opzionale, `layer` |
 | Box2DPlatformer / `Gear` | `rect` o `rotRect` | `layer`; il costruttore richiede lo sprite `gear` |
 | Box2DPlatformer / `Box` | `rect` o `rotRect` | `layer`; mantiene lo sprite e l'impulso iniziale del costruttore |
 | Box2DPlatformer / `Slime` | `rect` o `rotRect` | `layer`; il centro indica lo spawn |
 | Box2DPlatformer / `Player` | `rect` o `rotRect` | `layer`; il centro indica lo spawn, deve essere presente esattamente un player |
+| ActionRPG / `Static`, `Bush` | `rect` o `rotRect` | Collider statico, senza sprite |
+| ActionRPG / `Static`, `Cliff` | `multiline` | Un collider statico per segmento valido |
+| ActionRPG / `Portal` | `rect` o `rotRect` | `name` non vuoto; collega la coppia con lo stesso nome |
+| ActionRPG / `Clipper` | `rect` o `rotRect` | Regione di clipping del rendering |
+| ActionRPG / `NPC` | `rect` o `rotRect` | La posizione del rettangolo indica lo spawn |
+| ActionRPG / `Soldier` | `rect` o `rotRect` | Posizione di spawn e `patrolRect`, con gli stessi campi di `rect` |
+| ActionRPG / `Link` | `rect` o `rotRect` | La posizione del rettangolo indica lo spawn; deve essere presente esattamente un Link |
 
 I personaggi mantengono dimensioni e collider definiti dalle rispettive classi; il rettangolo nell'editor ne determina la posizione. CustomPlatformer supporta rettangoli allineati agli assi: rotazioni e polilinee richiederebbero un supporto fisico aggiuntivo e vengono segnalate come errori.
+
+ActionRPG descrive nel JSON anche il colore e la vista iniziale della scena, gli sfondi, NPC, Soldier e Link. Il loader crea prima Link, poi le altre entità e i portali: il collegamento non dipende dall'ordine delle regioni nel documento. L'esempio mantiene le stesse posizioni, geometrie e regole di gameplay.
 
 Il trigger di CustomPlatformer è un esempio hardcoded nel loader: dopo aver creato Mario e gli ascensori, viene istanziato in `RectF(1, -12, 0.5f, 13)` passando il giocatore e una lambda che alterna lo stato `freezed` degli ascensori. `Trigger` resta generico e riceve un task `std::function<void()>`, come negli altri due prototipi. In CustomPlatformer il task viene eseguito all'ingresso e all'uscita dell'oggetto osservato; in Box2DPlatformer e ActionRPG soltanto all'ingresso, secondo il comportamento originale. Il trigger di esempio non è una regione del JSON e non richiede ID, azioni o riferimenti da risolvere.
 
 Le classi specifiche scelgono lo sprite nel proprio costruttore. Il campo `sprite` rimane per gli oggetti generici, come `StaticObject` e `RenderableObject`, e per le immagini di sfondo.
 
-In Box2DPlatformer le immagini fisse del mondo, come la grafica del terreno, sono nell'array principale `backgroundImages`:
+In Box2DPlatformer e ActionRPG le immagini fisse del mondo sono nell'array principale `backgroundImages`: il terreno del platformer, oppure l'overworld e la casa di Link. Per esempio:
 
 ```json
 {
@@ -82,7 +91,7 @@ In Box2DPlatformer le immagini fisse del mondo, come la grafica del terreno, son
 
 Queste immagini non hanno categoria né nome; accettano `rect` o `rotRect`, uno `sprite` e un `layer` (default -1). Restano visibili nel gioco e nell'editor, senza generare rettangoli modificabili che coprano i collider. Il profilo fisico del terreno rimane una `multiline` di categoria `Terrain` in `objects`.
 
-Gli sfondi e gli effetti con parallasse sono nell'array principale `overlays`, nell'ordine di disegno:
+In Box2DPlatformer gli sfondi e gli effetti con parallasse sono nell'array principale `overlays`, nell'ordine di disegno:
 
 ```json
 {
@@ -97,8 +106,8 @@ Gli sfondi e gli effetti con parallasse sono nell'array principale `overlays`, n
 
 ## Modifica e salvataggio
 
-Il tasto `E` apre il JSON effettivamente caricato dal livello. L'editor modifica geometrie, categorie ed etichette e conserva le altre proprietà degli oggetti e del documento, comprese impostazioni della scena e sfondi. Le proprietà specifiche del gioco si impostano direttamente nel JSON; non è stato aggiunto un pannello delle proprietà.
+Il tasto `E` apre il JSON effettivamente caricato dal livello. L'editor modifica geometrie, categorie ed etichette e conserva le altre proprietà degli oggetti e del documento, comprese impostazioni della scena e sfondi. Quando crea un nuovo documento, l'editor include `scene` ricavandolo dalla scena di gioco. Le proprietà specifiche del gioco si impostano direttamente nel JSON; non è stato aggiunto un pannello delle proprietà.
 
 CMake copia i JSON accanto all'eseguibile a ogni build, anche senza modifiche C++. L'editor salva quella **copia di esecuzione**: riportare le modifiche nel file sorgente del progetto prima della build successiva, che ricopia i livelli distribuiti. Per applicare un livello modificato occorre ricaricarlo o riavviare il gioco.
 
-File mancanti, documenti malformati, categorie fuori intervallo e geometrie non valide producono un errore esplicito. I vecchi JSON di ActionRPG rimangono leggibili senza conversione.
+File mancanti, documenti malformati, categorie fuori intervallo e geometrie non valide producono un errore esplicito. Non è previsto un formato alternativo senza `scene`.

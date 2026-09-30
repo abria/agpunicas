@@ -38,7 +38,7 @@ class agp::LevelData
 		const nlohmann::ordered_json& objects() const { return _json.at("objects"); }
 		std::string category(const nlohmann::ordered_json& object) const;
 
-		// scene settings (optional in legacy editor files)
+		// scene settings
 		RectF sceneRect() const;
 		Point pixelUnitSize() const;
 		float timeStep() const;

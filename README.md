@@ -9,9 +9,9 @@ La [wiki](https://github.com/abria/agpunicas/wiki) raccoglie le guide al framewo
 
 ## utils
 
-Libreria header-only di utilità condivise: geometria, collisioni, tempo, matematica, file e funzioni di supporto a SDL.
+Libreria header-only di utilità condivise: vettori e forme geometriche, test di collisione, autotiling ed estrazione dei fotogrammi dalle spritesheet, oltre a funzioni per tempo, matematica, file e SDL.
 
-[Esplora il codice](https://github.com/abria/agpunicas/tree/main/utils)
+[Geometria e collisioni](https://github.com/abria/agpunicas/wiki/Utils-Geometria) · [Autotiling e spritesheet](https://github.com/abria/agpunicas/wiki/Utils-Autotiling) · [Esplora il codice](https://github.com/abria/agpunicas/tree/main/utils)
 
 ## Core
 

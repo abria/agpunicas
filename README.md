@@ -18,20 +18,20 @@ Libreria header-only di utilità per la programmazione di videogiochi, che inclu
 - gestione di file e cartelle (elenco dei file in una cartella, ecc.)
 - collisioni (SAT, Swept AABB contro AABB, Swept AABB contro segmenti, ecc.)
 - shader CPU (dissolvenze, illuminazione, transizioni di scena, ecc.)
+- funzioni di supporto per le spritesheet (autotiling ed estrazione delle componenti connesse)
 
 ## Core
-Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gioco.
+Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gioco. Include:
 - game loop con semi-fixed timestep
 - framework Scene/View/Window con adattamento automatico alla risoluzione dello schermo e scene sovrapposte
 - separazione tra scene dell'interfaccia e scene di gioco
 - modello base degli oggetti con metodi per posizionamento, rendering, aggiornamento e scheduling
-- raycasting
+- query spaziali mediante quadtree e raycasting
 - sistema di sprite (`AnimatedSprite`, `TiledSprite`, `FilledSprite`) con blitting GPU dalle spritesheet
 - camera manuale o agganciata al giocatore
 - sistema audio con suoni e musiche riproducibili, sospendibili e ripristinabili
 - parallax e overlay di scena
-- sprite testuali basati su SDL_ttf
-- funzioni di supporto per le spritesheet (autotiling ed estrazione delle componenti connesse)
+- sprite testuali generate da font mediante SDL_ttf
 - editor dei livelli con persistenza JSON (geometrie supportate: rettangoli, rettangoli ruotati e spezzate)
 - caricamento condiviso dei livelli JSON tramite `LevelData`, con validazione e conservazione delle proprietà specifiche dei giochi nell'editor ([formato e utilizzo](core/levels.md))
 - finestra opzionale con shader CPU o post-processing GPU tramite SDL_GPU; le tre demo condividono dieci effetti attivabili con i tasti `1`-`9` e `0`

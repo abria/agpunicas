@@ -18,31 +18,29 @@ Libreria header-only di utilità per la programmazione di videogiochi, che inclu
 - gestione di file e cartelle (elenco dei file in una cartella, ecc.)
 - collisioni (SAT, Swept AABB contro AABB, Swept AABB contro segmenti, ecc.)
 - shader CPU (dissolvenze, illuminazione, transizioni di scena, ecc.)
+- funzioni di supporto per le spritesheet (autotiling ed estrazione delle componenti connesse)
 
 ## Core
-Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gioco.
+Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gioco. Include:
 - game loop con semi-fixed timestep
 - framework Scene/View/Window con adattamento automatico alla risoluzione dello schermo e scene sovrapposte
 - separazione tra scene dell'interfaccia e scene di gioco
 - modello base degli oggetti con metodi per posizionamento, rendering, aggiornamento e scheduling
-- raycasting
+- query spaziali mediante quadtree e raycasting
 - sistema di sprite (`AnimatedSprite`, `TiledSprite`, `FilledSprite`) con blitting GPU dalle spritesheet
 - camera manuale o agganciata al giocatore
 - sistema audio con suoni e musiche riproducibili, sospendibili e ripristinabili
 - parallax e overlay di scena
-- sprite testuali basati su SDL_ttf
-- funzioni di supporto per le spritesheet (autotiling ed estrazione delle componenti connesse)
+- sprite testuali generate da font mediante SDL_ttf
 - editor dei livelli con persistenza JSON (geometrie supportate: rettangoli, rettangoli ruotati e spezzate)
 - caricamento condiviso dei livelli JSON tramite `LevelData`, con validazione e conservazione delle proprietà specifiche dei giochi nell'editor ([formato e utilizzo](core/levels.md))
 - finestra opzionale con shader CPU o post-processing GPU tramite SDL_GPU; le tre demo condividono dieci effetti attivabili con i tasti `1`-`9` e `0`
-
-<img src="https://github.com/abria/agpunicas/blob/main/demo_leveleditor.png">
 
 #### Diagramma delle classi
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Core.png">
 
 ## CustomPlatformer
-Prototipo per semplici platform 2D basato su SDL e su un motore fisico personalizzato.
+Prototipo per semplici platform 2D basato su core/SDL e su un motore fisico personalizzabile realizzato _from scratch_.
 A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> (NES).
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros.png">
@@ -69,7 +67,7 @@ A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> 
 - broad phase basata sulla scansione lineare degli oggetti; narrow phase con test Swept AABB o AABB
 
 ## Box2DPlatformer
-Prototipo per platform 2D complessi basato su SDL e sul motore fisico Box2D.
+Prototipo per platform 2D complessi basato su core/SDL e sul motore fisico Box2D.
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_Box2DPlatformer.png">
 
@@ -80,7 +78,7 @@ Prototipo per platform 2D complessi basato su SDL e sul motore fisico Box2D.
 - simulazione del world, collision detection e collision response gestite da Box2D 3.x
 - body con shape composte
 - body statici, dinamici e cinematici
-- notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati
+- notifica a tutti gli oggetti collidabili dell'inizio e della fine delle collisioni, con normali e metadati
 - trigger tramite sensor shape
 - interfaccia di base (HUD e menu)
 - esempi di parallax e overlay di scena
@@ -95,7 +93,7 @@ Prototipo per platform 2D complessi basato su SDL e sul motore fisico Box2D.
 - nessun esempio di joint; consultare la documentazione di Box2D
 
 ## ActionRPG
-Prototipo per giochi di ruolo d'azione basato su SDL e su un sistema di collisioni personalizzato.
+Prototipo per giochi di ruolo (e più in generale con vista dall'alto) basato su core/SDL e su un motore fisico personalizzabile realizzato _from scratch_.
 A scopo dimostrativo implementa una piccola porzione di <i>Legend of Zelda: A Link to the Past</i> (NES).
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_ActionRPG.png">
@@ -106,17 +104,17 @@ A scopo dimostrativo implementa una piccola porzione di <i>Legend of Zelda: A Li
 #### Funzionalità
 - collision detection e collision response basate su OBB
 - categorie di oggetti statici e dinamici
-- notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati
+- notifica a tutti gli oggetti collidabili dell'inizio e della fine delle collisioni, con normali e metadati
 - trigger, detti anche sensori
 - interfaccia avanzata (HUD e inventario)
 - dialoghi testuali (`DialogBox`)
 - portali per il teletrasporto del giocatore
 - esempio di attacco del giocatore con la spada
-- esempio di animazione di un collider (spada)
+- esempio di collider animato (spada)
+- pathfinding tramite BFS
 - esempio di NPC (soldato con pattugliamento e inseguimento)
 - livello caricato da `levels/overworld.json`, inclusi scena, sfondi, personaggi, collider e portali
 - esempio di transizione di scena con maschera circolare e dissolvenza
-- pathfinding tramite BFS
 
 #### Limitazioni
-- collision detection discreta: la narrow phase usa SAT su OBB, senza CCD per oggetti molto veloci
+- broad phase basata sulla scansione lineare degli oggetti; narrow phase con test SAT su OBB

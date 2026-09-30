@@ -36,8 +36,6 @@ Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gi
 - caricamento condiviso dei livelli JSON tramite `LevelData`, con validazione e conservazione delle proprietà specifiche dei giochi nell'editor ([formato e utilizzo](core/levels.md))
 - finestra opzionale con shader CPU o post-processing GPU tramite SDL_GPU; le tre demo condividono dieci effetti attivabili con i tasti `1`-`9` e `0`
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_leveleditor.png">
-
 #### Diagramma delle classi
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Core.png">
 

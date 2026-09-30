@@ -82,7 +82,7 @@ Usa le librerie condivise `core` e `utils`.
 - geometrie e proprietà delle slope conservate dall'editor condiviso
 
 #### Diagramma delle classi
-<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_CustomPlatformer.png">
+<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_CustomPlatformerSlopes.png">
 
 #### Limitazioni
 - tutte quelle di CustomPlatformer, di cui questo è un'estensione

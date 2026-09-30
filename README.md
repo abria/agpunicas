@@ -21,12 +21,6 @@ Infrastruttura comune dei quattro prototipi: game loop, scene, oggetti, renderin
 
 [Guida al core](https://github.com/abria/agpunicas/wiki/Core) · [Editor e livelli](https://github.com/abria/agpunicas/wiki/Core-Editor) · [Diagramma delle classi](https://github.com/abria/agpunicas/wiki/Core-Diagramma-delle-classi)
 
-## Post-processing
-
-Effetti visivi applicati al frame completo, con elaborazione CPU o GPU. Il modulo raccoglie le risorse per il post-processing GPU usato dalle finestre del core.
-
-[Guida agli shader](https://github.com/abria/agpunicas/wiki/Core-Shader) · [Esplora il codice](https://github.com/abria/agpunicas/tree/main/postprocessing)
-
 ## CustomPlatformer
 
 Platform 2D ispirato a *Super Mario Bros*, con movimento e collisioni AABB implementati da zero. È il punto di partenza per studiare la fisica personalizzata e le interazioni di un platform.
@@ -58,3 +52,9 @@ Prototipo con vista dall'alto ispirato a *The Legend of Zelda: A Link to the Pas
 ![ActionRPG](https://github.com/abria/agpunicas/blob/main/demo_ActionRPG.png)
 
 [Guida al prototipo](https://github.com/abria/agpunicas/wiki/ActionRPG) · [Diagramma delle classi](https://github.com/abria/agpunicas/wiki/ActionRPG-Diagramma-delle-classi)
+
+## Post-processing
+
+Effetti visivi applicati al frame completo, con elaborazione CPU o GPU. Il modulo raccoglie le risorse per il post-processing GPU usato dalle finestre del core.
+
+[Guida agli shader](https://github.com/abria/agpunicas/wiki/Core-Shader) · [Esplora il codice](https://github.com/abria/agpunicas/tree/main/postprocessing)

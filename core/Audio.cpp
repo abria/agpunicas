@@ -48,9 +48,13 @@ Audio::Audio()
 	}
 
 	auto musicFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/musics", "*.wav");
+	auto mp3Files = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/musics", "*.mp3");
+	musicFiles.insert(musicFiles.end(), mp3Files.begin(), mp3Files.end());
 	for (auto& f : musicFiles)
 	{
 		std::string name = getFileName(f, false);
+		if (_musics.count(name))
+			continue; // prefer the WAV when both formats share the same id
 		//printf("music: \"%s\"\n", name.c_str());
 
 		MIX_Audio* audio = MIX_LoadAudio(_mixer, (std::string(SDL_GetBasePath()) + "assets/musics/" + f).c_str(), false);

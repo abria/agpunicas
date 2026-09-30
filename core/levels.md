@@ -1,14 +1,15 @@
 # Livelli JSON
 
-I livelli usano il formato del level editor: `categories` contiene i nomi delle categorie e `objects` le regioni da convertire in oggetti di gioco. `LevelData` legge e valida il documento, converte le geometrie e applica le impostazioni della scena. Nei tre prototipi `LevelLoader::load()` legge il documento e crea la scena; `loadJson()` riceve la scena e il `LevelData` già letto, poi crea gli oggetti specifici del gioco.
+I livelli usano il formato del level editor: `categories` contiene i nomi delle categorie e `objects` le regioni da convertire in oggetti di gioco. `LevelData` legge e valida il documento, converte le geometrie e applica le impostazioni della scena. Nei quattro prototipi `LevelLoader::load()` legge il documento e crea la scena; `loadJson()` riceve la scena e il `LevelData` già letto, poi crea gli oggetti specifici del gioco.
 
 I livelli inclusi sono:
 
 - `CustomPlatformer/levels/overworld.json`
+- `CustomPlatformerSlopes/levels/1-1.json`
 - `Box2DPlatformer/levels/level0.json`
 - `ActionRPG/levels/overworld.json`
 
-Tutti e tre i prototipi caricano `levels/<name>.json` dalla cartella dell'eseguibile e usano lo stesso formato: `scene`, `categories` e `objects`. Nuovi file possono essere caricati passando il loro nome a `LevelLoader::load()`. Cambiano le categorie e le proprietà specifiche del gioco, non la struttura del documento.
+Tutti e quattro i prototipi caricano `levels/<name>.json` dalla cartella dell'eseguibile e usano lo stesso formato: `scene`, `categories` e `objects`. Nuovi file possono essere caricati passando il loro nome a `LevelLoader::load()`. Cambiano le categorie e le proprietà specifiche del gioco, non la struttura del documento.
 
 ## Documento e geometrie
 
@@ -38,7 +39,7 @@ Tutti e tre i prototipi caricano `levels/<name>.json` dalla cartella dell'esegui
 }
 ```
 
-`scene` è obbligatorio in tutti e tre i prototipi e contiene `rect`, `pixelUnitSize` e `dt`. `backgroundColor` (RGBA) e `view` sono opzionali. `dt` è il passo fisico in secondi.
+`scene` è obbligatorio in tutti e quattro i prototipi e contiene `rect`, `pixelUnitSize` e `dt`. `backgroundColor` (RGBA) e `view` sono opzionali. `dt` è il passo fisico in secondi.
 
 Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 
@@ -56,6 +57,12 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 | CustomPlatformer / `HammerBrother` | Rettangolo del personaggio | `layer`; la posizione viene convertita nello spawn atteso dal costruttore |
 | CustomPlatformer / `Lift` | Rettangolo allineato agli assi | `vertical` (default true), `range` (default 3), `layer`; il costruttore richiede lo sprite `platform` |
 | CustomPlatformer / `Mario` | Rettangolo del personaggio | `layer`; deve essere presente esattamente un Mario |
+| CustomPlatformerSlopes / `Slope` | Rettangolo allineato agli assi, `yUp: false` | `risesRight` (default true), `color` RGBA (default marrone), `layer` (default 1); collider e disegno triangolari senza sprite |
+| CustomPlatformerSlopes / `Static`, `Pipe` | Rettangolo allineato agli assi | `sprite` e `color` opzionali, `layer` |
+| CustomPlatformerSlopes / `Block`, `Brick`, `Wood` | Rettangolo del blocco | `content`: `coin`, `powerup`, `life`, `starman` o stringa vuota; `layer`. Mantiene le implementazioni di SMB3 (starman e foglia non ancora implementati) |
+| CustomPlatformerSlopes / `Coin`, `Goomba`, `Mario` | Rettangolo del personaggio/oggetto | `layer`; esattamente un Mario; il loader compensa l'offset dello spawn |
+| CustomPlatformerSlopes / `Platform` | `multiline` di segmenti orizzontali | `layer`; collisione solo dall’alto per tutti i dinamici; attraversabili dal basso e dai lati |
+| CustomPlatformerSlopes / `Lift` | Rettangolo allineato agli assi | `vertical`, `range` positivo, `sprite` e `color` opzionali, `layer` |
 | Box2DPlatformer / `Renderable` | `rect` o `rotRect` | `sprite` opzionale, `layer`; decorazione senza fisica |
 | Box2DPlatformer / `Terrain` | `multiline` | `layer`; un collider per segmento, la grafica del terreno è in `backgroundImages` |
 | Box2DPlatformer / `Static` | `rect` o `rotRect` | `sprite` opzionale, `layer` |
@@ -75,11 +82,11 @@ I personaggi mantengono dimensioni e collider definiti dalle rispettive classi; 
 
 ActionRPG descrive nel JSON anche il colore e la vista iniziale della scena, gli sfondi, NPC, Soldier e Link. Il loader crea prima Link, poi le altre entità e i portali: il collegamento non dipende dall'ordine delle regioni nel documento. L'esempio mantiene le stesse posizioni, geometrie e regole di gameplay.
 
-Il trigger di CustomPlatformer è un esempio hardcoded nel loader: dopo aver creato Mario e gli ascensori, viene istanziato in `RectF(1, -12, 0.5f, 13)` passando il giocatore e una lambda che alterna lo stato `freezed` degli ascensori. `Trigger` resta generico e riceve un task `std::function<void()>`, come negli altri due prototipi. In CustomPlatformer il task viene eseguito all'ingresso e all'uscita dell'oggetto osservato; in Box2DPlatformer e ActionRPG soltanto all'ingresso, secondo il comportamento originale. Il trigger di esempio non è una regione del JSON e non richiede ID, azioni o riferimenti da risolvere.
+Il trigger di CustomPlatformer è un esempio hardcoded nel loader: dopo aver creato Mario e gli ascensori, viene istanziato in `RectF(1, -12, 0.5f, 13)` passando il giocatore e una lambda che alterna lo stato `freezed` degli ascensori. `Trigger` resta generico e riceve un task `std::function<void()>`, come negli altri prototipi. In CustomPlatformer il task viene eseguito all'ingresso e all'uscita dell'oggetto osservato; in Box2DPlatformer e ActionRPG soltanto all'ingresso, secondo il comportamento originale. Il trigger di esempio non è una regione del JSON e non richiede ID, azioni o riferimenti da risolvere.
 
 Le classi specifiche scelgono lo sprite nel proprio costruttore. Il campo `sprite` rimane per gli oggetti generici, come `StaticObject` e `RenderableObject`, e per le immagini di sfondo.
 
-In Box2DPlatformer e ActionRPG le immagini fisse del mondo sono nell'array principale `backgroundImages`: il terreno del platformer, oppure l'overworld e la casa di Link. Per esempio:
+In CustomPlatformerSlopes, Box2DPlatformer e ActionRPG le immagini fisse del mondo sono nell'array principale `backgroundImages`: il terreno del platformer, oppure l'overworld e la casa di Link. Per esempio:
 
 ```json
 {
@@ -88,6 +95,8 @@ In Box2DPlatformer e ActionRPG le immagini fisse del mondo sono nell'array princ
    "layer": -1
 }
 ```
+
+CustomPlatformerSlopes usa lo sprite `level_1_1` per lo sfondo originale SMB3, con `layer: 0`. Le pendenze sono rettangoli di categoria `Slope`: il rettangolo ne definisce larghezza e altezza; `risesRight` seleziona il verso della salita. Le proprietà `risesRight`, `color` e `content` sono indipendenti dall’etichetta `name`. Il trigger della linea di morte rimane nel loader C++.
 
 Queste immagini non hanno categoria né nome; accettano `rect` o `rotRect`, uno `sprite` e un `layer` (default -1). Restano visibili nel gioco e nell'editor, senza generare rettangoli modificabili che coprano i collider. Il profilo fisico del terreno rimane una `multiline` di categoria `Terrain` in `objects`.
 

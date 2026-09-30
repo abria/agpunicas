@@ -5,138 +5,56 @@ Un framework per programmare videogiochi 2D in C++ con SDL3.
 > [!IMPORTANT]
 > Questo è il repository ufficiale dell'insegnamento di ***Algoritmi e Programmazione dei Videogiochi*** del corso di laurea in _Ingegneria Informatica e delle Telecomunicazioni_ dell'Università di Cassino. La cartella Drive del corso, che include slide, esercizi e codice sorgente, è pubblicamente accessibile a [questo indirizzo](https://drive.google.com/open?id=1Qk3xPAt2qOVHL6Si3TY1qLDPabbv_kcsZ92gnlwyDK176RSNcc92Jy5ALNNzp6Kzfj_IKN8s&usp=drive_fs).
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_leveleditor.png">
-
+La [wiki](https://github.com/abria/agpunicas/wiki) raccoglie le guide al framework e ai quattro prototipi. Nel menu laterale trovi gli approfondimenti e i diagrammi delle classi di ciascun progetto.
 
 ## utils
-Libreria header-only di utilità per la programmazione di videogiochi, che include:
-- geometria (forme geometriche di base e vettori 2D)
-- tempo (timer, FPS, profiler)
-- manipolazione di stringhe
-- SDL (disegno di forme complesse e composizione di immagini)
-- matematica (interpolazione, percentili, ecc.)
-- gestione di file e cartelle (elenco dei file in una cartella, ecc.)
-- collisioni (SAT, Swept AABB contro AABB, Swept AABB contro segmenti, ecc.)
-- shader CPU (dissolvenze, illuminazione, transizioni di scena, ecc.)
-- funzioni di supporto per le spritesheet (autotiling ed estrazione delle componenti connesse)
+
+Libreria header-only di utilità condivise: geometria, collisioni, tempo, matematica, file e funzioni di supporto a SDL.
+
+[Esplora il codice](https://github.com/abria/agpunicas/tree/main/utils)
 
 ## Core
-Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gioco. Include:
-- game loop con semi-fixed timestep
-- framework Scene/View/Window con adattamento automatico alla risoluzione dello schermo e scene sovrapposte
-- separazione tra scene dell'interfaccia e scene di gioco
-- modello base degli oggetti con metodi per posizionamento, rendering, aggiornamento e scheduling
-- query spaziali mediante quadtree e raycasting
-- sistema di sprite (`AnimatedSprite`, `TiledSprite`, `FilledSprite`) con blitting GPU dalle spritesheet
-- camera manuale o agganciata al giocatore
-- sistema audio con suoni e musiche riproducibili, sospendibili e ripristinabili
-- parallax e overlay di scena
-- sprite testuali generate da font mediante SDL_ttf
-- editor dei livelli con persistenza JSON (geometrie supportate: rettangoli, rettangoli ruotati e spezzate)
-- caricamento condiviso dei livelli JSON tramite `LevelData`, con validazione e conservazione delle proprietà specifiche dei giochi nell'editor ([formato e utilizzo](core/levels.md))
-- finestra opzionale con shader CPU o post-processing GPU tramite SDL_GPU; le tre demo condividono dieci effetti attivabili con i tasti `1`-`9` e `0`
 
-#### Diagramma delle classi
-<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Core.png">
+Infrastruttura comune dei quattro prototipi: game loop, scene, oggetti, rendering, sprite, camera, audio e interfaccia. Include un editor visuale e il caricamento dei livelli JSON tramite LevelData; ciascun gioco definisce la propria fisica e le proprie regole.
+
+![Editor dei livelli](https://github.com/abria/agpunicas/blob/main/demo_leveleditor.png)
+
+[Guida al core](https://github.com/abria/agpunicas/wiki/Core) · [Editor e livelli](https://github.com/abria/agpunicas/wiki/Core-Editor) · [Diagramma delle classi](https://github.com/abria/agpunicas/wiki/Core-Diagramma-delle-classi)
+
+## Post-processing
+
+Effetti visivi applicati al frame completo, con elaborazione CPU o GPU. Il modulo raccoglie le risorse per il post-processing GPU usato dalle finestre del core.
+
+[Guida agli shader](https://github.com/abria/agpunicas/wiki/Core-Shader) · [Esplora il codice](https://github.com/abria/agpunicas/tree/main/postprocessing)
 
 ## CustomPlatformer
-Prototipo per platform 2D con fisica personalizzata realizzata _from scratch_ e pendenze, basato su <i>Super Mario Bros</i>.
-Usa le librerie condivise `core` e `utils`.
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros.png">
+Platform 2D ispirato a *Super Mario Bros*, con movimento e collisioni AABB implementati da zero. È il punto di partenza per studiare la fisica personalizzata e le interazioni di un platform.
 
-#### Diagramma delle classi
-<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_CustomPlatformer.png">
+![CustomPlatformer](https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros.png)
 
-#### Funzionalità
-- continuous collision detection (CCD) con Swept AABB
-- collider AABB
-- collision response con sliding e correzione delle compenetrazioni
-- filtri di collisione basati sul tipo
-- dinamica lineare configurabile con attrito e slittamento semplici
-- categorie di oggetti statici, dinamici e cinematici
-- notifica a tutti gli oggetti collidibili dell'inizio e della fine delle collisioni, con normali e metadati
-- trigger, detti anche sensori
-- interfaccia di base (HUD e menu)
-- selezione tra CCD e collision detection discreta AABB
-- livello caricato da `levels/overworld.json`, inclusi nemici e piattaforme mobili; esempio di trigger collegato direttamente in C++
-
-#### Limitazioni
-- nessun collider composto: ogni oggetto può avere un solo collider
-- nessuna pendenza (usare CustomPlatformerSlopes se si desidera questa funzionalità)
-- broad phase basata sulla scansione lineare degli oggetti; narrow phase con test Swept AABB o AABB
+[Guida al prototipo](https://github.com/abria/agpunicas/wiki/CustomPlatformer) · [Diagramma delle classi](https://github.com/abria/agpunicas/wiki/CustomPlatformer-Diagramma-delle-classi)
 
 ## CustomPlatformerSlopes
-Prototipo per platform 2D con fisica personalizzata realizzata _from scratch_ e pendenze, basato su <i>Super Mario Bros 3</i>.
-Usa le librerie condivise `core` e `utils`.
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros3.png">
+Platform 2D ispirato a *Super Mario Bros 3*, con fisica personalizzata estesa alle pendenze: salita rallentata, scivolamento a riposo e piattaforme attraversabili dal basso. Riusa core, utils e formato JSON condivisi; il livello include rampe triangolari senza sprite.
 
-#### Funzionalità
-- tutte quelle di CustomPlatformer, di cui questo è un'estensione
-- collider triangolari statici, con salita e discesa in entrambe le direzioni
-- aderenza al terreno, raccordi con superfici piane, salti, salita rallentata e scivolamento moderato a riposo
-- collisioni con pareti, soffitti, piattaforme attraversabili dal basso per tutti i dinamici, nemici e oggetti raccoglibili
-- gameplay SMB3 con blocchi, monete, Goomba, power-up, HUD e menu
-- livello `levels/1-1.json` caricato tramite `LevelData`, con sei rampe colorate senza sprite
-- geometrie e proprietà delle slope conservate dall'editor condiviso
+![CustomPlatformerSlopes](https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros3.png)
 
-#### Diagramma delle classi
-<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_CustomPlatformerSlopes.png">
-
-#### Limitazioni
-- tutte quelle di CustomPlatformer, di cui questo è un'estensione
+[Guida al prototipo](https://github.com/abria/agpunicas/wiki/CustomPlatformerSlopes) · [Diagramma delle classi](https://github.com/abria/agpunicas/wiki/CustomPlatformerSlopes-Diagramma-delle-classi)
 
 ## Box2DPlatformer
-Prototipo per platform 2D con fisica newtoniana complessa basato sul motore fisico Box2D.
-Usa le librerie condivise `core` e `utils`.
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_Box2DPlatformer.png">
+Platform 2D con simulazione fisica affidata a Box2D 3.x: corpi rigidi, forme composte, pendenze e contatti. Mostra come integrare un motore fisico esterno con scene, rendering e servizi del core.
 
-#### Diagramma delle classi
-<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Box2DPlatformer.png">
+![Box2DPlatformer](https://github.com/abria/agpunicas/blob/main/demo_Box2DPlatformer.png)
 
-#### Funzionalità
-- simulazione del world, collision detection e collision response gestite da Box2D 3.x
-- body con shape composte
-- body statici, dinamici e cinematici
-- notifica a tutti gli oggetti collidabili dell'inizio e della fine delle collisioni, con normali e metadati
-- trigger tramite sensor shape
-- interfaccia di base (HUD e menu)
-- esempi di parallax e overlay di scena
-- esempio di fisica del player con camminata, salto, dash e compensazione della forza tangenziale sulle pendenze
-- esempio di oggetto cinematico composto (ingranaggio)
-- esempi di oggetti dinamici (cassa e proiettile `Fire`)
-- esempio di nemico
-- livello caricato da `levels/level0.json`, inclusi terreno, ingranaggi, player e sfondi
-
-#### Limitazioni
-- il giocatore non resta stabile sulle piattaforme mobili; il problema può essere corretto compensando le forze come sulle pendenze
-- nessun esempio di joint; consultare la documentazione di Box2D
+[Guida al prototipo](https://github.com/abria/agpunicas/wiki/Box2DPlatformer) · [Diagramma delle classi](https://github.com/abria/agpunicas/wiki/Box2DPlatformer-Diagramma-delle-classi)
 
 ## ActionRPG
-Prototipo per giochi di ruolo (e più in generale con vista dall'alto) basato su core/SDL e su un motore fisico personalizzabile realizzato _from scratch_.
-A scopo dimostrativo implementa una piccola porzione di <i>Legend of Zelda: A Link to the Past</i> (NES).
 
-<img src="https://github.com/abria/agpunicas/blob/main/demo_ActionRPG.png">
+Prototipo con vista dall'alto ispirato a *The Legend of Zelda: A Link to the Past*. Combina collisioni personalizzate, combattimento, NPC, pathfinding, dialoghi e portali fra scene.
 
-#### Diagramma delle classi
-<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_ActionRPG.png">
+![ActionRPG](https://github.com/abria/agpunicas/blob/main/demo_ActionRPG.png)
 
-#### Funzionalità
-- collision detection e collision response basate su OBB
-- categorie di oggetti statici e dinamici
-- notifica a tutti gli oggetti collidabili dell'inizio e della fine delle collisioni, con normali e metadati
-- trigger, detti anche sensori
-- interfaccia avanzata (HUD e inventario)
-- dialoghi testuali (`DialogBox`)
-- portali per il teletrasporto del giocatore
-- esempio di attacco del giocatore con la spada
-- esempio di collider animato (spada)
-- pathfinding tramite BFS
-- esempio di NPC (soldato con pattugliamento e inseguimento)
-- livello caricato da `levels/overworld.json`, inclusi scena, sfondi, personaggi, collider e portali
-- esempio di transizione di scena con maschera circolare e dissolvenza
-
-#### Limitazioni
-- broad phase basata sulla scansione lineare degli oggetti; narrow phase con test SAT su OBB
+[Guida al prototipo](https://github.com/abria/agpunicas/wiki/ActionRPG) · [Diagramma delle classi](https://github.com/abria/agpunicas/wiki/ActionRPG-Diagramma-delle-classi)

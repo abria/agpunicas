@@ -40,8 +40,8 @@ Motore di rendering e audio basato su SDL, utilizzato da tutti i prototipi di gi
 <img src="https://github.com/abria/agpunicas/blob/main/classdiagram_Core.png">
 
 ## CustomPlatformer
-Prototipo per semplici platform 2D basato su core/SDL e su un motore fisico personalizzabile realizzato _from scratch_.
-A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> (NES).
+Prototipo per platform 2D con fisica personalizzata realizzata _from scratch_ e pendenze, basato su <i>Super Mario Bros</i>.
+Usa le librerie condivise `core` e `utils`.
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros.png">
 
@@ -63,14 +63,17 @@ A scopo dimostrativo implementa una piccola porzione di <i>Super Mario Bros</i> 
 
 #### Limitazioni
 - nessun collider composto: ogni oggetto può avere un solo collider
-- nessuna pendenza
+- nessuna pendenza (usare CustomPlatformerSlopes se si desidera questa funzionalità)
 - broad phase basata sulla scansione lineare degli oggetti; narrow phase con test Swept AABB o AABB
 
 ## CustomPlatformerSlopes
-Prototipo per platform 2D con fisica personalizzata e pendenze, basato su <i>Super Mario Bros 3</i>.
-Usa le librerie condivise `core` e `utils`, come gli altri prototipi.
+Prototipo per platform 2D con fisica personalizzata realizzata _from scratch_ e pendenze, basato su <i>Super Mario Bros 3</i>.
+Usa le librerie condivise `core` e `utils`.
+
+<img src="https://github.com/abria/agpunicas/blob/main/demo_SuperMarioBros3.png">
 
 #### Funzionalità
+- tutte quelle di CustomPlatformer, di cui questo è un'estensione
 - collider triangolari statici, con salita e discesa in entrambe le direzioni
 - aderenza al terreno, raccordi con superfici piane, salti, salita rallentata e scivolamento moderato a riposo
 - collisioni con pareti, soffitti, piattaforme attraversabili dal basso per tutti i dinamici, nemici e oggetti raccoglibili
@@ -78,15 +81,15 @@ Usa le librerie condivise `core` e `utils`, come gli altri prototipi.
 - livello `levels/1-1.json` caricato tramite `LevelData`, con sei rampe colorate senza sprite
 - geometrie e proprietà delle slope conservate dall'editor condiviso
 
-[Struttura, comandi, formato delle slope e compilazione](CustomPlatformerSlopes/README.md).
+#### Diagramma delle classi
+<img src="https://github.com/abria/agpunicas/blob/main/classdiagram_CustomPlatformer.png">
 
 #### Limitazioni
-- slope statiche triangolari; gli oggetti mobili mantengono collider AABB
-- la velocità sulle pendenze segue una regola arcade, senza simulazione di attrito fisico
-- broad phase basata sulla scansione lineare degli oggetti
+- tutte quelle di CustomPlatformer, di cui questo è un'estensione
 
 ## Box2DPlatformer
-Prototipo per platform 2D complessi basato su core/SDL e sul motore fisico Box2D.
+Prototipo per platform 2D con fisica newtoniana complessa basato sul motore fisico Box2D.
+Usa le librerie condivise `core` e `utils`.
 
 <img src="https://github.com/abria/agpunicas/blob/main/demo_Box2DPlatformer.png">
 

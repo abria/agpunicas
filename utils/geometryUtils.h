@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <ostream>
 #include <string>
 #include <cmath>
@@ -476,6 +477,69 @@ namespace agp
 	template <class U>
 	Rect<T>::Rect(const Rect<U>& other)
 		: pos(other.pos), size(other.size), yUp(other.yUp) {}
+
+
+	// circle class
+	template <class T>
+	struct Circle
+	{
+		// attributes
+		Vec2D<T> center;
+		T radius;
+
+		// constructors
+		Circle() : center(0, 0), radius(0) {}
+		Circle(T x, T y, T r) : center(x, y), radius(r) {}
+		Circle(const Vec2D<T>& c, T r) : center(c), radius(r) {}
+
+		// operations
+		inline bool isValid() const { return radius > 0; }
+
+		// Test overlap with an axis-aligned rectangle; tangency is excluded,
+		// consistently with Rect::intersects. Invalid shapes never intersect.
+		inline bool intersects(const Rect<T>& rect) const
+		{
+			if (!isValid() || !rect.isValid())
+				return false;
+
+			// Find Q, the point in the rectangle closest to the circle center C.
+			// For an axis-aligned rectangle, clamp each coordinate independently:
+			// Q.x = max(xMin, min(C.x, xMax)), Q.y = max(yMin, min(C.y, yMax)).
+			// Here min = pos and max = pos + size for either y-axis orientation.
+			// Q lies on an edge/corner if C is outside, and Q = C if C is inside.
+			Vec2D<T> closest(
+				std::max(rect.pos.x, std::min(center.x, rect.pos.x + rect.size.x)),
+				std::max(rect.pos.y, std::min(center.y, rect.pos.y + rect.size.y)));
+
+			// The shapes overlap iff the distance from C to Q is less than radius r:
+			// d^2 = (C.x - Q.x)^2 + (C.y - Q.y)^2 < r^2.
+			// Squared distances avoid a square root. If C is inside, d = 0, so
+			// containment is included; d = r is tangency and is excluded.
+			// Promote before subtracting and squaring to avoid integer overflow.
+			double dx = double(center.x) - double(closest.x);
+			double dy = double(center.y) - double(closest.y);
+			return dx * dx + dy * dy < double(radius) * double(radius);
+		}
+
+		// Test overlap of two filled circles, including containment.
+		// External tangency is excluded; invalid circles never intersect.
+		inline bool intersects(const Circle<T>& circle) const
+		{
+			if (!isValid() || !circle.isValid())
+				return false;
+
+			// Circles with centers C1, C2 and radii r1, r2 overlap iff
+			// d = |C1 - C2| < r1 + r2. Compare squared distances to avoid sqrt:
+			// (C1.x - C2.x)^2 + (C1.y - C2.y)^2 < (r1 + r2)^2.
+			// No lower bound on d is needed: one circle may contain the other.
+			// Promote before subtracting, adding radii and squaring.
+			double dx = double(center.x) - double(circle.center.x);
+			double dy = double(center.y) - double(circle.center.y);
+			double radiusSum = double(radius) + double(circle.radius);
+			return dx * dx + dy * dy < radiusSum * radiusSum;
+		}
+	};
+	typedef Circle<float> CircleF;
 
 
 	// line class

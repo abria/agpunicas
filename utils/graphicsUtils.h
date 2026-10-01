@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 namespace agp
 {
@@ -86,6 +87,38 @@ namespace agp
         r = static_cast<unsigned char>(std::round(rf * 255.0f));
         g = static_cast<unsigned char>(std::round(gf * 255.0f));
         b = static_cast<unsigned char>(std::round(bf * 255.0f));
+    }
+
+    // Convert HSV to RGB. All inputs must be finite.
+    // h: hue in [0, 1], representing one full turn (h = degrees / 360).
+    //    0 and 1 are red, 1/3 is green, 2/3 is blue; other values wrap modulo 1.
+    // s: saturation in [0, 1], from grayscale (0) to fully saturated (1).
+    // v: value in [0, 1], from black (0) to maximum brightness (1).
+    // s and v are clamped to [0, 1]; output channels are rounded to [0, 255].
+    inline static void HSVtoRGB(float h, float s, float v, unsigned char& r, unsigned char& g, unsigned char& b)
+    {
+        h = (h - std::floor(h)) * 6.0f;
+        s = std::max(0.0f, std::min(s, 1.0f));
+        v = std::max(0.0f, std::min(v, 1.0f));
+
+        // Split the hue wheel into six sectors (red, yellow, green, cyan, blue, magenta).
+        // Chroma C = V*S is the distance between the largest and smallest RGB channels.
+        // X interpolates the intermediate channel; m = V-C sets the minimum channel.
+        float c = v * s;
+        float x = c * (1.0f - std::abs(std::fmod(h, 2.0f) - 1.0f));
+        float m = v - c;
+        float rf = 0.0f, gf = 0.0f, bf = 0.0f;
+
+        if (h < 1.0f)      { rf = c; gf = x; }
+        else if (h < 2.0f) { rf = x; gf = c; }
+        else if (h < 3.0f) { gf = c; bf = x; }
+        else if (h < 4.0f) { gf = x; bf = c; }
+        else if (h < 5.0f) { rf = x; bf = c; }
+        else              { rf = c; bf = x; }
+
+        r = static_cast<unsigned char>(std::round((rf + m) * 255.0f));
+        g = static_cast<unsigned char>(std::round((gf + m) * 255.0f));
+        b = static_cast<unsigned char>(std::round((bf + m) * 255.0f));
     }
 
 	// color class
@@ -192,42 +225,40 @@ namespace agp
 		friend std::ostream& operator << (std::ostream& os, const Color& c) { os << c.str(); return os; }
 	};
 
+    // Same normalized HSV inputs as above; returns an opaque RGB color (alpha = 255).
+    inline static Color HSVtoRGB(float h, float s, float v)
+    {
+        unsigned char r, g, b;
+        HSVtoRGB(h, s, v, r, g, b);
+        return { r, g, b };
+    }
+
+    // Fixed palette, indexed from 0 to 14, ordered by increasing hue.
+    // Black has no defined hue and is kept last.
     inline static Color distinctColor(int n)
     {
-        if(n == 0)
-            return { 255, 255, 25 };  // yellow
-        else if (n == 1)
-            return { 0, 130, 200 };  // blue
-        else if (n == 2)
-            return { 60, 180, 75 };  // green
-        else if (n ==  3)
-            return { 245, 130, 48 }; // orange
-        else if (n ==  4)
-            return { 70, 240, 240 }; // cyan
-        else if (n ==  5)
-            return { 145, 30, 180 }; // purple
-        else if (n ==  6)
-            return { 230, 25, 75 };  // red
-        else if (n ==  7)
-            return { 210, 245, 60 }; // lime
-        else if (n ==  8)
-            return { 240, 50, 230 }; // magenta
-        else if (n ==  9)
-            return { 0, 0, 128 };    // navy
-        else if (n ==  10)
-            return { 128, 0, 0 };    // maroon
-        else if (n ==  11)
-            return { 170, 110, 40 }; // brown
-        else if (n ==  12)
-            return { 128, 128, 0 };  // olive
-        else if (n ==  13)
-            return { 0, 128, 128 };  // teal
-        else if (n == 14)
-            return { 0, 0, 0 };      // black
-        else
-        {
-            std::cerr << "Cannot generate " << n << "-th distinct color\n";
-            return { 0, 0, 0 };      // black
-        }
+        static const Color colors[] = {
+            { 128, 0, 0 },     // maroon
+            { 245, 130, 48 },  // orange
+            { 170, 110, 40 },  // brown
+            { 255, 255, 25 },  // yellow
+            { 128, 128, 0 },   // olive
+            { 210, 245, 60 },  // lime
+            { 60, 180, 75 },   // green
+            { 70, 240, 240 },  // cyan
+            { 0, 128, 128 },   // teal
+            { 0, 130, 200 },   // blue
+            { 0, 0, 128 },     // navy
+            { 145, 30, 180 },  // purple
+            { 240, 50, 230 },  // magenta
+            { 230, 25, 75 },   // red
+            { 0, 0, 0 }       // black
+        };
+        constexpr int colorCount = sizeof(colors) / sizeof(colors[0]);
+        if (n >= 0 && n < colorCount)
+            return colors[n];
+
+        std::cerr << "Cannot generate " << n << "-th distinct color\n";
+        return { 0, 0, 0 };
     }
 }

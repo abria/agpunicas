@@ -54,7 +54,7 @@ void Game::run()
 {
 	_running = true;
 
-	FPS fps;
+	FrequencyMeter frameRate;
 	Timer <float> frameTimer;
 
 	while (_running)
@@ -73,8 +73,8 @@ void Game::run()
 
 		_window->render(_scenes);
 
-		if (fps.update(false))
-			_currentFPS = int(round(fps.lastFPS()));
+		if (frameRate.update(false))
+			_currentFPS = int(round(frameRate.lastFrequency()));
 	}
 
 	destroy();

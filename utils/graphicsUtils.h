@@ -121,6 +121,39 @@ namespace agp
         b = static_cast<unsigned char>(std::round((bf + m) * 255.0f));
     }
 
+	// predefined palette colors, encoded as 0xRRGGBB
+	enum class ColorName : unsigned int
+	{
+		MAROON  = 0x800000,
+		ORANGE  = 0xF58230,
+		BROWN   = 0xAA6E28,
+		YELLOW  = 0xFFFF19,
+		OLIVE   = 0x808000,
+		LIME    = 0xD2F53C,
+		GREEN   = 0x3CB44B,
+		CYAN    = 0x46F0F0,
+		TEAL    = 0x008080,
+		BLUE    = 0x0082C8,
+		NAVY    = 0x000080,
+		PURPLE  = 0x911EB4,
+		MAGENTA = 0xF032E6,
+		RED     = 0xE6194B,
+		BLACK   = 0x000000,
+
+		WHITE      = 0xFFFFFF,
+		LIGHT_GRAY = 0xD3D3D3,
+		GRAY       = 0x808080,
+		DARK_GRAY  = 0x404040,
+		PINK       = 0xFFC0CB,
+		GOLD       = 0xFFD700,
+		BEIGE      = 0xF5F5DC,
+		CORAL      = 0xFF7F50,
+		TURQUOISE  = 0x40E0D0,
+		SKY_BLUE   = 0x87CEEB,
+		INDIGO     = 0x4B0082,
+		VIOLET     = 0xEE82EE
+	};
+
 	// color class
 	struct Color
 	{
@@ -141,6 +174,11 @@ namespace agp
             b = rgbData[2];
             a = alpha? rgbData[3] : 255;
         }
+		Color(ColorName color, unsigned char alpha = 255) :
+			r((static_cast<unsigned int>(color) >> 16) & 0xFF),
+			g((static_cast<unsigned int>(color) >> 8) & 0xFF),
+			b(static_cast<unsigned int>(color) & 0xFF),
+			a(alpha) {}
 		Color(const Color& c) : r(c.r), g(c.g), b(c.b), a(c.a) {}
 
         // operator[] for non-const objects
@@ -238,27 +276,27 @@ namespace agp
     inline static Color distinctColor(int n)
     {
         static const Color colors[] = {
-            { 128, 0, 0 },     // maroon
-            { 245, 130, 48 },  // orange
-            { 170, 110, 40 },  // brown
-            { 255, 255, 25 },  // yellow
-            { 128, 128, 0 },   // olive
-            { 210, 245, 60 },  // lime
-            { 60, 180, 75 },   // green
-            { 70, 240, 240 },  // cyan
-            { 0, 128, 128 },   // teal
-            { 0, 130, 200 },   // blue
-            { 0, 0, 128 },     // navy
-            { 145, 30, 180 },  // purple
-            { 240, 50, 230 },  // magenta
-            { 230, 25, 75 },   // red
-            { 0, 0, 0 }       // black
+            ColorName::MAROON,
+            ColorName::ORANGE,
+            ColorName::BROWN,
+            ColorName::YELLOW,
+            ColorName::OLIVE,
+            ColorName::LIME,
+            ColorName::GREEN,
+            ColorName::CYAN,
+            ColorName::TEAL,
+            ColorName::BLUE,
+            ColorName::NAVY,
+            ColorName::PURPLE,
+            ColorName::MAGENTA,
+            ColorName::RED,
+            ColorName::BLACK
         };
         constexpr int colorCount = sizeof(colors) / sizeof(colors[0]);
         if (n >= 0 && n < colorCount)
             return colors[n];
 
         std::cerr << "Cannot generate " << n << "-th distinct color\n";
-        return { 0, 0, 0 };
+        return ColorName::BLACK;
     }
 }

@@ -47,40 +47,41 @@ namespace agp
 			}
 	};
 
-	class FPS
+	// Measures the frequency of calls to update(), in Hz.
+	class FrequencyMeter
 	{
 		private:
 
 			std::chrono::time_point<std::chrono::system_clock> _t0;
 			long long _deltaTime;
-			unsigned int _framesCount;
-			float _lastFPS;
+			unsigned int _callsCount;
+			float _lastFrequency;
 
 		public:
 
-			FPS()
+			FrequencyMeter()
 			{
 				_t0 = std::chrono::system_clock::now();
-				_framesCount = 0;
-				_lastFPS = 0;
+				_callsCount = 0;
+				_lastFrequency = 0;
 				_deltaTime = 0;
 			}
 
-			float lastFPS() { return _lastFPS; }
+			float lastFrequency() { return _lastFrequency; }
 
-			// returns true if FPS has been updated
+			// counts one call and returns true if the frequency has been updated
 			inline bool update(bool print = true)
 			{
-				_framesCount++;
+				_callsCount++;
 				_deltaTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - _t0).count();
 				if (_deltaTime >= 1000.0f)
 				{
-					_lastFPS = 1000.0f*_framesCount / _deltaTime;
+					_lastFrequency = 1000.0f*_callsCount / _deltaTime;
 					_t0 = std::chrono::system_clock::now();
-					_framesCount = 0;
+					_callsCount = 0;
 
 					if (print)
-						printf("FPS = %.0f\n", _lastFPS);
+						printf("Frequency = %.0f Hz\n", _lastFrequency);
 
 					return true;
 				}

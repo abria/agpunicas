@@ -10,7 +10,6 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 #include "geometryUtils.h"
 #include "graphicsUtils.h"
 #include "mathUtils.h"
@@ -59,6 +58,131 @@ namespace agp
             SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
             SDL_RenderLine(renderer, a.x, a.y, b.x, b.y);
         }
+    }
+
+    static inline void FillCircle(SDL_Renderer* renderer, const PointF& center, float radius, const Color& color, int nSegments = 100)
+    {
+        if (radius <= 0 || nSegments < 3)
+            return;
+
+        // use SDL_RenderGeometry to draw n-gon with triangles
+        int n = nSegments;    // this determines circle approximation with n-gon
+
+        // size our vector so it can hold all the requested vertices plus our center one
+        std::vector< SDL_Vertex > SDL_vertices(n + 1);
+        std::vector<int> SDL_indices;
+
+        // calculate the angle we'll need to rotate by for each iteration (* (PI / 180) to convert it into radians)
+        float angleStep = (360.f / n) * (float(agp::PI) / 180);
+
+        // we need an initial vertex in the center as a point for all of the triangles we'll generate
+        SDL_vertices[0].position.x = center.x;
+        SDL_vertices[0].position.y = center.y;
+
+        // set the color of the center point
+        SDL_vertices[0].color.r = color.r / 255.0f;
+        SDL_vertices[0].color.g = color.g / 255.0f;
+        SDL_vertices[0].color.b = color.b / 255.0f;
+        SDL_vertices[0].color.a = color.a / 255.0f;
+
+        // set the starting point for the initial generated vertex. We'll be rotating this point around the origin in the loop
+        float startX = 0.0f - radius;
+        float startY = 0.0f;
+
+        for (int i = 1; i < n + 1; i++)
+        {
+            // calculate the angle to rotate the starting point around the origin
+            float angle = (i * angleStep);
+
+            // rotate the start point around the origin (0, 0) by the angle (see https://en.wikipedia.org/wiki/Rotation_(mathematics) section on two dimensional rotation)
+            SDL_vertices[i].position.x = cos(angle) * startX - sin(angle) * startY;
+            SDL_vertices[i].position.y = cos(angle) * startY + sin(angle) * startX;
+
+            // set the point relative to our defined center
+            SDL_vertices[i].position.x += center.x;
+            SDL_vertices[i].position.y += center.y;
+
+            // set the color for the vertex
+            SDL_vertices[i].color.r = color.r / 255.0f;
+            SDL_vertices[i].color.g = color.g / 255.0f;
+            SDL_vertices[i].color.b = color.b / 255.0f;
+            SDL_vertices[i].color.a = color.a / 255.0f;
+
+            // add center point index
+            SDL_indices.push_back(0);
+
+            // add generated point index
+            SDL_indices.push_back(i);
+
+            // add next point index (with logic to wrap around when we reach the start)
+            int index = (i + 1) % n;
+            if (index == 0)
+                index = n;
+            SDL_indices.push_back(index);
+        }
+
+        SDL_RenderGeometry(renderer, nullptr, &SDL_vertices[0], int(SDL_vertices.size()),
+            &SDL_indices[0], int(SDL_indices.size()));
+    }
+
+    // Fill a circle with a one-unit alpha fringe (one pixel at the default render scale).
+    static inline void FillCircleAA(SDL_Renderer* renderer, const PointF& center, float radius, const Color& color, int nSegments = 100)
+    {
+        if (radius <= 0 || nSegments < 3)
+            return;
+
+        int n = nSegments;
+        float innerRadius = (std::max)(0.0f, radius - 0.5f);
+        float outerRadius = radius + 0.5f;
+        float angleStep = 2 * PI / n;
+
+        // one center vertex, n inner vertices and n transparent outer vertices
+        std::vector< SDL_Vertex > SDL_vertices(2 * n + 1);
+        std::vector<int> SDL_indices;
+        SDL_indices.reserve(9 * n);
+
+        SDL_FColor fillColor = { color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f };
+        SDL_FColor edgeColor = fillColor;
+        edgeColor.a = 0;
+        SDL_vertices[0] = { center.toSDLf(), fillColor, SDL_FPoint {0} };
+
+        for (int i = 0; i < n; i++)
+        {
+            float angle = (i + 1) * angleStep;
+            float x = -cosf(angle);
+            float y = -sinf(angle);
+
+            int inner = i + 1;
+            int innerNext = (i + 1) % n + 1;
+            int outer = inner + n;
+            int outerNext = innerNext + n;
+
+            SDL_vertices[inner] =
+            {
+                SDL_FPoint {center.x + innerRadius * x, center.y + innerRadius * y},
+                fillColor,
+                SDL_FPoint {0}
+            };
+            SDL_vertices[outer] =
+            {
+                SDL_FPoint {center.x + outerRadius * x, center.y + outerRadius * y},
+                edgeColor,
+                SDL_FPoint {0}
+            };
+
+            // one triangle fills the interior; two triangles fade the edge to zero alpha
+            SDL_indices.insert(SDL_indices.end(), { 0, inner, innerNext });
+            SDL_indices.insert(SDL_indices.end(), { inner, outer, outerNext, inner, outerNext, innerNext });
+        }
+
+        // enable alpha blending for this draw, then restore the renderer's previous state
+        SDL_BlendMode blendMode;
+        if (!SDL_GetRenderDrawBlendMode(renderer, &blendMode))
+            return;
+        if (SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND))
+            SDL_RenderGeometry(renderer, nullptr, &SDL_vertices[0], int(SDL_vertices.size()),
+                &SDL_indices[0], int(SDL_indices.size()));
+        SDL_SetRenderDrawBlendMode(renderer, blendMode);
     }
 
     static inline void DrawCapsule(SDL_Renderer* renderer, const PointF& centerDown, const PointF& centerUp, float radius, const Color& color, int nSegments = 100)
@@ -180,6 +304,8 @@ namespace agp
         SDL_RenderGeometry(renderer, nullptr, &SDL_vertices[0], 4, &SDL_indices[0], 6);
     }
 
+// Include <SDL3_image/SDL_image.h> before sdlUtils.h to enable image loading.
+#ifdef SDL_IMAGE_MAJOR_VERSION
     // load image from file into texture
     static inline SDL_Texture* loadTexture(
         SDL_Renderer* renderer,
@@ -533,6 +659,8 @@ namespace agp
         return tex;
     }
 
+#endif // SDL_IMAGE_MAJOR_VERSION
+
     // move rect within spritesheet
     static inline RectI moveBy(
         RectI srcRect,
@@ -576,6 +704,7 @@ namespace agp
             }
     };
 
+#ifdef SDL_IMAGE_MAJOR_VERSION
     // load image from file into texture and detect rects with connected component labeling
     static inline SDL_Texture* loadTextureConnectedComponents(
         SDL_Renderer* renderer,
@@ -814,6 +943,8 @@ namespace agp
 
         return tex;
     }
+
+#endif // SDL_IMAGE_MAJOR_VERSION
 
 #ifdef WITH_TTF
     static inline SDL_Texture* generateText(

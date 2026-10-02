@@ -8,6 +8,7 @@
 // ----------------------------------------------------------------
 
 #include "MovableObject.h"
+#include "mathUtils.h"
 
 using namespace agp;
 
@@ -36,10 +37,8 @@ void MovableObject::defaultPhysics()
 
 void MovableObject::velClip(float vx, float vy)
 {
-	_vel.x = std::max(_vel.x, -vx);
-	_vel.x = std::min(_vel.x, vx);
-	_vel.y = std::max(_vel.y, -vy);
-	_vel.y = std::min(_vel.y, vy);
+	_vel.x = agp::clamp(_vel.x, -vx, vx);
+	_vel.y = agp::clamp(_vel.y, -vy, vy);
 }
 
 void MovableObject::velAdd(Vec2Df amount)

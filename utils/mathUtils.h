@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <limits>
 #include <vector>
 #include <fstream>
@@ -26,6 +27,14 @@ namespace agp
 	const int MAXINT = std::numeric_limits<int>::max();
 	const int MININT = std::numeric_limits<int>::min();
 	/*-------------------------------------------------------------------------------------------------------------------------*/
+
+	// Clamp an ordered value to the inclusive range [lower, upper] (lower <= upper).
+	// Return by value so the result is safe even when the bounds are temporaries.
+	template <typename T>
+	inline T clamp(T value, T lower, T upper)
+	{
+		return std::min(std::max(value, lower), upper);
+	}
 
 	// floating point comparisons
 	// The following definitions are from The art of computer programming by Knuth

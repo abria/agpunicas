@@ -478,6 +478,27 @@ namespace agp
 			return float(size.x) / float(size.y);
 		}
 
+		// Shrink to the given width/height ratio, keeping the center and yUp.
+		// Invalid rectangles and non-positive/non-finite ratios are left unchanged.
+		// Integral coordinates truncate the new size and the centering offset.
+		inline void fitAspectRatio(float ratio)
+		{
+			if (!isValid() || !(ratio > 0) || !std::isfinite(ratio))
+				return;
+			if (aspectRatio() > ratio)
+			{
+				T newWidth = T(size.y * ratio);
+				pos.x += (size.x - newWidth) / T(2);
+				size.x = newWidth;
+			}
+			else
+			{
+				T newHeight = T(size.x / ratio);
+				pos.y += (size.y - newHeight) / T(2);
+				size.y = newHeight;
+			}
+		}
+
 		inline bool isSeparatedFrom(const Rect<T>& r, T epsilon = T(1e-5))
 		{
 			// We consider them separated if one rectangle is strictly

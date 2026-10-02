@@ -125,26 +125,10 @@ void View::updateViewport()
 			_clipRect.size.y * rendHeight);
 
 	// correct aspect ratio
-	if (_aspectRatio)
-	{
-		float currentRatio = _viewportAbs.size.x / _viewportAbs.size.y;
-		if (currentRatio > _aspectRatio) // too wide
-		{
-			float newWidth = _viewportAbs.size.y * _aspectRatio;
-			_viewportAbs.pos.x += (_viewportAbs.size.x - newWidth) / 2;
-			_viewportAbs.size.x = newWidth;
-		}
-		else // too tall
-		{
-			float newHeight = _viewportAbs.size.x / _aspectRatio;
-			_viewportAbs.pos.y += (_viewportAbs.size.y - newHeight) / 2;
-			_viewportAbs.size.y = newHeight;
-		}
-	}
+	_viewportAbs.fitAspectRatio(_aspectRatio);
 
 	// update magnification factor
-	_magf.x = _viewportAbs.size.x / _rect.size.x;
-	_magf.y = _viewportAbs.size.y / _rect.size.y;
+	_magf = _viewportAbs.size / _rect.size;
 
 	// update transforms
 	_scene2view = [this](const PointF& p)

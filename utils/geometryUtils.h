@@ -203,6 +203,9 @@ namespace agp
 	}
 
 	
+	// Axis-Aligned direction (Y-downwards by default)
+	enum class Direction { RIGHT, LEFT, UP, DOWN, NONE };
+
 	// rectangle class
 	template <class T> 
 	struct Rect
@@ -276,20 +279,43 @@ namespace agp
 		// operations
 		inline bool isValid() const { return size.x > 0 && size.y > 0; }
 
-		inline bool intersects(const Rect& r) const 
-		{ 
+		// Optional output: collision side of this rectangle, opposite its minimum
+		// separating translation. NONE on no hit, ties, invalid or mixed-yUp shapes.
+		inline bool intersects(const Rect& r, Direction* fromDir = nullptr) const
+		{
+			bool overlap;
 			if (yUp)
 			{
-				return
+				overlap =
 					left() < r.right() && right() > r.left() &&
 					bottom() < r.top() && top() > r.bottom();
 			}
 			else
 			{
-				return
+				overlap =
 					left() < r.right() && right() > r.left() &&
-					top() < r.bottom() && bottom() > r.top(); 
+					top() < r.bottom() && bottom() > r.top();
 			}
+			if (fromDir)
+			{
+				*fromDir = Direction::NONE;
+				if (overlap && isValid() && r.isValid() && yUp == r.yUp)
+				{
+					// Distances to separation also handle one rectangle containing the other.
+					double leftDepth = double(r.right()) - double(left());
+					double rightDepth = double(right()) - double(r.left());
+					double lowDepth = double(r.pos.y) + double(r.size.y) - double(pos.y);
+					double highDepth = double(pos.y) + double(size.y) - double(r.pos.y);
+					double dx = std::min(leftDepth, rightDepth);
+					double dy = std::min(lowDepth, highDepth);
+					if (dx < dy && leftDepth != rightDepth)
+						*fromDir = leftDepth < rightDepth ? Direction::LEFT : Direction::RIGHT;
+					else if (dy < dx && lowDepth != highDepth)
+						*fromDir = lowDepth < highDepth ? (yUp ? Direction::DOWN : Direction::UP)
+							: (yUp ? Direction::UP : Direction::DOWN);
+				}
+			}
+			return overlap;
 		}
 
 		// return the intersection rectangle (invalid if no intersection)
@@ -321,15 +347,20 @@ namespace agp
 			}
 		}
 
-		// Liang-Barsky algorithm for line-rectangle intersection
-		inline bool intersectsLine(const Vec2D<T>& p0, const Vec2D<T>& p1, T& tNear, T& tFar)
+		// Liang-Barsky algorithm for line-rectangle intersection.
+		// Optional output: entry side of this rectangle (p0 -> p1), respecting yUp.
+		// NONE on no hit, tied entry sides, or a segment starting strictly inside.
+		inline bool intersectsLine(const Vec2D<T>& p0, const Vec2D<T>& p1, T& tNear, T& tFar, Direction* fromDir = nullptr)
 		{
+			if (fromDir)
+				*fromDir = Direction::NONE;
+			Direction entryDir = Direction::NONE;
 			T t0 = 0.0;
 			T t1 = 1.0;
 			T dx = p1.x - p0.x;
 			T dy = p1.y - p0.y;
 
-			auto clip = [&](T p, T q) -> bool
+			auto clip = [&](T p, T q, Direction side) -> bool
 			{
 				if (p == 0.0)
 					return q >= 0.0;
@@ -337,7 +368,13 @@ namespace agp
 				if (p < 0.0) 
 				{
 					if (r > t1) return false;
-					if (r > t0) t0 = r;
+					if (r > t0)
+					{
+						t0 = r;
+						entryDir = side;
+					}
+					else if (r == t0)
+						entryDir = entryDir == Direction::NONE ? side : Direction::NONE;
 				}
 				else 
 				{
@@ -354,16 +391,19 @@ namespace agp
 			T yMax = pos.y + size.y;
 
 			// Clipping against all four edges of the rectangle:
-			if (!clip(-dx, p0.x - xMin)) return false;  // Left edge
-			if (!clip(dx, xMax - p0.x)) return false;   // Right edge
-			if (!clip(-dy, p0.y - yMin)) return false;  // Bottom edge
-			if (!clip(dy, yMax - p0.y)) return false;   // Top edge
+			if (!clip(-dx, p0.x - xMin, Direction::LEFT)) return false;
+			if (!clip(dx, xMax - p0.x, Direction::RIGHT)) return false;
+			if (!clip(-dy, p0.y - yMin, yUp ? Direction::DOWN : Direction::UP)) return false;
+			if (!clip(dy, yMax - p0.y, yUp ? Direction::UP : Direction::DOWN)) return false;
 
 			if (t0 > t1) return false;
 
 			tNear = (t0 >= 0.0) ? t0 : t1;
 			tFar = (t0 >= 0.0) ? t1 : t0;
-			return tNear >= 0.0 && tNear <= 1.0;
+			bool overlap = tNear >= 0.0 && tNear <= 1.0;
+			if (fromDir && overlap && !contains(p0))
+				*fromDir = entryDir;
+			return overlap;
 		}
 
 		inline bool contains(const Vec2D<T> & p) const
@@ -497,8 +537,13 @@ namespace agp
 
 		// Test overlap with an axis-aligned rectangle; tangency is excluded,
 		// consistently with Rect::intersects. Invalid shapes never intersect.
-		inline bool intersects(const Rect<T>& rect) const
+		// Optional output: collision side of this circle, using rect.yUp.
+		// Use the dominant component towards the closest point; if C is inside,
+		// use the opposite of the nearest exit. NONE on no hit or tied directions.
+		inline bool intersects(const Rect<T>& rect, Direction* fromDir = nullptr) const
 		{
+			if (fromDir)
+				*fromDir = Direction::NONE;
 			if (!isValid() || !rect.isValid())
 				return false;
 
@@ -518,13 +563,41 @@ namespace agp
 			// Promote before subtracting and squaring to avoid integer overflow.
 			double dx = double(center.x) - double(closest.x);
 			double dy = double(center.y) - double(closest.y);
-			return dx * dx + dy * dy < double(radius) * double(radius);
+			bool overlap = dx * dx + dy * dy < double(radius) * double(radius);
+			if (fromDir && overlap)
+			{
+				if (dx == 0 && dy == 0)
+				{
+					// The radius adds equally to all four exit distances.
+					double left = double(center.x) - double(rect.pos.x);
+					double right = double(rect.pos.x) + double(rect.size.x) - double(center.x);
+					double low = double(center.y) - double(rect.pos.y);
+					double high = double(rect.pos.y) + double(rect.size.y) - double(center.y);
+					double minX = std::min(left, right), minY = std::min(low, high);
+					if (minX < minY && left != right)
+						*fromDir = left < right ? Direction::RIGHT : Direction::LEFT;
+					else if (minY < minX && low != high)
+						*fromDir = low < high ? (rect.yUp ? Direction::UP : Direction::DOWN)
+							: (rect.yUp ? Direction::DOWN : Direction::UP);
+				}
+				else if (std::abs(dx) > std::abs(dy))
+					*fromDir = dx < 0 ? Direction::RIGHT : Direction::LEFT;
+				else if (std::abs(dy) > std::abs(dx))
+					*fromDir = dy < 0 ? (rect.yUp ? Direction::UP : Direction::DOWN)
+						: (rect.yUp ? Direction::DOWN : Direction::UP);
+			}
+			return overlap;
 		}
 
 		// Test overlap of two filled circles, including containment.
 		// External tangency is excluded; invalid circles never intersect.
-		inline bool intersects(const Circle<T>& circle) const
+		// Optional output: dominant direction from this center to the other.
+		// Circle has no yUp flag: use Y-downwards. NONE on no hit, coincident
+		// centers or equal absolute components (no unique cardinal direction).
+		inline bool intersects(const Circle<T>& circle, Direction* fromDir = nullptr) const
 		{
+			if (fromDir)
+				*fromDir = Direction::NONE;
 			if (!isValid() || !circle.isValid())
 				return false;
 
@@ -536,7 +609,15 @@ namespace agp
 			double dx = double(center.x) - double(circle.center.x);
 			double dy = double(center.y) - double(circle.center.y);
 			double radiusSum = double(radius) + double(circle.radius);
-			return dx * dx + dy * dy < radiusSum * radiusSum;
+			bool overlap = dx * dx + dy * dy < radiusSum * radiusSum;
+			if (fromDir && overlap)
+			{
+				if (std::abs(dx) > std::abs(dy))
+					*fromDir = dx < 0 ? Direction::RIGHT : Direction::LEFT;
+				else if (std::abs(dy) > std::abs(dx))
+					*fromDir = dy < 0 ? Direction::DOWN : Direction::UP;
+			}
+			return overlap;
 		}
 	};
 	typedef Circle<float> CircleF;
@@ -870,8 +951,7 @@ namespace agp
 	typedef std::function< Vec2Df(const Vec2Df&) > Transform;
 
 	
-	// Axis-Aligned direction (Y-downwards)
-	enum class Direction { RIGHT, LEFT, UP, DOWN, NONE };
+	// Axis-aligned direction conversions
 	static Vec2Df dir2vec(Direction dir, bool yUp = false)
 	{
 		if (dir == Direction::RIGHT)

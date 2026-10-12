@@ -28,6 +28,17 @@ Hammer::Hammer(Scene* scene, const PointF& pos, Enemy* thrower)
 		});
 }
 
+void Hammer::forgetObject(Object* objectToRemove)
+{
+	Enemy::forgetObject(objectToRemove);
+	if (objectToRemove == _thrower)
+	{
+		_thrower = nullptr;
+		if (!_throwing)
+			kill();
+	}
+}
+
 void Hammer::update(float dt)
 {
 	Enemy::update(dt);

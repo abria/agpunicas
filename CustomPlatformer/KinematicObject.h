@@ -32,6 +32,7 @@ class agp::KinematicObject : public CollidableObject
 
 		// extends game logic (+moving colliding dynamic objects)
 		virtual void update(float dt) override;
+		virtual void forgetObject(Object* objectToRemove) override;
 
 		// extends logic collision (+capturing colliding dynamic objects)
 		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;

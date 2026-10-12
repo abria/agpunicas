@@ -457,6 +457,11 @@ void EditorScene::event(SDL_Event& evt)
 					updateState(State::DEFAULT);
 					_currentObject = nullptr;
 				}
+				if (_resizingObject == underMouse)
+				{
+					_resizingObject = nullptr;
+					_isResizing = false;
+				}
 				underMouse->kill();
 			}
 			else if (_resizingObject)

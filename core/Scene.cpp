@@ -43,7 +43,9 @@ void Scene::newObject(Object* obj)
 
 void Scene::killObject(Object* obj)
 {
-	_deadObjects.insert(obj);
+	if (obj->_killed)
+		return;
+	_killedObjects.insert(obj);
 	obj->_killed = true;
 }
 
@@ -53,27 +55,29 @@ void Scene::refreshObjects()
 		_objects.emplace_back(obj);
 	_newObjects.clear();
 
-	for (auto it = _deadObjects.begin(); it != _deadObjects.end(); )
+	while (!_killedObjects.empty())
 	{
-		Object* obj = *it;
+		Object* objectToRemove = *_killedObjects.begin();
 
-		if (obj->_itersFromKilled < 2)
-		{
-			++it;
-			continue;
-		}
+		// Every other object gets a chance to clear its references, even if frozen.
+		// Only after these calls can objectToRemove be safely deleted.
+		for (auto other : _objects)
+			if (other != objectToRemove)
+				other->forgetObject(objectToRemove);
+		for (auto other : _newObjects)
+			if (other != objectToRemove)
+				other->forgetObject(objectToRemove);
 
-		auto jt = std::find(_objects.begin(), _objects.end(), obj);
-		if (jt != _objects.end()) 
-		{
-			size_t idxToRemove = std::distance(_objects.begin(), jt);
-			_objects[idxToRemove] = _objects.back();
-			_objects.pop_back();
-		}
+		auto it = std::find(_objects.begin(), _objects.end(), objectToRemove);
+		if (it != _objects.end())
+			_objects.erase(it);
 
-		// Erase the element from the set and advance the iterator safely
-		it = _deadObjects.erase(it); // 'erase' returns an iterator to the next element
-		delete obj;
+		// Edge-case precaution: a callback may create and kill an object during this refresh,
+		// leaving it queued for both insertion and removal.
+		_newObjects.erase(objectToRemove);
+
+		_killedObjects.erase(objectToRemove);
+		delete objectToRemove;
 	}
 }
 

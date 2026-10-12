@@ -41,6 +41,7 @@ public:
 	}
 	void velocity(float x, float y = 0) { _vel = {x, y}; }
 	void freezePhysics(bool on) { _freezedPhysics = on; }
+	bool ccd() const { return _CCD; }
 	void gravity(float value) { _yGravityForce = value; }
 	void defaultForces(float maxSpeed = 6) { defaultPhysics(); _xVelMax = maxSpeed; }
 	bool collision(CollidableObject* with, bool begin, Direction) override
@@ -50,6 +51,74 @@ public:
 		return true;
 	}
 };
+
+void objectRemoval()
+{
+	// Removing a frozen support must end its contact and restore CCD immediately.
+	Scene scene({-20,-20,60,50},{16,16});
+	auto* platform = new KinematicObject(&scene, {0,0,4,1}, nullptr);
+	auto* body = new Body(&scene, {1,-1,0.6f,1});
+	scene.update(0);
+	body->setCCD(false);
+	body->update(0.01f);
+	require(body->contacts[platform] > 0, "removal: missing initial platform contact");
+	int exits = body->exits[platform];
+	body->setFreezed(true);
+	platform->setFreezed(true);
+	platform->kill();
+	platform->kill(); // repeated kill must still delete only once
+	scene.update(0);
+	require(scene.objects().size() == 1 && body->exits[platform] == exits + 1,
+		"removal: frozen support was not removed or contact did not end once");
+	require(body->ccd(), "removal: losing the platform did not restore CCD");
+	body->setFreezed(false);
+	body->update(0.01f); // also exercises previous contacts after the deletion
+	require(body->pos().y > -1, "removal: body did not fall after losing its support");
+
+	// A frozen platform must forget its passengers even without updating itself.
+	platform = new KinematicObject(&scene, {0,5,4,1}, nullptr);
+	scene.update(0);
+	platform->collision(body, true, Direction::UP);
+	platform->setFreezed(true);
+	body->kill();
+	scene.update(0);
+	platform->setFreezed(false);
+	platform->update(0.01f); // AddressSanitizer catches a stale passenger here
+
+	// Compenetrable contacts must also be safe to resume after removal.
+	body = new Body(&scene, {-1,0,0.6f,1});
+	body->gravity(0);
+	body->velocity(3);
+	int triggered = 0;
+	auto* trigger = new Trigger(&scene, {0,0,4,2}, body, [&]() { ++triggered; });
+	scene.update(0);
+	for (int i = 0; i < 30; ++i) body->update(0.01f);
+	require(triggered > 0, "removal: missing initial trigger contact");
+	body->setFreezed(true);
+	trigger->kill();
+	scene.update(0);
+	body->setFreezed(false);
+	body->update(0.01f);
+
+	// New/frozen objects and kills requested during notification need no extra tick.
+	struct Probe : Object
+	{
+		int& destroyed;
+		bool cascade;
+		Probe(Scene* scene, int& count, bool cascade = false)
+			: Object(scene, {0,0,1,1}), destroyed(count), cascade(cascade) {}
+		~Probe() override { ++destroyed; }
+		void forgetObject(Object*) override { if (cascade) kill(); }
+	};
+	int destroyed = 0;
+	Scene pending({0,0,10,10},{16,16});
+	auto* victim = new Probe(&pending, destroyed);
+	new Probe(&pending, destroyed, true);
+	victim->setFreezed(true);
+	victim->kill();
+	pending.update(0);
+	require(destroyed == 2 && pending.objects().empty(), "removal: pending/cascaded kill was delayed");
+}
 
 void hill(bool reverse, bool ccd)
 {
@@ -390,7 +459,7 @@ int main(int argc, char** argv)
 		valley(false); valley(true);
 		for (bool ccd : {false,true}) { oneWayPlatforms(ccd); idleSliding(ccd); }
 		uphillControl(); uphillRelease();
-		speedAndJump(); blockers(); platformAndTrigger();
+		speedAndJump(); blockers(); platformAndTrigger(); objectRemoval();
 		std::cout << "Slope physics regression checks passed\n";
 		return 0;
 	}

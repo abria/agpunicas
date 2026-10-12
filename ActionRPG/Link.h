@@ -41,6 +41,7 @@ class agp::Link : public DynamicObject
 
 		// extends game logic (+mario logic)
 		virtual void update(float dt) override;
+		virtual void forgetObject(Object* objectToRemove) override;
 
 		// scripted actions
 		virtual void attack();

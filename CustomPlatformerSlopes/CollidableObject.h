@@ -78,6 +78,7 @@ class agp::CollidableObject : public MovableObject
 
 		// extends game logic (+collisions)
 		virtual void update(float dt) override;
+		virtual void forgetObject(Object* objectToRemove) override;
 
 		// extends rendering (+collider)
 		virtual void draw(SDL_Renderer* renderer, Transform camera) override;

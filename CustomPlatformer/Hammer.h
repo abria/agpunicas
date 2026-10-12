@@ -29,6 +29,7 @@ class agp::Hammer : public Enemy
 
 		// extends game logic (+Hammer logic)
 		virtual void update(float dt) override;
+		virtual void forgetObject(Object* objectToRemove) override;
 
 		// extends collision logic (+collision with Mario only)
 		virtual bool collidableWith(CollidableObject* obj) override;

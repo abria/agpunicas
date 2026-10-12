@@ -39,7 +39,7 @@ class agp::Scene
 		
 		Objects _objects;
 		ObjectsSet _newObjects;		// new objects that need to be added
-		ObjectsSet _deadObjects;	// dead objects that need to be deallocated
+		ObjectsSet _killedObjects;	// still allocated; awaiting removal and deallocation
 		RectF _rect;				// the scene (world) rectangle
 		Point _pixelUnitSize;		// unit size in pixels
 		Color _backgroundColor;		// background color

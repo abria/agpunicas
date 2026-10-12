@@ -69,6 +69,13 @@ Mario::Mario(Scene* scene, const PointF& pos)
 	_sprite = _sprites["stand"];
 }
 
+void Mario::forgetObject(Object* objectToRemove)
+{
+	DynamicObject::forgetObject(objectToRemove);
+	if (objectToRemove == _sword)
+		_sword = nullptr;
+}
+
 void Mario::update(float dt)
 {
 	// physics
@@ -181,7 +188,8 @@ void Mario::attack()
 	schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sword->sprite())->duration(), [this]()
 		{
 			_attacking = false;
-			_scene->killObject(_sword);
+			if (_sword)
+				_scene->killObject(_sword);
 			_sword = nullptr;
 		});
 }

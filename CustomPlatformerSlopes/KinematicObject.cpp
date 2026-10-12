@@ -19,6 +19,12 @@ KinematicObject::KinematicObject(Scene* scene, const RectF& rect, Sprite* sprite
 	_compenetrable = false;
 }
 
+void KinematicObject::forgetObject(Object* objectToRemove)
+{
+	CollidableObject::forgetObject(objectToRemove);
+	_collidingItems.erase(dynamic_cast<DynamicObject*>(objectToRemove));
+}
+
 void KinematicObject::update(float dt)
 {
 	CollidableObject::update(dt);

@@ -45,6 +45,15 @@ Link::Link(Scene* scene, const PointF& pos)
 	_shadow = new RenderableObject(scene, rect(), SpriteFactory::instance()->get(std::string("link_shadow")), _layer - 1, false);
 }
 
+void Link::forgetObject(Object* objectToRemove)
+{
+	DynamicObject::forgetObject(objectToRemove);
+	if (objectToRemove == _sword)
+		_sword = nullptr;
+	if (objectToRemove == _shadow)
+		_shadow = nullptr;
+}
+
 void Link::update(float dt)
 {
 	// physics
@@ -62,7 +71,8 @@ void Link::update(float dt)
 		setSprite(_sprites[int(_facingDir)]["stand"]);
 
 	// decorations
-	_shadow->setPos(rect().pos + Vec2Df(dir2vec(_facingDir).x * (2.0f / _scene->pixelUnitSize().x), dir2vec(_facingDir).y == 0 ? 1.0f / _scene->pixelUnitSize().y : 0));
+	if (_shadow)
+		_shadow->setPos(rect().pos + Vec2Df(dir2vec(_facingDir).x * (2.0f / _scene->pixelUnitSize().x), dir2vec(_facingDir).y == 0 ? 1.0f / _scene->pixelUnitSize().y : 0));
 
 	// x-mirroring
 	if (_facingDir == Direction::LEFT)
@@ -87,7 +97,8 @@ void Link::attack()
 	schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sprites[int(_facingDir)]["attack"])->duration(), [this]() 
 		{
 			_attacking = false; 
-			_sword->kill();
+			if (_sword)
+				_sword->kill();
 			_sword = nullptr;
 		});
 }

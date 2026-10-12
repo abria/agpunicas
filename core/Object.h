@@ -40,7 +40,6 @@ class agp::Object
 		int _id;
 		bool _freezed;	// if false, does not update
 		bool _killed;
-		int _itersFromKilled;
 		float _timeElapsed;		// internal usage to keep track of elapsed time
 		std::map<std::string, Scheduler> _schedulers;
 
@@ -85,6 +84,11 @@ class agp::Object
 
 		// kill
 		virtual void kill();
+
+		// The scene asks this object to forget another object that is about to be deleted.
+		// objectToRemove is still valid here; release references to it, not the object itself.
+		// Called even when this object is frozen; the default has no references to clear.
+		virtual void forgetObject(Object* objectToRemove) {}
 
 		// debugging
 		int id() const { return _id; }

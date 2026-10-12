@@ -45,6 +45,7 @@ class agp::Mario : public DynamicObject
 
 		// extends game logic (+mario logic)
 		virtual void update(float dt) override;
+		virtual void forgetObject(Object* objectToRemove) override;
 
 		// player actions
 		virtual void move(Direction dir) override;

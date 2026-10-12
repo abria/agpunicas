@@ -75,6 +75,31 @@ bool CollidableObject::midair() const
 	return true;
 }
 
+void CollidableObject::forgetObject(Object* objectToRemove)
+{
+	auto other = dynamic_cast<CollidableObject*>(objectToRemove);
+	if (!other)
+		return;
+
+	// Remove the contact and its matching axis/depth together.
+	bool contact = false;
+	for (size_t i = _collisions.size(); i-- > 0; )
+		if (_collisions[i] == other)
+		{
+			_collisions.erase(_collisions.begin() + i);
+			_collisionAxes.erase(_collisionAxes.begin() + i);
+			_collisionDepths.erase(_collisionDepths.begin() + i);
+			contact = true;
+		}
+	_collisionsPrev.erase(std::remove(_collisionsPrev.begin(), _collisionsPrev.end(), other), _collisionsPrev.end());
+	_collisionsCompenetrables.erase(other);
+	if (contact)
+	{
+		collision(other, false, Direction::NONE);
+		other->collision(this, false, Direction::NONE);
+	}
+}
+
 void CollidableObject::update(float dt)
 {
 	MovableObject::update(dt);

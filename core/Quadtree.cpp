@@ -9,7 +9,7 @@
 
 #include "Quadtree.h"
 #include <algorithm>
-#include <memory>
+#include <utility>
 #include <iostream>
 #include "Object.h"
 
@@ -22,7 +22,6 @@ struct Quadtree::Node
 
     Node()
     {
-        int count = 0;
         for (int i = 0; i < 4; i++)
             children[i] = nullptr;
     }
@@ -59,7 +58,6 @@ void Quadtree::add(Object* obj)
 
 void Quadtree::remove(Object* obj)
 {
-    //remove(_root, _rect, obj);
     auto it = _objectToNode.find(obj->id());
     if (it != _objectToNode.end())
         nodeRemoveObject(it->second, obj);
@@ -84,21 +82,7 @@ std::vector<Object*> Quadtree::queryObjects(const RectF& queryRect) const
     auto objects = std::vector<Object*>();
     query(_root, _rect, queryRect, objects);
 
-    /*printf("\n_rect = %s\nqueryRect = %s\nobjects = %d\n", 
-        _rect.str().c_str(), queryRect.str().c_str(), objects.size());
-    printf("{\n");
-    for (auto v : objects)
-        printf("\t%s at %s\n", v->name().c_str(), v->rect().str().c_str());
-    printf("}\n");*/
-
     return objects;
-}
-
-std::vector<std::pair<Object*, Object*>> Quadtree::queryIntersections() const
-{
-    auto intersections = std::vector<std::pair<Object*, Object*>>();
-    queryIntersections(_root, intersections);
-    return intersections;
 }
 
 bool Quadtree::isLeaf(const Node* node) const
@@ -226,39 +210,6 @@ void Quadtree::nodeRemoveObject(Node* node, Object* obj)
     _objectToNode.erase(obj->id());
 }
 
-bool Quadtree::tryMerge(Node* node)
-{
-    if (!node)
-        throw "Quadtree::tryMerge: invalid node pointer";
-
-    if (isLeaf(node))
-        throw "Quadtree::tryMerge: only interior nodes can be merged";
-
-    auto objectsCount = node->objects.size();
-    for (const auto& child : node->children)
-    {
-        if (!isLeaf(child))
-            return false;
-        objectsCount += child->objects.size();
-    }
-    if (objectsCount <= MAX_OBJECTS_PER_NODE)
-    {
-        node->objects.reserve(objectsCount);
-        // merge the objects of all the children
-        for (const auto& child : node->children)
-        {
-            for (const auto& obj : child->objects)
-                nodeAddObject(node, obj);
-        }
-        // remove the children
-        for (auto& child : node->children)
-            child = nullptr;
-        return true;
-    }
-    else
-        return false;
-}
-
 void Quadtree::query(Node* node, const RectF& nodeRect, const RectF& queryRect, std::vector<Object*>& objects) const
 {
     if (!node)
@@ -287,47 +238,5 @@ void Quadtree::query(Node* node, const RectF& nodeRect, const RectF& queryRect, 
             if (queryRect.intersects(childRect))
                 query(node->children[i], childRect, queryRect, objects);
         }
-    }
-}
-
-void Quadtree::queryIntersections(Node* node, std::vector<std::pair<Object*, Object*>>& intersections) const
-{
-    // Find intersections between objects stored in this node
-    // Make sure to not report the same intersection twice
-    for (int i = 0; i < node->objects.size(); ++i)
-    {
-        for (int j = 0; j < i; ++j)
-        {
-            if (node->objects[i]->rect().intersects(node->objects[j]->rect()))
-                intersections.emplace_back(node->objects[i], node->objects[j]);
-        }
-    }
-    if (!isLeaf(node))
-    {
-        // objects in this node can intersect objects in descendants
-        for (const auto& child : node->children)
-        {
-            for (const auto& obj : node->objects)
-                queryIntersectionsInDescendants(child, obj, intersections);
-        }
-        // find intersections in children
-        for (const auto& child : node->children)
-            queryIntersections(child, intersections);
-    }
-}
-
-void Quadtree::queryIntersectionsInDescendants(Node* node, Object* obj, std::vector<std::pair<Object*, Object*>>& intersections) const
-{
-    // test against the objects stored in this node
-    for (const auto& other : node->objects)
-    {
-        if (obj->rect().intersects(other->rect()))
-            intersections.emplace_back(obj, other);
-    }
-    // test against objects stored into descendants of this node
-    if (!isLeaf(node))
-    {
-        for (const auto& child : node->children)
-            queryIntersectionsInDescendants(child, obj, intersections);
     }
 }

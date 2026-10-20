@@ -50,21 +50,16 @@ class agp::Quadtree
         void split(Node* node, const RectF& nodeRect);
         void nodeAddObject(Node* node, Object* obj);
         void nodeRemoveObject(Node* node, Object* obj);
-        bool tryMerge(Node* node);
         void query(Node* node, const RectF& nodeRect, const RectF& queryRect, std::vector<Object*>& objects) const;
-        void queryIntersections(Node* node, std::vector<std::pair<Object*, Object*>>& intersections) const;
-        void queryIntersectionsInDescendants(Node* node, Object* obj, std::vector<std::pair<Object*, Object*>>& intersections) const;
 
     public:
 
         Quadtree(const RectF& rect);
         ~Quadtree();
-        RectF rect() const { return _rect; }
 
         void add(Object* obj);
         void remove(Object* obj);
         void update(Object* obj);
 
         std::vector<Object*> queryObjects(const RectF& rect) const;
-        std::vector<std::pair<Object*, Object*>> queryIntersections() const;
 };

@@ -50,13 +50,16 @@ smorza rapidamente l'inerzia residua: segue subito lo scivolamento, conservando
 un breve tratto di rallentamento. In fondo alle valli l'entità si ferma senza
 oscillazioni.
 
-`Slope` definisce superficie, lati solidi e disegno. `DynamicObject`
+`Slope` definisce il solo segmento inclinato e lo disegna come triangolo.
+Base e lato verticale non esistono per le collisioni: gli oggetti li attraversano,
+sia in CCD sia nel modo discreto. La vista dei collider mostra solo il segmento.
+`DynamicObject`
 adatta lo spostamento prima della collisione e registra il contatto dopo la
 risoluzione, anche nel modo discreto usato sulle piattaforme cinematiche.
 Mario, nemici e power-up ereditano questo comportamento. I salti staccano
 l'oggetto dalla pendenza; pareti e soffitti restano solidi.
 
-Le pendenze sono statiche e triangolari; gli oggetti mobili restano AABB.
+Le pendenze sono segmenti statici; gli oggetti mobili restano AABB.
 Non sono supportate slope mobili o ruotate. La risposta alla pendenza è
 arcade, con rallentamento in salita e scivolamento a riposo.
 

@@ -45,16 +45,6 @@ float Slope::slideVelocity() const
 	return _risesRight ? -speed : speed;
 }
 
-bool Slope::sweep(const RectF& body, const Vec2Df& movement,
-						Vec2Df& point, Vec2Df& normal, float& time) const
-{
-	if (!StaticObject::sweep(body, movement, point, normal, time))
-		return false;
-	// DynamicObject handles the slope surface
-	// only the bottom and the high vertical side use the AABB test
-	return normal.y > 0 || (_risesRight ? normal.x > 0 : normal.x < 0);
-}
-
 void Slope::draw(SDL_Renderer* renderer, Transform camera)
 {
 	if (!_visible) return;
@@ -76,18 +66,6 @@ void Slope::draw(SDL_Renderer* renderer, Transform camera)
 	if (scene && scene->collidersVisible())
 	{
 		SDL_SetRenderDrawColor(renderer, _colliderColor.r, _colliderColor.g, _colliderColor.b, 255);
-		for (int i = 0; i < 3; ++i)
-			SDL_RenderLine(renderer, points[i].x, points[i].y, points[(i+1)%3].x, points[(i+1)%3].y);
+		SDL_RenderLine(renderer, points[0].x, points[0].y, points[1].x, points[1].y);
 	}
-}
-
-// Discrete collision mode is used while riding kinematic platforms.
-bool Slope::overlap(const RectF& body, Direction& axis, float& depth) const
-{
-	// The empty upper half of the bounding box is not solid.
-	if (body.bottom() <= surfaceY(body) + 0.001f)
-		return false;
-	if (!StaticObject::overlap(body, axis, depth))
-		return false;
-	return axis == Direction::UP || (_risesRight ? axis == Direction::LEFT : axis == Direction::RIGHT);
 }

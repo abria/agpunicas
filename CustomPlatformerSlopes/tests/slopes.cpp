@@ -203,7 +203,7 @@ void speedAndJump()
 void blockers()
 {
 	Scene scene({-20,-20,60,50},{16,16});
-	auto* slope = new Slope(&scene, {0,-4,4,4}, {190,120,65}, true);
+	new Slope(&scene, {0,-4,4,4}, {190,120,65}, true);
 	auto* body = new Body(&scene, {1,-2.6f,0.6f,1});
 	new StaticObject(&scene, {2,-6,0.5f,5}, nullptr);
 	scene.update(0);
@@ -218,10 +218,30 @@ void blockers()
 	body->move(Direction::RIGHT);
 	for (int i=0;i<100;++i) body->update(0.01f);
 	require(body->sceneCollider().top() >= -2.801f, "climbed through ceiling");
-	Vec2Df point, normal;
-	float time;
-	require(slope->sweep({4.2f,-1,0.6f,1},{-1,0},point,normal,time) && normal.x > 0, "high side is not solid");
-	require(slope->sweep({1,1,0.6f,1},{0,-2},point,normal,time) && normal.y > 0, "underside is not solid");
+}
+
+void openSlopeSides(bool ccd, bool risesRight)
+{
+	Scene scene({-20,-20,60,50},{16,16});
+	auto* slope = new Slope(&scene, {0,-4,4,4}, {190,120,65}, risesRight);
+	auto* body = new Body(&scene, {0,0,0.6f,0.6f});
+	body->gravity(0);
+	body->setCCD(ccd);
+	scene.update(0);
+	// Cross each lateral edge and the base, below the inclined surface.
+	const PointF starts[] = {{-0.8f,-0.5f}, {4.2f,-0.5f}, {2,0.2f}};
+	const Vec2Df velocities[] = {{2,0}, {-2,0}, {0,-2}};
+	for (int i = 0; i < 3; ++i)
+	{
+		body->setPos(starts[i]);
+		body->velocity(velocities[i].x, velocities[i].y);
+		body->update(0.3f);
+		const PointF expected = starts[i] + velocities[i] * 0.3f;
+		require(body->pos().distance(expected) < 0.0001f,
+			"slope segment: an absent side blocked movement");
+		require(body->contacts[slope] == 0,
+			"slope segment: an absent side generated a contact");
+	}
 }
 
 void platformAndTrigger()
@@ -455,7 +475,11 @@ int main(int argc, char** argv)
 			levelIntegration();
 			return 0;
 		}
-		for (bool ccd : {true,false}) for (bool reverse : {true,false}) hill(reverse,ccd);
+		for (bool ccd : {true,false}) for (bool reverse : {true,false})
+		{
+			hill(reverse,ccd);
+			openSlopeSides(ccd,reverse);
+		}
 		valley(false); valley(true);
 		for (bool ccd : {false,true}) { oneWayPlatforms(ccd); idleSliding(ccd); }
 		uphillControl(); uphillRelease();

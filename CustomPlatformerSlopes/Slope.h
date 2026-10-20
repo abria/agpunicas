@@ -16,7 +16,7 @@ namespace agp
 }
 
 // Slope class.
-// - defines a static triangular collider
+// - defines a static inclined segment, drawn as a triangle
 // - provides surface height and slope-dependent speed
 class agp::Slope : public StaticObject
 {
@@ -35,11 +35,9 @@ class agp::Slope : public StaticObject
 		float speedFactor(float vx) const;
 		float slideVelocity() const; // horizontal component of passive downhill motion
 
-		// extends collision detection (+bottom and high vertical side)
-		bool sweep(const RectF& body, const Vec2Df& movement,
-			Vec2Df& point, Vec2Df& normal, float& time) const override;
-
-		bool overlap(const RectF& body, Direction& axis, float& depth) const override;
+		// DynamicObject handles the segment; its bounding box is not solid.
+		bool sweep(const RectF&, const Vec2Df&, Vec2Df&, Vec2Df&, float&) const override { return false; }
+		bool overlap(const RectF&, Direction&, float&) const override { return false; }
 
 		// extends rendering (+triangular shape)
 		void draw(SDL_Renderer* renderer, Transform camera) override;

@@ -16,7 +16,16 @@
 #ifdef _WIN32
 #include <ctime>
 #include <direct.h>
+#ifndef NOMINMAX
+#define NOMINMAX // prevent <windows.h> from defining min/max macros that break std::min/std::max
+#endif
 #include <windows.h>
+#ifdef min // in case <windows.h> was already included elsewhere without NOMINMAX
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #else
 #include <fnmatch.h>
 #include <time.h>

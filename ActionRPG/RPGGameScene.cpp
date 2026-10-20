@@ -30,7 +30,7 @@ RPGGameScene::RPGGameScene(const RectF& rect, const Point& pixelUnitSize, float 
 	_transitionExit = false;
 	_transitionCounter = 0;
 
-	_useQuadtree = true;
+	_useQuadtree = false;
 	_autoKillWhenOutsideScene = false;
 	
 	// SNES aspect ratio

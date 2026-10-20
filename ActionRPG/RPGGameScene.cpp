@@ -136,7 +136,7 @@ void RPGGameScene::update(float timeToSimulate)
 
 bool RPGGameScene::isEmpty(const RectF& rect)
 {
-	Objects candidates = _quadtree.queryObjects(rect);
+	Objects candidates = objects(rect);
 	for (auto obj : candidates)
 		if (dynamic_cast<StaticObject*>(obj) && obj->intersectsRect(rect))
 			return false;

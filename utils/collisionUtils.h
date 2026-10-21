@@ -55,6 +55,100 @@ namespace agp
 		return true;
 	}
 
+	// SAT Polygon vs. Polygon collision detection
+	// for better performance, replace std::vector with static std::array[MAX_DIM]
+	static inline bool checkCollisionSAT(
+		const std::vector < Vec2Df >& polyA,
+		const std::vector < Vec2Df >& polyB,
+		Vec2Df &collisionAxis,
+		float &collisionDepth)
+	{
+		// by default, we hypothesize there is an intersection
+		// if at least one test passes, we declare no intersection
+		bool intersects = true;
+
+		// test A vs. B
+		for (int i = 0; i < polyA.size() && intersects; i++)
+		{
+			Vec2Df normal = (polyA[(i + 1) % polyA.size()] - polyA[i]).perp(); //.norm() is neglected to save computation
+
+			bool edgeTestPassed = true;
+			for (int j = 0; j < polyB.size(); j++)
+				if ((polyB[j] - polyA[i]).dot(normal) < 0)
+					edgeTestPassed = false;
+
+			if (edgeTestPassed)
+				intersects = false;
+		}
+
+		// test B vs. A
+		for (int i = 0; i < polyB.size() && intersects; i++)
+		{
+			Vec2Df normal = (polyB[(i + 1) % polyB.size()] - polyB[i]).perp(); //.norm() is neglected to save computation
+
+			bool edgeTestPassed = true;
+			for (int j = 0; j < polyA.size(); j++)
+				if ((polyA[j] - polyB[i]).dot(normal) < 0)
+					edgeTestPassed = false;
+
+			if (edgeTestPassed)
+				intersects = false;
+		}
+
+		// if intersects, compute collision direction and depth
+		if (intersects)
+		{
+			std::vector<Vec2Df> normals(polyA.size() + polyB.size());
+			Vec2Df centerA, centerB;
+			for (int i = 0; i < polyA.size(); i++)
+			{
+				normals[i] = (polyA[(i + 1) % polyA.size()] - polyA[i]).perp().norm(); //.norm() is necessary since we are measuring projections
+				centerA += polyA[i];
+			}
+			centerA /= float(polyA.size());
+			for (int i = 0; i < polyB.size(); i++)
+			{
+				normals[i + polyA.size()] = (polyB[(i + 1) % polyB.size()] - polyB[i]).perp().norm(); //.norm() is necessary since we are measuring projections
+				centerB += polyB[i];
+			}
+			centerB /= float(polyB.size());
+
+			collisionDepth = inf<float>();
+			for (auto& normal : normals)
+			{
+				float minA = inf<float>();
+				float maxA = -inf<float>();
+				for (auto& vertex : polyA)
+				{
+					float proj = vertex.dot(normal);
+					minA = std::min(minA, proj);
+					maxA = std::max(maxA, proj);
+				}
+				float minB = inf<float>();
+				float maxB = -inf<float>();
+				for (auto& vertex : polyB)
+				{
+					float proj = vertex.dot(normal);
+					minB = std::min(minB, proj);
+					maxB = std::max(maxB, proj);
+				}
+
+				float axisDepth = (std::min(maxB - minA, maxA - minB));
+				if (axisDepth < collisionDepth)
+				{
+					collisionDepth = axisDepth;
+					collisionAxis = normal;
+				}
+			}
+
+			// invert collisionAxis if not already going from A to B
+			if ((centerB - centerA).dot(collisionAxis) < 0)
+				collisionAxis = -collisionAxis;
+		}
+
+		return intersects;
+	}
+
 	// SAT Polygon vs. Polygon collision detection with precomputed unit axes
 	// polygon containers can be std::vector or std::array; touching counts as contact
 	template <class PolygonA, class PolygonB, class Axes>
@@ -105,28 +199,6 @@ namespace agp
 		if ((centerB - centerA).dot(collisionAxis) < 0)
 			collisionAxis = -collisionAxis;
 		return true;
-	}
-
-	// SAT Polygon vs. Polygon collision detection
-	// build axes from polygon edges; keep the nonzero-overlap test of this overload
-	static inline bool checkCollisionSAT(
-		const std::vector<Vec2Df>& polyA,
-		const std::vector<Vec2Df>& polyB,
-		Vec2Df& collisionAxis,
-		float& collisionDepth)
-	{
-		std::vector<Vec2Df> axes;
-		const std::vector<Vec2Df>* polygons[] = { &polyA, &polyB };
-		for (const auto* poly : polygons)
-			for (std::size_t i = 0; i < poly->size(); i++)
-			{
-				const Vec2Df edge = (*poly)[(i + 1) % poly->size()] - (*poly)[i];
-				if (edge.mag2() > 0)
-					axes.push_back(edge.perp().norm());
-			}
-		if (axes.empty())
-			return false;
-		return checkCollisionSAT(polyA, polyB, axes, collisionAxis, collisionDepth) && collisionDepth > 0;
 	}
 
 	// collision data for a single representative contact

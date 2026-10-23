@@ -79,7 +79,7 @@ void Mario::update(float dt)
 	if (_vel.x != 0 && !_jumping)
 		_xLastNonZeroVel = _vel.x;
 	// Passive sliding moves Mario while leaving his stored horizontal velocity at zero.
-	_walking = _vel.x != 0 || (_slopeSliding && std::abs(pos().x - previousX) > 0.00001f);
+	_walking = _vel.x != 0 || (_slope_sliding && std::abs(pos().x - previousX) > 0.00001f);
 	_running = std::abs(_vel.x) > 6;
 	if (_transformSmall2Super && dynamic_cast<AnimatedSprite*>(_sprites[0]["small2big"])->ended())
 		powerup(false);

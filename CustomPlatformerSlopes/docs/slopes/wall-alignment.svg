@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="450" viewBox="0 0 680 450" role="img">
+<!-- Figure from Slope in SimplePlatformer, by Alessandro Bria. See README.md for source. -->
+<style>
+text { font-family: Arial, Helvetica, sans-serif; }
+.t { font-size: 13px; font-weight: 500; fill: #1A1F22; }
+.ts { font-size: 12px; fill: #5E676D; }
+.tm { font-family: Menlo, Consolas, monospace; font-size: 12px; fill: #1A1F22; }
+.tmb { font-family: Menlo, Consolas, monospace; font-size: 13px; font-weight: 500; fill: #1A1F22; }
+.halo { paint-order: stroke; stroke: #FFFFFF; stroke-width: 4px; stroke-linejoin: round; }
+.slope { fill: #B9481A; fill-opacity: .16; }
+.sline { stroke: #B9481A; stroke-width: 2; fill: none; stroke-linecap: round; }
+.ext { stroke: #B9481A; stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.band { stroke: #DD9216; stroke-width: 10; stroke-opacity: .28; stroke-linecap: round; }
+.body { fill: #DCE7FA; stroke: #2E64C2; stroke-width: 1.2; }
+.next { fill: none; stroke: #2E64C2; stroke-width: 1.4; stroke-dasharray: 4 3; }
+.bad { fill: none; stroke: #CC3333; stroke-width: 1.4; stroke-dasharray: 4 3; }
+.plan { fill: none; stroke: #5E676D; stroke-width: 1.3; stroke-dasharray: 4 3; }
+.solid { fill: #E3E7E8; stroke: #8B9498; stroke-width: .8; }
+.foot { fill: #DD9216; }
+.dot-mute { fill: #5E676D; } .dot-bad { fill: #CC3333; } .dot-body { fill: #2E64C2; } .dot-brick { fill: #B9481A; }
+.ring { fill: none; stroke: #CC3333; stroke-width: 1.5; }
+.lead { stroke: #5E676D; stroke-width: .8; stroke-dasharray: 2 3; fill: none; }
+.guide { stroke: #5E676D; stroke-width: .9; stroke-dasharray: 3 3; fill: none; }
+.sep { stroke: #D9DEDD; stroke-width: 1; stroke-dasharray: 2 4; }
+.gridl { stroke: #E8ECEC; stroke-width: 1; }
+.a-mute { stroke: #5E676D; stroke-width: 1.5; fill: none; }
+.a-body { stroke: #2E64C2; stroke-width: 1.6; fill: none; }
+.a-bad { stroke: #CC3333; stroke-width: 1.5; fill: none; }
+.a-foot { stroke: #DD9216; stroke-width: 1.8; fill: none; }
+.a-brick { stroke: #B9481A; stroke-width: 1.5; fill: none; }
+.dash { stroke-dasharray: 4 3; }
+.mk-mute { fill: none; stroke: #5E676D; } .mk-body { fill: none; stroke: #2E64C2; } .mk-bad { fill: none; stroke: #CC3333; }
+.mk-foot { fill: none; stroke: #DD9216; } .mk-brick { fill: none; stroke: #B9481A; }
+.mk { stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.bx-eng { fill: #F1F3F2; stroke: #A9B1B3; stroke-width: .8; }
+.bx-slope { fill: #F8E4D9; stroke: #B9481A; stroke-width: .8; }
+.cont { fill: none; stroke: #B9481A; stroke-width: 1; stroke-dasharray: 5 4; }
+.bar-mute { fill: #8B9498; } .bar-body { fill: #2E64C2; } .bar-ok { fill: #1F8A68; } .bar-bad { fill: #CC3333; fill-opacity: .8; }
+.cell-ok { fill: #1F8A68; fill-opacity: .85; } .cell-bad { fill: #CC3333; fill-opacity: .85; }
+
+</style>
+<defs>
+<marker id="m-mute" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-mute" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-body" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-body" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-bad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-bad" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-foot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-foot" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-brick" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-brick" d="M2 1L8 5L2 9"></path></marker>
+</defs>
+<rect width="680" height="450" fill="#FFFFFF"/>
+<title>U2</title><desc>Salita e discesa contro un muro: P7 pianifica Δy per tutto il dx, il CCD taglia solo vx, U2 riporta i piedi sulla superficie.</desc><text class="tmb" x="120" y="30" text-anchor="middle" dominant-baseline="central">P7 · piano</text><text class="ts" x="120" y="48" text-anchor="middle" dominant-baseline="central">Δy per tutto il dx</text><text class="tmb" x="335" y="30" text-anchor="middle" dominant-baseline="central">CCD</text><text class="ts" x="335" y="48" text-anchor="middle" dominant-baseline="central">il muro taglia vx, non Δy</text><text class="tmb" x="550" y="30" text-anchor="middle" dominant-baseline="central">U2</text><text class="ts" x="550" y="48" text-anchor="middle" dominant-baseline="central">pos.y += surfaceY − bottom</text><line class="sep" x1="228" y1="24" x2="228" y2="410"></line><line class="sep" x1="443" y1="24" x2="443" y2="410"></line><text class="t" x="30" y="74" text-anchor="start" dominant-baseline="central">in salita: il Δy pianificato è troppo, il corpo resta sospeso</text><polygon class="slope" points="40,226 200,116 200,226"></polygon><line class="sline" x1="40" y1="226" x2="200" y2="116"></line><rect class="solid" x="155" y="91" width="14" height="105"></rect><polygon class="slope" points="255,226 415,116 415,226"></polygon><line class="sline" x1="255" y1="226" x2="415" y2="116"></line><rect class="solid" x="370" y="91" width="14" height="105"></rect><polygon class="slope" points="470,226 630,116 630,226"></polygon><line class="sline" x1="470" y1="226" x2="630" y2="116"></line><rect class="solid" x="585" y="91" width="14" height="105"></rect><rect class="body" x="88" y="155.9" width="22" height="22" rx="2"></rect><rect class="plan" x="173" y="97.4" width="22" height="22" rx="2"></rect><line class="a-foot" x1="110" y1="177.9" x2="192" y2="121.4" marker-end="url(#m-foot)"></line><circle class="foot" cx="110" cy="177.9" r="4"></circle><rect class="body" x="303" y="155.9" width="22" height="22" rx="2"></rect><rect class="bad" x="348" y="97.4" width="22" height="22" rx="2"></rect><line class="guide" x1="364" y1="122" x2="364" y2="147"></line><text class="ts" x="358" y="135" text-anchor="end" dominant-baseline="central">gap</text><rect class="bad" x="563" y="97.4" width="22" height="22" rx="2"></rect><rect class="next" x="563" y="124.9" width="22" height="22" rx="2"></rect><line class="a-foot" x1="557" y1="121" x2="557" y2="144" marker-end="url(#m-foot)"></line><circle class="foot" cx="585" cy="146.9" r="4"></circle><text class="t" x="30" y="254" text-anchor="start" dominant-baseline="central">in discesa: il Δy è troppo verso il basso, il corpo entra nella rampa</text><polygon class="slope" points="40,296 200,406 40,406"></polygon><line class="sline" x1="40" y1="296" x2="200" y2="406"></line><rect class="solid" x="145" y="271" width="14" height="115"></rect><polygon class="slope" points="255,296 415,406 255,406"></polygon><line class="sline" x1="255" y1="296" x2="415" y2="406"></line><rect class="solid" x="360" y="271" width="14" height="115"></rect><polygon class="slope" points="470,296 630,406 470,406"></polygon><line class="sline" x1="470" y1="296" x2="630" y2="406"></line><rect class="solid" x="575" y="271" width="14" height="115"></rect><rect class="body" x="70" y="294.6" width="22" height="22" rx="2"></rect><rect class="plan" x="155" y="353.1" width="22" height="22" rx="2"></rect><line class="a-foot" x1="70" y1="316.6" x2="153" y2="373.3" marker-end="url(#m-foot)"></line><circle class="foot" cx="70" cy="316.6" r="4"></circle><rect class="body" x="285" y="294.6" width="22" height="22" rx="2"></rect><rect class="bad" x="338" y="353.1" width="22" height="22" rx="2"></rect><line class="guide" x1="334" y1="354" x2="334" y2="375"></line><text class="ts" x="328" y="364" text-anchor="end" dominant-baseline="central">dentro</text><rect class="bad" x="553" y="353.1" width="22" height="22" rx="2"></rect><rect class="next" x="553" y="331.1" width="22" height="22" rx="2"></rect><line class="a-foot" x1="547" y1="375" x2="547" y2="357" marker-end="url(#m-foot)"></line><circle class="foot" cx="553" cy="353.1" r="4"></circle><rect class="body" x="30" y="425" width="16" height="14" rx="2"></rect><text class="ts" x="52" y="432" text-anchor="start" dominant-baseline="central">curRect</text><rect class="plan" x="120" y="425" width="16" height="14" rx="2"></rect><text class="ts" x="142" y="432" text-anchor="start" dominant-baseline="central">piano di P7</text><rect class="bad" x="250" y="425" width="16" height="14" rx="2"></rect><text class="ts" x="272" y="432" text-anchor="start" dominant-baseline="central">dopo il CCD</text><rect class="next" x="380" y="425" width="16" height="14" rx="2"></rect><text class="ts" x="402" y="432" text-anchor="start" dominant-baseline="central">dopo U2</text></svg>

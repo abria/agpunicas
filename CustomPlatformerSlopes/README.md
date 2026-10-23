@@ -59,6 +59,25 @@ risoluzione, anche nel modo discreto usato sulle piattaforme cinematiche.
 Mario, nemici e power-up ereditano questo comportamento. I salti staccano
 l'oggetto dalla pendenza; pareti e soffitti restano solidi.
 
+### Ordine del passo e stato della rampa
+
+`prepareMovement()` azzera lo stato temporaneo e delega a
+`resolveSlopeCollisions()`: supporto iniziale, fattore orizzontale, previsione
+sulla rampa corrente, scelta della superficie all'arrivo e conversione del
+dislivello in una velocità verticale temporanea. `CollidableObject` risolve poi
+le altre collisioni, con CCD oppure in modo discreto.
+
+`finishMovement()` rimuove il fattore orizzontale dalla velocità risolta,
+verifica che rimbalzi, soffitti o piattaforme non abbiano invalidato il supporto,
+e riallinea i piedi alla x realmente raggiunta. Su ogni contatto confermato
+azzera `_vel.y`: la componente usata per seguire la superficie non deve diventare
+un salto o una caduta nel passo successivo. Infine registra il supporto prima
+della rilevazione dei contatti terminati.
+
+La [guida illustrata nella wiki](https://github.com/abria/agpunicas/wiki/CustomPlatformerSlopes-Movimento-e-Collisioni)
+spiega la motivazione di ogni passaggio, con esempi, formule e limiti del modello.
+Le [figure originali e la provenienza](docs/slopes/README.md) sono nella repository.
+
 Le pendenze sono segmenti statici; gli oggetti mobili restano AABB.
 Non sono supportate slope mobili o ruotate. La risposta alla pendenza è
 arcade, con rallentamento in salita e scivolamento a riposo.

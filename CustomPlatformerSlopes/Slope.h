@@ -16,8 +16,9 @@ namespace agp
 }
 
 // Slope class.
-// - defines a static inclined segment, drawn as a triangle
-// - provides surface height and slope-dependent speed
+// - defines a static inclined segment, drawn as a triangle (positive width and height)
+// - provides surface height and slope-dependent horizontal speed
+// - leaves segment collision resolution to DynamicObject
 class agp::Slope : public StaticObject
 {
 	protected:
@@ -29,16 +30,17 @@ class agp::Slope : public StaticObject
 		Slope(Scene* scene, const RectF& rect, const Color& color, bool risesRight, int layer = 0)
 			: StaticObject(scene, rect, nullptr, layer), _risesRight(risesRight) { setColor(color); }
 
-		// slope queries
+		// slope queries (scene coordinates, y points downwards)
 		bool overlapsX(const RectF& body) const;
-		float surfaceY(const RectF& body) const;
-		float speedFactor(float vx) const;
+		float surfaceY(const RectF& body) const; // height at the uphill foot, clamped to the segment
+		float speedFactor(float vx) const;     // horizontal displacement multiplier, always positive
 		float slideVelocity() const; // horizontal component of passive downhill motion
 
-		// DynamicObject handles the segment; its bounding box is not solid.
-		bool sweep(const RectF&, const Vec2Df&, Vec2Df&, Vec2Df&, float&) const override { return false; }
-		bool overlap(const RectF&, Direction&, float&) const override { return false; }
+		// disable generic shape tests: the bounding rect is not a solid block
+		// DynamicObject resolves contact with the inclined segment instead
+		virtual bool sweep(const RectF&, const Vec2Df&, Vec2Df&, Vec2Df&, float&) const override { return false; }
+		virtual bool overlap(const RectF&, Direction&, float&) const override { return false; }
 
 		// extends rendering (+triangular shape)
-		void draw(SDL_Renderer* renderer, Transform camera) override;
+		virtual void draw(SDL_Renderer* renderer, Transform camera) override;
 };

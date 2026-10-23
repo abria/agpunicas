@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="310" viewBox="0 0 680 310" role="img">
+<!-- Figure from Slope in SimplePlatformer, by Alessandro Bria. See README.md for source. -->
+<style>
+text { font-family: Arial, Helvetica, sans-serif; }
+.t { font-size: 13px; font-weight: 500; fill: #1A1F22; }
+.ts { font-size: 12px; fill: #5E676D; }
+.tm { font-family: Menlo, Consolas, monospace; font-size: 12px; fill: #1A1F22; }
+.tmb { font-family: Menlo, Consolas, monospace; font-size: 13px; font-weight: 500; fill: #1A1F22; }
+.halo { paint-order: stroke; stroke: #FFFFFF; stroke-width: 4px; stroke-linejoin: round; }
+.slope { fill: #B9481A; fill-opacity: .16; }
+.sline { stroke: #B9481A; stroke-width: 2; fill: none; stroke-linecap: round; }
+.ext { stroke: #B9481A; stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.band { stroke: #DD9216; stroke-width: 10; stroke-opacity: .28; stroke-linecap: round; }
+.body { fill: #DCE7FA; stroke: #2E64C2; stroke-width: 1.2; }
+.next { fill: none; stroke: #2E64C2; stroke-width: 1.4; stroke-dasharray: 4 3; }
+.bad { fill: none; stroke: #CC3333; stroke-width: 1.4; stroke-dasharray: 4 3; }
+.plan { fill: none; stroke: #5E676D; stroke-width: 1.3; stroke-dasharray: 4 3; }
+.solid { fill: #E3E7E8; stroke: #8B9498; stroke-width: .8; }
+.foot { fill: #DD9216; }
+.dot-mute { fill: #5E676D; } .dot-bad { fill: #CC3333; } .dot-body { fill: #2E64C2; } .dot-brick { fill: #B9481A; }
+.ring { fill: none; stroke: #CC3333; stroke-width: 1.5; }
+.lead { stroke: #5E676D; stroke-width: .8; stroke-dasharray: 2 3; fill: none; }
+.guide { stroke: #5E676D; stroke-width: .9; stroke-dasharray: 3 3; fill: none; }
+.sep { stroke: #D9DEDD; stroke-width: 1; stroke-dasharray: 2 4; }
+.gridl { stroke: #E8ECEC; stroke-width: 1; }
+.a-mute { stroke: #5E676D; stroke-width: 1.5; fill: none; }
+.a-body { stroke: #2E64C2; stroke-width: 1.6; fill: none; }
+.a-bad { stroke: #CC3333; stroke-width: 1.5; fill: none; }
+.a-foot { stroke: #DD9216; stroke-width: 1.8; fill: none; }
+.a-brick { stroke: #B9481A; stroke-width: 1.5; fill: none; }
+.dash { stroke-dasharray: 4 3; }
+.mk-mute { fill: none; stroke: #5E676D; } .mk-body { fill: none; stroke: #2E64C2; } .mk-bad { fill: none; stroke: #CC3333; }
+.mk-foot { fill: none; stroke: #DD9216; } .mk-brick { fill: none; stroke: #B9481A; }
+.mk { stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.bx-eng { fill: #F1F3F2; stroke: #A9B1B3; stroke-width: .8; }
+.bx-slope { fill: #F8E4D9; stroke: #B9481A; stroke-width: .8; }
+.cont { fill: none; stroke: #B9481A; stroke-width: 1; stroke-dasharray: 5 4; }
+.bar-mute { fill: #8B9498; } .bar-body { fill: #2E64C2; } .bar-ok { fill: #1F8A68; } .bar-bad { fill: #CC3333; fill-opacity: .8; }
+.cell-ok { fill: #1F8A68; fill-opacity: .85; } .cell-bad { fill: #CC3333; fill-opacity: .85; }
+
+</style>
+<defs>
+<marker id="m-mute" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-mute" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-body" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-body" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-bad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-bad" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-foot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-foot" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-brick" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-brick" d="M2 1L8 5L2 9"></path></marker>
+</defs>
+<rect width="680" height="310" fill="#FFFFFF"/>
+<title>C1</title><desc>In cima a una rampa ripida che finisce contro un blocco alla stessa quota, la mossa diagonale taglia lo spigolo e colpisce il fianco del blocco.</desc><polygon class="slope" points="200,290 290,110 290,290"></polygon><line class="sline" x1="200" y1="290" x2="290" y2="110"></line><rect class="solid" x="290" y="110" width="120" height="180"></rect><text class="t" x="350" y="270" text-anchor="middle" dominant-baseline="central">blocco</text><rect class="body" x="232" y="106" width="40" height="40" rx="2"></rect><circle class="foot" cx="272" cy="146" r="5"></circle><rect class="next" x="280" y="70" width="40" height="40" rx="2"></rect><line class="a-bad dash" x1="272" y1="146" x2="318" y2="111.5" marker-end="url(#m-bad)"></line><circle class="ring" cx="290" cy="133" r="6"></circle><text class="ts" x="40" y="165" text-anchor="start" dominant-baseline="central">piede sulla rampa</text><line class="lead" x1="154" y1="165" x2="266" y2="151"></line><line class="lead" x1="324" y1="108" x2="424" y2="90"></line><text class="ts" x="430" y="90" text-anchor="start" dominant-baseline="central">arrivo (quota clampata)</text><line class="lead" x1="296" y1="134" x2="424" y2="135"></line><text class="ts" x="430" y="135" text-anchor="start" dominant-baseline="central">urto col fianco: vx = 0</text><text class="t" x="430" y="185" text-anchor="start" dominant-baseline="central">collidableWith → false se:</text><text class="tm" x="440" y="207" text-anchor="start" dominant-baseline="central">sameTop: stesso top</text><text class="tm" x="440" y="227" text-anchor="start" dominant-baseline="central">atHighEnd: lato alto</text><text class="tm" x="440" y="247" text-anchor="start" dominant-baseline="central">adjacent: bordi coincidenti</text></svg>

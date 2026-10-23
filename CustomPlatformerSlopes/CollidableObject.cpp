@@ -109,7 +109,8 @@ void CollidableObject::update(float dt)
 		return;
 
 	_fallingPrev = falling();
-	// Return to the start of the step before choosing the supporting surface.
+	// undo the free move before constraining it (e.g. to a slope surface)
+	// prepareMovement() changes the velocity used by BOTH collision methods
 	setPos(pos() - _vel * dt);
 	prepareMovement(dt);
 	if (_CCD)
@@ -123,8 +124,9 @@ void CollidableObject::update(float dt)
 		detectCollisionsAABB();
 		resolveCollisionsAABB();
 	}
+	// finalize position, restore stored velocity and record any slope support
 	finishMovement(dt);
-	// Slope contacts must be recorded before checking for ended contacts.
+	// check ended contacts only after finishMovement() has registered support
 	detectDecollisions();
 }
 
@@ -217,7 +219,9 @@ void CollidableObject::detectResolveCollisionsCCD(float dt)
 		{
 			if (!obj.first->compenetrable())
 			{
-				// Resolve the current displacement without clamping slope-scaled speed.
+				// resolve the current displacement without velAdd()/velClip()
+				// slope-scaled velocity may exceed the stored speed limit for this step;
+				// clamping it here would lose speed when finishMovement() removes the factor
 				_vel -= cn * cn.dot(_vel * (1 - std::max(0.0f, std::min(ct, 1.0f))));
 				if (std::abs(_vel.y) < _yVelMin) _vel.y = 0;
 				_collisions.push_back(obj.first);

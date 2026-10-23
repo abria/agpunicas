@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="305" viewBox="0 0 680 305" role="img">
+<!-- Figure from Slope in SimplePlatformer, by Alessandro Bria. See README.md for source. -->
+<style>
+text { font-family: Arial, Helvetica, sans-serif; }
+.t { font-size: 13px; font-weight: 500; fill: #1A1F22; }
+.ts { font-size: 12px; fill: #5E676D; }
+.tm { font-family: Menlo, Consolas, monospace; font-size: 12px; fill: #1A1F22; }
+.tmb { font-family: Menlo, Consolas, monospace; font-size: 13px; font-weight: 500; fill: #1A1F22; }
+.halo { paint-order: stroke; stroke: #FFFFFF; stroke-width: 4px; stroke-linejoin: round; }
+.slope { fill: #B9481A; fill-opacity: .16; }
+.sline { stroke: #B9481A; stroke-width: 2; fill: none; stroke-linecap: round; }
+.ext { stroke: #B9481A; stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.band { stroke: #DD9216; stroke-width: 10; stroke-opacity: .28; stroke-linecap: round; }
+.body { fill: #DCE7FA; stroke: #2E64C2; stroke-width: 1.2; }
+.next { fill: none; stroke: #2E64C2; stroke-width: 1.4; stroke-dasharray: 4 3; }
+.bad { fill: none; stroke: #CC3333; stroke-width: 1.4; stroke-dasharray: 4 3; }
+.plan { fill: none; stroke: #5E676D; stroke-width: 1.3; stroke-dasharray: 4 3; }
+.solid { fill: #E3E7E8; stroke: #8B9498; stroke-width: .8; }
+.foot { fill: #DD9216; }
+.dot-mute { fill: #5E676D; } .dot-bad { fill: #CC3333; } .dot-body { fill: #2E64C2; } .dot-brick { fill: #B9481A; }
+.ring { fill: none; stroke: #CC3333; stroke-width: 1.5; }
+.lead { stroke: #5E676D; stroke-width: .8; stroke-dasharray: 2 3; fill: none; }
+.guide { stroke: #5E676D; stroke-width: .9; stroke-dasharray: 3 3; fill: none; }
+.sep { stroke: #D9DEDD; stroke-width: 1; stroke-dasharray: 2 4; }
+.gridl { stroke: #E8ECEC; stroke-width: 1; }
+.a-mute { stroke: #5E676D; stroke-width: 1.5; fill: none; }
+.a-body { stroke: #2E64C2; stroke-width: 1.6; fill: none; }
+.a-bad { stroke: #CC3333; stroke-width: 1.5; fill: none; }
+.a-foot { stroke: #DD9216; stroke-width: 1.8; fill: none; }
+.a-brick { stroke: #B9481A; stroke-width: 1.5; fill: none; }
+.dash { stroke-dasharray: 4 3; }
+.mk-mute { fill: none; stroke: #5E676D; } .mk-body { fill: none; stroke: #2E64C2; } .mk-bad { fill: none; stroke: #CC3333; }
+.mk-foot { fill: none; stroke: #DD9216; } .mk-brick { fill: none; stroke: #B9481A; }
+.mk { stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.bx-eng { fill: #F1F3F2; stroke: #A9B1B3; stroke-width: .8; }
+.bx-slope { fill: #F8E4D9; stroke: #B9481A; stroke-width: .8; }
+.cont { fill: none; stroke: #B9481A; stroke-width: 1; stroke-dasharray: 5 4; }
+.bar-mute { fill: #8B9498; } .bar-body { fill: #2E64C2; } .bar-ok { fill: #1F8A68; } .bar-bad { fill: #CC3333; fill-opacity: .8; }
+.cell-ok { fill: #1F8A68; fill-opacity: .85; } .cell-bad { fill: #CC3333; fill-opacity: .85; }
+
+</style>
+<defs>
+<marker id="m-mute" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-mute" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-body" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-body" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-bad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-bad" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-foot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-foot" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-brick" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-brick" d="M2 1L8 5L2 9"></path></marker>
+</defs>
+<rect width="680" height="305" fill="#FFFFFF"/>
+<title>surfaceY</title><desc>Due rampe, una che sale e una che scende verso destra: la quota si legge all’angolo inferiore dal lato in salita; oltre gli estremi la superficie è prolungata in piano.</desc><polygon class="slope" points="60,250 280,140 280,250"></polygon><line class="sline" x1="60" y1="250" x2="280" y2="140"></line><line class="ext" x1="280" y1="140" x2="315" y2="140"></line><rect class="body" x="160" y="125" width="50" height="50" rx="2"></rect><line class="guide" x1="160" y1="175" x2="160" y2="200"></line><circle class="dot-mute" cx="160" cy="200" r="3"></circle><circle class="foot" cx="210" cy="175" r="5"></circle><text class="tmb" x="170" y="30" text-anchor="middle" dominant-baseline="central">risesRight = true</text><text class="tm" x="170" y="50" text-anchor="middle" dominant-baseline="central">footX = body.right()</text><polygon class="slope" points="380,140 600,250 380,250"></polygon><line class="sline" x1="380" y1="140" x2="600" y2="250"></line><line class="ext" x1="345" y1="140" x2="380" y2="140"></line><rect class="body" x="450" y="125" width="50" height="50" rx="2"></rect><line class="guide" x1="500" y1="175" x2="500" y2="200"></line><circle class="dot-mute" cx="500" cy="200" r="3"></circle><circle class="foot" cx="450" cy="175" r="5"></circle><text class="tmb" x="490" y="30" text-anchor="middle" dominant-baseline="central">risesRight = false</text><text class="tm" x="490" y="50" text-anchor="middle" dominant-baseline="central">footX = body.left()</text><circle class="foot" cx="170" cy="285" r="5"></circle><text class="ts" x="182" y="285" text-anchor="start" dominant-baseline="central">piede a monte: lì si legge surfaceY</text><line class="ext" x1="440" y1="285" x2="470" y2="285"></line><text class="ts" x="478" y="285" text-anchor="start" dominant-baseline="central">clamp all’estremo</text></svg>

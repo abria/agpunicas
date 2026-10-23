@@ -37,7 +37,8 @@ class agp::CollidableObject : public MovableObject
 		std::vector<CollidableObject*> _collisionsPrev;
 		bool _fallingPrev;
 
-		// Hooks shared by CCD and discrete movement (e.g. slope support).
+		// movement hooks shared by CCD and discrete collision resolution
+		// prepare: constrain the planned move; finish: finalize state and contacts
 		virtual void prepareMovement(float dt) {}
 		virtual void finishMovement(float dt) {}
 

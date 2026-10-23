@@ -14,55 +14,71 @@ using namespace agp;
 
 bool Slope::overlapsX(const RectF& body) const
 {
+	// touching an endpoint without horizontal overlap is not support
 	return body.right() > rect().left() && body.left() < rect().right();
 }
 
 float Slope::surfaceY(const RectF& body) const
 {
-	// use the uphill foot corner to avoid compenetration
-	// clamp to the slope endpoints for transitions to flat platforms
-	const float footX = _risesRight ? body.right() : body.left();
-	const float x = std::max(rect().left(), std::min(footX, rect().right()));
-	const float t = (x - rect().left()) / rect().size.x;
+	// sample at the uphill foot corner, where the surface is highest
+	// placing the bottom here keeps the whole axis-aligned body above the slope
+	float footX = _risesRight ? body.right() : body.left();
+
+	// clamp the sample to the segment endpoints
+	// a body straddling a slope and flat ground must use the endpoint height,
+	// not the height obtained by extending the inclined line beyond the slope
+	float x = std::max(rect().left(), std::min(footX, rect().right()));
+	float t = (x - rect().left()) / rect().size.x; // 0 = left endpoint, 1 = right endpoint
 	return _risesRight ? rect().bottom() - t * rect().size.y
 					   : rect().top() + t * rect().size.y;
 }
 
 float Slope::speedFactor(float vx) const
 {
-	const float slope = rect().size.y / rect().size.x; // |dy/dx|
-	const bool uphill = _risesRight ? vx > 0 : vx < 0;
-	if (vx == 0) return 1;
-	return uphill ? 1.0f / (1.0f + slope) : 1.0f + slope;
+	if (vx == 0)
+		return 1;
+
+	// gameplay rule: slow down uphill, speed up downhill
+	// use actual velocity rather than input direction (e.g. while skidding)
+	// the factor changes horizontal displacement, not stored acceleration
+	float gradient = rect().size.y / rect().size.x; // |dy/dx|
+	bool uphill = _risesRight ? vx > 0 : vx < 0;
+	return uphill ? 1.0f / (1.0f + gradient) : 1.0f + gradient;
 }
 
 float Slope::slideVelocity() const
 {
-	const float slope = rect().size.y / rect().size.x;
-	// One scene unit/s per unit of gradient, capped at two along the surface.
-	// Project onto x so steep ramps cannot produce excessive vertical speed.
-	const float speed = 5*std::min(slope, 2.0f) / std::sqrt(1.0f + slope * slope);
+	// gameplay rule: downhill surface speed grows with gradient, up to 10 units/s
+	// project onto x so steep ramps cannot produce excessive vertical speed
+	float gradient = rect().size.y / rect().size.x;
+	float speed = 5 * std::min(gradient, 2.0f) / std::sqrt(1.0f + gradient * gradient);
 	return _risesRight ? -speed : speed;
 }
 
 void Slope::draw(SDL_Renderer* renderer, Transform camera)
 {
-	if (!_visible) return;
-	const Color color = _focused ? _focusColor : _color;
+	if (!_visible)
+		return;
+
+	Color color = _focused ? _focusColor : _color;
 	_focused = false;
-	const PointF points[] = {
+
+	// first two vertices define the inclined segment; the third closes the fill
+	PointF points[] = {
 		camera(_risesRight ? rect().bl() : rect().tl()),
 		camera(_risesRight ? rect().tr() : rect().br()),
 		camera(_risesRight ? rect().br() : rect().bl())
 	};
 	SDL_Vertex vertices[3]{};
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 3; i++)
 	{
 		vertices[i].position = points[i].toSDLf();
-		vertices[i].color = {color.r/255.0f, color.g/255.0f, color.b/255.0f, color.a/255.0f};
+		vertices[i].color = { color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f };
 	}
 	SDL_RenderGeometry(renderer, nullptr, vertices, 3, nullptr, 0);
-	auto* scene = dynamic_cast<GameScene*>(_scene);
+
+	// only the inclined segment collides; the base and vertical side are visual
+	GameScene* scene = dynamic_cast<GameScene*>(_scene);
 	if (scene && scene->collidersVisible())
 	{
 		SDL_SetRenderDrawColor(renderer, _colliderColor.r, _colliderColor.g, _colliderColor.b, 255);

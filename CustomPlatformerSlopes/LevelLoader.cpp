@@ -26,17 +26,6 @@ namespace
 			throw std::runtime_error("CustomPlatformerSlopes requires axis-aligned rectangles with yUp=false");
 		return geometry.toRect();
 	}
-
-	Sprite* objectSprite(const nlohmann::ordered_json& object)
-	{
-		std::string name = object.value("sprite", "");
-		if (name.empty())
-			return nullptr;
-		Sprite* sprite = SpriteFactory::instance()->get(name);
-		if (!sprite)
-			throw std::runtime_error("Unknown sprite: " + name);
-		return sprite;
-	}
 }
 
 LevelLoader::LevelLoader() {}
@@ -92,11 +81,7 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 		RectF rect = axisAlignedRect(object);
 		Object* created = nullptr;
 		if (category == "Static" || category == "Pipe")
-		{
-			auto* solid = new StaticObject(world, rect, objectSprite(object), layer);
-			solid->setColor(LevelData::color(object));
-			created = solid;
-		}
+			created = new StaticObject(world, rect, layer);
 		else if (category == "Block" || category == "Brick" || category == "Wood")
 		{
 			std::string content = object.value("content", "");
@@ -115,9 +100,7 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 			float range = object.value("range", 3.0f);
 			if (!std::isfinite(range) || range <= 0)
 				throw std::runtime_error("Lift range must be positive");
-			auto* lift = new Lift(world, rect, objectSprite(object), object.value("vertical", true), range, layer);
-			lift->setColor(LevelData::color(object));
-			created = lift;
+			created = new Lift(world, rect, object.value("vertical", true), range, layer);
 		}
 		else if (category == "Mario")
 		{

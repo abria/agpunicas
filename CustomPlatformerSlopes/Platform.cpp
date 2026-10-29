@@ -4,7 +4,7 @@
 using namespace agp;
 
 Platform::Platform(Scene* scene, const LineF& line, int layer) :
-	StaticObject(scene, line.boundingRect(false), nullptr, layer)
+	StaticObject(scene, line.boundingRect(false), layer)
 {
 
 }

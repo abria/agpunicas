@@ -12,8 +12,8 @@
 
 using namespace agp;
 
-Terrain::Terrain(GameScene* scene, const LineF& surface, Sprite* sprite, int layer) :
-	StaticObject(scene, RotatedRectF(surface, 0.5f, true), sprite, layer)
+Terrain::Terrain(GameScene* scene, const LineF& surface, int layer) :
+	StaticObject(scene, RotatedRectF(surface, 0.5f, true), layer)
 {
 	_slope = _obb.angle != 0;
 }
@@ -27,13 +27,12 @@ void Terrain::TerrainSequence(
 	GameScene* scene,
 	const PointF& start,
 	const std::vector<PointF>& increments,
-	Sprite* sprite,
 	int layer)
 {
 	std::vector<PointF> points = { start };
 	for (int k = 0; k < increments.size(); k++)
 	{
 		points.push_back(points.back() + increments[k]);
-		new Terrain(scene, LineF(points[k], points[k + 1]), sprite, layer);
+		new Terrain(scene, LineF(points[k], points[k + 1]), layer);
 	}
 }

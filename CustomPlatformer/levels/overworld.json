@@ -42,8 +42,7 @@
             "width": 68,
             "height": 2,
             "yUp": false
-         },
-         "sprite": "terrain"
+         }
       },
       {
          "category": 0,
@@ -53,8 +52,7 @@
             "width": 1,
             "height": 1,
             "yUp": false
-         },
-         "sprite": "box"
+         }
       },
       {
          "category": 0,
@@ -64,8 +62,7 @@
             "width": 1,
             "height": 1,
             "yUp": false
-         },
-         "sprite": "box"
+         }
       },
       {
          "category": 0,
@@ -75,8 +72,7 @@
             "width": 1,
             "height": 1,
             "yUp": false
-         },
-         "sprite": "box"
+         }
       },
       {
          "category": 0,
@@ -86,8 +82,7 @@
             "width": 1,
             "height": 1,
             "yUp": false
-         },
-         "sprite": "box"
+         }
       },
       {
          "category": 0,
@@ -97,8 +92,7 @@
             "width": 1,
             "height": 1,
             "yUp": false
-         },
-         "sprite": "brick"
+         }
       },
       {
          "category": 0,
@@ -108,8 +102,7 @@
             "width": 1,
             "height": 1,
             "yUp": false
-         },
-         "sprite": "brick"
+         }
       },
       {
          "category": 0,
@@ -119,8 +112,7 @@
             "width": 1,
             "height": 1,
             "yUp": false
-         },
-         "sprite": "brick"
+         }
       },
       {
          "category": 0,
@@ -131,7 +123,6 @@
             "height": 4,
             "yUp": false
          },
-         "sprite": "pipe3",
          "layer": -1
       },
       {
@@ -143,7 +134,6 @@
             "height": 5,
             "yUp": false
          },
-         "sprite": "pipe4",
          "layer": -1
       },
       {
@@ -155,7 +145,6 @@
             "height": 6,
             "yUp": false
          },
-         "sprite": "pipe5",
          "layer": -1
       },
       {
@@ -167,7 +156,6 @@
             "height": 6,
             "yUp": false
          },
-         "sprite": "pipe5",
          "layer": -1
       },
       {
@@ -179,7 +167,6 @@
             "height": 11,
             "yUp": false
          },
-         "sprite": "pipe10",
          "layer": -1
       },
       {
@@ -191,7 +178,6 @@
             "height": 13,
             "yUp": false
          },
-         "sprite": "pipe12",
          "layer": -1
       },
       {
@@ -203,7 +189,6 @@
             "height": 15,
             "yUp": false
          },
-         "sprite": "pipe14",
          "layer": -1
       },
       {

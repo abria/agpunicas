@@ -76,7 +76,7 @@ void LevelLoader::loadJson(
 			else if (category == "Soldier")
 				new Soldier(world, rrect.toRect().pos, LevelData::rect(jObj.at("patrolRect")));
 			else if (category == "Static" || category == "Bush")
-				new StaticObject(world, rrect, nullptr, 1);
+				new StaticObject(world, rrect, 1);
 			else if (category == "Portal")
 			{
 				std::string name = jObj.value("name", "");
@@ -94,7 +94,7 @@ void LevelLoader::loadJson(
 			{
 				LineF line(points[i - 1], points[i]);
 				if (line.isValid())
-					new StaticObject(world, RotatedRectF(line, 0.1f, false), nullptr, 2);
+					new StaticObject(world, RotatedRectF(line, 0.1f, false), 2);
 			}
 		}
 	}

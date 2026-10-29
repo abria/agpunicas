@@ -89,6 +89,10 @@ Sprite* SpriteFactory::get(const std::string& id)
 	else if (id == "hud_P")
 		return new Sprite(_spriteSheets["hud"], RectI(653, 25, 16, 8));
 
+	// Wooden moving platform.
+	else if (id == "platform")
+		return new FilledSprite(_spriteSheets["stages"], RectI(104, 199, 16, 16), {1, 0.5f});
+
 	// Mario
 	else if (id == "mario_stand")
 		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][0]);

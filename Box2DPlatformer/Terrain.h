@@ -26,7 +26,7 @@ class agp::Terrain : public StaticObject
 
 	public:
 
-		Terrain(GameScene* scene, const LineF& surface, Sprite* sprite = nullptr, int layer = 0);
+		Terrain(GameScene* scene, const LineF& surface, int layer = 0);
 		virtual ~Terrain() {}
 
 		virtual bool slope() const { return _slope; }
@@ -41,6 +41,5 @@ class agp::Terrain : public StaticObject
 			GameScene* scene,
 			const PointF& start,
 			const std::vector<PointF>& increments,
-			Sprite* sprite = nullptr,
 			int layer = 0);
 };

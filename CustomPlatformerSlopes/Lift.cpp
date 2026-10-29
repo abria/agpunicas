@@ -1,9 +1,10 @@
 #include "Lift.h"
+#include "SpriteFactory.h"
 
 using namespace agp;
 
-Lift::Lift(Scene* scene, const RectF& rect, Sprite* sprite, bool vertical, float range, int layer) :
-	KinematicObject(scene, rect, sprite, layer)
+Lift::Lift(Scene* scene, const RectF& rect, bool vertical, float range, int layer) :
+	KinematicObject(scene, rect, SpriteFactory::instance()->get("platform"), layer)
 {
 	_compenetrable = false;
 	_vertical = vertical;

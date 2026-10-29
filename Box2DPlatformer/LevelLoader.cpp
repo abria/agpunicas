@@ -67,24 +67,13 @@ void LevelLoader::loadJson(
 
 		RotatedRectF geometry = LevelData::rotRect(object);
 		Object* created = nullptr;
-		if (category == "Renderable" || category == "Static")
+		if (category == "Static")
+			created = new StaticObject(world, geometry, layer);
+		else if (category == "Renderable")
 		{
-			Sprite* sprite = nullptr;
-			std::string spriteName = object.value("sprite", "");
-			if (!spriteName.empty())
-			{
-				sprite = spriteLoader->get(spriteName);
-				if (!sprite)
-					throw std::runtime_error("Unknown sprite: " + spriteName);
-			}
-			if (category == "Static")
-				created = new StaticObject(world, geometry, sprite, layer);
-			else
-			{
-				RenderableObject* rendered = new RenderableObject(world, geometry.toRect(), sprite, layer);
-				rendered->setAngle(rad2deg(geometry.angle));
-				created = rendered;
-			}
+			auto* rendered = new RenderableObject(world, geometry.toRect(), nullptr, layer);
+			rendered->setAngle(rad2deg(geometry.angle));
+			created = rendered;
 		}
 		else if (category == "Gear")
 			created = new Gear(world, geometry, layer);

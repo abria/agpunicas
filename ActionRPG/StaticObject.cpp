@@ -12,8 +12,8 @@
 
 using namespace agp;
 
-StaticObject::StaticObject(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer) :
-	CollidableObject(scene, rrect, sprite, layer)
+StaticObject::StaticObject(Scene* scene, const RotatedRectF& rrect, int layer) :
+	CollidableObject(scene, rrect, nullptr, layer)
 {	
 
 }

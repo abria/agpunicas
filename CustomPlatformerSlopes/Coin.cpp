@@ -9,8 +9,9 @@
 using namespace agp;
 
 Coin::Coin(Scene* scene, const PointF& pos, int layer) :
-	StaticObject(scene, RectF(pos.x, pos.y, 1, 1), SpriteFactory::instance()->get("coin"), layer)
+	StaticObject(scene, RectF(pos.x, pos.y, 1, 1), layer)
 {
+	setSprite(SpriteFactory::instance()->get("coin"));
 	_compenetrable = true;
 }
 

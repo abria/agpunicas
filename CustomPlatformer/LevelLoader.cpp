@@ -33,6 +33,24 @@ void LevelLoader::loadJson(
 	level.configure(world);
 	std::vector<Object*> lifts;
 
+	// Scenery is separate from the transparent Static colliders edited in the JSON.
+	// a better solution is to use a level map background that already contains these graphics
+	new RenderableObject(world, RectF(0, 1, 68, 2), spriteLoader->get("terrain"), 0);
+	new RenderableObject(world, RectF(16, -3, 1, 1), spriteLoader->get("box"), 0);
+	new RenderableObject(world, RectF(21, -3, 1, 1), spriteLoader->get("box"), 0);
+	new RenderableObject(world, RectF(22, -7, 1, 1), spriteLoader->get("box"), 0);
+	new RenderableObject(world, RectF(23, -3, 1, 1), spriteLoader->get("box"), 0);
+	new RenderableObject(world, RectF(20, -3, 1, 1), spriteLoader->get("brick"), 0);
+	new RenderableObject(world, RectF(22, -3, 1, 1), spriteLoader->get("brick"), 0);
+	new RenderableObject(world, RectF(24, -3, 1, 1), spriteLoader->get("brick"), 0);
+	new RenderableObject(world, RectF(28, -1, 2, 4), spriteLoader->get("pipe3"), -1);
+	new RenderableObject(world, RectF(38, -2, 2, 5), spriteLoader->get("pipe4"), -1);
+	new RenderableObject(world, RectF(46, -3, 2, 6), spriteLoader->get("pipe5"), -1);
+	new RenderableObject(world, RectF(57, -3, 2, 6), spriteLoader->get("pipe5"), -1);
+	new RenderableObject(world, RectF(70, -3, 2, 11), spriteLoader->get("pipe10"), -1);
+	new RenderableObject(world, RectF(74, -5, 2, 13), spriteLoader->get("pipe12"), -1);
+	new RenderableObject(world, RectF(78, -7, 2, 15), spriteLoader->get("pipe14"), -1);
+
 	for (const auto& object : level.objects())
 	{
 		std::string category = level.category(object);
@@ -44,17 +62,7 @@ void LevelLoader::loadJson(
 		Object* created = nullptr;
 
 		if (category == "Static")
-		{
-			Sprite* sprite = nullptr;
-			std::string spriteName = object.value("sprite", "");
-			if (!spriteName.empty())
-			{
-				sprite = spriteLoader->get(spriteName);
-				if (!sprite)
-					throw std::runtime_error("Unknown sprite: " + spriteName);
-			}
-			created = new StaticObject(world, rect, sprite, layer);
-		}
+			created = new StaticObject(world, rect, layer);
 		else if (category == "HammerBrother")
 			// constructor uses a sprite-specific spawn offset
 			created = new HammerBrother(world, rect.pos + PointF(-1 / 16.0f, 1));

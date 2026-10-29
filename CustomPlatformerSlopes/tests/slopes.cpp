@@ -1,6 +1,7 @@
 // Regression checks for the port of SimplePlatformer-Slopes to SMB3/core.
 #include "DynamicObject.h"
 #include "Slope.h"
+#include "Lift.h"
 #include "Platform.h"
 #include "Lift.h"
 #include "Trigger.h"
@@ -123,9 +124,9 @@ void objectRemoval()
 void hill(bool reverse, bool ccd)
 {
 	Scene scene({-20,-20,60,50},{16,16});
-	new StaticObject(&scene, {-10,0,40,3}, nullptr);
+	new StaticObject(&scene, {-10,0,40,3});
 	auto* up = new Slope(&scene, {0,-2,4,2}, {190,120,65}, true);
-	new StaticObject(&scene, {4,-2,2,2}, nullptr);
+	new StaticObject(&scene, {4,-2,2,2});
 	auto* down = new Slope(&scene, {6,-2,4,2}, {190,120,65}, false);
 	auto* body = new Body(&scene, {reverse ? 11.0f : -2.0f,-1,0.6f,1});
 	body->velocity(reverse ? -3 : 3);
@@ -148,7 +149,7 @@ void hill(bool reverse, bool ccd)
 void valley(bool reverse)
 {
 	Scene scene({-20,-20,60,50},{16,16});
-	new StaticObject(&scene, {-10,0,40,3}, nullptr);
+	new StaticObject(&scene, {-10,0,40,3});
 	auto* left = new Slope(&scene, {0,-3,4,3}, {190,120,65}, false);
 	auto* right = new Slope(&scene, {4,-3,4,3}, {190,120,65}, true);
 	auto* body = new Body(&scene, {reverse ? 6.0f : 1.0f,-4,0.6f,1});
@@ -205,13 +206,13 @@ void blockers()
 	Scene scene({-20,-20,60,50},{16,16});
 	new Slope(&scene, {0,-4,4,4}, {190,120,65}, true);
 	auto* body = new Body(&scene, {1,-2.6f,0.6f,1});
-	new StaticObject(&scene, {2,-6,0.5f,5}, nullptr);
+	new StaticObject(&scene, {2,-6,0.5f,5});
 	scene.update(0);
 	body->velocity(3);
 	body->move(Direction::RIGHT);
 	for (int i=0;i<100;++i) body->update(0.01f);
 	require(body->sceneCollider().right() <= 2.001f, "passed through wall on slope");
-	new StaticObject(&scene, {0,-3,1.8f,0.2f}, nullptr);
+	new StaticObject(&scene, {0,-3,1.8f,0.2f});
 	scene.update(0);
 	body->setPos({1,-2.6f});
 	body->velocity(3);
@@ -444,6 +445,10 @@ void levelIntegration()
 
 	// Round-trip using the editor's actual object serialization.
 	Scene editorObjects(world->rect(), world->pixelUnitSize());
+	auto* lift = new Lift(&editorObjects, {0, 0, 3, 0.5f}, true, 3);
+	require(lift->sprite() != nullptr, "Lift must load its own sprite");
+	auto* collider = new StaticObject(&editorObjects, {0, 2, 3, 1});
+	require(collider->sprite() == nullptr && collider->color().a == 0, "generic Static must be transparent");
 	auto categories = level.json().at("categories").get<std::vector<std::string>>();
 	auto saved = level.json();
 	saved["objects"] = nlohmann::ordered_json::array();

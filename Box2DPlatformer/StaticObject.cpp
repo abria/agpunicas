@@ -12,8 +12,8 @@
 
 using namespace agp;
 
-StaticObject::StaticObject(GameScene* scene, const RotatedRectF& obb, Sprite* sprite, int layer) :
-	RigidObject(scene, obb, sprite, b2BodyType::b2_staticBody, layer)
+StaticObject::StaticObject(GameScene* scene, const RotatedRectF& obb, int layer) :
+	RigidObject(scene, obb, nullptr, b2BodyType::b2_staticBody, layer)
 {	
 	// default box shape
 	b2ShapeDef shapeDef = b2DefaultShapeDef();

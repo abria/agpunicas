@@ -53,20 +53,20 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 
 | Gioco / categoria | Geometria | Proprietà aggiuntive |
 | --- | --- | --- |
-| CustomPlatformer / `Static` | Rettangolo allineato agli assi | `sprite` opzionale, `layer` (default 0) |
+| CustomPlatformer / `Static` | Rettangolo allineato agli assi | Collider trasparente senza sprite, `layer` (default 0) |
 | CustomPlatformer / `HammerBrother` | Rettangolo del personaggio | `layer`; la posizione viene convertita nello spawn atteso dal costruttore |
-| CustomPlatformer / `Lift` | Rettangolo allineato agli assi | `vertical` (default true), `range` (default 3), `layer`; il costruttore richiede lo sprite `platform` |
+| CustomPlatformer / `Lift` | Rettangolo allineato agli assi | `vertical` (default true), `range` (default 3), `layer`; il costruttore carica lo sprite `platform` |
 | CustomPlatformer / `Mario` | Rettangolo del personaggio | `layer`; deve essere presente esattamente un Mario |
 | CustomPlatformerSlopes / `Slope` | `multiline` di segmenti inclinati, scena con `yUp: false` | Verso ricavato dagli estremi, indipendente dal loro ordine; `color` RGBA opzionale (trasparente se assente), `layer` (default 1); collisione sul segmento, disegno triangolare senza sprite |
-| CustomPlatformerSlopes / `Static`, `Pipe` | Rettangolo allineato agli assi | `sprite` e `color` opzionali, `layer` |
+| CustomPlatformerSlopes / `Static`, `Pipe` | Rettangolo allineato agli assi | Collider trasparente senza sprite, `layer` |
 | CustomPlatformerSlopes / `Block`, `Brick`, `Wood` | Rettangolo del blocco | `content`: `coin`, `powerup`, `life`, `starman` o stringa vuota; `layer`. Mantiene le implementazioni di SMB3 (starman e foglia non ancora implementati) |
 | CustomPlatformerSlopes / `Coin`, `Goomba`, `Mario` | Rettangolo del personaggio/oggetto | `layer`; esattamente un Mario; il loader compensa l'offset dello spawn |
 | CustomPlatformerSlopes / `Platform` | `multiline` di segmenti orizzontali | `layer`; collisione solo dall’alto per tutti i dinamici; attraversabili dal basso e dai lati |
-| CustomPlatformerSlopes / `Lift` | Rettangolo allineato agli assi | `vertical`, `range` positivo, `sprite` e `color` opzionali, `layer` |
-| Box2DPlatformer / `Renderable` | `rect` o `rotRect` | `sprite` opzionale, `layer`; decorazione senza fisica |
+| CustomPlatformerSlopes / `Lift` | Rettangolo allineato agli assi | `vertical`, `range` positivo, `layer`; il costruttore carica la sprite `platform` |
+| Box2DPlatformer / `Renderable` | `rect` o `rotRect` | `layer`; oggetto trasparente senza fisica |
 | Box2DPlatformer / `Terrain` | `multiline` | `layer`; un collider per segmento, la grafica del terreno è creata nel loader C++ |
-| Box2DPlatformer / `Static` | `rect` o `rotRect` | `sprite` opzionale, `layer` |
-| Box2DPlatformer / `Gear` | `rect` o `rotRect` | `layer`; il costruttore richiede lo sprite `gear` |
+| Box2DPlatformer / `Static` | `rect` o `rotRect` | Collider trasparente senza sprite, `layer` |
+| Box2DPlatformer / `Gear` | `rect` o `rotRect` | `layer`; il costruttore carica lo sprite `gear` |
 | Box2DPlatformer / `Box` | `rect` o `rotRect` | `layer`; mantiene lo sprite e l'impulso iniziale del costruttore |
 | Box2DPlatformer / `Slime` | `rect` o `rotRect` | `layer`; il centro indica lo spawn |
 | Box2DPlatformer / `Player` | `rect` o `rotRect` | `layer`; il centro indica lo spawn, deve essere presente esattamente un player |
@@ -84,7 +84,11 @@ ActionRPG descrive nel JSON anche il colore e la vista iniziale della scena, NPC
 
 Il trigger di CustomPlatformer è un esempio hardcoded nel loader: dopo aver creato Mario e gli ascensori, viene istanziato in `RectF(1, -12, 0.5f, 13)` passando il giocatore e una lambda che alterna lo stato `freezed` degli ascensori. `Trigger` resta generico e riceve un task `std::function<void()>`, come negli altri prototipi. In CustomPlatformer il task viene eseguito all'ingresso e all'uscita dell'oggetto osservato; in Box2DPlatformer e ActionRPG soltanto all'ingresso, secondo il comportamento originale. Il trigger di esempio non è una regione del JSON e non richiede ID, azioni o riferimenti da risolvere.
 
-Le classi specifiche scelgono lo sprite nel proprio costruttore. Il campo `sprite` rimane per gli oggetti generici, come `StaticObject` e `RenderableObject`.
+Le classi specifiche caricano la propria sprite nel costruttore, senza riceverla
+dal loader. I collider generici `Static` non hanno sprite né colore: sono
+trasparenti e si appoggiano alla grafica di sfondo. Il JSON non contiene il
+campo `sprite`. Le classi base di movimento continuano a ricevere la sprite
+dalle sottoclassi.
 
 Sfondi e parallassi sono creati direttamente nei rispettivi `LevelLoader.cpp`,
 con chiamate esplicite: non fanno parte del JSON perché non sono oggetti
@@ -95,7 +99,8 @@ creabili nell'editor.
 - Box2DPlatformer: immagine del terreno `fg_ground`; cielo, case ed erba come
   sfondi; pioggia e nebbia in primo piano. Le velocità di parallasse e la
   ripetizione delle immagini sono argomenti dei costruttori `OverlayScene`.
-- CustomPlatformer: non usa sfondi o parallassi separati nel JSON.
+- CustomPlatformer: terreno, blocchi e tubi sono immagini create nel C++,
+  sovrapposte ai collider `Static` del JSON.
 
 Le immagini fisse restano visibili nell'editor, senza rettangoli selezionabili;
 si modificano nel C++. I collider restano in `objects`: ad esempio `Terrain`

@@ -25,7 +25,7 @@ class agp::StaticObject : public RigidObject
 
 	public:
 
-		StaticObject(GameScene* scene, const RotatedRectF& obb, Sprite* sprite, int layer = 0);
+		StaticObject(GameScene* scene, const RotatedRectF& obb, int layer = 0);
 		virtual ~StaticObject() {}
 
 		// extends logic collision (+focus)

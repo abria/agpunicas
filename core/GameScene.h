@@ -68,7 +68,7 @@ class agp::GameScene : public Scene
 
 	public:
 
-		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
+		GameScene(const RectF& rect, const Point& pixelUnitSize, float dt, const Color& backgroundColor);
 		virtual ~GameScene();
 
 		float timeStep() const { return _dt; }

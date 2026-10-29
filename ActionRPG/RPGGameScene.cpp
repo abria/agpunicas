@@ -23,8 +23,8 @@
 
 using namespace agp;
 
-RPGGameScene::RPGGameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
-	: GameScene(rect, pixelUnitSize, dt)
+RPGGameScene::RPGGameScene(const RectF& rect, const Point& pixelUnitSize, float dt, const Color& backgroundColor)
+	: GameScene(rect, pixelUnitSize, dt, backgroundColor)
 {
 	_transitionEnter = false;
 	_transitionExit = false;

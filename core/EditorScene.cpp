@@ -73,13 +73,11 @@ void EditorScene::fromJson()
 		// scene settings for a new level
 		const RectF& rect = _gameScene->rect();
 		Point unit = _gameScene->pixelUnitSize();
-		const Color& color = _gameScene->backgroundColor();
 		_json["scene"] = {
 			{ "rect", {{ "x", rect.pos.x }, { "y", rect.pos.y },
 				{ "width", rect.size.x }, { "height", rect.size.y }, { "yUp", rect.yUp }} },
 			{ "pixelUnitSize", {{ "x", unit.x }, { "y", unit.y }} },
 			{ "dt", _gameScene->timeStep() },
-			{ "backgroundColor", { color.r, color.g, color.b, color.a } },
 			{ "view", {{ "x", _gameRect.pos.x }, { "y", _gameRect.pos.y },
 				{ "width", _gameRect.size.x }, { "height", _gameRect.size.y }, { "yUp", _gameRect.yUp }} }
 		};

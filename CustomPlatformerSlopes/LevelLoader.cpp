@@ -44,37 +44,14 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 	{
 		std::string category = level.category(object);
 		int layer = object.value("layer", 1);
-		if (category == "Platform")
+		if (category == "Platform" || category == "Slope")
 		{
 			auto points = LevelData::multiline(object.at("multiline"));
 			for (size_t i = 1; i < points.size(); ++i)
-			{
-				LineF line(points[i - 1], points[i]);
-				if (!line.isValid())
-					continue;
-				if (line.start.y != line.end.y)
-					throw std::runtime_error("Platform segments must be horizontal; use Slope for ramps");
-				new Platform(world, line, layer);
-			}
-			continue;
-		}
-
-		if (category == "Slope")
-		{
-			if (!object.contains("multiline"))
-				throw std::runtime_error("Slope requires a multiline of inclined segments");
-			auto points = LevelData::multiline(object.at("multiline"));
-			Color color = LevelData::color(object);
-			for (size_t i = 1; i < points.size(); ++i)
-			{
-				PointF left = points[i - 1], right = points[i];
-				if (left.x > right.x)
-					std::swap(left, right);
-				if (left.x == right.x || left.y == right.y)
-					throw std::runtime_error("Slope segments must be inclined, neither horizontal nor vertical");
-				// The line determines the direction; the rectangle is only its runtime bounds.
-				new Slope(world, LineF(left, right).boundingRect(false), color, right.y < left.y, layer);
-			}
+				if (category == "Platform")
+					new Platform(world, LineF(points[i - 1], points[i]), layer);
+				else
+					new Slope(world, LineF(points[i - 1], points[i]), layer);
 			continue;
 		}
 
@@ -126,7 +103,7 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 Scene* LevelLoader::load(const std::string& name)
 {
 	LevelData level(std::string(SDL_GetBasePath()) + "levels/" + name + ".json");
-	auto* world = new PlatformerGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep());
+	auto* world = new PlatformerGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep(), {156, 252, 240, 255});
 	try
 	{
 		loadJson(world, level);

@@ -115,7 +115,7 @@ Scene* LevelLoader::load(const std::string& name)
 {
 	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
 	LevelData level(path);
-	RPGGameScene* world = new RPGGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep());
+	RPGGameScene* world = new RPGGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep(), {128, 128, 128, 255});
 	try
 	{
 		loadJson(world, level);

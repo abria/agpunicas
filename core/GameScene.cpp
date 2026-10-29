@@ -19,9 +19,10 @@
 
 using namespace agp;
 
-GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
+GameScene::GameScene(const RectF& rect, const Point& pixelUnitSize, float dt, const Color& backgroundColor)
 	: Scene(rect, pixelUnitSize), _quadtree(rect.scaleOnCenter(10))
 {
+	_backgroundColor = backgroundColor;
 	_dt = dt;
 	_timeToSimulateAccum = 0;
 	_player = nullptr;

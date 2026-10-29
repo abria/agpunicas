@@ -18,8 +18,8 @@
 
 using namespace agp;
 
-PlatformerGameScene::PlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
-	: GameScene(rect, pixelUnitSize, dt)
+PlatformerGameScene::PlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt, const Color& backgroundColor)
+	: GameScene(rect, pixelUnitSize, dt, backgroundColor)
 {
 	// NES aspect ratio (16 x 15)
 	_view->setRect(RectF(0, -12, 16, 15));

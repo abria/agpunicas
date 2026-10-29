@@ -117,15 +117,6 @@ void LevelData::validate(const nlohmann::ordered_json& json)
 		throw std::runtime_error("dt must be positive");
 	if (scene.contains("view"))
 		rect(scene.at("view"));
-	if (scene.contains("backgroundColor"))
-	{
-		const auto& color = scene.at("backgroundColor");
-		if (!color.is_array() || color.size() != 4)
-			throw std::runtime_error("backgroundColor must contain RGBA components");
-		for (const auto& component : color)
-			if (!component.is_number_integer() || component.get<int>() < 0 || component.get<int>() > 255)
-				throw std::runtime_error("color components must be integers in [0,255]");
-	}
 }
 
 std::string LevelData::category(const nlohmann::ordered_json& object) const
@@ -155,24 +146,6 @@ void LevelData::configure(GameScene* scene) const
 	const auto& settings = _json.at("scene");
 	if (settings.contains("view"))
 		scene->view()->setRect(rect(settings.at("view")));
-	if (settings.contains("backgroundColor"))
-	{
-		const auto& color = settings.at("backgroundColor");
-		scene->setBackgroundColor(Color(color[0], color[1], color[2], color[3]));
-	}
-}
-
-Color LevelData::color(const nlohmann::ordered_json& object)
-{
-	if (!object.contains("color"))
-		return {0, 0, 0, 0};
-	const auto& color = object.at("color");
-	if (!color.is_array() || color.size() != 4)
-		throw std::runtime_error("Object color must contain four RGBA components");
-	for (const auto& component : color)
-		if (!component.is_number_integer() || component.get<int>() < 0 || component.get<int>() > 255)
-			throw std::runtime_error("Object color components must be integers in [0,255]");
-	return Color(color[0], color[1], color[2], color[3]);
 }
 
 void LevelData::save(const std::string& path, const nlohmann::ordered_json& json)

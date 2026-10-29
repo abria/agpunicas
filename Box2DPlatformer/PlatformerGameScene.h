@@ -36,7 +36,7 @@ class agp::PlatformerGameScene : public GameScene
 
 	public:
 
-		PlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
+		PlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt, const Color& backgroundColor);
 		virtual ~PlatformerGameScene();
 
 		// getters / setters

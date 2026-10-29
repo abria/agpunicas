@@ -9,8 +9,30 @@
 
 #include "Slope.h"
 #include "GameScene.h"
+#include <stdexcept>
 
 using namespace agp;
+
+namespace
+{
+	// Validate before the base constructor registers the object in its scene.
+	RectF slopeBounds(const LineF& line)
+	{
+		if (!std::isfinite(line.start.x) || !std::isfinite(line.start.y) ||
+			!std::isfinite(line.end.x) || !std::isfinite(line.end.y) ||
+			line.start.x == line.end.x || line.start.y == line.end.y)
+			throw std::runtime_error("Slope requires a finite inclined segment, neither horizontal nor vertical");
+		return line.boundingRect(false);
+	}
+}
+
+Slope::Slope(Scene* scene, const LineF& line, int layer) :
+	StaticObject(scene, slopeBounds(line), layer)
+{
+	// y points downwards; the direction does not depend on endpoint order.
+	_risesRight = line.start.x < line.end.x ? line.end.y < line.start.y : line.start.y < line.end.y;
+	setColor({0, 0, 0, 0}); // collision-only surface, graphics belong to the scenery
+}
 
 bool Slope::overlapsX(const RectF& body) const
 {

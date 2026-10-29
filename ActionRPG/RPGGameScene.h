@@ -33,7 +33,7 @@ class agp::RPGGameScene : public GameScene
 
 	public:
 
-		RPGGameScene(const RectF& rect, const Point& pixelUnitSize, float dt);
+		RPGGameScene(const RectF& rect, const Point& pixelUnitSize, float dt, const Color& backgroundColor);
 		virtual ~RPGGameScene() {};
 
 		// getters/setters

@@ -17,7 +17,7 @@ nel progetto di partenza non sono inclusi nel JSON eseguibile.
 
 ## Pendenze
 
-Le sei rampe sono collider senza sprite, invisibili se `color` è omesso:
+Le sei rampe sono collider trasparenti senza sprite:
 
 - x = 5–12: salita, raccordo piano e discesa vicino alla partenza;
 - x = 20–27: salita ripida e discesa raccordate al primo tubo;
@@ -29,14 +29,15 @@ Una slope si aggiunge come oggetto di categoria `Slope` (indice 9 nel livello):
 {
    "category": 9,
    "multiline": [{"x": 5, "y": 1}, {"x": 8, "y": -1}],
-   "color": [190, 120, 65, 255],
    "layer": 1
 }
 ```
 
 I due estremi determinano il verso: con y crescente verso il basso, una quota
 minore a destra indica una salita verso destra. Invertire l’ordine dei punti
-non cambia la rampa. Si possono concatenare più segmenti inclinati; segmenti
+non cambia la rampa. Il costruttore di `Slope` riceve il segmento, ne verifica
+la validità e ricava ingombro e verso; il loader si limita a crearlo.
+Si possono concatenare più segmenti inclinati; segmenti
 orizzontali, verticali o degeneri non sono ammessi (per i tratti piani usare `Platform`). La superficie usa l'angolo del
 collider rivolto a monte. Con pendenza `s = height / width`, lo spostamento
 orizzontale è moltiplicato per `1 / (1 + s)` in salita e `1 + s` in discesa;
@@ -52,8 +53,8 @@ smorza rapidamente l'inerzia residua: segue subito lo scivolamento, conservando
 un breve tratto di rallentamento. In fondo alle valli l'entità si ferma senza
 oscillazioni.
 
-`Slope` definisce il solo segmento inclinato. Se è specificato `color`,
-lo disegna come triangolo; altrimenti rimane invisibile.
+`Slope` definisce il solo segmento inclinato e imposta la trasparenza nel
+costruttore. Il JSON non contiene colori.
 Base e lato verticale non esistono per le collisioni: gli oggetti li attraversano,
 sia in CCD sia nel modo discreto. La vista dei collider mostra solo il segmento.
 `DynamicObject`
@@ -87,6 +88,9 @@ arcade, con rallentamento in salita e scivolamento a riposo.
 
 ## Piattaforme attraversabili
 
+Il costruttore di `Platform` accetta solo segmenti orizzontali di lunghezza
+non nulla e calcola il relativo ingombro.
+
 `Platform` gestisce direttamente le collisioni di tutti i dinamici: Mario,
 nemici e power-up possono attraversarla dai lati e dal basso, mentre vi
 atterrano dall'alto. Il filtro usa il collider all'inizio del passo fisico:
@@ -105,7 +109,7 @@ C mostra i collider, R i rettangoli degli oggetti, M attiva la camera manuale,
 E apre l'editor. Le slope sono linee di categoria `Slope`: premere L, scegliere
 la categoria con Spazio, fare clic sui due estremi e premere Esc per terminare.
 Il verso è visibile direttamente nella linea; non serve `risesRight`.
-L'editor conserva `color`, `content` e le altre proprietà nel salvataggio;
+L'editor conserva `content` e le altre proprietà di gioco nel salvataggio;
 queste proprietà si modificano direttamente nel JSON.
 
 L'editor salva la copia del livello accanto all'eseguibile. Riportare le

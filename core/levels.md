@@ -21,14 +21,12 @@ Tutti e quattro i prototipi caricano `levels/<name>.json` dalla cartella dell'es
       "rect": {"x": 0, "y": -20, "width": 224, "height": 50, "yUp": false},
       "pixelUnitSize": {"x": 16, "y": 16},
       "dt": 0.01,
-      "backgroundColor": [92, 148, 252, 255],
       "view": {"x": 0, "y": -12, "width": 16, "height": 15, "yUp": false}
    },
    "objects": [
       {
          "category": 0,
          "rect": {"x": 0, "y": 1, "width": 68, "height": 2, "yUp": false},
-         "sprite": "terrain",
          "layer": 0
       },
       {
@@ -39,15 +37,15 @@ Tutti e quattro i prototipi caricano `levels/<name>.json` dalla cartella dell'es
 }
 ```
 
-`scene` è obbligatorio in tutti e quattro i prototipi e contiene `rect`, `pixelUnitSize` e `dt`. `backgroundColor` (RGBA) e `view` sono opzionali. `dt` è il passo fisico in secondi.
+`scene` è obbligatorio in tutti e quattro i prototipi e contiene `rect`, `pixelUnitSize` e `dt`. `view` è opzionale. Il colore di sfondo è scelto nel `LevelLoader.cpp` e passato al costruttore della scena. `dt` è il passo fisico in secondi.
 
 Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 
 - `rect`: `x`, `y`, `width`, `height`, `yUp`; posizione e dimensioni del rettangolo.
 - `rotRect`: `cx`, `cy`, `width`, `height`, `angle`, `yUp`; centro, dimensioni e angolo **in gradi**. `LevelData::rotRect()` converte l'angolo in radianti per il gioco.
-- `multiline`: array di punti `{"x": ..., "y": ...}`, almeno due. I segmenti di lunghezza nulla vengono saltati dai loader.
+- `multiline`: array di punti `{"x": ..., "y": ...}`, almeno due. In CustomPlatformerSlopes i costruttori rifiutano segmenti di lunghezza nulla; negli altri loader di polilinee vengono saltati.
 
-`name` è opzionale: normalmente basta la categoria. Si usa quando serve identificare una regione specifica, come i due portali `"A"` di ActionRPG, collegati dal loader tramite il nome. Gli attributi come `sprite`, `layer` e `range` sono proprietà autonome e non richiedono un nome. L'editor mostra l'etichetta solo se presente e omette `name` dal salvataggio quando è vuoto.
+`name` è opzionale: normalmente basta la categoria. Si usa quando serve identificare una regione specifica, come i due portali `"A"` di ActionRPG, collegati dal loader tramite il nome. Gli attributi come `layer` e `range` sono proprietà autonome e non richiedono un nome. L'editor mostra l'etichetta solo se presente e omette `name` dal salvataggio quando è vuoto.
 
 ## Oggetti e proprietà
 
@@ -57,7 +55,7 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 | CustomPlatformer / `HammerBrother` | Rettangolo del personaggio | `layer`; la posizione viene convertita nello spawn atteso dal costruttore |
 | CustomPlatformer / `Lift` | Rettangolo allineato agli assi | `vertical` (default true), `range` (default 3), `layer`; il costruttore carica lo sprite `platform` |
 | CustomPlatformer / `Mario` | Rettangolo del personaggio | `layer`; deve essere presente esattamente un Mario |
-| CustomPlatformerSlopes / `Slope` | `multiline` di segmenti inclinati, scena con `yUp: false` | Verso ricavato dagli estremi, indipendente dal loro ordine; `color` RGBA opzionale (trasparente se assente), `layer` (default 1); collisione sul segmento, disegno triangolare senza sprite |
+| CustomPlatformerSlopes / `Slope` | `multiline` di segmenti inclinati, scena con `yUp: false` | Verso ricavato dagli estremi, indipendente dal loro ordine; `layer` (default 1); collider trasparente, collisione sul segmento |
 | CustomPlatformerSlopes / `Static`, `Pipe` | Rettangolo allineato agli assi | Collider trasparente senza sprite, `layer` |
 | CustomPlatformerSlopes / `Block`, `Brick`, `Wood` | Rettangolo del blocco | `content`: `coin`, `powerup`, `life`, `starman` o stringa vuota; `layer`. Mantiene le implementazioni di SMB3 (starman e foglia non ancora implementati) |
 | CustomPlatformerSlopes / `Coin`, `Goomba`, `Mario` | Rettangolo del personaggio/oggetto | `layer`; esattamente un Mario; il loader compensa l'offset dello spawn |
@@ -80,14 +78,15 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 
 I personaggi mantengono dimensioni e collider definiti dalle rispettive classi; il rettangolo nell'editor ne determina la posizione. CustomPlatformer supporta rettangoli allineati agli assi: rotazioni e polilinee richiederebbero un supporto fisico aggiuntivo e vengono segnalate come errori.
 
-ActionRPG descrive nel JSON anche il colore e la vista iniziale della scena, NPC, Soldier e Link. Il loader crea prima Link, poi le altre entità e i portali: il collegamento non dipende dall'ordine delle regioni nel documento. L'esempio mantiene le stesse posizioni, geometrie e regole di gameplay.
+ActionRPG descrive nel JSON anche la vista iniziale della scena, NPC, Soldier e Link. Il loader crea prima Link, poi le altre entità e i portali: il collegamento non dipende dall'ordine delle regioni nel documento. L'esempio mantiene le stesse posizioni, geometrie e regole di gameplay.
 
 Il trigger di CustomPlatformer è un esempio hardcoded nel loader: dopo aver creato Mario e gli ascensori, viene istanziato in `RectF(1, -12, 0.5f, 13)` passando il giocatore e una lambda che alterna lo stato `freezed` degli ascensori. `Trigger` resta generico e riceve un task `std::function<void()>`, come negli altri prototipi. In CustomPlatformer il task viene eseguito all'ingresso e all'uscita dell'oggetto osservato; in Box2DPlatformer e ActionRPG soltanto all'ingresso, secondo il comportamento originale. Il trigger di esempio non è una regione del JSON e non richiede ID, azioni o riferimenti da risolvere.
 
 Le classi specifiche caricano la propria sprite nel costruttore, senza riceverla
 dal loader. I collider generici `Static` non hanno sprite né colore: sono
-trasparenti e si appoggiano alla grafica di sfondo. Il JSON non contiene il
-campo `sprite`. Le classi base di movimento continuano a ricevere la sprite
+trasparenti e si appoggiano alla grafica di sfondo. Il JSON non contiene i
+campi `sprite`, `color` o `backgroundColor`: ogni classe definisce il proprio
+aspetto nel costruttore; per la scena il colore di sfondo arriva dal loader C++. Le classi base di movimento continuano a ricevere la sprite
 dalle sottoclassi.
 
 Sfondi e parallassi sono creati direttamente nei rispettivi `LevelLoader.cpp`,
@@ -105,13 +104,12 @@ creabili nell'editor.
 Le immagini fisse restano visibili nell'editor, senza rettangoli selezionabili;
 si modificano nel C++. I collider restano in `objects`: ad esempio `Terrain`
 in Box2DPlatformer e le linee `Slope` in CustomPlatformerSlopes. Gli estremi
-delle slope ne determinano il verso, senza `risesRight`. Senza sprite o colore
-esplicito, gli oggetti restano invisibili nel gioco. Anche il trigger della
+delle slope ne determinano il verso, senza `risesRight`. Le slope e i collider generici sono trasparenti nel gioco. Anche il trigger della
 linea di morte rimane nel loader C++.
 
 ## Modifica e salvataggio
 
-Il tasto `E` apre il JSON effettivamente caricato dal livello. L'editor modifica geometrie, categorie ed etichette e conserva le altre proprietà degli oggetti e del documento, comprese impostazioni della scena e sfondi. Quando crea un nuovo documento, l'editor include `scene` ricavandolo dalla scena di gioco. Le proprietà specifiche del gioco si impostano direttamente nel JSON; non è stato aggiunto un pannello delle proprietà.
+Il tasto `E` apre il JSON effettivamente caricato dal livello. L'editor modifica geometrie, categorie ed etichette e conserva le altre proprietà degli oggetti e del documento, comprese le impostazioni geometriche della scena. Quando crea un nuovo documento, l'editor include `scene` ricavandolo dalla scena di gioco. Le proprietà specifiche del gioco si impostano direttamente nel JSON; non è stato aggiunto un pannello delle proprietà.
 
 CMake copia i JSON accanto all'eseguibile a ogni build, anche senza modifiche C++. L'editor salva quella **copia di esecuzione**: riportare le modifiche nel file sorgente del progetto prima della build successiva, che ricopia i livelli distribuiti. Per applicare un livello modificato occorre ricaricarlo o riavviare il gioco.
 

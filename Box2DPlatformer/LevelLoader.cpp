@@ -110,7 +110,7 @@ Scene* LevelLoader::load(const std::string& name)
 {
 	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
 	LevelData level(path);
-	PlatformerGameScene* world = new PlatformerGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep());
+	PlatformerGameScene* world = new PlatformerGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep(), {0, 0, 0, 0});
 	try
 	{
 		loadJson(world, level);

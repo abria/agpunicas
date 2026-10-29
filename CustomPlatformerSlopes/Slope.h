@@ -27,8 +27,7 @@ class agp::Slope : public StaticObject
 
 	public:
 
-		Slope(Scene* scene, const RectF& rect, const Color& color, bool risesRight, int layer = 0)
-			: StaticObject(scene, rect, layer), _risesRight(risesRight) { setColor(color); }
+		Slope(Scene* scene, const LineF& line, int layer = 0);
 
 		// slope queries (scene coordinates, y points downwards)
 		bool overlapsX(const RectF& body) const;

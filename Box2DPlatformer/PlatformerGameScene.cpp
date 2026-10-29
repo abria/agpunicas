@@ -21,8 +21,8 @@
 
 using namespace agp;
 
-PlatformerGameScene::PlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt)
-	: GameScene(rect, pixelUnitSize, dt)
+PlatformerGameScene::PlatformerGameScene(const RectF& rect, const Point& pixelUnitSize, float dt, const Color& backgroundColor)
+	: GameScene(rect, pixelUnitSize, dt, backgroundColor)
 {
 	// box2D world init
 	b2WorldDef worldDef = b2DefaultWorldDef();

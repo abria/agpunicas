@@ -29,6 +29,34 @@ void require(bool condition, const std::string& message)
 	if (!condition) throw std::runtime_error(message);
 }
 
+// Keep the physical fixtures readable while constructing slopes from segments.
+LineF slopeLine(const RectF& bounds, bool risesRight)
+{
+	return risesRight ? LineF(bounds.bl(), bounds.tr()) : LineF(bounds.tl(), bounds.br());
+}
+
+void segmentValidation()
+{
+	Scene scene({-20,-20,60,50},{16,16});
+	for (LineF line : {LineF(0,0,0,0), LineF(0,0,0,2), LineF(0,0,2,1)})
+	{
+		bool rejected = false;
+		try { new Platform(&scene, line); }
+		catch (const std::runtime_error&) { rejected = true; }
+		require(rejected, "Platform constructor accepted an invalid segment");
+	}
+	for (LineF line : {LineF(0,0,0,0), LineF(0,0,0,2), LineF(0,0,2,0)})
+	{
+		bool rejected = false;
+		try { new Slope(&scene, line); }
+		catch (const std::runtime_error&) { rejected = true; }
+		require(rejected, "Slope constructor accepted an invalid segment");
+	}
+	new Platform(&scene, LineF(4,0,0,0));
+	scene.update(0);
+	require(scene.objects().size() == 1, "failed construction left objects in the scene");
+}
+
 class Body : public DynamicObject
 {
 public:
@@ -125,9 +153,9 @@ void hill(bool reverse, bool ccd)
 {
 	Scene scene({-20,-20,60,50},{16,16});
 	new StaticObject(&scene, {-10,0,40,3});
-	auto* up = new Slope(&scene, {0,-2,4,2}, {190,120,65}, true);
+	auto* up = new Slope(&scene, slopeLine({0,-2,4,2}, true));
 	new StaticObject(&scene, {4,-2,2,2});
-	auto* down = new Slope(&scene, {6,-2,4,2}, {190,120,65}, false);
+	auto* down = new Slope(&scene, slopeLine({6,-2,4,2}, false));
 	auto* body = new Body(&scene, {reverse ? 11.0f : -2.0f,-1,0.6f,1});
 	body->velocity(reverse ? -3 : 3);
 	body->move(reverse ? Direction::LEFT : Direction::RIGHT);
@@ -150,8 +178,8 @@ void valley(bool reverse)
 {
 	Scene scene({-20,-20,60,50},{16,16});
 	new StaticObject(&scene, {-10,0,40,3});
-	auto* left = new Slope(&scene, {0,-3,4,3}, {190,120,65}, false);
-	auto* right = new Slope(&scene, {4,-3,4,3}, {190,120,65}, true);
+	auto* left = new Slope(&scene, slopeLine({0,-3,4,3}, false));
+	auto* right = new Slope(&scene, slopeLine({4,-3,4,3}, true));
 	auto* body = new Body(&scene, {reverse ? 6.0f : 1.0f,-4,0.6f,1});
 	body->setPos({body->pos().x, (reverse ? right : left)->surfaceY(body->sceneCollider())-1});
 	body->velocity(reverse ? -3 : 3);
@@ -170,7 +198,7 @@ void valley(bool reverse)
 void speedAndJump()
 {
 	Scene scene({-20,-20,60,50},{16,16});
-	auto* slope = new Slope(&scene, {0,-4,8,4}, {190,120,65}, true);
+	auto* slope = new Slope(&scene, slopeLine({0,-4,8,4}, true));
 	auto* body = new Body(&scene, {3,-3,0.6f,1});
 	scene.update(0);
 	for (float vx : {3.0f, -3.0f, 6.0f, -6.0f})
@@ -204,7 +232,7 @@ void speedAndJump()
 void blockers()
 {
 	Scene scene({-20,-20,60,50},{16,16});
-	new Slope(&scene, {0,-4,4,4}, {190,120,65}, true);
+	new Slope(&scene, slopeLine({0,-4,4,4}, true));
 	auto* body = new Body(&scene, {1,-2.6f,0.6f,1});
 	new StaticObject(&scene, {2,-6,0.5f,5});
 	scene.update(0);
@@ -224,7 +252,7 @@ void blockers()
 void openSlopeSides(bool ccd, bool risesRight)
 {
 	Scene scene({-20,-20,60,50},{16,16});
-	auto* slope = new Slope(&scene, {0,-4,4,4}, {190,120,65}, risesRight);
+	auto* slope = new Slope(&scene, slopeLine({0,-4,4,4}, risesRight));
 	auto* body = new Body(&scene, {0,0,0.6f,0.6f});
 	body->gravity(0);
 	body->setCCD(ccd);
@@ -248,7 +276,7 @@ void openSlopeSides(bool ccd, bool risesRight)
 void platformAndTrigger()
 {
 	Scene scene({-20,-20,60,50},{16,16});
-	new Slope(&scene, {0,-2,4,2}, {190,120,65}, true);
+	new Slope(&scene, slopeLine({0,-2,4,2}, true));
 	new Platform(&scene, LineF(0,-3,4,-3));
 	auto* body = new Body(&scene, {1,-5,0.6f,1});
 	int count = 0;
@@ -308,7 +336,7 @@ void idleSliding(bool ccd)
 	for (float gradient : {0.25f,0.5f,1.0f,1.5f,4.0f})
 	{
 		Scene scene({-50,-150,100,200},{16,16});
-		auto* slope = new Slope(&scene, {0,-20*gradient,20,20*gradient}, {190,120,65}, risesRight);
+		auto* slope = new Slope(&scene, slopeLine({0,-20*gradient,20,20*gradient}, risesRight));
 		auto* body = new Body(&scene, {10,0,0.6f,1});
 		body->setPos({10,slope->surfaceY(body->sceneCollider())-1});
 		body->setCCD(ccd);
@@ -323,8 +351,8 @@ void idleSliding(bool ccd)
 	}
 
 	Scene valley({-20,-20,60,50},{16,16});
-	auto* left = new Slope(&valley, {0,-3,4,3}, {190,120,65}, false);
-	new Slope(&valley, {4,-3,4,3}, {190,120,65}, true);
+	auto* left = new Slope(&valley, slopeLine({0,-3,4,3}, false));
+	new Slope(&valley, slopeLine({4,-3,4,3}, true));
 	auto* body = new Body(&valley, {1.5f,0,0.6f,1});
 	body->setPos({1.5f,left->surfaceY(body->sceneCollider())-1});
 	body->setCCD(ccd);
@@ -342,7 +370,7 @@ void uphillControl()
 	for (float gradient : {0.5f,1.0f,2.0f})
 	{
 		Scene scene({-50,-150,100,200},{16,16});
-		auto* slope = new Slope(&scene, {0,-20*gradient,20,20*gradient}, {190,120,65}, true);
+		auto* slope = new Slope(&scene, slopeLine({0,-20*gradient,20,20*gradient}, true));
 		auto* body = new Body(&scene, {10,0,0.6f,1});
 		body->setPos({10,slope->surfaceY(body->sceneCollider())-1});
 		body->defaultForces();
@@ -371,7 +399,7 @@ void uphillRelease()
 	for (float inputSpeed : {6.0f,13.0f})
 	{
 		Scene scene({-50,-150,100,200},{16,16});
-		auto* slope = new Slope(&scene, {0,-20*gradient,20,20*gradient}, {190,120,65}, risesRight);
+		auto* slope = new Slope(&scene, slopeLine({0,-20*gradient,20,20*gradient}, risesRight));
 		auto* body = new Body(&scene, {10,0,0.6f,1});
 		body->setPos({10,slope->surfaceY(body->sceneCollider())-1});
 		body->defaultForces(inputSpeed);
@@ -419,12 +447,9 @@ void levelIntegration()
 		if (auto* slope = object->to<Slope*>())
 		{
 			++ramps;
-			require(slope->color().a == 0, "slope without an explicit color must be invisible");
+			require(slope->color().a == 0, "slope collider must be invisible");
 		}
 	require(ramps == 6, "level did not instantiate six slopes");
-	Color explicitColor = LevelData::color(nlohmann::ordered_json{{"color", {10, 20, 30, 128}}});
-	require(explicitColor.r == 10 && explicitColor.g == 20 && explicitColor.b == 30 && explicitColor.a == 128,
-		"explicit object color was not preserved");
 	require(world->backgroundImages().size() == 1, "missing editor background image");
 	Audio::instance()->playMusic("overworld");
 
@@ -456,7 +481,7 @@ void levelIntegration()
 	{
 		auto* editable = new EditableObject(&editorObjects, object, categories);
 		auto serialized = editable->toJson();
-		for (const char* key : {"multiline", "content", "color", "layer"})
+		for (const char* key : {"multiline", "content", "layer"})
 			if (object.contains(key)) require(serialized.at(key) == object.at(key), std::string("editor lost ") + key);
 		saved["objects"].push_back(serialized);
 	}
@@ -526,6 +551,7 @@ int main(int argc, char** argv)
 			levelIntegration();
 			return 0;
 		}
+		segmentValidation();
 		for (bool ccd : {true,false}) for (bool reverse : {true,false})
 		{
 			hill(reverse,ccd);

@@ -162,6 +162,19 @@ void LevelData::configure(GameScene* scene) const
 	}
 }
 
+Color LevelData::color(const nlohmann::ordered_json& object)
+{
+	if (!object.contains("color"))
+		return {0, 0, 0, 0};
+	const auto& color = object.at("color");
+	if (!color.is_array() || color.size() != 4)
+		throw std::runtime_error("Object color must contain four RGBA components");
+	for (const auto& component : color)
+		if (!component.is_number_integer() || component.get<int>() < 0 || component.get<int>() > 255)
+			throw std::runtime_error("Object color components must be integers in [0,255]");
+	return Color(color[0], color[1], color[2], color[3]);
+}
+
 void LevelData::save(const std::string& path, const nlohmann::ordered_json& json)
 {
 	validate(json);

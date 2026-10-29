@@ -57,7 +57,7 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 | CustomPlatformer / `HammerBrother` | Rettangolo del personaggio | `layer`; la posizione viene convertita nello spawn atteso dal costruttore |
 | CustomPlatformer / `Lift` | Rettangolo allineato agli assi | `vertical` (default true), `range` (default 3), `layer`; il costruttore richiede lo sprite `platform` |
 | CustomPlatformer / `Mario` | Rettangolo del personaggio | `layer`; deve essere presente esattamente un Mario |
-| CustomPlatformerSlopes / `Slope` | Rettangolo allineato agli assi, `yUp: false` | `risesRight` (default true), `color` RGBA (default marrone), `layer` (default 1); collider e disegno triangolari senza sprite |
+| CustomPlatformerSlopes / `Slope` | `multiline` di segmenti inclinati, scena con `yUp: false` | Verso ricavato dagli estremi, indipendente dal loro ordine; `color` RGBA opzionale (trasparente se assente), `layer` (default 1); collisione sul segmento, disegno triangolare senza sprite |
 | CustomPlatformerSlopes / `Static`, `Pipe` | Rettangolo allineato agli assi | `sprite` e `color` opzionali, `layer` |
 | CustomPlatformerSlopes / `Block`, `Brick`, `Wood` | Rettangolo del blocco | `content`: `coin`, `powerup`, `life`, `starman` o stringa vuota; `layer`. Mantiene le implementazioni di SMB3 (starman e foglia non ancora implementati) |
 | CustomPlatformerSlopes / `Coin`, `Goomba`, `Mario` | Rettangolo del personaggio/oggetto | `layer`; esattamente un Mario; il loader compensa l'offset dello spawn |
@@ -96,7 +96,7 @@ In CustomPlatformerSlopes, Box2DPlatformer e ActionRPG le immagini fisse del mon
 }
 ```
 
-CustomPlatformerSlopes usa lo sprite `level_1_1` per lo sfondo originale SMB3, con `layer: 0`. Le pendenze sono rettangoli di categoria `Slope`: il rettangolo ne definisce larghezza e altezza; `risesRight` seleziona il verso della salita. Le proprietà `risesRight`, `color` e `content` sono indipendenti dall’etichetta `name`. Il trigger della linea di morte rimane nel loader C++.
+CustomPlatformerSlopes usa lo sprite `level_1_1` per lo sfondo originale SMB3, con `layer: 0`. Le pendenze sono linee di categoria `Slope`: gli estremi ne definiscono posizione e verso, senza `risesRight`. I segmenti devono avere larghezza e dislivello non nulli. Le proprietà `color` e `content` sono indipendenti dall’etichetta `name`. Senza sprite e senza un colore esplicito, i collider rimangono invisibili e la grafica è fornita dallo sfondo. Il trigger della linea di morte rimane nel loader C++.
 
 Queste immagini non hanno categoria né nome; accettano `rect` o `rotRect`, uno `sprite` e un `layer` (default -1). Restano visibili nel gioco e nell'editor, senza generare rettangoli modificabili che coprano i collider. Il profilo fisico del terreno rimane una `multiline` di categoria `Terrain` in `objects`.
 

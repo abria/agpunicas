@@ -1494,15 +1494,17 @@
       },
       {
          "category": 9,
-         "rect": {
-            "x": 5,
-            "y": -1,
-            "width": 3,
-            "height": 2,
-            "yUp": false
-         },
-         "risesRight": true,
-         "layer": 1
+         "layer": 1,
+         "multiline": [
+            {
+               "x": 5,
+               "y": 1
+            },
+            {
+               "x": 8,
+               "y": -1
+            }
+         ]
       },
       {
          "category": 1,
@@ -1523,63 +1525,73 @@
       },
       {
          "category": 9,
-         "rect": {
-            "x": 9,
-            "y": -1,
-            "width": 3,
-            "height": 2,
-            "yUp": false
-         },
-         "risesRight": false,
-         "layer": 1
+         "layer": 1,
+         "multiline": [
+            {
+               "x": 9,
+               "y": -1
+            },
+            {
+               "x": 12,
+               "y": 1
+            }
+         ]
       },
       {
          "category": 9,
-         "rect": {
-            "x": 20,
-            "y": -2,
-            "width": 2,
-            "height": 3,
-            "yUp": false
-         },
-         "risesRight": true,
-         "layer": 1
+         "layer": 1,
+         "multiline": [
+            {
+               "x": 20,
+               "y": 1
+            },
+            {
+               "x": 22,
+               "y": -2
+            }
+         ]
       },
       {
          "category": 9,
-         "rect": {
-            "x": 24,
-            "y": -2,
-            "width": 3,
-            "height": 3,
-            "yUp": false
-         },
-         "risesRight": false,
-         "layer": 1
+         "layer": 1,
+         "multiline": [
+            {
+               "x": 24,
+               "y": -2
+            },
+            {
+               "x": 27,
+               "y": 1
+            }
+         ]
       },
       {
          "category": 9,
-         "rect": {
-            "x": 45,
-            "y": -2,
-            "width": 4,
-            "height": 2,
-            "yUp": false
-         },
-         "risesRight": false,
-         "layer": 1
+         "layer": 1,
+         "multiline": [
+            {
+               "x": 45,
+               "y": -2
+            },
+            {
+               "x": 49,
+               "y": 0
+            }
+         ]
       },
       {
          "category": 9,
-         "rect": {
-            "x": 49,
-            "y": -2,
-            "width": 4,
-            "height": 2,
-            "yUp": false
-         },
-         "risesRight": true,
-         "layer": 1
+         "layer": 1,
+         "multiline": [
+            {
+               "x": 49,
+               "y": 0
+            },
+            {
+               "x": 53,
+               "y": -2
+            }
+         ]
       }
    ]
 }

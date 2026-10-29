@@ -27,19 +27,6 @@ namespace
 		return geometry.toRect();
 	}
 
-	Color objectColor(const nlohmann::ordered_json& object, Color fallback)
-	{
-		if (!object.contains("color"))
-			return fallback;
-		const auto& color = object.at("color");
-		if (!color.is_array() || color.size() != 4)
-			throw std::runtime_error("Object color must contain four RGBA components");
-		for (const auto& component : color)
-			if (!component.is_number_integer() || component.get<int>() < 0 || component.get<int>() > 255)
-				throw std::runtime_error("Object color components must be integers in [0,255]");
-		return Color(color[0], color[1], color[2], color[3]);
-	}
-
 	Sprite* objectSprite(const nlohmann::ordered_json& object)
 	{
 		std::string name = object.value("sprite", "");
@@ -85,16 +72,33 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 			continue;
 		}
 
+		if (category == "Slope")
+		{
+			if (!object.contains("multiline"))
+				throw std::runtime_error("Slope requires a multiline of inclined segments");
+			auto points = LevelData::multiline(object.at("multiline"));
+			Color color = LevelData::color(object);
+			for (size_t i = 1; i < points.size(); ++i)
+			{
+				PointF left = points[i - 1], right = points[i];
+				if (left.x > right.x)
+					std::swap(left, right);
+				if (left.x == right.x || left.y == right.y)
+					throw std::runtime_error("Slope segments must be inclined, neither horizontal nor vertical");
+				// The line determines the direction; the rectangle is only its runtime bounds.
+				new Slope(world, LineF(left, right).boundingRect(false), color, right.y < left.y, layer);
+			}
+			continue;
+		}
+
 		RectF rect = axisAlignedRect(object);
 		Object* created = nullptr;
 		if (category == "Static" || category == "Pipe")
 		{
 			auto* solid = new StaticObject(world, rect, objectSprite(object), layer);
-			solid->setColor(objectColor(object, {0, 0, 0, 0}));
+			solid->setColor(LevelData::color(object));
 			created = solid;
 		}
-		else if (category == "Slope")
-			created = new Slope(world, rect, objectColor(object, {190, 120, 65, 255}), object.value("risesRight", true), layer);
 		else if (category == "Block" || category == "Brick" || category == "Wood")
 		{
 			std::string content = object.value("content", "");
@@ -114,7 +118,7 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 			if (!std::isfinite(range) || range <= 0)
 				throw std::runtime_error("Lift range must be positive");
 			auto* lift = new Lift(world, rect, objectSprite(object), object.value("vertical", true), range, layer);
-			lift->setColor(objectColor(object, {100, 160, 220, 255}));
+			lift->setColor(LevelData::color(object));
 			created = lift;
 		}
 		else if (category == "Mario")

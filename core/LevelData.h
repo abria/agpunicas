@@ -10,6 +10,7 @@
 #pragma once
 #include "json.hpp"
 #include "geometryUtils.h"
+#include "graphicsUtils.h"
 
 namespace agp
 {
@@ -48,6 +49,9 @@ class agp::LevelData
 		static RectF rect(const nlohmann::ordered_json& json);
 		static RotatedRectF rotRect(const nlohmann::ordered_json& object);
 		static std::vector<PointF> multiline(const nlohmann::ordered_json& json);
+
+		// Explicit object color; transparent when omitted.
+		static Color color(const nlohmann::ordered_json& object);
 
 		static void save(const std::string& path, const nlohmann::ordered_json& json);
 };

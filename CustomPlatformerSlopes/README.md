@@ -16,7 +16,7 @@ nel progetto di partenza non sono inclusi nel JSON eseguibile.
 
 ## Pendenze
 
-Le sei rampe sono visibili come triangoli marroni, senza sprite:
+Le sei rampe sono collider senza sprite, invisibili se `color` è omesso:
 
 - x = 5–12: salita, raccordo piano e discesa vicino alla partenza;
 - x = 20–27: salita ripida e discesa raccordate al primo tubo;
@@ -27,15 +27,16 @@ Una slope si aggiunge come oggetto di categoria `Slope` (indice 9 nel livello):
 ```json
 {
    "category": 9,
-   "rect": {"x": 5, "y": -1, "width": 3, "height": 2, "yUp": false},
-   "risesRight": true,
+   "multiline": [{"x": 5, "y": 1}, {"x": 8, "y": -1}],
    "color": [190, 120, 65, 255],
    "layer": 1
 }
 ```
 
-`risesRight: true` indica una salita verso destra; `false` verso sinistra.
-Larghezza e altezza devono essere positive. La superficie usa l'angolo del
+I due estremi determinano il verso: con y crescente verso il basso, una quota
+minore a destra indica una salita verso destra. Invertire l’ordine dei punti
+non cambia la rampa. Si possono concatenare più segmenti inclinati; segmenti
+orizzontali, verticali o degeneri non sono ammessi (per i tratti piani usare `Platform`). La superficie usa l'angolo del
 collider rivolto a monte. Con pendenza `s = height / width`, lo spostamento
 orizzontale è moltiplicato per `1 / (1 + s)` in salita e `1 + s` in discesa;
 la velocità memorizzata viene ripristinata alla fine del passo.
@@ -50,7 +51,8 @@ smorza rapidamente l'inerzia residua: segue subito lo scivolamento, conservando
 un breve tratto di rallentamento. In fondo alle valli l'entità si ferma senza
 oscillazioni.
 
-`Slope` definisce il solo segmento inclinato e lo disegna come triangolo.
+`Slope` definisce il solo segmento inclinato. Se è specificato `color`,
+lo disegna come triangolo; altrimenti rimane invisibile.
 Base e lato verticale non esistono per le collisioni: gli oggetti li attraversano,
 sia in CCD sia nel modo discreto. La vista dei collider mostra solo il segmento.
 `DynamicObject`
@@ -99,9 +101,11 @@ Il controllo bilaterale di `collidableWith` era già presente in
 Frecce sinistra/destra: movimento; Spazio: salto; Z: corsa; freccia giù:
 accovacciamento; Invio/Esc: pausa; T/H: power-up/power-down di prova.
 C mostra i collider, R i rettangoli degli oggetti, M attiva la camera manuale,
-E apre l'editor. L'editor mostra il rettangolo che delimita ogni slope e
-conserva `risesRight`, `color`, `content` e le altre proprietà nel salvataggio.
-Queste proprietà si modificano direttamente nel JSON.
+E apre l'editor. Le slope sono linee di categoria `Slope`: premere L, scegliere
+la categoria con Spazio, fare clic sui due estremi e premere Esc per terminare.
+Il verso è visibile direttamente nella linea; non serve `risesRight`.
+L'editor conserva `color`, `content` e le altre proprietà nel salvataggio;
+queste proprietà si modificano direttamente nel JSON.
 
 L'editor salva la copia del livello accanto all'eseguibile. Riportare le
 modifiche nel JSON sorgente prima di ricompilare: ogni build ricopia i livelli.

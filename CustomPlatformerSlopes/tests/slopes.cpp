@@ -415,8 +415,15 @@ void levelIntegration()
 	LevelData level(std::string(SDL_GetBasePath()) + "levels/1-1.json");
 	int ramps = 0;
 	for (auto* object : world->objects())
-		if (object->to<Slope*>()) ramps++;
+		if (auto* slope = object->to<Slope*>())
+		{
+			++ramps;
+			require(slope->color().a == 0, "slope without an explicit color must be invisible");
+		}
 	require(ramps == 6, "level did not instantiate six slopes");
+	Color explicitColor = LevelData::color(nlohmann::ordered_json{{"color", {10, 20, 30, 128}}});
+	require(explicitColor.r == 10 && explicitColor.g == 20 && explicitColor.b == 30 && explicitColor.a == 128,
+		"explicit object color was not preserved");
 	require(world->backgroundImages().size() == 1, "missing editor background image");
 	Audio::instance()->playMusic("overworld");
 
@@ -444,7 +451,7 @@ void levelIntegration()
 	{
 		auto* editable = new EditableObject(&editorObjects, object, categories);
 		auto serialized = editable->toJson();
-		for (const char* key : {"risesRight", "content", "color", "layer"})
+		for (const char* key : {"multiline", "content", "color", "layer"})
 			if (object.contains(key)) require(serialized.at(key) == object.at(key), std::string("editor lost ") + key);
 		saved["objects"].push_back(serialized);
 	}
@@ -453,6 +460,45 @@ void levelIntegration()
 	LevelData roundtrip(savedPath);
 	require(roundtrip.json().at("scene") == level.json().at("scene"), "scene settings changed in roundtrip");
 	delete LevelLoader::instance()->load("roundtrip-test");
+	// Reversing every slope's endpoints must preserve its surface and downhill direction.
+	for (auto& object : saved["objects"])
+		if (level.category(object) == "Slope")
+			std::reverse(object["multiline"].begin(), object["multiline"].end());
+	LevelData::save(savedPath, saved);
+	auto* reversed = LevelLoader::instance()->load("roundtrip-test");
+	reversed->update(0);
+	int matched = 0;
+	for (auto* object : reversed->objects())
+		if (auto* slope = object->to<Slope*>())
+			for (auto* original : world->objects())
+				if (auto* expected = original->to<Slope*>())
+					if (slope->rect().pos == expected->rect().pos && slope->rect().size == expected->rect().size)
+					{
+						require(slope->surfaceY(mario->sceneCollider()) == expected->surfaceY(mario->sceneCollider()), "reversing endpoints changed slope surface");
+						require(slope->slideVelocity() == expected->slideVelocity(), "reversing endpoints changed downhill direction");
+						++matched;
+					}
+	require(matched == 6, "reversed slopes did not match original geometry");
+	delete reversed;
+
+	// Reject flat, vertical and zero-length ramps, rather than dividing by zero.
+	for (int kind = 0; kind < 3; ++kind)
+	{
+		auto invalid = saved;
+		for (auto& object : invalid["objects"])
+			if (level.category(object) == "Slope")
+			{
+				auto& points = object["multiline"];
+				if (kind != 0) points[1]["x"] = points[0]["x"];
+				if (kind != 1) points[1]["y"] = points[0]["y"];
+				break;
+			}
+		LevelData::save(savedPath, invalid);
+		bool rejected = false;
+		try { delete LevelLoader::instance()->load("roundtrip-test"); }
+		catch (const std::runtime_error&) { rejected = true; }
+		require(rejected, "invalid slope segment was accepted");
+	}
 	std::remove(savedPath.c_str());
 
 	// Render an actual game frame for visual inspection.

@@ -13,7 +13,6 @@
 
 namespace agp
 {
-	class GameScene;
 	class LevelData;
 }
 
@@ -25,7 +24,6 @@ class agp::LevelData
 {
 	protected:
 
-		std::string _path;
 		nlohmann::ordered_json _json;
 
 		static void validate(const nlohmann::ordered_json& json);
@@ -37,12 +35,6 @@ class agp::LevelData
 		const nlohmann::ordered_json& json() const { return _json; }
 		const nlohmann::ordered_json& objects() const { return _json.at("objects"); }
 		std::string category(const nlohmann::ordered_json& object) const;
-
-		// scene settings
-		RectF sceneRect() const;
-		Point pixelUnitSize() const;
-		float timeStep() const;
-		void configure(GameScene* scene) const;
 
 		// geometry (json angles are in degrees, runtime angles in radians)
 		static RectF rect(const nlohmann::ordered_json& json);

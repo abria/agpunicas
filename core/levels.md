@@ -1,6 +1,6 @@
 # Livelli JSON
 
-I livelli usano il formato del level editor: `categories` contiene i nomi delle categorie e `objects` le regioni da convertire in oggetti di gioco. `LevelData` legge e valida il documento, converte le geometrie e applica le impostazioni della scena. Nei quattro prototipi `LevelLoader::load()` legge il documento e crea la scena; `loadJson()` riceve la scena e il `LevelData` già letto, poi crea gli oggetti specifici del gioco.
+I livelli usano il formato del level editor: `categories` contiene i nomi delle categorie e `objects` le regioni da convertire in oggetti di gioco. `LevelData` legge, valida e salva il documento e converte le geometrie. Nei quattro prototipi `LevelLoader::load()` legge il documento e crea la scena; `loadJson()` riceve la scena e il `LevelData` già letto, poi crea gli oggetti specifici del gioco.
 
 I livelli inclusi sono:
 
@@ -9,7 +9,7 @@ I livelli inclusi sono:
 - `Box2DPlatformer/levels/level0.json`
 - `ActionRPG/levels/overworld.json`
 
-Tutti e quattro i prototipi caricano `levels/<name>.json` dalla cartella dell'eseguibile e usano lo stesso formato: `scene`, `categories` e `objects`. Nuovi file possono essere caricati passando il loro nome a `LevelLoader::load()`. Cambiano le categorie e le proprietà specifiche del gioco, non la struttura del documento.
+Tutti e quattro i prototipi caricano `levels/<name>.json` dalla cartella dell'eseguibile e usano lo stesso formato: `categories` e `objects`, con `core_version` come metadato. Nuovi file possono essere caricati passando il loro nome a `LevelLoader::load()`. Cambiano le categorie e le proprietà specifiche del gioco, non la struttura del documento.
 
 ## Documento e geometrie
 
@@ -17,12 +17,6 @@ Tutti e quattro i prototipi caricano `levels/<name>.json` dalla cartella dell'es
 {
    "core_version": "3.7.3",
    "categories": ["Static", "Mario"],
-   "scene": {
-      "rect": {"x": 0, "y": -20, "width": 224, "height": 50, "yUp": false},
-      "pixelUnitSize": {"x": 16, "y": 16},
-      "dt": 0.01,
-      "view": {"x": 0, "y": -12, "width": 16, "height": 15, "yUp": false}
-   },
    "objects": [
       {
          "category": 0,
@@ -37,7 +31,18 @@ Tutti e quattro i prototipi caricano `levels/<name>.json` dalla cartella dell'es
 }
 ```
 
-`scene` è obbligatorio in tutti e quattro i prototipi e contiene `rect`, `pixelUnitSize` e `dt`. `view` è opzionale. Il colore di sfondo è scelto nel `LevelLoader.cpp` e passato al costruttore della scena. `dt` è il passo fisico in secondi.
+Dimensioni della scena (`sceneRect`), unità in pixel (`pixelUnitSize`), passo fisico
+(`dt`, in secondi) e colore di sfondo sono definiti nel `LevelLoader.cpp` e
+passati al costruttore della scena. La vista iniziale è definita nel costruttore
+della scena specifica. Questi parametri non fanno parte del JSON.
+
+Per esempio, in CustomPlatformerSlopes il loader crea la scena con:
+
+```cpp
+auto* world = new PlatformerGameScene(
+    RectF(0, -20, 176, 50), {16, 16}, 0.01f, {156, 252, 240, 255});
+world->setJsonPath(path); // file che sarà aperto e salvato dall'editor
+```
 
 Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 
@@ -78,7 +83,7 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 
 I personaggi mantengono dimensioni e collider definiti dalle rispettive classi; il rettangolo nell'editor ne determina la posizione. CustomPlatformer supporta rettangoli allineati agli assi: rotazioni e polilinee richiederebbero un supporto fisico aggiuntivo e vengono segnalate come errori.
 
-ActionRPG descrive nel JSON anche la vista iniziale della scena, NPC, Soldier e Link. Il loader crea prima Link, poi le altre entità e i portali: il collegamento non dipende dall'ordine delle regioni nel documento. L'esempio mantiene le stesse posizioni, geometrie e regole di gameplay.
+ActionRPG descrive nel JSON NPC, Soldier, Link, collider e portali. Il loader crea prima Link, poi le altre entità e i portali: il collegamento non dipende dall'ordine delle regioni nel documento. L'esempio mantiene le stesse posizioni, geometrie e regole di gameplay.
 
 Il trigger di CustomPlatformer è un esempio hardcoded nel loader: dopo aver creato Mario e gli ascensori, viene istanziato in `RectF(1, -12, 0.5f, 13)` passando il giocatore e una lambda che alterna lo stato `freezed` degli ascensori. `Trigger` resta generico e riceve un task `std::function<void()>`, come negli altri prototipi. In CustomPlatformer il task viene eseguito all'ingresso e all'uscita dell'oggetto osservato; in Box2DPlatformer e ActionRPG soltanto all'ingresso, secondo il comportamento originale. Il trigger di esempio non è una regione del JSON e non richiede ID, azioni o riferimenti da risolvere.
 
@@ -109,8 +114,8 @@ linea di morte rimane nel loader C++.
 
 ## Modifica e salvataggio
 
-Il tasto `E` apre il JSON effettivamente caricato dal livello. L'editor modifica geometrie, categorie ed etichette e conserva le altre proprietà degli oggetti e del documento, comprese le impostazioni geometriche della scena. Quando crea un nuovo documento, l'editor include `scene` ricavandolo dalla scena di gioco. Le proprietà specifiche del gioco si impostano direttamente nel JSON; non è stato aggiunto un pannello delle proprietà.
+Il tasto `E` apre il JSON effettivamente caricato dal livello. L'editor modifica geometrie, categorie ed etichette e conserva le proprietà specifiche degli oggetti. Il documento salvato contiene soltanto `core_version`, `categories` e `objects`; l'editor usa dimensioni e unità della scena di gioco già creata dal loader. Le proprietà specifiche del gioco si impostano direttamente nel JSON; non è stato aggiunto un pannello delle proprietà.
 
 CMake copia i JSON accanto all'eseguibile a ogni build, anche senza modifiche C++. L'editor salva quella **copia di esecuzione**: riportare le modifiche nel file sorgente del progetto prima della build successiva, che ricopia i livelli distribuiti. Per applicare un livello modificato occorre ricaricarlo o riavviare il gioco.
 
-File mancanti, documenti malformati, categorie fuori intervallo e geometrie non valide producono un errore esplicito. Non è previsto un formato alternativo senza `scene`.
+File mancanti, documenti malformati, categorie fuori intervallo e geometrie non valide producono un errore esplicito.

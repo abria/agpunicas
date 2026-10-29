@@ -30,7 +30,6 @@ void LevelLoader::loadJson(
 	const LevelData& level)
 {
 	SpriteFactory* spriteLoader = SpriteFactory::instance();
-	level.configure(world);
 	std::vector<Object*> lifts;
 
 	// Scenery is separate from the transparent Static colliders edited in the JSON.
@@ -103,9 +102,10 @@ Scene* LevelLoader::load(const std::string& name)
 {
 	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
 	LevelData level(path);
-	PlatformerGameScene* world = new PlatformerGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep(), {92, 148, 252, 255});
+	PlatformerGameScene* world = new PlatformerGameScene(RectF(0, -20, 224, 50), {16, 16}, 0.01f, {92, 148, 252, 255});
 	try
 	{
+		world->setJsonPath(path);
 		loadJson(world, level);
 	}
 	catch (...)

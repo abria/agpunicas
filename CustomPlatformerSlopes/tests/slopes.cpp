@@ -488,7 +488,7 @@ void levelIntegration()
 	std::string savedPath = std::string(SDL_GetBasePath()) + "levels/roundtrip-test.json";
 	LevelData::save(savedPath, saved);
 	LevelData roundtrip(savedPath);
-	require(roundtrip.json().at("scene") == level.json().at("scene"), "scene settings changed in roundtrip");
+	require(!roundtrip.json().contains("scene"), "editor data must not contain scene settings");
 	delete LevelLoader::instance()->load("roundtrip-test");
 	// Reversing every slope's endpoints must preserve its surface and downhill direction.
 	for (auto& object : saved["objects"])

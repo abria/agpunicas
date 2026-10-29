@@ -40,7 +40,6 @@ void LevelLoader::loadJson(
 	const LevelData& level)
 {
 	SpriteFactory* spriteLoader = SpriteFactory::instance();
-	level.configure(world);
 
 	// Ground graphics; the Terrain lines in the editor define its collisions.
 	world->addBackgroundImage(new RenderableObject(world,
@@ -110,9 +109,10 @@ Scene* LevelLoader::load(const std::string& name)
 {
 	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
 	LevelData level(path);
-	PlatformerGameScene* world = new PlatformerGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep(), {0, 0, 0, 0});
+	PlatformerGameScene* world = new PlatformerGameScene(RectF(0, 0, 96, 13, true), {32, 32}, 0.01f, {0, 0, 0, 0});
 	try
 	{
+		world->setJsonPath(path);
 		loadJson(world, level);
 	}
 	catch (...)

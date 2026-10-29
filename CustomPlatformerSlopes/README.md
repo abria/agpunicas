@@ -5,9 +5,9 @@ pendenze di `06-SimplePlatformer-Slopes`. CMake usa `../core` e `../utils`:
 non ci sono copie locali delle librerie. Sprite e audio provengono da SMB3.
 
 Il livello iniziale è `levels/1-1.json`, nel [formato condiviso](../core/levels.md).
-`LevelLoader::load()` legge `LevelData` e crea la scena; `loadJson()` configura
-la scena e istanzia gli oggetti. Spawn di Mario, nemici e impostazioni
-sono nel JSON. Il contenuto dei blocchi usa `content`, separato da `name`.
+`LevelLoader::load()` crea la scena con dimensioni, unità in pixel, passo fisico
+e colore definiti in C++; `loadJson()` istanzia gli oggetti letti da `LevelData`.
+Geometrie, categorie e proprietà degli oggetti (inclusi gli spawn) sono nel JSON. Il contenuto dei blocchi usa `content`, separato da `name`.
 Lo sfondo `level_1_1` è creato direttamente nel loader C++, sotto i collider
 modificabili nell’editor. La linea di morte rimane un trigger C++ a y = 4, come nel progetto originale.
 

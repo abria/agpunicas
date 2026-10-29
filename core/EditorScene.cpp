@@ -69,32 +69,18 @@ void EditorScene::fromJson()
 	// a new editor document may not exist yet
 	std::ifstream file(_jsonPath);
 	if (!file.is_open())
-	{
-		// scene settings for a new level
-		const RectF& rect = _gameScene->rect();
-		Point unit = _gameScene->pixelUnitSize();
-		_json["scene"] = {
-			{ "rect", {{ "x", rect.pos.x }, { "y", rect.pos.y },
-				{ "width", rect.size.x }, { "height", rect.size.y }, { "yUp", rect.yUp }} },
-			{ "pixelUnitSize", {{ "x", unit.x }, { "y", unit.y }} },
-			{ "dt", _gameScene->timeStep() },
-			{ "view", {{ "x", _gameRect.pos.x }, { "y", _gameRect.pos.y },
-				{ "width", _gameRect.size.x }, { "height", _gameRect.size.y }, { "yUp", _gameRect.yUp }} }
-		};
 		return;
-	}
 	file.close();
 
 	LevelData level(_jsonPath);
-	_json = level.json();
-	_categories = _json.at("categories").get<std::vector<std::string>>();
+	_categories = level.json().at("categories").get<std::vector<std::string>>();
 	for (const auto& json : level.objects())
 		_editObjects.push_back(new EditableObject(this, json, _categories));
 }
 
 void EditorScene::toJson()
 {
-	nlohmann::ordered_json j = _json.is_object() ? _json : nlohmann::ordered_json::object();
+	nlohmann::ordered_json j;
 	j["core_version"] = agp::core::VERSION();
 	j["categories"] = _categories;
 
@@ -104,7 +90,6 @@ void EditorScene::toJson()
 	j["objects"] = jsonObjects;
 
 	LevelData::save(_jsonPath, j);
-	_json = j;
 }
 
 void EditorScene::updateState(State newState)

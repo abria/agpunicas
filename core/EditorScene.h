@@ -78,7 +78,6 @@ class agp::EditorScene : public UIScene
 		State _state;
 		State _prevState;
 		std::string _jsonPath;
-		nlohmann::ordered_json _json;	// preserves scene settings and game-specific data
 
 		// constants
 		static constexpr int MAX_CATEGORIES = 15;

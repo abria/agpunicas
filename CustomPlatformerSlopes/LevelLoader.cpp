@@ -32,7 +32,6 @@ LevelLoader::LevelLoader() {}
 
 void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 {
-	level.configure(world);
 	if (world->rect().yUp)
 		throw std::runtime_error("CustomPlatformerSlopes requires a scene with yUp=false");
 
@@ -102,10 +101,12 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 
 Scene* LevelLoader::load(const std::string& name)
 {
-	LevelData level(std::string(SDL_GetBasePath()) + "levels/" + name + ".json");
-	auto* world = new PlatformerGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep(), {156, 252, 240, 255});
+	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
+	LevelData level(path);
+	auto* world = new PlatformerGameScene(RectF(0, -20, 176, 50), {16, 16}, 0.01f, {156, 252, 240, 255});
 	try
 	{
+		world->setJsonPath(path);
 		loadJson(world, level);
 	}
 	catch (...)

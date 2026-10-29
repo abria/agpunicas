@@ -13,27 +13,6 @@
       "Slope",
       "Lift"
    ],
-   "scene": {
-      "rect": {
-         "x": 0,
-         "y": -20,
-         "width": 176,
-         "height": 50,
-         "yUp": false
-      },
-      "pixelUnitSize": {
-         "x": 16,
-         "y": 16
-      },
-      "dt": 0.01,
-      "view": {
-         "x": 0,
-         "y": -10,
-         "width": 16,
-         "height": 15,
-         "yUp": false
-      }
-   },
    "objects": [
       {
          "category": 0,

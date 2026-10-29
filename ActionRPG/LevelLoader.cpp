@@ -39,7 +39,6 @@ void LevelLoader::loadJson(
 	const LevelData& level)
 {
 	SpriteFactory* spriteLoader = SpriteFactory::instance();
-	level.configure(world);
 
 	// Fixed scenery: the editor only edits the collision regions above these images.
 	world->addBackgroundImage(new RenderableObject(world,
@@ -115,9 +114,10 @@ Scene* LevelLoader::load(const std::string& name)
 {
 	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
 	LevelData level(path);
-	RPGGameScene* world = new RPGGameScene(level.sceneRect(), level.pixelUnitSize(), level.timeStep(), {128, 128, 128, 255});
+	RPGGameScene* world = new RPGGameScene(RectF(0, 0, 256, 256), {16, 16}, 0.01f, {128, 128, 128, 255});
 	try
 	{
+		world->setJsonPath(path);
 		loadJson(world, level);
 	}
 	catch (...)

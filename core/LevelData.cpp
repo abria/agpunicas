@@ -8,15 +8,13 @@
 // ----------------------------------------------------------------
 
 #include "LevelData.h"
-#include "GameScene.h"
-#include "View.h"
 #include "mathUtils.h"
 #include <fstream>
 #include <stdexcept>
 
 using namespace agp;
 
-LevelData::LevelData(const std::string& path) : _path(path)
+LevelData::LevelData(const std::string& path)
 {
 	try
 	{
@@ -106,46 +104,11 @@ void LevelData::validate(const nlohmann::ordered_json& json)
 		}
 	}
 
-	const auto& scene = json.at("scene");
-	rect(scene.at("rect"));
-	const auto& unit = scene.at("pixelUnitSize");
-	if (!unit.at("x").is_number_integer() || !unit.at("y").is_number_integer() ||
-		unit.at("x").get<int>() <= 0 || unit.at("y").get<int>() <= 0)
-		throw std::runtime_error("pixelUnitSize must contain positive integers");
-	float dt = scene.at("dt");
-	if (!std::isfinite(dt) || dt <= 0)
-		throw std::runtime_error("dt must be positive");
-	if (scene.contains("view"))
-		rect(scene.at("view"));
 }
 
 std::string LevelData::category(const nlohmann::ordered_json& object) const
 {
 	return _json.at("categories").at(object.at("category").get<size_t>()).get<std::string>();
-}
-
-RectF LevelData::sceneRect() const
-{
-	return rect(_json.at("scene").at("rect"));
-}
-
-Point LevelData::pixelUnitSize() const
-{
-	const auto& unit = _json.at("scene").at("pixelUnitSize");
-	return { unit.at("x"), unit.at("y") };
-}
-
-float LevelData::timeStep() const
-{
-	return _json.at("scene").at("dt");
-}
-
-void LevelData::configure(GameScene* scene) const
-{
-	scene->setJsonPath(_path);
-	const auto& settings = _json.at("scene");
-	if (settings.contains("view"))
-		scene->view()->setRect(rect(settings.at("view")));
 }
 
 void LevelData::save(const std::string& path, const nlohmann::ordered_json& json)

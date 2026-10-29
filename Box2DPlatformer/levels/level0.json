@@ -9,27 +9,6 @@
       "Box",
       "Slime"
    ],
-   "scene": {
-      "rect": {
-         "x": 0,
-         "y": 0,
-         "width": 96,
-         "height": 13,
-         "yUp": true
-      },
-      "pixelUnitSize": {
-         "x": 32,
-         "y": 32
-      },
-      "dt": 0.01,
-      "view": {
-         "x": 0,
-         "y": 0,
-         "width": 24,
-         "height": 13,
-         "yUp": true
-      }
-   },
    "objects": [
       {
          "category": 1,

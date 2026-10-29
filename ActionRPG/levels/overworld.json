@@ -17,27 +17,6 @@
       "Category 13",
       "Category 14"
    ],
-   "scene": {
-      "rect": {
-         "x": 0,
-         "y": 0,
-         "width": 256,
-         "height": 256,
-         "yUp": false
-      },
-      "pixelUnitSize": {
-         "x": 16,
-         "y": 16
-      },
-      "dt": 0.01,
-      "view": {
-         "x": 0,
-         "y": 0,
-         "width": 16,
-         "height": 14,
-         "yUp": false
-      }
-   },
    "objects": [
       {
          "category": 0,

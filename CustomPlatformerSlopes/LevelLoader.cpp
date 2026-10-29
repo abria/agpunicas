@@ -47,11 +47,9 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 	if (world->rect().yUp)
 		throw std::runtime_error("CustomPlatformerSlopes requires a scene with yUp=false");
 
-	for (const auto& object : level.json().value("backgroundImages", nlohmann::ordered_json::array()))
-	{
-		auto* image = new RenderableObject(world, axisAlignedRect(object), objectSprite(object), object.value("layer", 0));
-		world->addBackgroundImage(image);
-	}
+	// Fixed level graphics; the editor places collision shapes over this image.
+	world->addBackgroundImage(new RenderableObject(world,
+		RectF(0, -25, 176, 41), SpriteFactory::instance()->get("level_1_1"), 0));
 
 	for (const auto& object : level.objects())
 	{

@@ -6,9 +6,10 @@ non ci sono copie locali delle librerie. Sprite e audio provengono da SMB3.
 
 Il livello iniziale è `levels/1-1.json`, nel [formato condiviso](../core/levels.md).
 `LevelLoader::load()` legge `LevelData` e crea la scena; `loadJson()` configura
-la scena e istanzia gli oggetti. Spawn di Mario, nemici, sfondo e impostazioni
+la scena e istanzia gli oggetti. Spawn di Mario, nemici e impostazioni
 sono nel JSON. Il contenuto dei blocchi usa `content`, separato da `name`.
-La linea di morte rimane un trigger C++ a y = 4, come nel progetto originale.
+Lo sfondo `level_1_1` è creato direttamente nel loader C++, sotto i collider
+modificabili nell’editor. La linea di morte rimane un trigger C++ a y = 4, come nel progetto originale.
 
 Sono mantenuti i quattro Goomba già definiti nel livello. La generazione di
 100 Goomba casuali è stata rimossa; i segnaposto per nemici non implementati

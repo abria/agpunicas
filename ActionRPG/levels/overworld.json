@@ -44,30 +44,6 @@
          "yUp": false
       }
    },
-   "backgroundImages": [
-      {
-         "rect": {
-            "x": 0,
-            "y": 0,
-            "width": 256,
-            "height": 256,
-            "yUp": false
-         },
-         "sprite": "overworld",
-         "layer": 0
-      },
-      {
-         "rect": {
-            "x": -16,
-            "y": -14,
-            "width": 16,
-            "height": 14,
-            "yUp": false
-         },
-         "sprite": "linkhouse",
-         "layer": 0
-      }
-   ],
    "objects": [
       {
          "category": 0,

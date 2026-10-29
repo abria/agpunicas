@@ -30,19 +30,6 @@
          "yUp": true
       }
    },
-   "backgroundImages": [
-      {
-         "rect": {
-            "x": 0,
-            "y": 0,
-            "width": 96,
-            "height": 13,
-            "yUp": true
-         },
-         "sprite": "fg_ground",
-         "layer": -1
-      }
-   ],
    "objects": [
       {
          "category": 1,
@@ -159,53 +146,6 @@
             "angle": 0,
             "yUp": true
          }
-      }
-   ],
-   "overlays": [
-      {
-         "placement": "background",
-         "sprite": "bg_sky",
-         "parallax": {
-            "x": 0,
-            "y": 0
-         },
-         "seamless": false
-      },
-      {
-         "placement": "background",
-         "sprite": "bg_houses",
-         "parallax": {
-            "x": 0.2,
-            "y": 1
-         },
-         "seamless": true
-      },
-      {
-         "placement": "background",
-         "sprite": "bg_grass",
-         "parallax": {
-            "x": 0.4,
-            "y": 1
-         },
-         "seamless": true
-      },
-      {
-         "placement": "foreground",
-         "sprite": "rain",
-         "parallax": {
-            "x": 0,
-            "y": 0
-         },
-         "seamless": false
-      },
-      {
-         "placement": "foreground",
-         "sprite": "fg_fog",
-         "parallax": {
-            "x": 1.2,
-            "y": 1
-         },
-         "seamless": true
       }
    ]
 }

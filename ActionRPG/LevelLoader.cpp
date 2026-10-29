@@ -18,7 +18,6 @@
 #include <stdexcept>
 #include "LevelData.h"
 #include "Portal.h"
-#include "mathUtils.h"
 #include "NPC.h"
 #include "Clipper.h"
 
@@ -42,18 +41,11 @@ void LevelLoader::loadJson(
 	SpriteFactory* spriteLoader = SpriteFactory::instance();
 	level.configure(world);
 
-	// world images are not editable regions
-	for (const auto& object : level.json().value("backgroundImages", nlohmann::ordered_json::array()))
-	{
-		RotatedRectF geometry = LevelData::rotRect(object);
-		std::string spriteName = object.at("sprite");
-		Sprite* sprite = spriteLoader->get(spriteName);
-		if (!sprite)
-			throw std::runtime_error("Unknown sprite: " + spriteName);
-		RenderableObject* image = new RenderableObject(world, geometry.toRect(), sprite, object.value("layer", -1));
-		image->setAngle(rad2deg(geometry.angle));
-		world->addBackgroundImage(image);
-	}
+	// Fixed scenery: the editor only edits the collision regions above these images.
+	world->addBackgroundImage(new RenderableObject(world,
+		RectF(0, 0, 256, 256), spriteLoader->get("overworld"), 0));
+	world->addBackgroundImage(new RenderableObject(world,
+		RectF(-16, -14, 16, 14), spriteLoader->get("linkhouse"), 0));
 
 	// portals need the player, regardless of json object order
 	for (const auto& object : level.objects())

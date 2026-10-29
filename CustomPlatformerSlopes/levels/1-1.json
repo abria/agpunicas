@@ -40,19 +40,6 @@
          "yUp": false
       }
    },
-   "backgroundImages": [
-      {
-         "rect": {
-            "x": 0,
-            "y": -25,
-            "width": 176,
-            "height": 41,
-            "yUp": false
-         },
-         "sprite": "level_1_1",
-         "layer": 0
-      }
-   ],
    "objects": [
       {
          "category": 0,

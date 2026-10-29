@@ -42,18 +42,9 @@ void LevelLoader::loadJson(
 	SpriteFactory* spriteLoader = SpriteFactory::instance();
 	level.configure(world);
 
-	// world images are not editable regions
-	for (const auto& object : level.json().value("backgroundImages", nlohmann::ordered_json::array()))
-	{
-		RotatedRectF geometry = LevelData::rotRect(object);
-		std::string spriteName = object.at("sprite");
-		Sprite* sprite = spriteLoader->get(spriteName);
-		if (!sprite)
-			throw std::runtime_error("Unknown sprite: " + spriteName);
-		RenderableObject* image = new RenderableObject(world, geometry.toRect(), sprite, object.value("layer", -1));
-		image->setAngle(rad2deg(geometry.angle));
-		world->addBackgroundImage(image);
-	}
+	// Ground graphics; the Terrain lines in the editor define its collisions.
+	world->addBackgroundImage(new RenderableObject(world,
+		RectF(0, 0, 96, 13, true), spriteLoader->get("fg_ground"), -1));
 
 	for (const auto& object : level.objects())
 	{
@@ -116,26 +107,14 @@ void LevelLoader::loadJson(
 	if (!world->player())
 		throw std::runtime_error("A level must contain exactly one Player");
 
-	// decorative backgrounds and foregrounds, in drawing order
-	for (const auto& object : level.json().value("overlays", nlohmann::ordered_json::array()))
-	{
-		std::string placement = object.at("placement");
-		if (placement != "background" && placement != "foreground")
-			throw std::runtime_error("Unknown overlay placement: " + placement);
-		PointF parallax;
-		if (object.contains("parallax"))
-			parallax = { object.at("parallax").at("x"), object.at("parallax").at("y") };
-		bool seamless = object.value("seamless", false);
-		std::string spriteName = object.at("sprite");
-		Sprite* sprite = spriteLoader->get(spriteName);
-		if (!sprite)
-			throw std::runtime_error("Unknown sprite: " + spriteName);
-		OverlayScene* overlay = new OverlayScene(world, sprite, parallax, seamless);
-		if (placement == "background")
-			world->addBackgroundScene(overlay);
-		else
-			world->addForegroundScene(overlay);
-	}
+	// Backgrounds, from farthest to nearest. Parallax is relative to the camera.
+	world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_sky")));
+	world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_houses"), {0.2f, 1}, true));
+	world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_grass"), {0.4f, 1}, true));
+
+	// Foreground effects, drawn over the game.
+	world->addForegroundScene(new OverlayScene(world, spriteLoader->get("rain")));
+	world->addForegroundScene(new OverlayScene(world, spriteLoader->get("fg_fog"), {1.2f, 1}, true));
 }
 
 Scene* LevelLoader::load(const std::string& name)

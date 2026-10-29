@@ -64,7 +64,7 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 | CustomPlatformerSlopes / `Platform` | `multiline` di segmenti orizzontali | `layer`; collisione solo dall’alto per tutti i dinamici; attraversabili dal basso e dai lati |
 | CustomPlatformerSlopes / `Lift` | Rettangolo allineato agli assi | `vertical`, `range` positivo, `sprite` e `color` opzionali, `layer` |
 | Box2DPlatformer / `Renderable` | `rect` o `rotRect` | `sprite` opzionale, `layer`; decorazione senza fisica |
-| Box2DPlatformer / `Terrain` | `multiline` | `layer`; un collider per segmento, la grafica del terreno è in `backgroundImages` |
+| Box2DPlatformer / `Terrain` | `multiline` | `layer`; un collider per segmento, la grafica del terreno è creata nel loader C++ |
 | Box2DPlatformer / `Static` | `rect` o `rotRect` | `sprite` opzionale, `layer` |
 | Box2DPlatformer / `Gear` | `rect` o `rotRect` | `layer`; il costruttore richiede lo sprite `gear` |
 | Box2DPlatformer / `Box` | `rect` o `rotRect` | `layer`; mantiene lo sprite e l'impulso iniziale del costruttore |
@@ -80,38 +80,29 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 
 I personaggi mantengono dimensioni e collider definiti dalle rispettive classi; il rettangolo nell'editor ne determina la posizione. CustomPlatformer supporta rettangoli allineati agli assi: rotazioni e polilinee richiederebbero un supporto fisico aggiuntivo e vengono segnalate come errori.
 
-ActionRPG descrive nel JSON anche il colore e la vista iniziale della scena, gli sfondi, NPC, Soldier e Link. Il loader crea prima Link, poi le altre entità e i portali: il collegamento non dipende dall'ordine delle regioni nel documento. L'esempio mantiene le stesse posizioni, geometrie e regole di gameplay.
+ActionRPG descrive nel JSON anche il colore e la vista iniziale della scena, NPC, Soldier e Link. Il loader crea prima Link, poi le altre entità e i portali: il collegamento non dipende dall'ordine delle regioni nel documento. L'esempio mantiene le stesse posizioni, geometrie e regole di gameplay.
 
 Il trigger di CustomPlatformer è un esempio hardcoded nel loader: dopo aver creato Mario e gli ascensori, viene istanziato in `RectF(1, -12, 0.5f, 13)` passando il giocatore e una lambda che alterna lo stato `freezed` degli ascensori. `Trigger` resta generico e riceve un task `std::function<void()>`, come negli altri prototipi. In CustomPlatformer il task viene eseguito all'ingresso e all'uscita dell'oggetto osservato; in Box2DPlatformer e ActionRPG soltanto all'ingresso, secondo il comportamento originale. Il trigger di esempio non è una regione del JSON e non richiede ID, azioni o riferimenti da risolvere.
 
-Le classi specifiche scelgono lo sprite nel proprio costruttore. Il campo `sprite` rimane per gli oggetti generici, come `StaticObject` e `RenderableObject`, e per le immagini di sfondo.
+Le classi specifiche scelgono lo sprite nel proprio costruttore. Il campo `sprite` rimane per gli oggetti generici, come `StaticObject` e `RenderableObject`.
 
-In CustomPlatformerSlopes, Box2DPlatformer e ActionRPG le immagini fisse del mondo sono nell'array principale `backgroundImages`: il terreno del platformer, oppure l'overworld e la casa di Link. Per esempio:
+Sfondi e parallassi sono creati direttamente nei rispettivi `LevelLoader.cpp`,
+con chiamate esplicite: non fanno parte del JSON perché non sono oggetti
+creabili nell'editor.
 
-```json
-{
-   "rect": {"x": 0, "y": 0, "width": 96, "height": 13, "yUp": true},
-   "sprite": "fg_ground",
-   "layer": -1
-}
-```
+- CustomPlatformerSlopes: immagine `level_1_1` dietro i collider.
+- ActionRPG: immagini `overworld` e `linkhouse`.
+- Box2DPlatformer: immagine del terreno `fg_ground`; cielo, case ed erba come
+  sfondi; pioggia e nebbia in primo piano. Le velocità di parallasse e la
+  ripetizione delle immagini sono argomenti dei costruttori `OverlayScene`.
+- CustomPlatformer: non usa sfondi o parallassi separati nel JSON.
 
-CustomPlatformerSlopes usa lo sprite `level_1_1` per lo sfondo originale SMB3, con `layer: 0`. Le pendenze sono linee di categoria `Slope`: gli estremi ne definiscono posizione e verso, senza `risesRight`. I segmenti devono avere larghezza e dislivello non nulli. Le proprietà `color` e `content` sono indipendenti dall’etichetta `name`. Senza sprite e senza un colore esplicito, i collider rimangono invisibili e la grafica è fornita dallo sfondo. Il trigger della linea di morte rimane nel loader C++.
-
-Queste immagini non hanno categoria né nome; accettano `rect` o `rotRect`, uno `sprite` e un `layer` (default -1). Restano visibili nel gioco e nell'editor, senza generare rettangoli modificabili che coprano i collider. Il profilo fisico del terreno rimane una `multiline` di categoria `Terrain` in `objects`.
-
-In Box2DPlatformer gli sfondi e gli effetti con parallasse sono nell'array principale `overlays`, nell'ordine di disegno:
-
-```json
-{
-   "placement": "background",
-   "sprite": "bg_houses",
-   "parallax": {"x": 0.2, "y": 1},
-   "seamless": true
-}
-```
-
-`placement` può essere `background` o `foreground`. `parallax` ha default `(0,0)` e `seamless` ha default false; gli sfondi ripetuti richiedono uno sprite compatibile (`FilledSprite`).
+Le immagini fisse restano visibili nell'editor, senza rettangoli selezionabili;
+si modificano nel C++. I collider restano in `objects`: ad esempio `Terrain`
+in Box2DPlatformer e le linee `Slope` in CustomPlatformerSlopes. Gli estremi
+delle slope ne determinano il verso, senza `risesRight`. Senza sprite o colore
+esplicito, gli oggetti restano invisibili nel gioco. Anche il trigger della
+linea di morte rimane nel loader C++.
 
 ## Modifica e salvataggio
 

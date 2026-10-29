@@ -87,6 +87,12 @@ Audio::~Audio()
 	MIX_Quit();
 }
 
+void Audio::toggleMute()
+{
+	if (MIX_SetMixerGain(_mixer, _muted ? 1.0f : 0.0f))
+		_muted = !_muted;
+}
+
 void Audio::playSound(const std::string& id, int loops, bool forceReplay)
 {
 	auto sound = _sounds.find(id);

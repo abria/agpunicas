@@ -29,6 +29,7 @@ class agp::Audio : public Singleton<Audio>
 
 	private:
 
+		bool _muted = false;
 		MIX_Mixer* _mixer;
 		MIX_Track* _musicTrack;
 		std::map< std::string, MIX_Audio*> _sounds;
@@ -42,6 +43,8 @@ class agp::Audio : public Singleton<Audio>
 	public:
 
 		~Audio();
+
+		void toggleMute();
 
 		// controls
 		void playSound(const std::string & id, int loops = 0, bool forceReplay = false);

@@ -119,6 +119,15 @@ void Game::dispatchEvent(SDL_Event& evt)
 		return;
 	}
 
+	// Global audio toggle, also available in menus and while paused.
+	if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.scancode == SDL_SCANCODE_V
+		&& !SDL_TextInputActive(SDL_GetWindowFromID(evt.key.windowID)))
+	{
+		if (!evt.key.repeat)
+			Audio::instance()->toggleMute();
+		return;
+	}
+
 	// detect CTRL and SHIFT modifiers
 	const bool* keyboardState = SDL_GetKeyboardState(0);
 	bool ctrlPressed = keyboardState[SDL_SCANCODE_LCTRL] || keyboardState[SDL_SCANCODE_RCTRL];

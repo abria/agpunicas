@@ -7,6 +7,8 @@ Un framework per programmare videogiochi 2D in C++ con SDL3.
 
 La [wiki](https://github.com/abria/agpunicas/wiki) raccoglie le guide al framework e ai quattro prototipi. Nel menu laterale trovi gli approfondimenti e i diagrammi delle classi di ciascun progetto.
 
+In tutti e quattro i prototipi, **V** attiva/disattiva musica ed effetti sonori (anche nei menu e in pausa; escluso l’inserimento di testo nell’editor).
+
 ## utils
 
 Libreria header-only di utilità condivise: vettori e forme geometriche, test di collisione, autotiling ed estrazione dei fotogrammi dalle spritesheet, oltre a funzioni per tempo, matematica, file e SDL.

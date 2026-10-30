@@ -27,7 +27,12 @@ class agp::Singleton
 
         // protected constructor and destructor to prevent direct instantiation and deletion
         Singleton() = default;
-        virtual ~Singleton() = default;
+        virtual ~Singleton()
+        {
+            // A scene owner may delete a singleton (e.g. HUD) directly.
+            if (_instance && static_cast<Singleton<T>*>(_instance) == this)
+                _instance = nullptr;
+        }
 
     public:
 
@@ -42,11 +47,13 @@ class agp::Singleton
         // needed for polymorphic behavior
         static void setInstance(T* newInstance) 
         {
-            uninstance();
+            if (_instance == newInstance)
+                return;
+            destroyInstance();
             _instance = newInstance;
         }
 
-        static void uninstance()
+        static void destroyInstance()
         {
             if (_instance)
                 delete _instance;

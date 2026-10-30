@@ -71,7 +71,8 @@ SpriteFactory::SpriteFactory()
 
 SpriteFactory::~SpriteFactory()
 {
-	// todo: deallocate all assets
+	for (auto& entry : _spriteSheets)
+		SDL_DestroyTexture(entry.second);
 }
 
 // anchors

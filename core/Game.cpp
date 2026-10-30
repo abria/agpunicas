@@ -37,12 +37,12 @@ Game::Game(
 	_timeScales = { 0.05f, 0.1f, 0.2f, 0.5f, 1.0f, 2.0f, 4.0f, 10.0f, 20.0f };
 
 	if (rendering == Rendering::SDL)
-		_window = new Window(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
+		_window.reset(new Window(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y));
 	else if (rendering == Rendering::SDL_CPU_SHADERS)
-		_window = new CPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
+		_window.reset(new CPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y));
 	else if (rendering == Rendering::SDL_GPU_SHADERS)
 #ifdef WITH_SHADERS
-		_window = new GPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y);
+		_window.reset(new GPUShaderWindow(windowTitle, int(_aspectRatio * windowSize.x), windowSize.y));
 #else
 		throw "GPUShaderWindow not supported, you need to activate WITH_SHADERS at CMake time";
 #endif
@@ -76,19 +76,21 @@ void Game::run()
 		if (frameRate.update(false))
 			_currentFPS = int(round(frameRate.lastFrequency()));
 	}
-
-	destroy();
 }
 
-void Game::destroy()
+Game::~Game()
+{
+	clearScenes();
+	// _window is released automatically after the destructor body.
+}
+
+void Game::clearScenes()
 {
 	for (auto scene : _scenes)
 		delete scene;
-
-	if(_window)
-		delete _window;
-
-	SDL_Quit();
+	_scenes.clear();
+	_scenesToPop = 0;
+	_running = false;
 }
 
 void Game::processEvents()

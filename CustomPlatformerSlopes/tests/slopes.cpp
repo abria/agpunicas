@@ -431,6 +431,46 @@ public:
 	PlatformerGameScene* world() { return dynamic_cast<PlatformerGameScene*>(_scenes.front()); }
 };
 
+void shutdownIntegration()
+{
+	for (int phase = 0; phase < 5; ++phase)
+	{
+		TestGame* game = nullptr;
+		try
+		{
+			game = new TestGame();
+			Game::setInstance(game);
+			Game::setInstance(game); // registering the same game must be harmless
+			if (phase == 0) throw std::runtime_error("simulated startup failure");
+			SpriteFactory::instance();
+			if (phase == 1) throw std::runtime_error("simulated startup failure");
+			Audio::instance();
+			if (phase == 2) throw std::runtime_error("simulated startup failure");
+			game->init();
+			if (phase == 3) throw std::runtime_error("simulated startup failure");
+			SDL_Event quit{};
+			quit.type = SDL_EVENT_QUIT;
+			SDL_PushEvent(&quit);
+			game->run();
+		}
+		catch (const std::runtime_error& error)
+		{
+			require(std::string(error.what()) == "simulated startup failure", error.what());
+		}
+		require(game != nullptr, "game did not initialize");
+		game->clearScenes();
+		game->clearScenes(); // repeated cleanup must not delete scenes twice
+		require(SDL_WasInit(SDL_INIT_VIDEO) != 0, "SDL stopped before resources were released");
+		SpriteFactory::destroyInstance();
+		Audio::destroyInstance();
+		Game::destroyInstance();
+		Game::destroyInstance();
+		SDL_Quit();
+		require(SDL_WasInit(0) == 0, "SDL still active after shutdown");
+	}
+	std::cout << "Normal and failed startup cleanup checks passed\n";
+}
+
 void levelIntegration()
 {
 	auto* game = new TestGame();
@@ -492,13 +532,13 @@ void levelIntegration()
 	LevelData::save(savedPath, saved);
 	LevelData roundtrip(savedPath);
 	require(!roundtrip.json().contains("scene"), "editor data must not contain scene settings");
-	delete LevelLoader::instance()->load("roundtrip-test");
+	delete LevelLoader::load("roundtrip-test");
 	// Reversing every slope's endpoints must preserve its surface and downhill direction.
 	for (auto& object : saved["objects"])
 		if (level.category(object) == "Slope")
 			std::reverse(object["multiline"].begin(), object["multiline"].end());
 	LevelData::save(savedPath, saved);
-	auto* reversed = LevelLoader::instance()->load("roundtrip-test");
+	auto* reversed = LevelLoader::load("roundtrip-test");
 	reversed->update(0);
 	int matched = 0;
 	for (auto* object : reversed->objects())
@@ -528,7 +568,7 @@ void levelIntegration()
 			}
 		LevelData::save(savedPath, invalid);
 		bool rejected = false;
-		try { delete LevelLoader::instance()->load("roundtrip-test"); }
+		try { delete LevelLoader::load("roundtrip-test"); }
 		catch (const std::runtime_error&) { rejected = true; }
 		require(rejected, "invalid slope segment was accepted");
 	}
@@ -549,6 +589,11 @@ int main(int argc, char** argv)
 {
 	try
 	{
+		if (argc > 1 && std::string(argv[1]) == "--shutdown")
+		{
+			shutdownIntegration();
+			return 0;
+		}
 		if (argc > 1 && std::string(argv[1]) == "--level")
 		{
 			levelIntegration();

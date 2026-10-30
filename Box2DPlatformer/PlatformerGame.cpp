@@ -24,7 +24,7 @@ PlatformerGame::PlatformerGame() : Game("Box2DPlatformer", { 600,600 }, 1.846f, 
 void PlatformerGame::init()
 {
 	DemoShaders::load(static_cast<GPUShaderWindow*>(window()));
-	pushScene(LevelLoader::instance()->load("level0"));
+	pushScene(LevelLoader::load("level0"));
 	_hud = new HUD();
 	pushScene(_hud);
 	pushScene(Menu::mainMenu());

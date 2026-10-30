@@ -20,12 +20,6 @@
 
 using namespace agp;
 
-SpriteFactory* SpriteFactory::instance()
-{
-	static SpriteFactory uniqueInstance;
-	return &uniqueInstance;
-}
-
 SpriteFactory::SpriteFactory()
 {
 	SDL_Renderer* renderer = Game::instance()->window()->renderer();
@@ -52,6 +46,12 @@ static RectI hud_number(519, 263, 8, 8);
 static RectI hud_letter_disabled(519, 366, 8, 8);
 static RectI hud_number_disabled(519, 375, 8, 8);
 static RectI hud_coin(519, 289, 8, 8);
+
+SpriteFactory::~SpriteFactory()
+{
+	for (auto& entry : _spriteSheets)
+		SDL_DestroyTexture(entry.second);
+}
 
 Sprite* SpriteFactory::get(const std::string& id)
 {

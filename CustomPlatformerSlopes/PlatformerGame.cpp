@@ -28,7 +28,7 @@ PlatformerGame::PlatformerGame() :
 
 void PlatformerGame::init()
 {
-	pushScene(LevelLoader::instance()->load("1-1"));
+	pushScene(LevelLoader::load("1-1"));
 	_hud = new HUD();
 	pushScene(_hud);
 	pushScene(Menu::mainMenu());

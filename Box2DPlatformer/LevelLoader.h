@@ -10,7 +10,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 namespace agp
 {
@@ -20,23 +19,15 @@ namespace agp
 	class PlatformerGameScene;
 }
 
-// LevelLoader (singleton)
-// - provides game scene creation methods
+// Stateless level loading utilities.
 class agp::LevelLoader
 {
-	protected:
+	private:
 
-		// constructor inaccesible due to singleton
-		LevelLoader();
-
-		void loadJson(
-			PlatformerGameScene* world,
-			const LevelData& level);
+		LevelLoader() = delete;
+		static void loadJson(PlatformerGameScene* world, const LevelData& level);
 
 	public:
 
-		// singleton
-		static LevelLoader* instance();
-
-		Scene* load(const std::string& name);
+		static Scene* load(const std::string& name);
 };

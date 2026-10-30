@@ -30,7 +30,7 @@ void PlatformerGame::init()
 {
 	DemoShaders::load(static_cast<GPUShaderWindow*>(window()));
 
-	pushScene(LevelLoader::instance()->load("overworld"));
+	pushScene(LevelLoader::load("overworld"));
 	_hud = new HUD();
 	pushScene(_hud);
 	pushScene(Menu::mainMenu());

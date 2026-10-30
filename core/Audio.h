@@ -39,6 +39,7 @@ class agp::Audio : public Singleton<Audio>
 
 		// constructor accessible only to Singleton (thanks to friend declaration)
 		Audio();
+		void release();
 
 	public:
 

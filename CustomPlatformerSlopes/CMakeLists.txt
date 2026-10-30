@@ -53,6 +53,9 @@ if(SLOPES_BUILD_TESTS)
     add_dependencies(slopes_tests copy_levels)
     add_test(NAME slopes_physics COMMAND slopes_tests)
     add_test(NAME slopes_level COMMAND slopes_tests --level)
-    set_tests_properties(slopes_level PROPERTIES ENVIRONMENT
+    add_test(NAME slopes_shutdown COMMAND slopes_tests --shutdown)
+    add_executable(singleton_tests ../core/tests/singleton.cpp)
+    add_test(NAME singleton_lifetime COMMAND singleton_tests)
+    set_tests_properties(slopes_level slopes_shutdown PROPERTIES ENVIRONMENT
         "SDL_VIDEODRIVER=dummy;SDL_AUDIODRIVER=dummy;SDL_RENDER_DRIVER=software")
 endif()

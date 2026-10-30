@@ -17,19 +17,6 @@
 
 using namespace agp;
 
-namespace
-{
-	RectF axisAlignedRect(const nlohmann::ordered_json& object)
-	{
-		RotatedRectF geometry = LevelData::rotRect(object);
-		if (geometry.angle != 0 || geometry.yUp)
-			throw std::runtime_error("CustomPlatformerSlopes requires axis-aligned rectangles with yUp=false");
-		return geometry.toRect();
-	}
-}
-
-LevelLoader::LevelLoader() {}
-
 void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 {
 	if (world->rect().yUp)
@@ -53,7 +40,7 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 			continue;
 		}
 
-		RectF rect = axisAlignedRect(object);
+		RectF rect = LevelData::axisAlignedRect(object);
 		if (category == "Static" || category == "Pipe")
 			new StaticObject(world, rect);
 		else if (category == "Block" || category == "Brick" || category == "Wood")

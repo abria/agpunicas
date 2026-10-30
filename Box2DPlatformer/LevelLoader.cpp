@@ -24,17 +24,6 @@
 
 using namespace agp;
 
-LevelLoader* LevelLoader::instance()
-{
-	static LevelLoader uniqueInstance;
-	return &uniqueInstance;
-}
-
-LevelLoader::LevelLoader()
-{
-	// e.g. load level maps from disk
-}
-
 void LevelLoader::loadJson(
 	PlatformerGameScene* world,
 	const LevelData& level)

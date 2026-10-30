@@ -38,6 +38,8 @@ class agp::LevelData
 
 		// geometry (json angles are in degrees, runtime angles in radians)
 		static RectF rect(const nlohmann::ordered_json& json);
+		// Axis-aligned geometry in the requested coordinate system.
+		static RectF axisAlignedRect(const nlohmann::ordered_json& object, bool yUp = false);
 		static RotatedRectF rotRect(const nlohmann::ordered_json& object);
 		static std::vector<PointF> multiline(const nlohmann::ordered_json& json);
 

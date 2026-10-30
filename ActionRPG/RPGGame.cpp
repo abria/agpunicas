@@ -26,7 +26,7 @@ void RPGGame::init()
 	auto* shaderWindow = static_cast<GPUShaderWindow*>(window());
 	shaderWindow->setShader(nullptr);
 	DemoShaders::load(shaderWindow);
-	pushScene(LevelLoader::instance()->load("overworld"));
+	pushScene(LevelLoader::load("overworld"));
 	_hud = HUD::instance();
 	pushScene(_hud);
 	pushScene(Menu::mainMenu());

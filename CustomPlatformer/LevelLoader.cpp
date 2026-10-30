@@ -20,11 +20,6 @@
 
 using namespace agp;
 
-LevelLoader::LevelLoader()
-{
-	// e.g. load level data from disk
-}
-
 void LevelLoader::loadJson(
 	PlatformerGameScene* world,
 	const LevelData& level)
@@ -53,10 +48,7 @@ void LevelLoader::loadJson(
 	for (const auto& object : level.objects())
 	{
 		std::string category = level.category(object);
-		RotatedRectF geometry = LevelData::rotRect(object);
-		if (geometry.angle != 0)
-			throw std::runtime_error("CustomPlatformer requires axis-aligned rectangles");
-		RectF rect = geometry.toRect();
+		RectF rect = LevelData::axisAlignedRect(object);
 
 		if (category == "Static")
 			new StaticObject(world, rect);

@@ -11,6 +11,7 @@
 #include "geometryUtils.h"
 #include "Singleton.h"
 #include <vector>
+#include <memory>
 
 namespace agp
 {
@@ -35,7 +36,7 @@ class agp::Game : public Singleton<Game>
 	protected:
 
 		// attributes
-		Window* _window;
+		std::unique_ptr<Window> _window;
 		float _aspectRatio;					// -1 if free to vary
 		std::vector<Scene*> _scenes;		// scenes stack
 		int _scenesToPop;					// for popSceneLater
@@ -46,7 +47,6 @@ class agp::Game : public Singleton<Game>
 		std::vector<float> _timeScales;
 
 		// helper functions
-		virtual void destroy();
 		virtual void processEvents();
 
 	public: 
@@ -57,8 +57,13 @@ class agp::Game : public Singleton<Game>
 			float aspectRatio = -1,
 			Rendering rendering = Rendering::SDL);
 
+		virtual ~Game();
+
+		// Releases scenes while shared services and the renderer are still alive.
+		void clearScenes();
+
 		// getters
-		Window* window() { return _window; }
+		Window* window() { return _window.get(); }
 		float aspectRatio() { return _aspectRatio; }
 		int currentFPS() { return _currentFPS; }
 

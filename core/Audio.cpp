@@ -1,8 +1,8 @@
 // ----------------------------------------------------------------
 // From "Algorithms and Game Programming" in C++ by Alessandro Bria
-// Copyright (C) 2024 Alessandro Bria (a.bria@unicas.it). 
+// Copyright (C) 2024 Alessandro Bria (a.bria@unicas.it).
 // All rights reserved.
-// 
+//
 // Released under the BSD License
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
@@ -12,6 +12,7 @@
 #include "fileUtils.h"
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 
 using namespace agp;
 
@@ -21,69 +22,84 @@ Audio::Audio()
 	_musicTrack = nullptr;
 
 	if (!SDL_Init(SDL_INIT_AUDIO))
-		throw SDL_GetError();
+		throw std::runtime_error(SDL_GetError());
 
 	if (!MIX_Init())
-		throw SDL_GetError();
+		throw std::runtime_error(SDL_GetError());
 
-	_mixer = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr);
-	if (!_mixer)
-		throw SDL_GetError();
-
-	_musicTrack = MIX_CreateTrack(_mixer);
-	if (!_musicTrack)
-		throw SDL_GetError();
-
-	auto soundFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/sounds", "*.wav");
-	for (auto& f : soundFiles)
+	try
 	{
-		std::string name = getFileName(f, false);
-		//printf("sound: \"%s\"\n", name.c_str());
+		_mixer = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr);
+		if (!_mixer)
+			throw std::runtime_error(SDL_GetError());
 
-		MIX_Audio* audio = MIX_LoadAudio(_mixer, (std::string(SDL_GetBasePath()) + "assets/sounds/" + f).c_str(), true);
-		if (!audio)
-			std::cerr << SDL_GetError() << "\n";
-		else
-			_sounds[name] = audio;
+		_musicTrack = MIX_CreateTrack(_mixer);
+		if (!_musicTrack)
+			throw std::runtime_error(SDL_GetError());
+
+		auto soundFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/sounds", "*.wav");
+		for (auto& f : soundFiles)
+		{
+			std::string name = getFileName(f, false);
+			//printf("sound: \"%s\"\n", name.c_str());
+
+			MIX_Audio* audio = MIX_LoadAudio(_mixer, (std::string(SDL_GetBasePath()) + "assets/sounds/" + f).c_str(), true);
+			if (!audio)
+				std::cerr << SDL_GetError() << "\n";
+			else
+				_sounds[name] = audio;
+		}
+
+		auto musicFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/musics", "*.wav");
+		auto mp3Files = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/musics", "*.mp3");
+		musicFiles.insert(musicFiles.end(), mp3Files.begin(), mp3Files.end());
+		for (auto& f : musicFiles)
+		{
+			std::string name = getFileName(f, false);
+			if (_musics.count(name))
+				continue; // prefer the WAV when both formats share the same id
+			//printf("music: \"%s\"\n", name.c_str());
+
+			MIX_Audio* audio = MIX_LoadAudio(_mixer, (std::string(SDL_GetBasePath()) + "assets/musics/" + f).c_str(), false);
+			if (!audio)
+				std::cerr << SDL_GetError() << "\n";
+			else
+				_musics[name] = audio;
+		}
+
+		_soundGains["Mario Jump"] = 1.0f;
+		_soundGains["Skid"] = 96.0f / 128.0f;
+
+		//regolo il volume del thwomp
+		_soundGains["Thwomp"] = 96.0f / 128.0f;
 	}
-
-	auto musicFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/musics", "*.wav");
-	auto mp3Files = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/musics", "*.mp3");
-	musicFiles.insert(musicFiles.end(), mp3Files.begin(), mp3Files.end());
-	for (auto& f : musicFiles)
+	catch (...)
 	{
-		std::string name = getFileName(f, false);
-		if (_musics.count(name))
-			continue; // prefer the WAV when both formats share the same id
-		//printf("music: \"%s\"\n", name.c_str());
-
-		MIX_Audio* audio = MIX_LoadAudio(_mixer, (std::string(SDL_GetBasePath()) + "assets/musics/" + f).c_str(), false);
-		if (!audio)
-			std::cerr << SDL_GetError() << "\n";
-		else
-			_musics[name] = audio;
+		release();
+		throw;
 	}
-
-    _soundGains["Mario Jump"] = 1.0f;
-    _soundGains["Skid"] = 96.0f / 128.0f;
-
-	//regolo il volume del thwomp
-	_soundGains["Thwomp"] = 96.0f / 128.0f;
 }
 
 Audio::~Audio()
 {
+	release();
+}
+
+void Audio::release()
+{
 	for (auto& entry : _soundTracks)
 		for (auto& track : entry.second)
 			MIX_DestroyTrack(track);
-	MIX_DestroyTrack(_musicTrack);
+	if (_musicTrack)
+		MIX_DestroyTrack(_musicTrack);
 
 	for (auto& entry : _musics)
 		MIX_DestroyAudio(entry.second);
 	for (auto& entry : _sounds)
 		MIX_DestroyAudio(entry.second);
 
-	MIX_DestroyMixer(_mixer);
+	if (_mixer)
+		MIX_DestroyMixer(_mixer);
 	MIX_Quit();
 }
 

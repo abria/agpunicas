@@ -39,6 +39,16 @@ RectF LevelData::rect(const nlohmann::ordered_json& json)
 	return result;
 }
 
+RectF LevelData::axisAlignedRect(const nlohmann::ordered_json& object, bool yUp)
+{
+	RotatedRectF geometry = rotRect(object);
+	if (geometry.angle != 0)
+		throw std::runtime_error("Expected an axis-aligned rectangle");
+	if (geometry.yUp != yUp)
+		throw std::runtime_error("Rectangle yUp does not match the required coordinate system");
+	return geometry.toRect();
+}
+
 RotatedRectF LevelData::rotRect(const nlohmann::ordered_json& object)
 {
 	if (object.contains("rect"))

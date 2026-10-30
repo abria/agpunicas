@@ -1,8 +1,8 @@
 // ----------------------------------------------------------------
 // From "Algorithms and Game Programming" in C++ by Alessandro Bria
-// Copyright (C) 2024 Alessandro Bria (a.bria@unicas.it). 
+// Copyright (C) 2024 Alessandro Bria (a.bria@unicas.it).
 // All rights reserved.
-// 
+//
 // Released under the BSD License
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
@@ -20,16 +20,26 @@ Fonts::Fonts()
 	if (!TTF_Init())
 		throw SDL_GetError();
 
-	auto fontFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/fonts");
-	for (auto& f : fontFiles)
+	try
 	{
-		std::string name = getFileName(f, false);
+		auto fontFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/fonts");
+		for (auto& f : fontFiles)
+		{
+			std::string name = getFileName(f, false);
 
-		TTF_Font* font = TTF_OpenFont((std::string(SDL_GetBasePath()) + "assets/fonts/" + f).c_str(), pointSize);
-		if (!font)
-			std::cerr << SDL_GetError() << "\n";
-		else
-			_fonts[name] = font;
+			TTF_Font* font = TTF_OpenFont((std::string(SDL_GetBasePath()) + "assets/fonts/" + f).c_str(), pointSize);
+			if (!font)
+				std::cerr << SDL_GetError() << "\n";
+			else
+				_fonts[name] = font;
+		}
+	}
+	catch (...)
+	{
+		for (auto& entry : _fonts)
+			TTF_CloseFont(entry.second);
+		TTF_Quit();
+		throw;
 	}
 }
 

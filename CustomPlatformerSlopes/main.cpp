@@ -1,8 +1,6 @@
 #include "Window.h"
 #include "SpriteFactory.h"
-#include "LevelLoader.h"
 #include "Audio.h"
-#include "Singleton.h"
 #include "Game.h"
 #include "PlatformerGame.h"
 #include "core_version.h"
@@ -15,38 +13,58 @@
 
 int main(int argc, char *argv[])
 {
-	printf("CustomPlatformerSlopes v%s\n", agp::CustomPlatformerSlopes::VERSION().c_str());
-	printf("Core v%s\n\n", agp::core::VERSION().c_str());
+    printf("CustomPlatformerSlopes v%s\n", agp::CustomPlatformerSlopes::VERSION().c_str());
+    printf("Core v%s\n\n", agp::core::VERSION().c_str());
 
-	try
-	{
-		agp::Game::setInstance(new agp::PlatformerGame());
-		agp::SpriteFactory::instance();
-		agp::LevelLoader::instance();
-		agp::Audio::instance();
+    agp::PlatformerGame* game = nullptr;
+    int exitCode = EXIT_SUCCESS;
+
+    try
+    {
+        game = new agp::PlatformerGame();
+        agp::Game::setInstance(game);
+
+        // Initialize shared services before loading the game.
+        agp::SpriteFactory::instance();
+        agp::Audio::instance();
 
 #ifdef WITH_TTF
-		agp::Fonts::instance();
+        agp::Fonts::instance();
 #endif
 
-		agp::Game::instance()->init();
-		agp::Game::instance()->run();
-	}
-	catch (const std::exception& error)
-	{
-		fprintf(stderr, "ERROR: %s\n", error.what());
-		return EXIT_FAILURE;
-	}
-	catch (const char* errMsg)
-	{
-		printf("ERROR: %s\n", errMsg);
-		return EXIT_FAILURE;
-	}
-	catch (std::string errMsg)
-	{
-		printf("ERROR: %s\n", errMsg.c_str());
-		return EXIT_FAILURE;
-	}
+        game->init();
+        game->run();
+    }
+    catch (const std::exception& error)
+    {
+        exitCode = EXIT_FAILURE;
+        fprintf(stderr, "ERROR: %s\n", error.what());
+    }
+    catch (const char* errMsg)
+    {
+        exitCode = EXIT_FAILURE;
+        printf("ERROR: %s\n", errMsg);
+    }
+    catch (std::string errMsg)
+    {
+        exitCode = EXIT_FAILURE;
+        printf("ERROR: %s\n", errMsg.c_str());
+    }
+    catch (...)
+    {
+        fprintf(stderr, "ERROR: unknown exception\n");
+        exitCode = EXIT_FAILURE;
+    }
 
-	return EXIT_SUCCESS;
+    // Scenes first, then shared resources, then the window and SDL.
+    if (game)
+        game->clearScenes();
+    agp::SpriteFactory::destroyInstance();
+    agp::Audio::destroyInstance();
+#ifdef WITH_TTF
+    agp::Fonts::destroyInstance();
+#endif
+    agp::Game::destroyInstance();
+    SDL_Quit();
+    return exitCode;
 }

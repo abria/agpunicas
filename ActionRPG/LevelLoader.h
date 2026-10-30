@@ -19,23 +19,15 @@ namespace agp
 	class RPGGameScene;
 }
 
-// LevelLoader (singleton)
-// - provides game scene creation methods
+// Stateless level loading utilities.
 class agp::LevelLoader
 {
-	protected:
+	private:
 
-		// constructor inaccesible due to singleton
-		LevelLoader();
-
-		void loadJson(
-			RPGGameScene* world,
-			const LevelData& level);
+		LevelLoader() = delete;
+		static void loadJson(RPGGameScene* world, const LevelData& level);
 
 	public:
 
-		// singleton
-		static LevelLoader* instance();
-
-		Scene* load(const std::string& name);
+		static Scene* load(const std::string& name);
 };

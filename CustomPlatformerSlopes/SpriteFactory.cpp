@@ -33,8 +33,18 @@ SDL_Renderer* renderer = Game::instance()->window()->renderer();
 	_spriteSheets["enemies"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/enemies.png", { 68, 145, 190 });
 }
 
+SpriteFactory::~SpriteFactory()
+{
+	for (auto& entry : _spriteSheets)
+		SDL_DestroyTexture(entry.second);
+	for (auto& entry : _levelBackgrounds)
+		SDL_DestroyTexture(entry.second);
+}
+
 Sprite* SpriteFactory::loadLevelBackground(const std::string& fileName)
 {
+	if (_levelBackgrounds.count(fileName))
+		return new Sprite(_levelBackgrounds.at(fileName));
 	SDL_Renderer* renderer = Game::instance()->window()->renderer();
 	SDL_Texture* levelTexture = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/levels/" + fileName);
 	

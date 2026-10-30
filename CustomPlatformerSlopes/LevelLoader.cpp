@@ -54,9 +54,8 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 		}
 
 		RectF rect = axisAlignedRect(object);
-		Object* created = nullptr;
 		if (category == "Static" || category == "Pipe")
-			created = new StaticObject(world, rect);
+			new StaticObject(world, rect);
 		else if (category == "Block" || category == "Brick" || category == "Wood")
 		{
 			std::string content = object.value("content", "");
@@ -64,25 +63,24 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 				throw std::runtime_error("Unknown block content: " + content);
 			Block::Type type = category == "Block" ? Block::Type::QUESTION :
 				(category == "Brick" ? Block::Type::BRICK : Block::Type::WOOD);
-			created = new Block(world, rect.pos, type, content);
+			new Block(world, rect.pos, type, content);
 		}
 		else if (category == "Coin")
-			created = new Coin(world, rect.pos);
+			new Coin(world, rect.pos);
 		else if (category == "Goomba")
-			created = new Goomba(world, rect.pos);
+			new Goomba(world, rect.pos);
 		else if (category == "Lift")
 		{
 			float range = object.value("range", 3.0f);
 			if (!std::isfinite(range) || range <= 0)
 				throw std::runtime_error("Lift range must be positive");
-			created = new Lift(world, rect, object.value("vertical", true), range);
+			new Lift(world, rect, object.value("vertical", true), range);
 		}
 		else if (category == "Mario")
 		{
 			if (world->player())
 				throw std::runtime_error("A level must contain exactly one Mario");
-			created = new Mario(world, rect.pos - PointF(1 / 16.0f, 0));
-			world->setPlayer(created);
+			world->setPlayer(new Mario(world, rect.pos - PointF(1 / 16.0f, 0)));
 		}
 		else
 			throw std::runtime_error("Unknown CustomPlatformerSlopes category: " + category);

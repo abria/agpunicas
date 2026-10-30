@@ -61,27 +61,24 @@ void LevelLoader::loadJson(
 		}
 
 		RotatedRectF geometry = LevelData::rotRect(object);
-		Object* created = nullptr;
 		if (category == "Static")
-			created = new StaticObject(world, geometry);
+			new StaticObject(world, geometry);
 		else if (category == "Renderable")
 		{
 			auto* rendered = new RenderableObject(world, geometry.toRect(), nullptr);
 			rendered->setAngle(rad2deg(geometry.angle));
-			created = rendered;
 		}
 		else if (category == "Gear")
-			created = new Gear(world, geometry);
+			new Gear(world, geometry);
 		else if (category == "Box")
-			created = new Box(world, geometry);
+			new Box(world, geometry);
 		else if (category == "Slime")
-			created = new Slime(world, geometry.center);
+			new Slime(world, geometry.center);
 		else if (category == "Player")
 		{
 			if (world->player())
 				throw std::runtime_error("A level must contain exactly one Player");
-			created = new Player(world, geometry.center);
-			world->setPlayer(created);
+			world->setPlayer(new Player(world, geometry.center));
 		}
 		else
 			throw std::runtime_error("Unknown Box2DPlatformer category: " + category);

@@ -10,7 +10,7 @@
 #include "Scene.h"
 #include <algorithm>
 #include <cstring>
-#include <stdexcept>
+#include <string>
 
 using namespace agp;
 
@@ -45,7 +45,7 @@ void GPUShaderWindow::initRenderer()
     _device = SDL_GetGPURendererDevice(_renderer);
     if (!_device || !SDL_SetRenderVSync(_renderer, 1) ||
         !SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND))
-        throw std::runtime_error(SDL_GetError());
+        throw "Cannot initialize GPU renderer";
 
     _startTime = SDL_GetTicksNS();
     resize(_width, _height);
@@ -74,7 +74,7 @@ void GPUShaderWindow::loadShader(const std::string& name, const std::string& ass
 
     const char* basePath = SDL_GetBasePath();
     if (!basePath)
-        throw std::runtime_error(SDL_GetError());
+        throw "Cannot get application base path";
 
     SDL_GPUShaderFormat supported = SDL_GetGPUShaderFormats(_device);
     for (const auto& candidate : formats)
@@ -105,23 +105,22 @@ void GPUShaderWindow::loadShader(const std::string& name, const std::string& ass
 
         SDL_GPUShader* shader = SDL_CreateGPUShader(_device, &info);
         if (!shader)
-            throw std::runtime_error("Cannot load shader " + path + ": " + SDL_GetError());
+            throw "Cannot load shader";
 
         SDL_GPURenderStateCreateInfo stateInfo{};
         stateInfo.fragment_shader = shader;
         SDL_GPURenderState* state = SDL_CreateGPURenderState(_renderer, &stateInfo);
         if (!state)
         {
-            std::string error = SDL_GetError();
             SDL_ReleaseGPUShader(_device, shader);
-            throw std::runtime_error("Cannot create shader state " + path + ": " + error);
+            throw "Cannot create shader state";
         }
 
         _shaders.emplace(name, ShaderPass{ shader, state });
         return;
     }
 
-    throw std::runtime_error("No compatible shader asset found for " + assetPath);
+    throw "No compatible shader asset found";
 }
 
 void GPUShaderWindow::applyShader(const std::string& name)
@@ -130,7 +129,7 @@ void GPUShaderWindow::applyShader(const std::string& name)
         return;
 
     if (!_shaders.count(name))
-        throw std::invalid_argument("Shader not loaded: " + name);
+        throw "Shader not loaded";
     if (!shaderActive(name))
         _activeShaders.push_back(name);
 }
@@ -151,7 +150,7 @@ void GPUShaderWindow::ensureTargets()
     int width = 0;
     int height = 0;
     if (!SDL_GetCurrentRenderOutputSize(_renderer, &width, &height))
-        throw std::runtime_error(SDL_GetError());
+        throw "Cannot get renderer output size";
     if (width == _targetWidth && height == _targetHeight)
         return;
 
@@ -172,7 +171,7 @@ void GPUShaderWindow::ensureTargets()
         !SDL_SetTextureBlendMode(_sceneTarget, SDL_BLENDMODE_NONE) ||
         !SDL_SetTextureBlendMode(_effectTarget, SDL_BLENDMODE_NONE) ||
         !SDL_SetTextureBlendMode(_cpuResult, SDL_BLENDMODE_NONE))
-        throw std::runtime_error(SDL_GetError());
+        throw "Cannot create render textures";
 
     _targetWidth = width;
     _targetHeight = height;
@@ -190,7 +189,7 @@ void GPUShaderWindow::render(const std::vector<Scene*>& scenes)
     if (!SDL_SetRenderTarget(_renderer, _sceneTarget) ||
         !SDL_SetRenderClipRect(_renderer, nullptr) ||
         !SDL_SetRenderViewport(_renderer, nullptr))
-        throw std::runtime_error(SDL_GetError());
+        throw "Cannot set scene render target";
 
     SDL_SetRenderDrawColor(_renderer, _color.r, _color.g, _color.b, 255);
     SDL_RenderClear(_renderer);
@@ -202,21 +201,21 @@ void GPUShaderWindow::render(const std::vector<Scene*>& scenes)
     {
         SDL_Surface* pixels = SDL_RenderReadPixels(_renderer, nullptr);
         if (!pixels)
-            throw std::runtime_error(SDL_GetError());
+            throw "Cannot read renderer pixels";
         if (pixels->format != SDL_PIXELFORMAT_RGBA8888)
         {
             SDL_Surface* converted = SDL_ConvertSurface(pixels, SDL_PIXELFORMAT_RGBA8888);
             SDL_DestroySurface(pixels);
             pixels = converted;
             if (!pixels)
-                throw std::runtime_error(SDL_GetError());
+                throw "Cannot convert renderer pixels";
         }
 
         _cpuShader(static_cast<Uint32*>(pixels->pixels), pixels->w, pixels->h, pixels->pitch);
         bool updated = SDL_UpdateTexture(_cpuResult, nullptr, pixels->pixels, pixels->pitch);
         SDL_DestroySurface(pixels);
         if (!updated)
-            throw std::runtime_error(SDL_GetError());
+            throw "Cannot update CPU result texture";
         source = _cpuResult;
     }
 
@@ -227,7 +226,7 @@ void GPUShaderWindow::render(const std::vector<Scene*>& scenes)
             !SDL_SetRenderViewport(_renderer, nullptr) ||
             !SDL_RenderTexture(_renderer, source, nullptr, nullptr) ||
             !SDL_RenderPresent(_renderer))
-            throw std::runtime_error(SDL_GetError());
+            throw "Cannot present rendered frame";
         return;
     }
 
@@ -239,7 +238,7 @@ void GPUShaderWindow::render(const std::vector<Scene*>& scenes)
         if (!SDL_SetRenderTarget(_renderer, target) ||
             !SDL_SetRenderClipRect(_renderer, nullptr) ||
             !SDL_SetRenderViewport(_renderer, nullptr))
-            throw std::runtime_error(SDL_GetError());
+            throw "Cannot set shader render target";
 
         SDL_SetRenderDrawColor(_renderer, _color.r, _color.g, _color.b, 255);
         SDL_RenderClear(_renderer);
@@ -251,17 +250,17 @@ void GPUShaderWindow::render(const std::vector<Scene*>& scenes)
         };
         if (!SDL_SetGPURenderStateFragmentUniforms(pass.state, 0, uniforms, sizeof(uniforms)) ||
             !SDL_SetGPURenderState(_renderer, pass.state))
-            throw std::runtime_error(SDL_GetError());
+            throw "Cannot set shader uniforms or state";
 
         bool rendered = SDL_RenderTexture(_renderer, source, nullptr, nullptr);
         SDL_SetGPURenderState(_renderer, nullptr);
         if (!rendered)
-            throw std::runtime_error(SDL_GetError());
+            throw "Cannot render shader texture";
         source = target;
     }
 
     if (!SDL_RenderPresent(_renderer))
-        throw std::runtime_error(SDL_GetError());
+        throw "Cannot present rendered frame";
 }
 
 #endif

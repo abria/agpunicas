@@ -9,7 +9,6 @@
 
 #include "Slope.h"
 #include "GameScene.h"
-#include <stdexcept>
 
 using namespace agp;
 
@@ -21,7 +20,7 @@ namespace
 		if (!std::isfinite(line.start.x) || !std::isfinite(line.start.y) ||
 			!std::isfinite(line.end.x) || !std::isfinite(line.end.y) ||
 			line.start.x == line.end.x || line.start.y == line.end.y)
-			throw std::runtime_error("Slope requires a finite inclined segment, neither horizontal nor vertical");
+			throw "Slope requires a finite inclined segment, neither horizontal nor vertical";
 		return line.boundingRect(false);
 	}
 }

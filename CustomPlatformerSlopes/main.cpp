@@ -5,7 +5,6 @@
 #include "PlatformerGame.h"
 #include "core_version.h"
 #include "version.h"
-#include <exception>
 
 #ifdef WITH_TTF
 #include "Fonts.h"
@@ -35,20 +34,10 @@ int main(int argc, char *argv[])
         game->init();
         game->run();
     }
-    catch (const std::exception& error)
+    catch (const char* error)
     {
+        fprintf(stderr, "ERROR: %s\n", error);
         exitCode = EXIT_FAILURE;
-        fprintf(stderr, "ERROR: %s\n", error.what());
-    }
-    catch (const char* errMsg)
-    {
-        exitCode = EXIT_FAILURE;
-        printf("ERROR: %s\n", errMsg);
-    }
-    catch (std::string errMsg)
-    {
-        exitCode = EXIT_FAILURE;
-        printf("ERROR: %s\n", errMsg.c_str());
     }
     catch (...)
     {

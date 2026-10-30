@@ -1,5 +1,4 @@
 #include "Singleton.h"
-#include <stdexcept>
 
 namespace
 {
@@ -26,7 +25,7 @@ public:
 void require(bool condition)
 {
     if (!condition)
-        throw std::runtime_error("Singleton lifetime regression");
+        throw "Singleton lifetime regression";
 }
 }
 

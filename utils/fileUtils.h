@@ -202,10 +202,10 @@ namespace agp
 #ifdef __linux__
 		system((std::string("rm -rf ") + path).c_str());
 #else
-		throw ("Unimplemented remove_folder() function for the current platform");
+		throw "Unimplemented remove_folder() function for the current platform";
 #endif
 		if(isDirectory(path))
-			throw (strprintf("Failed to remove folder \"%s\"", path.c_str()));
+			throw "Failed to remove folder";
 		else if(verbose)
 			printf("DONE!\n");
 	}
@@ -229,10 +229,10 @@ namespace agp
 #ifdef __linux__
 		system((std::string("mv -f ") + old_path + " " + new_path).c_str());
 #else
-		throw ("Unimplemented rename() function for the current platform");
+		throw "Unimplemented rename() function for the current platform";
 #endif
 		if(!isFile(new_path))
-			throw (strprintf("Failed to rename file \"%s\"", old_path.c_str()));
+			throw "Failed to rename file";
 		else if(verbose)
 			printf("DONE!\n");
 	}

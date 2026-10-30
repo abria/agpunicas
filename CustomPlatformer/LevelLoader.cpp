@@ -16,7 +16,7 @@
 #include "HammerBrother.h"
 #include "Lift.h"
 #include "Trigger.h"
-#include <stdexcept>
+#include <string>
 
 using namespace agp;
 
@@ -59,22 +59,22 @@ void LevelLoader::loadJson(
 		{
 			float range = object.value("range", 3.0f);
 			if (!std::isfinite(range) || range <= 0)
-				throw std::runtime_error("Lift range must be positive");
+				throw "Lift range must be positive";
 			lifts.push_back(new Lift(world, rect, object.value("vertical", true), range));
 		}
 		else if (category == "Mario")
 		{
 			if (world->player())
-				throw std::runtime_error("A level must contain exactly one Mario");
+				throw "A level must contain exactly one Mario";
 			world->setPlayer(new Mario(world, rect.pos - PointF(1 / 16.0f, 0)));
 		}
 		else
-			throw std::runtime_error("Unknown CustomPlatformer category: " + category);
+			throw "Unknown CustomPlatformer category";
 
 	}
 
 	if (!world->player())
-		throw std::runtime_error("A level must contain exactly one Mario");
+		throw "A level must contain exactly one Mario";
 
 	// trigger example
 	if (!lifts.empty())

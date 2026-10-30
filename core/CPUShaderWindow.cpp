@@ -7,6 +7,7 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
+#include <string>
 #include <algorithm>
 #include "CPUShaderWindow.h"
 #include "Scene.h"
@@ -52,13 +53,13 @@ void CPUShaderWindow::render(const std::vector<Scene*>& scenes)
 	// read pixels from target texture (GPU) into CPU buffer
 	SDL_Surface* pixels = SDL_RenderReadPixels(_renderer, NULL);
 	if (!pixels)
-		throw SDL_GetError();
+		throw "Cannot read renderer pixels";
 	if (pixels->format != SDL_PIXELFORMAT_RGBA8888)
 	{
 		SDL_Surface* converted = SDL_ConvertSurface(pixels, SDL_PIXELFORMAT_RGBA8888);
 		SDL_DestroySurface(pixels);
 		if (!converted)
-			throw SDL_GetError();
+			throw "Cannot convert renderer pixels";
 		pixels = converted;
 	}
 
@@ -91,7 +92,7 @@ void CPUShaderWindow::resize(int newWidth, int newHeight)
 		_height
 	);
 	if (!_targetTexture)
-		throw std::runtime_error(SDL_GetError());
+		throw "Cannot create target texture";
 
 	if (_GPUBuffer)
 		SDL_DestroyTexture(_GPUBuffer);
@@ -103,7 +104,7 @@ void CPUShaderWindow::resize(int newWidth, int newHeight)
 		_height
 	);
 	if (!_GPUBuffer)
-		throw std::runtime_error(SDL_GetError());
+		throw "Cannot create GPU buffer";
 
 	_CPUBuffer.resize(_width * _height * 4);
 }

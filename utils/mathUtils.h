@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <string>
 #include <algorithm>
 #include <limits>
 #include <vector>

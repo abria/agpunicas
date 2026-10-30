@@ -315,7 +315,7 @@ namespace agp
         // load from file
         SDL_Surface* surf = IMG_Load(filepath.c_str());
         if (!surf)
-            throw strprintf("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
+            throw "Failed to load texture file";
 
         // set transparent color
         if (mask.a)
@@ -325,7 +325,7 @@ namespace agp
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
         SDL_DestroySurface(surf);
         if (!tex)
-            throw strprintf("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
+            throw "Failed to convert surface to texture";
         SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
 
         return tex;
@@ -378,7 +378,7 @@ namespace agp
         }
 
         if (surfaces.empty())
-            throw strprintf("loadTextureSequence(): No images loaded.\n");
+            throw "loadTextureSequence(): No images loaded.\n";
 
         // retrieve renderer's maximum texture size
         SDL_PropertiesID props = SDL_GetRendererProperties(renderer);
@@ -398,7 +398,7 @@ namespace agp
         // check total height does not exceed max_texture_height
         int total_height = num_rows * image_height;
         if (total_height > max_texture_height)
-            throw strprintf("loadTextureSequence(): Cannot fit images within maximum texture size.\n");
+            throw "loadTextureSequence(): Cannot fit images within maximum texture size.\n";
 
         // correct total width if there is just one row
         int total_width = images_per_row * image_width;
@@ -408,7 +408,7 @@ namespace agp
         // Create a big surf to hold all images in a grid
         SDL_Surface* big_surface = SDL_CreateSurface(total_width, total_height, surfaces[0]->format);
         if (!big_surface)
-            throw strprintf("Failed to create big surf: %s", SDL_GetError());
+            throw "Failed to create texture atlas surface";
 
         // blit each image onto the big surf at the correct grid position
         for (int i = 0; i < surfaces.size(); ++i)
@@ -434,7 +434,7 @@ namespace agp
         // create a texture from the big surf
         SDL_Texture* result = SDL_CreateTextureFromSurface(renderer, big_surface);
         if (!result)
-            throw strprintf("Failed to convert big surf to big texture for %s: %s", folderPath.c_str(), SDL_GetError());
+            throw "Failed to convert texture atlas surface to texture";
         SDL_SetTextureScaleMode(result, SDL_SCALEMODE_NEAREST);
 
         SDL_DestroySurface(big_surface);
@@ -456,12 +456,12 @@ namespace agp
     {
         SDL_Surface* surf = IMG_Load(filepath.c_str());
         if (!surf)
-            throw strprintf("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
+            throw "Failed to load texture file";
 
         const SDL_PixelFormatDetails* format = SDL_GetPixelFormatDetails(surf->format);
 
         if (format->bytes_per_pixel != 3 && format->bytes_per_pixel != 4)
-            throw strprintf("Unsupported image format in %s. Only 24-bit and 32-bit images are supported.", filepath.c_str());
+            throw "Unsupported image format: only 24-bit and 32-bit images are supported";
 
         if (verbose)
         {
@@ -595,7 +595,7 @@ namespace agp
         {
             SDL_UnlockSurface(surf);
             SDL_DestroySurface(surf);
-            throw strprintf("Unable to extract auto tiles from texture file %s", filepath.c_str());
+            throw "Unable to extract auto tiles from texture";
         }
 
         // Eliminate background to allow rect minor adjustments
@@ -653,7 +653,7 @@ namespace agp
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
         SDL_DestroySurface(surf);
         if (!tex)
-            throw strprintf("Failed to convert surface to texture for %s: %s", filepath.c_str(), SDL_GetError());
+            throw "Failed to convert surface to texture";
         SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
 
         return tex;
@@ -718,7 +718,7 @@ namespace agp
         // load image
         SDL_Surface* surface = IMG_Load(filepath.c_str());
         if (!surface)
-            throw strprintf("Failed to load texture file %s: %s", filepath.c_str(), SDL_GetError());
+            throw "Failed to load texture file";
 
         // retrieve basic metadata
         SDL_LockSurface(surface);
@@ -732,7 +732,7 @@ namespace agp
 
         // check format
         if (BytesPerPixel < 3 || BytesPerPixel > 4)
-            throw strprintf("Unsupported bitdepth (must be 24 or 32 bits per pixel).\n");
+            throw "Unsupported bitdepth (must be 24 or 32 bits per pixel).\n";
 
         // initialize labels and union-find structure
         int nextLabel = 1;
@@ -914,7 +914,7 @@ namespace agp
                 rects.push_back(RectI(elem.second.pos.x, elem.second.pos.y, elem.second.size.x - elem.second.pos.x + 1, elem.second.size.y - elem.second.pos.y + 1));
 
         if (rects.empty())
-            throw(strprintf("Unable to extract connected components from texture file %s", filepath.c_str()));
+            throw "Unable to extract connected components from texture";
 
         // group row-wise
         std::sort(rects.begin(), rects.end(), [yDistanceThreshold, alignYCenters](const RectI& a, const RectI& b)
@@ -938,7 +938,7 @@ namespace agp
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_DestroySurface(surface);
         if (!tex)
-            throw strprintf("Failed to convert surf to texture for %s: %s", filepath.c_str(), SDL_GetError());
+            throw "Failed to convert surface to texture";
         SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
 
         return tex;

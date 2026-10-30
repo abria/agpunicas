@@ -8,6 +8,7 @@
 // ----------------------------------------------------------------
 
 #ifdef WITH_TTF
+#include <string>
 #include "Fonts.h"
 #include <SDL3/SDL.h>
 #include "fileUtils.h"
@@ -18,7 +19,7 @@ using namespace agp;
 Fonts::Fonts()
 {
 	if (!TTF_Init())
-		throw SDL_GetError();
+		throw "Cannot initialize SDL fonts";
 
 	try
 	{

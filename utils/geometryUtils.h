@@ -931,7 +931,7 @@ namespace agp
 					break;
 				}
 				default:
-					throw std::invalid_argument("edgeIndex must be in [0,3]");
+					throw "edgeIndex must be in [0,3]";
 			}
 
 			// Step 4: Transform center shift from local to world coordinates

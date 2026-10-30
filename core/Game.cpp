@@ -7,6 +7,7 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
+#include <string>
 #include <algorithm>
 #include "Game.h"
 #include "Window.h"

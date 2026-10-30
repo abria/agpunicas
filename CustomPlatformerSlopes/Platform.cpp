@@ -1,6 +1,5 @@
 #include "Platform.h"
 #include "DynamicObject.h"
-#include <stdexcept>
 
 using namespace agp;
 
@@ -12,7 +11,7 @@ namespace
 		if (!std::isfinite(line.start.x) || !std::isfinite(line.start.y) ||
 			!std::isfinite(line.end.x) || !std::isfinite(line.end.y) ||
 			!line.isValid() || line.start.y != line.end.y)
-			throw std::runtime_error("Platform requires a finite, nonzero horizontal segment; use Slope for ramps");
+			throw "Platform requires a finite, nonzero horizontal segment; use Slope for ramps";
 		return line.boundingRect(false);
 	}
 }

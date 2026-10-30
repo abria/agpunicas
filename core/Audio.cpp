@@ -12,7 +12,7 @@
 #include "fileUtils.h"
 #include <algorithm>
 #include <iostream>
-#include <stdexcept>
+#include <string>
 
 using namespace agp;
 
@@ -22,20 +22,20 @@ Audio::Audio()
 	_musicTrack = nullptr;
 
 	if (!SDL_Init(SDL_INIT_AUDIO))
-		throw std::runtime_error(SDL_GetError());
+		throw "Cannot initialize SDL audio";
 
 	if (!MIX_Init())
-		throw std::runtime_error(SDL_GetError());
+		throw "Cannot initialize SDL mixer";
 
 	try
 	{
 		_mixer = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr);
 		if (!_mixer)
-			throw std::runtime_error(SDL_GetError());
+			throw "Cannot create audio mixer";
 
 		_musicTrack = MIX_CreateTrack(_mixer);
 		if (!_musicTrack)
-			throw std::runtime_error(SDL_GetError());
+			throw "Cannot create music track";
 
 		auto soundFiles = getFilesInDirectory(std::string(SDL_GetBasePath()) + "assets/sounds", "*.wav");
 		for (auto& f : soundFiles)

@@ -7,6 +7,7 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
+#include <string>
 #include <algorithm>
 #include "Window.h"
 #include "View.h"
@@ -25,7 +26,7 @@ Window::Window(const std::string& title, int width, int height)
 	_height = height;
 
 	if (!SDL_Init(SDL_INIT_VIDEO))
-		throw SDL_GetError();
+		throw "Cannot initialize SDL video";
 }
 
 void Window::init()
@@ -60,7 +61,7 @@ void Window::initWindow()
 		windowFlags()
 	);
 	if (!_window)
-		throw SDL_GetError();
+		throw "Cannot create window";
 	SDL_SetWindowPosition(_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
@@ -71,7 +72,7 @@ void Window::initRenderer()
 		nullptr
 	);
 	if (!_renderer)
-		throw SDL_GetError();
+		throw "Cannot create renderer";
 	SDL_SetRenderVSync(_renderer, 1);
 
 	SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);

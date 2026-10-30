@@ -336,7 +336,7 @@ namespace agp
 	{
 		std::regex rgx("^\\[[0-9]+,([0-9]+|inf)\\)\\\\[[0-9]+,([0-9]+|inf)\\)$");
 		if(!std::regex_match(str, rgx))
-			throw (strprintf("\"%s\" does not match string pattern [a,b)\\[c,d)", str.c_str()));
+			throw "String does not match pattern [a,b)\\[c,d)";
 
 		std::string left  = str.substr(0, str.find("\\"));
 		std::string astr = left.substr(0, left.find(","));

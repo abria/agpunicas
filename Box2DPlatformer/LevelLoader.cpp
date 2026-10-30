@@ -20,7 +20,7 @@
 #include "Gear.h"
 #include "Box.h"
 #include "Slime.h"
-#include <stdexcept>
+#include <string>
 
 using namespace agp;
 
@@ -66,15 +66,15 @@ void LevelLoader::loadJson(
 		else if (category == "Player")
 		{
 			if (world->player())
-				throw std::runtime_error("A level must contain exactly one Player");
+				throw "A level must contain exactly one Player";
 			world->setPlayer(new Player(world, geometry.center));
 		}
 		else
-			throw std::runtime_error("Unknown Box2DPlatformer category: " + category);
+			throw "Unknown Box2DPlatformer category";
 	}
 
 	if (!world->player())
-		throw std::runtime_error("A level must contain exactly one Player");
+		throw "A level must contain exactly one Player";
 
 	// Backgrounds, from farthest to nearest. Parallax is relative to the camera.
 	world->addBackgroundScene(new OverlayScene(world, spriteLoader->get("bg_sky")));

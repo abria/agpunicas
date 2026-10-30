@@ -19,14 +19,14 @@
 #include <SDL3_image/SDL_image.h>
 #include <cmath>
 #include <iostream>
-#include <stdexcept>
+#include <string>
 #include <map>
 
 using namespace agp;
 
-void require(bool condition, const std::string& message)
+void require(bool condition, const char* message)
 {
-	if (!condition) throw std::runtime_error(message);
+	if (!condition) throw message;
 }
 
 // Keep the physical fixtures readable while constructing slopes from segments.
@@ -42,14 +42,14 @@ void segmentValidation()
 	{
 		bool rejected = false;
 		try { new Platform(&scene, line); }
-		catch (const std::runtime_error&) { rejected = true; }
+		catch (const char*) { rejected = true; }
 		require(rejected, "Platform constructor accepted an invalid segment");
 	}
 	for (LineF line : {LineF(0,0,0,0), LineF(0,0,0,2), LineF(0,0,2,0)})
 	{
 		bool rejected = false;
 		try { new Slope(&scene, line); }
-		catch (const std::runtime_error&) { rejected = true; }
+		catch (const char*) { rejected = true; }
 		require(rejected, "Slope constructor accepted an invalid segment");
 	}
 	new Platform(&scene, LineF(4,0,0,0));
@@ -170,7 +170,7 @@ void hill(bool reverse, bool ccd)
 				require(r.bottom() <= slope->surfaceY(r) + 0.015f, "hill: body penetrated a slope");
 		require(std::abs(body->vel().x - (reverse ? -3 : 3)) < 0.01f, "hill: stored horizontal speed changed");
 	}
-	require(reverse ? body->pos().x < -3 : body->pos().x > 13, "hill: blocked at a seam, reverse=" + std::to_string(reverse) + " ccd=" + std::to_string(ccd) + " x=" + std::to_string(body->pos().x) + " y=" + std::to_string(body->pos().y));
+	require(reverse ? body->pos().x < -3 : body->pos().x > 13, "hill: blocked at a seam");
 	require(body->exits[up] == 1 && body->exits[down] == 1, "hill: incorrect slope contact lifecycle");
 }
 
@@ -441,21 +441,21 @@ void shutdownIntegration()
 			game = new TestGame();
 			Game::setInstance(game);
 			Game::setInstance(game); // registering the same game must be harmless
-			if (phase == 0) throw std::runtime_error("simulated startup failure");
+			if (phase == 0) throw "simulated startup failure";
 			SpriteFactory::instance();
-			if (phase == 1) throw std::runtime_error("simulated startup failure");
+			if (phase == 1) throw "simulated startup failure";
 			Audio::instance();
-			if (phase == 2) throw std::runtime_error("simulated startup failure");
+			if (phase == 2) throw "simulated startup failure";
 			game->init();
-			if (phase == 3) throw std::runtime_error("simulated startup failure");
+			if (phase == 3) throw "simulated startup failure";
 			SDL_Event quit{};
 			quit.type = SDL_EVENT_QUIT;
 			SDL_PushEvent(&quit);
 			game->run();
 		}
-		catch (const std::runtime_error& error)
+		catch (const char* error)
 		{
-			require(std::string(error.what()) == "simulated startup failure", error.what());
+			require(std::string(error) == "simulated startup failure", error);
 		}
 		require(game != nullptr, "game did not initialize");
 		game->clearScenes();
@@ -525,7 +525,7 @@ void levelIntegration()
 		auto serialized = editable->toJson();
 		require(!serialized.contains("layer"), "editor must not save layer");
 		for (const char* key : {"multiline", "content"})
-			if (object.contains(key)) require(serialized.at(key) == object.at(key), std::string("editor lost ") + key);
+			if (object.contains(key)) require(serialized.at(key) == object.at(key), "editor lost an object property");
 		saved["objects"].push_back(serialized);
 	}
 	std::string savedPath = std::string(SDL_GetBasePath()) + "levels/roundtrip-test.json";
@@ -569,7 +569,7 @@ void levelIntegration()
 		LevelData::save(savedPath, invalid);
 		bool rejected = false;
 		try { delete LevelLoader::load("roundtrip-test"); }
-		catch (const std::runtime_error&) { rejected = true; }
+		catch (const char*) { rejected = true; }
 		require(rejected, "invalid slope segment was accepted");
 	}
 	std::remove(savedPath.c_str());
@@ -612,9 +612,9 @@ int main(int argc, char** argv)
 		std::cout << "Slope physics regression checks passed\n";
 		return 0;
 	}
-	catch(const std::exception& error)
+	catch(const char* error)
 	{
-		std::cerr << error.what() << '\n';
+		std::cerr << error << '\n';
 		return 1;
 	}
 }

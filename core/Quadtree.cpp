@@ -124,7 +124,7 @@ void Quadtree::add(Node* node, std::size_t depth, const RectF& nodeRect, Object*
         throw "Quadtree::add: invalid node pointer";
 
     if(!nodeRect.contains(obj->rect()))
-        throw strprintf("Quadtree::add: nodeRect (%s) does not fully contain object (%s) rect (%s)", nodeRect.str().c_str(), obj->name().c_str(), obj->rect().str().c_str());
+        throw "Quadtree::add: node rectangle does not fully contain object rectangle";
 
     if (isLeaf(node))
     {

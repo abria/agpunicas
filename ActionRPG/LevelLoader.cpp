@@ -15,7 +15,7 @@
 #include "Link.h"
 #include "Soldier.h"
 #include <iostream>
-#include <stdexcept>
+#include <string>
 #include "LevelData.h"
 #include "Portal.h"
 #include "NPC.h"
@@ -40,11 +40,11 @@ void LevelLoader::loadJson(
 		if (level.category(object) == "Link")
 		{
 			if (world->player())
-				throw std::runtime_error("A level must contain exactly one Link");
+				throw "A level must contain exactly one Link";
 			world->setPlayer(new Link(world, LevelData::rotRect(object).toRect().pos));
 		}
 	if (!world->player())
-		throw std::runtime_error("A level must contain exactly one Link");
+		throw "A level must contain exactly one Link";
 
 	// portals with matching names = portals to be connected
 	std::map<std::string, std::vector<Portal*>> portals;
@@ -69,7 +69,7 @@ void LevelLoader::loadJson(
 			{
 				std::string name = jObj.value("name", "");
 				if (name.empty())
-					throw std::runtime_error("A Portal needs a name to identify its destination");
+					throw "A Portal needs a name to identify its destination";
 				portals[name].push_back(new Portal(world, rrect));
 			}
 			else if (category == "Clipper")

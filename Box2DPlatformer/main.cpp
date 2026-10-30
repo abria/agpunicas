@@ -5,7 +5,6 @@
 #include "PlatformerGame.h"
 #include "core_version.h"
 #include "version.h"
-#include <exception>
 
 #ifdef WITH_TTF
 #include "Fonts.h"
@@ -35,23 +34,11 @@ int main(int argc, char *argv[])
         game->init();
         game->run();
     }
-    catch (const std::exception& err)
+    catch (const char* error)
     {
+        fprintf(stderr, "ERROR: %s\n", error);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Box2DPlatformer", error, nullptr);
         exitCode = EXIT_FAILURE;
-        printf("ERROR: %s\n", err.what());
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Box2DPlatformer", err.what(), nullptr);
-    }
-    catch (const char* errMsg)
-    {
-        exitCode = EXIT_FAILURE;
-        printf("ERROR: %s\n", errMsg);
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Box2DPlatformer", errMsg, nullptr);
-    }
-    catch (std::string errMsg)
-    {
-        exitCode = EXIT_FAILURE;
-        printf("ERROR: %s\n", errMsg.c_str());
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Box2DPlatformer", errMsg.c_str(), nullptr);
     }
     catch (...)
     {

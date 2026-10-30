@@ -190,7 +190,7 @@ namespace agp
                 case 1: return g;
                 case 2: return b;
                 case 3: return a;
-                default: throw std::out_of_range("Color index out of range");
+                default: throw "Color index out of range";
             }
         }
 
@@ -203,7 +203,7 @@ namespace agp
                 case 1: return g;
                 case 2: return b;
                 case 3: return a;
-                default: throw std::out_of_range("Color index out of range");
+                default: throw "Color index out of range";
             }
         }
 

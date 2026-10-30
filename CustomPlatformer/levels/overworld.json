@@ -95,8 +95,7 @@
             "width": 2,
             "height": 4,
             "yUp": false
-         },
-         "layer": -1
+         }
       },
       {
          "category": 0,
@@ -106,8 +105,7 @@
             "width": 2,
             "height": 5,
             "yUp": false
-         },
-         "layer": -1
+         }
       },
       {
          "category": 0,
@@ -117,8 +115,7 @@
             "width": 2,
             "height": 6,
             "yUp": false
-         },
-         "layer": -1
+         }
       },
       {
          "category": 0,
@@ -128,8 +125,7 @@
             "width": 2,
             "height": 6,
             "yUp": false
-         },
-         "layer": -1
+         }
       },
       {
          "category": 0,
@@ -139,8 +135,7 @@
             "width": 2,
             "height": 11,
             "yUp": false
-         },
-         "layer": -1
+         }
       },
       {
          "category": 0,
@@ -150,8 +145,7 @@
             "width": 2,
             "height": 13,
             "yUp": false
-         },
-         "layer": -1
+         }
       },
       {
          "category": 0,
@@ -161,8 +155,7 @@
             "width": 2,
             "height": 15,
             "yUp": false
-         },
-         "layer": -1
+         }
       },
       {
          "category": 1,
@@ -194,8 +187,7 @@
             "yUp": false
          },
          "vertical": false,
-         "range": 12,
-         "layer": 10
+         "range": 12
       },
       {
          "category": 2,
@@ -207,8 +199,7 @@
             "yUp": false
          },
          "vertical": true,
-         "range": 3,
-         "layer": 10
+         "range": 3
       },
       {
          "category": 3,

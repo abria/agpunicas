@@ -48,7 +48,6 @@ void LevelLoader::loadJson(
 	for (const auto& object : level.objects())
 	{
 		std::string category = level.category(object);
-		int layer = object.value("layer", 0);
 		if (category == "Terrain")
 		{
 			std::vector<PointF> points = LevelData::multiline(object.at("multiline"));
@@ -56,10 +55,7 @@ void LevelLoader::loadJson(
 			{
 				LineF line(points[i - 1], points[i]);
 				if (line.isValid())
-				{
-					Terrain* terrain = new Terrain(world, line);
-					terrain->setLayer(layer);
-				}
+					new Terrain(world, line);
 			}
 			continue;
 		}
@@ -67,15 +63,15 @@ void LevelLoader::loadJson(
 		RotatedRectF geometry = LevelData::rotRect(object);
 		Object* created = nullptr;
 		if (category == "Static")
-			created = new StaticObject(world, geometry, layer);
+			created = new StaticObject(world, geometry);
 		else if (category == "Renderable")
 		{
-			auto* rendered = new RenderableObject(world, geometry.toRect(), nullptr, layer);
+			auto* rendered = new RenderableObject(world, geometry.toRect(), nullptr);
 			rendered->setAngle(rad2deg(geometry.angle));
 			created = rendered;
 		}
 		else if (category == "Gear")
-			created = new Gear(world, geometry, layer);
+			created = new Gear(world, geometry);
 		else if (category == "Box")
 			created = new Box(world, geometry);
 		else if (category == "Slime")
@@ -89,7 +85,6 @@ void LevelLoader::loadJson(
 		}
 		else
 			throw std::runtime_error("Unknown Box2DPlatformer category: " + category);
-		created->setLayer(layer);
 	}
 
 	if (!world->player())

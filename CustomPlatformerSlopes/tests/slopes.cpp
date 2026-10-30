@@ -479,9 +479,12 @@ void levelIntegration()
 	saved["objects"] = nlohmann::ordered_json::array();
 	for (const auto& object : level.objects())
 	{
-		auto* editable = new EditableObject(&editorObjects, object, categories);
+		auto legacyObject = object;
+		legacyObject["layer"] = 99;
+		auto* editable = new EditableObject(&editorObjects, legacyObject, categories);
 		auto serialized = editable->toJson();
-		for (const char* key : {"multiline", "content", "layer"})
+		require(!serialized.contains("layer"), "editor must not save layer");
+		for (const char* key : {"multiline", "content"})
 			if (object.contains(key)) require(serialized.at(key) == object.at(key), std::string("editor lost ") + key);
 		saved["objects"].push_back(serialized);
 	}

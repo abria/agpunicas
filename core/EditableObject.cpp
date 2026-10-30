@@ -87,6 +87,7 @@ nlohmann::ordered_json EditableObject::toJson()
 	j.erase("rect");
 	j.erase("rotRect");
 	j.erase("multiline");
+	j.erase("layer"); // drawing order belongs to the game classes, not the editor
 	j["category"] = _category;
 	if (_name.empty())
 		j.erase("name");

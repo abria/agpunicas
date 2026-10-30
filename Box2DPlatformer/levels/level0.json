@@ -100,8 +100,7 @@
             "height": 15,
             "angle": 0,
             "yUp": true
-         },
-         "layer": -1
+         }
       },
       {
          "category": 2,
@@ -112,8 +111,7 @@
             "height": 15,
             "angle": 0,
             "yUp": true
-         },
-         "layer": 1
+         }
       },
       {
          "category": 3,

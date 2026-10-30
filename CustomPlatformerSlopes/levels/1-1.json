@@ -23,8 +23,7 @@
             "height": 1.0,
             "yUp": false
          },
-         "content": "coin",
-         "layer": 2
+         "content": "coin"
       },
       {
          "category": 0,
@@ -35,8 +34,7 @@
             "height": 1.0,
             "yUp": false
          },
-         "content": "powerup",
-         "layer": 2
+         "content": "powerup"
       },
       {
          "category": 0,
@@ -47,8 +45,7 @@
             "height": 1.0,
             "yUp": false
          },
-         "content": "coin",
-         "layer": 2
+         "content": "coin"
       },
       {
          "category": 0,
@@ -59,8 +56,7 @@
             "height": 1.0,
             "yUp": false
          },
-         "content": "coin",
-         "layer": 2
+         "content": "coin"
       },
       {
          "category": 0,
@@ -71,8 +67,7 @@
             "height": 1.0,
             "yUp": false
          },
-         "content": "powerup",
-         "layer": 2
+         "content": "powerup"
       },
       {
          "category": 2,
@@ -83,8 +78,7 @@
             "height": 3.0,
             "yUp": false
          },
-         "name": "Venus",
-         "layer": 1
+         "name": "Venus"
       },
       {
          "category": 2,
@@ -95,8 +89,7 @@
             "height": 2.0,
             "yUp": false
          },
-         "name": "Piranha",
-         "layer": 1
+         "name": "Piranha"
       },
       {
          "category": 2,
@@ -107,8 +100,7 @@
             "height": 3.0,
             "yUp": false
          },
-         "name": "Venus",
-         "layer": 1
+         "name": "Venus"
       },
       {
          "category": 2,
@@ -119,8 +111,7 @@
             "height": 2.0,
             "yUp": false
          },
-         "name": "EnterA",
-         "layer": 1
+         "name": "EnterA"
       },
       {
          "category": 2,
@@ -130,8 +121,7 @@
             "width": 2.0,
             "height": 12.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 2,
@@ -142,8 +132,7 @@
             "height": 2.0,
             "yUp": false
          },
-         "name": "ExitB",
-         "layer": 1
+         "name": "ExitB"
       },
       {
          "category": 1,
@@ -153,8 +142,7 @@
             "width": 39.0,
             "height": 2.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -164,8 +152,7 @@
             "width": 29.0,
             "height": 2.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -175,8 +162,7 @@
             "width": 22.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -186,8 +172,7 @@
             "width": 5.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -197,8 +182,7 @@
             "width": 36.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -208,8 +192,7 @@
             "width": 35.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 3,
@@ -222,8 +205,7 @@
                "x": 18.0,
                "y": -2.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 3,
@@ -236,8 +218,7 @@
                "x": 20.0,
                "y": -4.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 3,
@@ -250,8 +231,7 @@
                "x": 30.0,
                "y": -2.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 3,
@@ -264,8 +244,7 @@
                "x": 33.0,
                "y": -4.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 3,
@@ -278,8 +257,7 @@
                "x": 36.0,
                "y": -6.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 3,
@@ -292,8 +270,7 @@
                "x": 38.0,
                "y": -1.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 3,
@@ -306,8 +283,7 @@
                "x": 86.0,
                "y": -1.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 3,
@@ -320,8 +296,7 @@
                "x": 88.0,
                "y": -3.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 3,
@@ -334,8 +309,7 @@
                "x": 90.0,
                "y": -5.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 5,
@@ -345,8 +319,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -356,8 +329,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -367,8 +339,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -378,8 +349,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -389,8 +359,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -400,8 +369,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -411,8 +379,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -422,8 +389,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -433,8 +399,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -444,8 +409,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -455,8 +419,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -466,8 +429,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -477,8 +439,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -488,8 +449,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -499,8 +459,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -510,8 +469,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -521,8 +479,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -532,8 +489,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -543,8 +499,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 3,
@@ -557,8 +512,7 @@
                "x": 137.0,
                "y": -2.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 3,
@@ -571,8 +525,7 @@
                "x": 139.0,
                "y": -8.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 0,
@@ -583,8 +536,7 @@
             "height": 1.0,
             "yUp": false
          },
-         "content": "powerup",
-         "layer": 2
+         "content": "powerup"
       },
       {
          "category": 7,
@@ -594,8 +546,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -605,8 +556,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -616,8 +566,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -627,8 +576,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -638,8 +586,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -649,8 +596,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -660,8 +606,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -671,8 +616,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -682,8 +626,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -693,8 +636,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -704,8 +646,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -715,8 +656,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -726,8 +666,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -737,8 +676,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -748,8 +686,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -759,8 +696,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -770,8 +706,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 7,
@@ -781,8 +716,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 5,
@@ -793,8 +727,7 @@
             "height": 1.0,
             "yUp": false
          },
-         "content": "life",
-         "layer": 2
+         "content": "life"
       },
       {
          "category": 3,
@@ -807,8 +740,7 @@
                "x": 86.0,
                "y": -16.0
             }
-         ],
-         "layer": 2
+         ]
       },
       {
          "category": 1,
@@ -818,8 +750,7 @@
             "width": 4.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -829,8 +760,7 @@
             "width": 13.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 4,
@@ -840,8 +770,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 3
+         }
       },
       {
          "category": 4,
@@ -851,8 +780,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 3
+         }
       },
       {
          "category": 4,
@@ -862,8 +790,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 3
+         }
       },
       {
          "category": 6,
@@ -873,8 +800,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -884,8 +810,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -895,8 +820,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -906,8 +830,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -917,8 +840,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -928,8 +850,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -939,8 +860,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -950,8 +870,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -961,8 +880,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -972,8 +890,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -983,8 +900,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -994,8 +910,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1005,8 +920,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1016,8 +930,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1027,8 +940,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1038,8 +950,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1049,8 +960,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1060,8 +970,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1071,8 +980,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1082,8 +990,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1093,8 +1000,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1104,8 +1010,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1115,8 +1020,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1126,8 +1030,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1137,8 +1040,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1148,8 +1050,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1159,8 +1060,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1170,8 +1070,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1181,8 +1080,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1192,8 +1090,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1203,8 +1100,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1214,8 +1110,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1225,8 +1120,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1236,8 +1130,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 6,
@@ -1247,8 +1140,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 2
+         }
       },
       {
          "category": 2,
@@ -1259,8 +1151,7 @@
             "height": 2.0,
             "yUp": false
          },
-         "name": "ExitA",
-         "layer": 1
+         "name": "ExitA"
       },
       {
          "category": 2,
@@ -1271,8 +1162,7 @@
             "height": 2.0,
             "yUp": false
          },
-         "name": "EnterB",
-         "layer": 1
+         "name": "EnterB"
       },
       {
          "category": 1,
@@ -1282,8 +1172,7 @@
             "width": 8.0,
             "height": 12.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1293,8 +1182,7 @@
             "width": 10.0,
             "height": 2.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1304,8 +1192,7 @@
             "width": 4.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1315,8 +1202,7 @@
             "width": 4.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1326,8 +1212,7 @@
             "width": 4.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1337,8 +1222,7 @@
             "width": 5.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1348,8 +1232,7 @@
             "width": 5.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1359,8 +1242,7 @@
             "width": 5.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1370,8 +1252,7 @@
             "width": 3.0,
             "height": 4.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1381,8 +1262,7 @@
             "width": 12.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 4,
@@ -1392,8 +1272,7 @@
             "width": 1.0,
             "height": 1.0,
             "yUp": false
-         },
-         "layer": 3
+         }
       },
       {
          "category": 0,
@@ -1404,8 +1283,7 @@
             "height": 1.0,
             "yUp": false
          },
-         "content": "coin",
-         "layer": 2
+         "content": "coin"
       },
       {
          "category": 0,
@@ -1416,8 +1294,7 @@
             "height": 1.0,
             "yUp": false
          },
-         "content": "life",
-         "layer": 2
+         "content": "life"
       },
       {
          "category": 1,
@@ -1427,8 +1304,7 @@
             "width": 1.0,
             "height": 23.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 1,
@@ -1438,8 +1314,7 @@
             "width": 1.0,
             "height": 27.0,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 8,
@@ -1449,12 +1324,10 @@
             "width": 1,
             "height": 1,
             "yUp": false
-         },
-         "layer": 3
+         }
       },
       {
          "category": 9,
-         "layer": 1,
          "multiline": [
             {
                "x": 5,
@@ -1474,12 +1347,10 @@
             "width": 1,
             "height": 2,
             "yUp": false
-         },
-         "layer": 1
+         }
       },
       {
          "category": 9,
-         "layer": 1,
          "multiline": [
             {
                "x": 9,
@@ -1493,7 +1364,6 @@
       },
       {
          "category": 9,
-         "layer": 1,
          "multiline": [
             {
                "x": 20,
@@ -1507,7 +1377,6 @@
       },
       {
          "category": 9,
-         "layer": 1,
          "multiline": [
             {
                "x": 24,
@@ -1521,7 +1390,6 @@
       },
       {
          "category": 9,
-         "layer": 1,
          "multiline": [
             {
                "x": 45,
@@ -1535,7 +1403,6 @@
       },
       {
          "category": 9,
-         "layer": 1,
          "multiline": [
             {
                "x": 49,

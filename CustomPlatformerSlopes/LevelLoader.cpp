@@ -35,29 +35,28 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 	if (world->rect().yUp)
 		throw std::runtime_error("CustomPlatformerSlopes requires a scene with yUp=false");
 
-	// Fixed level graphics; the editor places collision shapes over this image.
+	// fixed level graphics: the editor places collision shapes over this image.
 	world->addBackgroundImage(new RenderableObject(world,
 		RectF(0, -25, 176, 41), SpriteFactory::instance()->get("level_1_1"), 0));
 
 	for (const auto& object : level.objects())
 	{
 		std::string category = level.category(object);
-		int layer = object.value("layer", 1);
 		if (category == "Platform" || category == "Slope")
 		{
 			auto points = LevelData::multiline(object.at("multiline"));
 			for (size_t i = 1; i < points.size(); ++i)
 				if (category == "Platform")
-					new Platform(world, LineF(points[i - 1], points[i]), layer);
+					new Platform(world, LineF(points[i - 1], points[i]));
 				else
-					new Slope(world, LineF(points[i - 1], points[i]), layer);
+					new Slope(world, LineF(points[i - 1], points[i]));
 			continue;
 		}
 
 		RectF rect = axisAlignedRect(object);
 		Object* created = nullptr;
 		if (category == "Static" || category == "Pipe")
-			created = new StaticObject(world, rect, layer);
+			created = new StaticObject(world, rect);
 		else if (category == "Block" || category == "Brick" || category == "Wood")
 		{
 			std::string content = object.value("content", "");
@@ -65,18 +64,18 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 				throw std::runtime_error("Unknown block content: " + content);
 			Block::Type type = category == "Block" ? Block::Type::QUESTION :
 				(category == "Brick" ? Block::Type::BRICK : Block::Type::WOOD);
-			created = new Block(world, rect.pos, type, content, layer);
+			created = new Block(world, rect.pos, type, content);
 		}
 		else if (category == "Coin")
-			created = new Coin(world, rect.pos, layer);
+			created = new Coin(world, rect.pos);
 		else if (category == "Goomba")
-			created = new Goomba(world, rect.pos, layer);
+			created = new Goomba(world, rect.pos);
 		else if (category == "Lift")
 		{
 			float range = object.value("range", 3.0f);
 			if (!std::isfinite(range) || range <= 0)
 				throw std::runtime_error("Lift range must be positive");
-			created = new Lift(world, rect, object.value("vertical", true), range, layer);
+			created = new Lift(world, rect, object.value("vertical", true), range);
 		}
 		else if (category == "Mario")
 		{
@@ -87,13 +86,12 @@ void LevelLoader::loadJson(PlatformerGameScene* world, const LevelData& level)
 		}
 		else
 			throw std::runtime_error("Unknown CustomPlatformerSlopes category: " + category);
-		created->setLayer(layer);
 	}
 
 	if (!world->player())
 		throw std::runtime_error("A level must contain exactly one Mario");
 
-	// The death trigger remains a C++ gameplay rule, as in the original SMB3.
+	// death trigger
 	Mario* mario = world->player()->to<Mario*>();
 	new Trigger(world, RectF(world->rect().left(), 4, world->rect().size.x, 0.1f), mario,
 		[mario]() { mario->die(); });

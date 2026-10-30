@@ -57,11 +57,10 @@ void LevelLoader::loadJson(
 		if (geometry.angle != 0)
 			throw std::runtime_error("CustomPlatformer requires axis-aligned rectangles");
 		RectF rect = geometry.toRect();
-		int layer = object.value("layer", 0);
 		Object* created = nullptr;
 
 		if (category == "Static")
-			created = new StaticObject(world, rect, layer);
+			created = new StaticObject(world, rect);
 		else if (category == "HammerBrother")
 			// constructor uses a sprite-specific spawn offset
 			created = new HammerBrother(world, rect.pos + PointF(-1 / 16.0f, 1));
@@ -70,7 +69,7 @@ void LevelLoader::loadJson(
 			float range = object.value("range", 3.0f);
 			if (!std::isfinite(range) || range <= 0)
 				throw std::runtime_error("Lift range must be positive");
-			created = new Lift(world, rect, object.value("vertical", true), range, layer);
+			created = new Lift(world, rect, object.value("vertical", true), range);
 			lifts.push_back(created);
 		}
 		else if (category == "Mario")
@@ -83,7 +82,6 @@ void LevelLoader::loadJson(
 		else
 			throw std::runtime_error("Unknown CustomPlatformer category: " + category);
 
-		created->setLayer(layer);
 	}
 
 	if (!world->player())

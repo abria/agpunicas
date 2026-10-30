@@ -27,7 +27,7 @@ class agp::Slope : public StaticObject
 
 	public:
 
-		Slope(Scene* scene, const LineF& line, int layer = 0);
+		Slope(Scene* scene, const LineF& line, int layer = 1);
 
 		// slope queries (scene coordinates, y points downwards)
 		bool overlapsX(const RectF& body) const;

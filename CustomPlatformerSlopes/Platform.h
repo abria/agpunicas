@@ -16,7 +16,7 @@ class agp::Platform : public StaticObject
 
 	public:
 
-		Platform(Scene* scene, const LineF& line, int layer = 0);
+		Platform(Scene* scene, const LineF& line, int layer = 2);
 
 		bool collidableWith(CollidableObject* obj) override;
 		bool sweep(const RectF& body, const Vec2Df& movement,

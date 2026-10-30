@@ -20,8 +20,7 @@ Tutti e quattro i prototipi caricano `levels/<name>.json` dalla cartella dell'es
    "objects": [
       {
          "category": 0,
-         "rect": {"x": 0, "y": 1, "width": 68, "height": 2, "yUp": false},
-         "layer": 0
+         "rect": {"x": 0, "y": 1, "width": 68, "height": 2, "yUp": false}
       },
       {
          "category": 1,
@@ -50,29 +49,33 @@ Ogni oggetto ha `category` (indice in `categories`) e una sola geometria:
 - `rotRect`: `cx`, `cy`, `width`, `height`, `angle`, `yUp`; centro, dimensioni e angolo **in gradi**. `LevelData::rotRect()` converte l'angolo in radianti per il gioco.
 - `multiline`: array di punti `{"x": ..., "y": ...}`, almeno due. In CustomPlatformerSlopes i costruttori rifiutano segmenti di lunghezza nulla; negli altri loader di polilinee vengono saltati.
 
-`name` è opzionale: normalmente basta la categoria. Si usa quando serve identificare una regione specifica, come i due portali `"A"` di ActionRPG, collegati dal loader tramite il nome. Gli attributi come `layer` e `range` sono proprietà autonome e non richiedono un nome. L'editor mostra l'etichetta solo se presente e omette `name` dal salvataggio quando è vuoto.
+`name` è opzionale: normalmente basta la categoria. Si usa quando serve identificare una regione specifica, come i due portali `"A"` di ActionRPG, collegati dal loader tramite il nome. Gli attributi come `range` sono proprietà autonome e non richiedono un nome. L'editor mostra l'etichetta solo se presente e omette `name` dal salvataggio quando è vuoto.
+
+Il campo `layer` non fa parte del JSON. Ogni costruttore ha un default ragionevole;
+una classe può scegliere un ordine specifico nel costruttore, oppure il loader
+può usare `setLayer()` per una necessità del livello.
 
 ## Oggetti e proprietà
 
 | Gioco / categoria | Geometria | Proprietà aggiuntive |
 | --- | --- | --- |
-| CustomPlatformer / `Static` | Rettangolo allineato agli assi | Collider trasparente senza sprite, `layer` (default 0) |
-| CustomPlatformer / `HammerBrother` | Rettangolo del personaggio | `layer`; la posizione viene convertita nello spawn atteso dal costruttore |
-| CustomPlatformer / `Lift` | Rettangolo allineato agli assi | `vertical` (default true), `range` (default 3), `layer`; il costruttore carica lo sprite `platform` |
-| CustomPlatformer / `Mario` | Rettangolo del personaggio | `layer`; deve essere presente esattamente un Mario |
-| CustomPlatformerSlopes / `Slope` | `multiline` di segmenti inclinati, scena con `yUp: false` | Verso ricavato dagli estremi, indipendente dal loro ordine; `layer` (default 1); collider trasparente, collisione sul segmento |
-| CustomPlatformerSlopes / `Static`, `Pipe` | Rettangolo allineato agli assi | Collider trasparente senza sprite, `layer` |
-| CustomPlatformerSlopes / `Block`, `Brick`, `Wood` | Rettangolo del blocco | `content`: `coin`, `powerup`, `life`, `starman` o stringa vuota; `layer`. Mantiene le implementazioni di SMB3 (starman e foglia non ancora implementati) |
-| CustomPlatformerSlopes / `Coin`, `Goomba`, `Mario` | Rettangolo del personaggio/oggetto | `layer`; esattamente un Mario; il loader compensa l'offset dello spawn |
-| CustomPlatformerSlopes / `Platform` | `multiline` di segmenti orizzontali | `layer`; collisione solo dall’alto per tutti i dinamici; attraversabili dal basso e dai lati |
-| CustomPlatformerSlopes / `Lift` | Rettangolo allineato agli assi | `vertical`, `range` positivo, `layer`; il costruttore carica la sprite `platform` |
-| Box2DPlatformer / `Renderable` | `rect` o `rotRect` | `layer`; oggetto trasparente senza fisica |
-| Box2DPlatformer / `Terrain` | `multiline` | `layer`; un collider per segmento, la grafica del terreno è creata nel loader C++ |
-| Box2DPlatformer / `Static` | `rect` o `rotRect` | Collider trasparente senza sprite, `layer` |
-| Box2DPlatformer / `Gear` | `rect` o `rotRect` | `layer`; il costruttore carica lo sprite `gear` |
-| Box2DPlatformer / `Box` | `rect` o `rotRect` | `layer`; mantiene lo sprite e l'impulso iniziale del costruttore |
-| Box2DPlatformer / `Slime` | `rect` o `rotRect` | `layer`; il centro indica lo spawn |
-| Box2DPlatformer / `Player` | `rect` o `rotRect` | `layer`; il centro indica lo spawn, deve essere presente esattamente un player |
+| CustomPlatformer / `Static` | Rettangolo allineato agli assi | Collider trasparente senza sprite, ordine di disegno definito nel C++ |
+| CustomPlatformer / `HammerBrother` | Rettangolo del personaggio | la posizione viene convertita nello spawn atteso dal costruttore |
+| CustomPlatformer / `Lift` | Rettangolo allineato agli assi | `vertical` (default true), `range` (default 3), il costruttore carica lo sprite `platform` |
+| CustomPlatformer / `Mario` | Rettangolo del personaggio | deve essere presente esattamente un Mario |
+| CustomPlatformerSlopes / `Slope` | `multiline` di segmenti inclinati, scena con `yUp: false` | Verso ricavato dagli estremi, indipendente dal loro ordine; collider trasparente, collisione sul segmento |
+| CustomPlatformerSlopes / `Static`, `Pipe` | Rettangolo allineato agli assi | Collider trasparente senza sprite |
+| CustomPlatformerSlopes / `Block`, `Brick`, `Wood` | Rettangolo del blocco | `content`: `coin`, `powerup`, `life`, `starman` o stringa vuota. Mantiene le implementazioni di SMB3 (starman e foglia non ancora implementati) |
+| CustomPlatformerSlopes / `Coin`, `Goomba`, `Mario` | Rettangolo del personaggio/oggetto | esattamente un Mario; il loader compensa l'offset dello spawn |
+| CustomPlatformerSlopes / `Platform` | `multiline` di segmenti orizzontali | collisione solo dall’alto per tutti i dinamici; attraversabili dal basso e dai lati |
+| CustomPlatformerSlopes / `Lift` | Rettangolo allineato agli assi | `vertical`, `range` positivo, il costruttore carica la sprite `platform` |
+| Box2DPlatformer / `Renderable` | `rect` o `rotRect` | oggetto trasparente senza fisica |
+| Box2DPlatformer / `Terrain` | `multiline` | un collider per segmento, la grafica del terreno è creata nel loader C++ |
+| Box2DPlatformer / `Static` | `rect` o `rotRect` | Collider trasparente senza sprite |
+| Box2DPlatformer / `Gear` | `rect` o `rotRect` | il costruttore carica lo sprite `gear` |
+| Box2DPlatformer / `Box` | `rect` o `rotRect` | mantiene lo sprite e l'impulso iniziale del costruttore |
+| Box2DPlatformer / `Slime` | `rect` o `rotRect` | il centro indica lo spawn |
+| Box2DPlatformer / `Player` | `rect` o `rotRect` | il centro indica lo spawn, deve essere presente esattamente un player |
 | ActionRPG / `Static`, `Bush` | `rect` o `rotRect` | Collider statico, senza sprite |
 | ActionRPG / `Static`, `Cliff` | `multiline` | Un collider statico per segmento valido |
 | ActionRPG / `Portal` | `rect` o `rotRect` | `name` non vuoto; collega la coppia con lo stesso nome |

@@ -28,8 +28,7 @@ Una slope si aggiunge come oggetto di categoria `Slope` (indice 9 nel livello):
 ```json
 {
    "category": 9,
-   "multiline": [{"x": 5, "y": 1}, {"x": 8, "y": -1}],
-   "layer": 1
+   "multiline": [{"x": 5, "y": 1}, {"x": 8, "y": -1}]
 }
 ```
 

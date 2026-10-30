@@ -12,7 +12,7 @@ class agp::Coin : public StaticObject
 {
 	public:
 
-		Coin(Scene* scene, const PointF& point, int layer = 1);
+		Coin(Scene* scene, const PointF& point, int layer = 2);
 
 		// +interaction with Mario
 		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;

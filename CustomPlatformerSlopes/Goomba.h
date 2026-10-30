@@ -27,7 +27,7 @@ class agp::Goomba : public Enemy
 
 	public:
 
-		Goomba(Scene* scene, const PointF& pos, int layer = 2);
+		Goomba(Scene* scene, const PointF& pos, int layer = 3);
 
 		// @override: die if stomped
 		virtual void stomp(Mario* mario) override;

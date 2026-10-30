@@ -22,6 +22,10 @@ namespace agp
 // - customizes parent's class Game to adapt to Box2D platformer games
 class agp::PlatformerGame : public Game
 { 
+	private:
+
+		void releaseServices();
+
 	protected:
 
 		HUD* _hud;
@@ -29,6 +33,7 @@ class agp::PlatformerGame : public Game
 	public: 
 		
 		PlatformerGame();
+		~PlatformerGame() override;
 		HUD* hud() { return _hud; }
 
 		virtual void init() override;

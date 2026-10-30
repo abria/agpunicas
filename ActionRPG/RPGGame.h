@@ -20,6 +20,10 @@ namespace agp
 // - customizes parent's class Game to adapt to RPG games
 class agp::RPGGame : public Game
 { 
+	private:
+
+		void releaseServices();
+
 	protected:
 
 		HUD* _hud;
@@ -27,6 +31,7 @@ class agp::RPGGame : public Game
 	public: 
 		
 		RPGGame();
+		~RPGGame() override;
 		HUD* hud() { return _hud; }
 
 		virtual void init() override;

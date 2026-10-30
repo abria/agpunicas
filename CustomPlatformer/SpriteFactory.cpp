@@ -11,18 +11,16 @@
 #include <SDL3_image/SDL_image.h>
 #include "graphicsUtils.h"
 #include "sdlUtils.h"
-#include "Window.h"
 #include "AnimatedSprite.h"
 #include "TiledSprite.h"
 #include "FilledSprite.h"
-#include "Game.h"
 #include <iostream>
 
 using namespace agp;
 
-SpriteFactory::SpriteFactory()
+void SpriteFactory::init(SDL_Renderer* renderer)
 {
-	SDL_Renderer* renderer = Game::instance()->window()->renderer();
+	_renderer = renderer;
 	_spriteSheets["mario"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/mario.png", _autoTiles["mario"], {27, 89, 153}, { 147, 187, 236 });
 	_spriteSheets["enemies"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/enemies.png", _autoTiles["enemies"], { 27, 89, 153 }, { 147, 187, 236 }, 17);
 	_spriteSheets["hud"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/hud.png", { 147, 187, 236 });

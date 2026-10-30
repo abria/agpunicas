@@ -11,18 +11,16 @@
 #include <SDL3_image/SDL_image.h>
 #include "graphicsUtils.h"
 #include "sdlUtils.h"
-#include "Window.h"
 #include "AnimatedSprite.h"
 #include "TiledSprite.h"
 #include "FilledSprite.h"
-#include "Game.h"
 #include <iostream>
 
 using namespace agp;
 
-SpriteFactory::SpriteFactory()
+void SpriteFactory::init(SDL_Renderer* renderer)
 {
-	SDL_Renderer* renderer = Game::instance()->window()->renderer();
+	_renderer = renderer;
 	_spriteSheets["hud"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/hud.png", { 147, 187, 236 });
 	_spriteSheets["bg_sky"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/bg_sky.png");
 	_spriteSheets["bg_houses"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/bg_house.png");

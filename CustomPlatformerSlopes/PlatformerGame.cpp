@@ -18,12 +18,49 @@
 #include "UIScene.h"
 #include "DynamicObject.h"
 
+#include "Window.h"
+
+#ifdef WITH_TTF
+#include "Fonts.h"
+#endif
+
 using namespace agp;
 
 PlatformerGame::PlatformerGame() : 
 	Game("CustomPlatformerSlopes", { 500,500 }, 16/15.0f)
 {
 	_hud = nullptr;
+
+	try
+	{
+		SpriteFactory::instance()->init(window()->renderer());
+		Audio::instance();
+#ifdef WITH_TTF
+		Fonts::instance();
+#endif
+	}
+	catch (...)
+	{
+		// A failed constructor does not run this class's destructor.
+		releaseServices();
+		throw;
+	}
+}
+
+PlatformerGame::~PlatformerGame()
+{
+	// Scenes must be destroyed before the resources they use.
+	clearScenes();
+	releaseServices();
+}
+
+void PlatformerGame::releaseServices()
+{
+#ifdef WITH_TTF
+	Fonts::destroyInstance();
+#endif
+	Audio::destroyInstance();
+	SpriteFactory::destroyInstance();
 }
 
 void PlatformerGame::init()

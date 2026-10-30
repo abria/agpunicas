@@ -433,7 +433,29 @@ public:
 
 void shutdownIntegration()
 {
-	for (int phase = 0; phase < 5; ++phase)
+	// Fail after sprite loading, then verify that a fresh game can start.
+	const char* audioDriver = SDL_GetHint(SDL_HINT_AUDIO_DRIVER);
+	std::string previousDriver = audioDriver ? audioDriver : "";
+	SDL_SetHintWithPriority(SDL_HINT_AUDIO_DRIVER, "invalid-driver", SDL_HINT_OVERRIDE);
+	TestGame* failedGame = nullptr;
+	bool rejected = false;
+	try
+	{
+		failedGame = new TestGame();
+	}
+	catch (const char* error)
+	{
+		rejected = std::string(error) == "Cannot initialize SDL audio";
+	}
+	delete failedGame;
+	SDL_Quit();
+	if (previousDriver.empty())
+		SDL_ResetHint(SDL_HINT_AUDIO_DRIVER);
+	else
+		SDL_SetHintWithPriority(SDL_HINT_AUDIO_DRIVER, previousDriver.c_str(), SDL_HINT_OVERRIDE);
+	require(rejected, "game constructor did not report audio initialization failure");
+
+	for (int phase = 0; phase < 3; ++phase)
 	{
 		TestGame* game = nullptr;
 		try
@@ -442,12 +464,8 @@ void shutdownIntegration()
 			Game::setInstance(game);
 			Game::setInstance(game); // registering the same game must be harmless
 			if (phase == 0) throw "simulated startup failure";
-			SpriteFactory::instance();
-			if (phase == 1) throw "simulated startup failure";
-			Audio::instance();
-			if (phase == 2) throw "simulated startup failure";
 			game->init();
-			if (phase == 3) throw "simulated startup failure";
+			if (phase == 1) throw "simulated startup failure";
 			SDL_Event quit{};
 			quit.type = SDL_EVENT_QUIT;
 			SDL_PushEvent(&quit);
@@ -458,11 +476,7 @@ void shutdownIntegration()
 			require(std::string(error) == "simulated startup failure", error);
 		}
 		require(game != nullptr, "game did not initialize");
-		game->clearScenes();
-		game->clearScenes(); // repeated cleanup must not delete scenes twice
 		require(SDL_WasInit(SDL_INIT_VIDEO) != 0, "SDL stopped before resources were released");
-		SpriteFactory::destroyInstance();
-		Audio::destroyInstance();
 		Game::destroyInstance();
 		Game::destroyInstance();
 		SDL_Quit();
@@ -475,8 +489,6 @@ void levelIntegration()
 {
 	auto* game = new TestGame();
 	Game::setInstance(game);
-	SpriteFactory::instance();
-	Audio::instance();
 	game->init();
 	game->popScene(); // title menu
 	auto* world = game->world();
@@ -582,6 +594,8 @@ void levelIntegration()
 	require(frame != nullptr, "could not render game frame");
 	IMG_SavePNG(frame, (std::string(SDL_GetBasePath()) + "slopes-preview.png").c_str());
 	SDL_DestroySurface(frame);
+	Game::destroyInstance();
+	SDL_Quit();
 	std::cout << "Level, Mario, assets and editor round-trip checks passed\n";
 }
 

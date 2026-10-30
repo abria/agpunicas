@@ -11,18 +11,16 @@
 #include <SDL3_image/SDL_image.h>
 #include "graphicsUtils.h"
 #include "sdlUtils.h"
-#include "Window.h"
 #include "AnimatedSprite.h"
 #include "TiledSprite.h"
 #include "FilledSprite.h"
-#include "Game.h"
 #include <iostream>
 
 using namespace agp;
 
-SpriteFactory::SpriteFactory()
+void SpriteFactory::init(SDL_Renderer* renderer)
 {
-SDL_Renderer* renderer = Game::instance()->window()->renderer();
+	_renderer = renderer;
 
 	_spriteSheets["mario"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/mario.png", _autoTiles["mario"], { 41, 88, 124 }, { 68, 145, 190 });
 	_spriteSheets["titlescreen"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/titlescreen.png", {224, 163, 216});
@@ -45,8 +43,7 @@ Sprite* SpriteFactory::loadLevelBackground(const std::string& fileName)
 {
 	if (_levelBackgrounds.count(fileName))
 		return new Sprite(_levelBackgrounds.at(fileName));
-	SDL_Renderer* renderer = Game::instance()->window()->renderer();
-	SDL_Texture* levelTexture = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/levels/" + fileName);
+	SDL_Texture* levelTexture = loadTexture(_renderer, std::string(SDL_GetBasePath()) + "sprites/levels/" + fileName);
 	
 	if (levelTexture)
 	{

@@ -29,15 +29,19 @@ class agp::SpriteFactory : public Singleton<SpriteFactory>
 
 	private:
 
+		SDL_Renderer* _renderer = nullptr; // owned by the game window
 		std::map<std::string, SDL_Texture*> _spriteSheets;
 		std::map<std::string, std::vector<RectI> > _autoTiles;
 
 		// constructor accessible only to Singleton
-		SpriteFactory();
+		SpriteFactory() = default;
 
 	public:
 
 		~SpriteFactory();
+
+		// Load resources once, after the game window is ready.
+		void init(SDL_Renderer* renderer);
 
 		// creation
 		Sprite* get(const std::string& id);

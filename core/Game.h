@@ -11,7 +11,6 @@
 #include "geometryUtils.h"
 #include "Singleton.h"
 #include <vector>
-#include <memory>
 
 namespace agp
 {
@@ -36,7 +35,7 @@ class agp::Game : public Singleton<Game>
 	protected:
 
 		// attributes
-		std::unique_ptr<Window> _window;
+		Window* _window;
 		float _aspectRatio;					// -1 if free to vary
 		std::vector<Scene*> _scenes;		// scenes stack
 		int _scenesToPop;					// for popSceneLater
@@ -63,7 +62,7 @@ class agp::Game : public Singleton<Game>
 		void clearScenes();
 
 		// getters
-		Window* window() { return _window.get(); }
+		Window* window() { return _window; }
 		float aspectRatio() { return _aspectRatio; }
 		int currentFPS() { return _currentFPS; }
 

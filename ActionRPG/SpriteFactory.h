@@ -10,6 +10,7 @@
 #pragma once
 #include <map>
 #include <string>
+#include <functional>
 #include <SDL3/SDL.h>
 #include "geometryUtils.h"
 #include "Singleton.h"
@@ -33,6 +34,8 @@ class agp::SpriteFactory : public Singleton<SpriteFactory>
 		std::map<std::string, SDL_Texture*> _spriteSheets;
 		std::map<std::string, std::vector< std::vector<RectI > > > _autoTiles;
 		std::map<std::string, std::vector<RectI > > _autoComponents;
+		std::map<std::string, std::function<Sprite*()> > _creators;				// sprite id -> creation function (see get)
+		std::map<std::string, std::function<Sprite*(int)> > _indexedCreators;	// sprite id prefix -> creation function of the index that follows
 
 		// constructor inaccesible due to singleton
 		SpriteFactory() = default;

@@ -15,8 +15,22 @@
 #include "TiledSprite.h"
 #include "FilledSprite.h"
 #include <iostream>
+#include <algorithm>
+#include <cctype>
 
 using namespace agp;
+
+// anchors
+static RectI link_down(1, 1, 16, 24);
+static RectI link_up(1, 101, 16, 24);
+static RectI link_right(1, 51, 16, 24);
+static RectI hud_letter(519, 254, 8, 8);
+static RectI hud_number(519, 263, 8, 8);
+static RectI hud_letter_disabled(519, 366, 8, 8);
+static RectI hud_number_disabled(519, 375, 8, 8);
+static RectI hud_coin(519, 289, 8, 8);
+static RectI hudzelda_number(259, 13, 7, 7);
+static RectI hudzelda_heart(259, 56, 7, 7);
 
 void SpriteFactory::init(SDL_Renderer* renderer)
 {
@@ -65,6 +79,68 @@ void SpriteFactory::init(SDL_Renderer* renderer)
 			_autoComponents["fonts"][i].size.y = 15;
 		}
 	}
+
+	// sprite creation functions (see get)
+
+	// single-frame sprites
+	_creators["welcome"] = [this] { return new Sprite(_spriteSheets["welcome"]); };
+	_creators["hud"] = [this] { return new Sprite(_spriteSheets["hud"], RectI(0, 0, 16 * 16, 16 * 14)); };
+	_creators["inventory"] = [this] { return new Sprite(_spriteSheets["inventory"], RectI(8, 10, 16 * 16, 16 * 14)); };
+	_creators["gameover"] = [this] { return new Sprite(_spriteSheets["hud_mario"], RectI(260, 253, 16 * 16, 15 * 16)); };
+	_creators["overworld"] = [this] { return new Sprite(_spriteSheets["overworld"]); };
+	_creators["linkhouse"] = [this] { return new Sprite(_spriteSheets["linkhouse"]); };
+	_creators["link_stand_DOWN"] = [this] { return new Sprite(_spriteSheets["player"], _autoTiles["player"][0][0]); };
+	_creators["link_stand_UP"] = [this] { return new Sprite(_spriteSheets["player"], _autoTiles["player"][4][0]); };
+	_creators["link_stand_RIGHT"] = [this] { return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0]); };
+	_creators["link_stand_LEFT"] = [this] { return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0]); };
+	_creators["link_shadow"] = [this] { return new Sprite(_spriteSheets["player"], _autoTiles["player"][6].back()); };
+	_creators["npc_example"] = [this] { return new Sprite(_spriteSheets["npcs_other_worlds"], RectI(556, 67, 20, 26)); };
+
+	// inventory (index = item category, e.g. "inventory_icon_3")
+	_indexedCreators["inventory_icon_"] = [this](int index)
+	{
+		int y = index / 5;
+		int x = index % 5;
+		return new Sprite(_spriteSheets["inventory"], moveBy(RectI(116, 560, 16, 16), x, y, 16, 16, 56, 56));
+	};
+	_indexedCreators["inventory_label_"] = [this](int index)
+	{
+		int y = index / 5;
+		int x = index % 5;
+		return new Sprite(_spriteSheets["inventory"], moveBy(RectI(92, 608, 64, 16), x, y, 64, 16, 8, 56));
+	};
+	_creators["inventory_selected"] = [this] { return new Sprite(_spriteSheets["inventory"], RectI(464, 328, 32, 32)); };
+
+	// hud
+	_creators["hud_heart"] = [this] { return new Sprite(_spriteSheets["hud"], hudzelda_heart); };
+	_creators["hud_heart_half"] = [this] { return new Sprite(_spriteSheets["hud"], moveBy(hudzelda_heart, 2, 0, 7, 7)); };
+	_creators["hud_heart_empty"] = [this] { return new Sprite(_spriteSheets["hud"], moveBy(hudzelda_heart, 4, 0, 7, 7)); };
+
+	// animated sprites
+	_creators["link_walk_DOWN"] = [this] { return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][0].begin() + 1, _autoTiles["player"][0].begin() + 8 }, 20); };
+	_creators["link_attack_DOWN"] = [this] { return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][1].begin(), _autoTiles["player"][1].begin() + 6 }, 44, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1); };
+	_creators["link_walk_UP"] = [this] { return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][4].begin() + 1, _autoTiles["player"][4].begin() + 8 }, 20); };
+	_creators["link_attack_UP"] = [this] { return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][5].begin(), _autoTiles["player"][5].begin() + 6 }, 44, {0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5}, 1); };
+	_creators["link_walk_RIGHT"] = _creators["link_walk_LEFT"] = [this] { return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][2].begin() + 1, _autoTiles["player"][2].begin() + 8 }, 20); };
+	_creators["link_attack_RIGHT"] = _creators["link_attack_LEFT"] = [this] { return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][3].begin(), _autoTiles["player"][3].begin() + 6 }, 44, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1); };
+	_creators["link_sword_RIGHT"] = [this] { return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][9].begin(), _autoTiles["player"][9].begin() + 9 }, 44, {0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8}, 1); };
+	_creators["soldier_attack_DOWN"] = [this] { return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][0].begin(), _autoTiles["enemies"][0].begin() + 4 }, 8); };
+	_creators["soldier_attack_RIGHT"] = _creators["soldier_attack_LEFT"] = [this] { return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][2].begin(), _autoTiles["enemies"][2].begin() + 3 }, 6); };
+	_creators["soldier_attack_UP"] = [this] { return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][4].begin(), _autoTiles["enemies"][4].begin() + 4 }, 8); };
+	_creators["soldier_DOWN"] = [this] { return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][1].begin(), _autoTiles["enemies"][1].begin() + 3 }, 6); };
+	_creators["soldier_RIGHT"] = _creators["soldier_LEFT"] = [this] { return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][3].begin(), _autoTiles["enemies"][3].begin() + 3 }, 6); };
+	_creators["soldier_UP"] = [this] { return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][5].begin(), _autoTiles["enemies"][5].begin() + 3 }, 6); };
+	_creators["hud_coin"] = [this]
+	{
+		std::vector< RectI> rects;
+		rects.push_back(moveBy(hud_coin, 0, 0));
+		rects.push_back(moveBy(hud_coin, 1, 0, 8, 8));
+		rects.push_back(moveBy(hud_coin, 2, 0, 8, 8));
+		rects.push_back(moveBy(hud_coin, 1, 0, 8, 8));
+		rects.push_back(moveBy(hud_coin, 0, 0));
+		rects.push_back(moveBy(hud_coin, 0, 0));
+		return new AnimatedSprite(_spriteSheets["hud_mario"], rects, 6);
+	};
 }
 
 SpriteFactory::~SpriteFactory()
@@ -73,121 +149,27 @@ SpriteFactory::~SpriteFactory()
 		SDL_DestroyTexture(entry.second);
 }
 
-// anchors
-static RectI link_down(1, 1, 16, 24);
-static RectI link_up(1, 101, 16, 24);
-static RectI link_right(1, 51, 16, 24);
-static RectI hud_letter(519, 254, 8, 8);
-static RectI hud_number(519, 263, 8, 8);
-static RectI hud_letter_disabled(519, 366, 8, 8);
-static RectI hud_number_disabled(519, 375, 8, 8);
-static RectI hud_coin(519, 289, 8, 8);
-static RectI hudzelda_number(259, 13, 7, 7);
-static RectI hudzelda_heart(259, 56, 7, 7);
-
 Sprite* SpriteFactory::get(const std::string& id)
 {
-	std::vector< RectI> rects;
+	// sprite with a fixed id, e.g. "brick"
+	auto creator = _creators.find(id);
+	if (creator != _creators.end())
+		return creator->second();
 
-	// single-frame sprites
-	if (id == "welcome")
-		return new Sprite(_spriteSheets["welcome"]);
-	else if (id == "hud")
-		return new Sprite(_spriteSheets["hud"], RectI(0, 0, 16 * 16, 16 * 14));
-	else if (id == "inventory")
-		return new Sprite(_spriteSheets["inventory"], RectI(8, 10, 16 * 16, 16 * 14));
-	else if (id == "gameover")
-		return new Sprite(_spriteSheets["hud_mario"], RectI(260, 253, 16 * 16, 15 * 16));
-	else if (id == "overworld")
-		return new Sprite(_spriteSheets["overworld"]);
-	else if (id == "linkhouse")
-		return new Sprite(_spriteSheets["linkhouse"]);
-	else if (id == "link_stand_DOWN")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][0][0]);
-	else if (id == "link_stand_UP")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][4][0]);
-	else if (id == "link_stand_RIGHT")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0]);
-	else if (id == "link_stand_LEFT")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][2][0]);
-	else if (id == "link_shadow")
-		return new Sprite(_spriteSheets["player"], _autoTiles["player"][6].back());
-	else if (id == "npc_example")
-		return new Sprite(_spriteSheets["npcs_other_worlds"], RectI(556, 67, 20, 26));
-
-	// inventory
-	else if (id.compare(0, 15, "inventory_icon_") == 0)
+	// indexed sprite: prefix followed by a non-negative integer, e.g. "pipe12"
+	for (auto& entry : _indexedCreators)
 	{
-		std::string digits = id.substr(15);
-		int index = std::stoi(digits);
-		int y = index / 5;
-		int x = index % 5;
-		return new Sprite(_spriteSheets["inventory"], moveBy(RectI(116, 560, 16, 16), x, y, 16, 16, 56, 56));
-	}
-	else if (id.compare(0, 16, "inventory_label_") == 0)
-	{
-		std::string digits = id.substr(16);
-		int index = std::stoi(digits);
-		int y = index / 5;
-		int x = index % 5;
-		return new Sprite(_spriteSheets["inventory"], moveBy(RectI(92, 608, 64, 16), x, y, 64, 16, 8, 56));
-	}
-	else if (id == "inventory_selected")
-		return new Sprite(_spriteSheets["inventory"], RectI(464, 328, 32, 32));
-
-	// hud
-	else if (id == "hud_heart")
-		return new Sprite(_spriteSheets["hud"], hudzelda_heart);
-	else if (id == "hud_heart_half")
-		return new Sprite(_spriteSheets["hud"], moveBy(hudzelda_heart, 2, 0, 7, 7));
-	else if (id == "hud_heart_empty")
-		return new Sprite(_spriteSheets["hud"], moveBy(hudzelda_heart, 4, 0, 7, 7));
-
-	// animated sprites
-	else if (id == "link_walk_DOWN")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][0].begin() + 1, _autoTiles["player"][0].begin() + 8 }, 20);
-	else if (id == "link_attack_DOWN")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][1].begin(), _autoTiles["player"][1].begin() + 6 }, 44, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
-	else if (id == "link_walk_UP")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][4].begin() + 1, _autoTiles["player"][4].begin() + 8 }, 20);
-	else if (id == "link_attack_UP")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][5].begin(), _autoTiles["player"][5].begin() + 6 }, 44, {0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5}, 1);
-	else if (id == "link_walk_RIGHT" || id == "link_walk_LEFT")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][2].begin() + 1, _autoTiles["player"][2].begin() + 8 }, 20);
-	else if (id == "link_attack_RIGHT" || id == "link_attack_LEFT")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][3].begin(), _autoTiles["player"][3].begin() + 6 }, 44, { 0, 0, 1, 1, 2, 3, 3, 4, 5, 5, 5 }, 1);
-	else if (id == "link_sword_RIGHT")
-		return new AnimatedSprite(_spriteSheets["player"], { _autoTiles["player"][9].begin(), _autoTiles["player"][9].begin() + 9 }, 44, {0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 8}, 1);
-	else if (id == "soldier_attack_DOWN")
-		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][0].begin(), _autoTiles["enemies"][0].begin() + 4 }, 8);
-	else if (id == "soldier_attack_RIGHT" || id == "soldier_attack_LEFT")
-		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][2].begin(), _autoTiles["enemies"][2].begin() + 3 }, 6);
-	else if (id == "soldier_attack_UP")
-		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][4].begin(), _autoTiles["enemies"][4].begin() + 4 }, 8);
-	else if (id == "soldier_DOWN")
-		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][1].begin(), _autoTiles["enemies"][1].begin() + 3 }, 6);
-	else if (id == "soldier_RIGHT" || id == "soldier_LEFT")
-		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][3].begin(), _autoTiles["enemies"][3].begin() + 3 }, 6);
-	else if (id == "soldier_UP")
-		return new AnimatedSprite(_spriteSheets["enemies"], { _autoTiles["enemies"][5].begin(), _autoTiles["enemies"][5].begin() + 3 }, 6); 
-	else if (id == "hud_coin")
-	{
-		rects.push_back(moveBy(hud_coin, 0, 0));
-		rects.push_back(moveBy(hud_coin, 1, 0, 8, 8));
-		rects.push_back(moveBy(hud_coin, 2, 0, 8, 8));
-		rects.push_back(moveBy(hud_coin, 1, 0, 8, 8));
-		rects.push_back(moveBy(hud_coin, 0, 0));
-		rects.push_back(moveBy(hud_coin, 0, 0));
-		return new AnimatedSprite(_spriteSheets["hud_mario"], rects, 6);
+		const std::string& prefix = entry.first;
+		if (id.size() > prefix.size() && id.size() - prefix.size() < 10 && id.compare(0, prefix.size(), prefix) == 0)
+		{
+			std::string index = id.substr(prefix.size());
+			if (std::all_of(index.begin(), index.end(), [](unsigned char c) { return std::isdigit(c) != 0; }))
+				return entry.second(std::stoi(index));
+		}
 	}
 
-	// tiled sprites
-
-	else
-	{
-		std::cerr << "Cannot find sprite \"" << id << "\"\n";
-		return nullptr;
-	}
+	std::cerr << "Cannot find sprite \"" << id << "\"\n";
+	return nullptr;
 }
 
 Sprite* SpriteFactory::getChar(char c)

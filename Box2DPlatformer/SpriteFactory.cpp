@@ -36,6 +36,39 @@ void SpriteFactory::init(SDL_Renderer* renderer)
 	_spriteSheets["player_dash"] = loadTextureSequence(renderer, std::string(SDL_GetBasePath()) + "sprites/PlayerDash/DashEffect", _autoTiles["player_dash"], { 4 * 32, 3 * 32 }, { -4 * 32, -3 * 32 });
 	_spriteSheets["slime"] = loadTextureSequence(renderer, std::string(SDL_GetBasePath()) + "sprites/Slime", _autoTiles["slime"]);
 	_spriteSheets["fire"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/fire.png");
+
+	// sprite creation functions (see get)
+
+	// static sprites
+	_creators["bg_sky"] = [this] { return new Sprite(_spriteSheets["bg_sky"]); };
+	_creators["bg_houses"] = [this] { return new FilledSprite(_spriteSheets["bg_houses"]); };
+	_creators["bg_grass"] = [this] { return new FilledSprite(_spriteSheets["bg_grass"]); };
+	_creators["fg_fog"] = [this] { return new FilledSprite(_spriteSheets["fg_fog"], RectI(0, 0, 1024, 416)); };
+	_creators["fg_ground"] = [this] { return new Sprite(_spriteSheets["fg_ground"]); };
+	_creators["gear"] = [this] { return new Sprite(_spriteSheets["gear"]); };
+	_creators["box"] = [this] { return new Sprite(_spriteSheets["box"]); };
+
+	// animated sprites
+	_creators["player_idle"] = [this] { return new AnimatedSprite(_spriteSheets["player_idle"], _autoTiles["player_idle"], 10); };
+	_creators["player_walk"] = [this] { return new AnimatedSprite(_spriteSheets["player_walk"], _autoTiles["player_walk"], 10); };
+	_creators["player_jump"] = [this] { return new AnimatedSprite(_spriteSheets["player_jump"], _autoTiles["player_jump"], 10); };
+	_creators["player_dash"] = [this] { return new AnimatedSprite(_spriteSheets["player_dash"], _autoTiles["player_dash"], 10); };
+	_creators["slime"] = [this] { return new AnimatedSprite(_spriteSheets["slime"], _autoTiles["slime"], 20); };
+	_creators["rain"] = [this] { return new AnimatedSprite(_spriteSheets["rain"], _autoTiles["rain"], 30); };
+	_creators["fire"] = [this]
+	{
+		std::vector< RectI> rects;
+		RectI baseRect(0, 0, 512, 512);
+		rects.push_back(baseRect);
+		rects.push_back(moveBy(baseRect, 1, 0, 512, 512, 0, 0));
+		rects.push_back(moveBy(baseRect, 2, 0, 512, 512, 0, 0));
+		rects.push_back(moveBy(baseRect, 3, 0, 512, 512, 0, 0));
+		rects.push_back(moveBy(baseRect, 4, 0, 512, 512, 0, 0));
+		rects.push_back(moveBy(baseRect, 5, 0, 512, 512, 0, 0));
+		for (auto& r : rects)
+			r.scaleOnCenter(0.5f);
+		return new AnimatedSprite(_spriteSheets["fire"], rects, 24);
+	};
 }
 
 // anchors
@@ -53,55 +86,12 @@ SpriteFactory::~SpriteFactory()
 
 Sprite* SpriteFactory::get(const std::string& id)
 {
-	std::vector< RectI> rects;
+	auto creator = _creators.find(id);
+	if (creator != _creators.end())
+		return creator->second();
 
-	// static sprites
-	if (id == "bg_sky")
-		return new Sprite(_spriteSheets["bg_sky"]);
-	else if (id == "bg_houses")
-		return new FilledSprite(_spriteSheets["bg_houses"]);
-	else if (id == "bg_grass")
-		return new FilledSprite(_spriteSheets["bg_grass"]);
-	else if (id == "fg_fog")
-		return new FilledSprite(_spriteSheets["fg_fog"], RectI(0, 0, 1024, 416));
-	else if (id == "fg_ground")
-		return new Sprite(_spriteSheets["fg_ground"]);
-	else if (id == "gear")
-		return new Sprite(_spriteSheets["gear"]);
-	else if (id == "box")
-		return new Sprite(_spriteSheets["box"]);
-
-	// animated sprites
-	else if (id == "player_idle")
-		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 10);
-	else if (id == "player_walk")
-		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 10);
-	else if (id == "player_jump")
-		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 10);
-	else if (id == "player_dash")
-		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 10);
-	else if (id == "slime")
-		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 20);
-	else if (id == "rain")
-		return new AnimatedSprite(_spriteSheets[id], _autoTiles[id], 30);
-	else if (id == "fire")
-	{
-		RectI baseRect(0, 0, 512, 512);
-		rects.push_back(baseRect);
-		rects.push_back(moveBy(baseRect, 1, 0, 512, 512, 0, 0));
-		rects.push_back(moveBy(baseRect, 2, 0, 512, 512, 0, 0));
-		rects.push_back(moveBy(baseRect, 3, 0, 512, 512, 0, 0));
-		rects.push_back(moveBy(baseRect, 4, 0, 512, 512, 0, 0));
-		rects.push_back(moveBy(baseRect, 5, 0, 512, 512, 0, 0));
-		for (auto& r : rects)
-			r.scaleOnCenter(0.5f);
-		return new AnimatedSprite(_spriteSheets[id], rects, 24);
-	}
-	else
-	{
-		std::cerr << "Cannot find sprite \"" << id << "\"\n";
-		return nullptr;
-	}
+	std::cerr << "Cannot find sprite \"" << id << "\"\n";
+	return nullptr;
 }
 
 Sprite* SpriteFactory::getText(std::string text, const Vec2Df& size, int fillN, char fillChar, bool enabled)

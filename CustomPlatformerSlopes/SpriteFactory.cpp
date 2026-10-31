@@ -15,6 +15,8 @@
 #include "TiledSprite.h"
 #include "FilledSprite.h"
 #include <iostream>
+#include <algorithm>
+#include <cctype>
 
 using namespace agp;
 
@@ -29,6 +31,129 @@ void SpriteFactory::init(SDL_Renderer* renderer)
 	_spriteSheets["stages"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/stages.png", { 224, 163, 216 });
 	_spriteSheets["items"] = loadTextureAutoDetect(renderer, std::string(SDL_GetBasePath()) + "sprites/items.png", _autoTiles["items"], { 41, 88, 124 }, { 68, 145, 190 });
 	_spriteSheets["enemies"] = loadTexture(renderer, std::string(SDL_GetBasePath()) + "sprites/enemies.png", { 68, 145, 190 });
+
+	// sprite creation functions (see get)
+	_creators["level_1_1"] = [this] { return loadLevelBackground("1-1.png"); };
+
+	// screens
+	_creators["welcome"] = [this] { return new Sprite(_spriteSheets["titlescreen"], RectI(783, 244, 16 * 16, 16 * 14)); };
+	_creators["flashing_3"] = [this]
+	{
+		std::vector< RectI> rects;
+		RectI welcome3(115, 574, 32, 48);
+		rects.push_back(welcome3);
+		rects.push_back(welcome3 + Point(1 * 260, 0));
+		rects.push_back(welcome3 + Point(2 * 260, 0));
+		rects.push_back(welcome3 + Point(3 * 260, 0));
+		return new AnimatedSprite(_spriteSheets["titlescreen"], rects, 10, {0, 1, 0, 2, 3, 2, 0});
+	};
+
+	// points (index = points digit, e.g. "points_3")
+	_indexedCreators["points_"] = [this](int point_idx) -> Sprite*
+	{
+		if (point_idx < 4)
+			return new Sprite(_spriteSheets["font"], moveBy(RectI(60, 89, 12, 8), point_idx, 0, 12, 8, 3));
+		else if (point_idx < 9)
+			return new Sprite(_spriteSheets["font"], moveBy(RectI(119, 89, 16, 8), point_idx-4, 0, 16, 8, 3));
+		else
+			return nullptr;
+	};
+
+	// HUD
+	_creators["hud"] = [this] { return new Sprite(_spriteSheets["hud"], RectI(4, 81, 16 * 16, 16 * 3)); };
+	_creators["hud_arrow"] = [this] { return new Sprite(_spriteSheets["hud"], RectI(625, 25, 8, 8)); };
+	_creators["hud_P"] = [this] { return new Sprite(_spriteSheets["hud"], RectI(653, 25, 16, 8)); };
+
+	// Wooden moving platform.
+	_creators["platform"] = [this] { return new FilledSprite(_spriteSheets["stages"], RectI(104, 199, 16, 16), {1, 0.5f}); };
+
+	// Mario
+	_creators["mario_stand"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][0]); };
+	_creators["mario_jump"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][2]); };
+	_creators["mario_jumpP"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][5]); };
+	_creators["mario_fall"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][2]); };
+	_creators["mario_skid"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][6]); };
+	_creators["mario_die"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][17]); };
+	_creators["mario_walk"] = [this] { return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][0].begin(), _autoTiles["mario"][0].begin() + 2 }, 10); };
+	_creators["mario_run"] = [this] { return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][0].begin(), _autoTiles["mario"][0].begin() + 2 }, 30); };
+	_creators["mario_pspeed"] = [this] { return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][0].begin() + 3, _autoTiles["mario"][0].begin() + 5 }, 30); };
+	_creators["mario_small2big"] = [this]
+	{
+		std::vector< RectI> rects;
+		rects.push_back(_autoTiles["mario"][3][8]);
+		rects.push_back(_autoTiles["mario"][0][0]);
+		rects.push_back(_autoTiles["mario"][2][0]);
+		return new AnimatedSprite(_spriteSheets["mario"], rects, 10, { 0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 2 }, 1);
+	};
+	_creators["supermario_big2small"] = [this]
+	{
+		std::vector< RectI> rects;
+		rects.push_back(_autoTiles["mario"][3][8]);
+		rects.push_back(_autoTiles["mario"][0][0]);
+		rects.push_back(_autoTiles["mario"][2][0]);
+		return new AnimatedSprite(_spriteSheets["mario"], rects, 10, { 2, 0, 2, 0, 2, 0, 1, 0, 1, 0, 1, 0, 1 }, 1);
+	};
+
+	// Super Mario
+	_creators["supermario_stand"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][0]); };
+	_creators["supermario_jump"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][4]); };
+	_creators["supermario_jumpP"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][8]); };
+	_creators["supermario_fall"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][2]); };
+	_creators["supermario_crouch"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][3]); };
+	_creators["supermario_skid"] = [this] { return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][9]); };
+	_creators["supermario_walk"] = [this] { return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][2].begin(), _autoTiles["mario"][2].begin() + 3 }, 10, { 0, 1, 2, 1 }); };
+	_creators["supermario_run"] = [this] { return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][2].begin(), _autoTiles["mario"][2].begin() + 3 }, 30, { 0, 1, 2, 1 }); };
+	_creators["supermario_pspeed"] = [this] { return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][2].begin() + 5, _autoTiles["mario"][2].begin() + 8 }, 30, { 0, 1, 2, 1 }); };
+
+	// enemies
+	_creators["goomba_walk"] = [this]
+	{
+		std::vector< RectI> rects;
+		RectI anchor(1, 1, 16, 16);
+		rects.push_back(anchor);
+		rects.push_back(moveBy(anchor, 1, 0, 16, 16, 1, 1));
+		return new AnimatedSprite(_spriteSheets["enemies"], rects, 8);
+	};
+	_creators["goomba_stomped"] = [this] { return new Sprite(_spriteSheets["enemies"], RectI(35, 1, 16, 16)); };
+
+	// level objects
+	_creators["block_question"] = [this]
+	{
+		std::vector< RectI> rects;
+		RectI anchor(104, 235, 16, 16);
+		rects.push_back(anchor);
+		rects.push_back(moveBy(anchor, 1, 0, 16, 16, 2, 2));
+		rects.push_back(moveBy(anchor, -1, 1, 16, 16, 2, 2));
+		rects.push_back(moveBy(anchor, 0, 1, 16, 16, 2, 2));
+		return new AnimatedSprite(_spriteSheets["stages"], rects, 8);
+	};
+	_creators["block_empty"] = [this] { return new Sprite(_spriteSheets["stages"], RectI(122, 199, 16, 16)); };
+	_creators["brick"] = [this]
+	{
+		std::vector< RectI> rects;
+		RectI anchor(122, 253, 16, 16);
+		rects.push_back(anchor);
+		rects.push_back(moveBy(anchor, -2, 1, 16, 16, 2, 2));
+		rects.push_back(moveBy(anchor, -1, 1, 16, 16, 2, 2));
+		rects.push_back(moveBy(anchor, 0, 1, 16, 16, 2, 2));
+		return new AnimatedSprite(_spriteSheets["stages"], rects, 8);
+	};
+	_creators["brick_debris"] = [this] { return new AnimatedSprite(_spriteSheets["items"], { _autoTiles["items"][4].begin() + 4, _autoTiles["items"][4].begin() + 6 }, 10); };
+	_creators["coin"] = [this]
+	{
+		std::vector< RectI> rects;
+		RectI anchor(86, 217, 16, 16);
+		rects.push_back(anchor);
+		rects.push_back(moveBy(anchor, 1, 0, 16, 16, 2, 2));
+		rects.push_back(moveBy(anchor, 2, 0, 16, 16, 2, 2));
+		rects.push_back(moveBy(anchor, 0, 1, 16, 16, 2, 2));
+		return new AnimatedSprite(_spriteSheets["stages"], rects, 8);
+	};
+	_creators["wood"] = [this] { return new Sprite(_spriteSheets["stages"], RectI(104, 199, 16, 16)); };
+	_creators["spawnable_coin"] = [this] { return new AnimatedSprite(_spriteSheets["items"], { _autoTiles["items"][0].begin() + 19, _autoTiles["items"][0].begin() + 22 }, 16, { 0, 1, 2, 1 }); };
+	_creators["mushroom_red"] = [this] { return new Sprite(_spriteSheets["items"], _autoTiles["items"][0][4]); };
+	_creators["leaf"] = [this] { return new Sprite(_spriteSheets["items"], _autoTiles["items"][0][5]); };
+	_creators["mushroom_green"] = [this] { return new Sprite(_spriteSheets["items"], _autoTiles["items"][0][7]); };
 }
 
 SpriteFactory::~SpriteFactory()
@@ -59,159 +184,25 @@ Sprite* SpriteFactory::loadLevelBackground(const std::string& fileName)
 
 Sprite* SpriteFactory::get(const std::string& id)
 {
-	if (id == "level_1_1")
-		return loadLevelBackground("1-1.png");
-	std::vector< RectI> rects;
+	// sprite with a fixed id, e.g. "brick"
+	auto creator = _creators.find(id);
+	if (creator != _creators.end())
+		return creator->second();
 
-	// screens
-	if (id == "welcome")
-		return new Sprite(_spriteSheets["titlescreen"], RectI(783, 244, 16 * 16, 16 * 14));
-	else if (id == "flashing_3")
+	// indexed sprite: prefix followed by a non-negative integer, e.g. "pipe12"
+	for (auto& entry : _indexedCreators)
 	{
-		RectI welcome3(115, 574, 32, 48);
-		rects.push_back(welcome3);
-		rects.push_back(welcome3 + Point(1 * 260, 0));
-		rects.push_back(welcome3 + Point(2 * 260, 0));
-		rects.push_back(welcome3 + Point(3 * 260, 0));
-		return new AnimatedSprite(_spriteSheets["titlescreen"], rects, 10, {0, 1, 0, 2, 3, 2, 0});
-	}
-
-	// points
-	else if (id.rfind("points_", 0) == 0 && id.size() == 8)
-	{
-		int point_idx = id[7] - '0';
-		if (point_idx < 4)
-			return new Sprite(_spriteSheets["font"], moveBy(RectI(60, 89, 12, 8), point_idx, 0, 12, 8, 3));
-		else if (point_idx < 9)
-			return new Sprite(_spriteSheets["font"], moveBy(RectI(119, 89, 16, 8), point_idx-4, 0, 16, 8, 3));
-		else
-			return nullptr;
+		const std::string& prefix = entry.first;
+		if (id.size() > prefix.size() && id.size() - prefix.size() < 10 && id.compare(0, prefix.size(), prefix) == 0)
+		{
+			std::string index = id.substr(prefix.size());
+			if (std::all_of(index.begin(), index.end(), [](unsigned char c) { return std::isdigit(c) != 0; }))
+				return entry.second(std::stoi(index));
+		}
 	}
 
-	// HUD
-	else if (id == "hud")
-		return new Sprite(_spriteSheets["hud"], RectI(4, 81, 16 * 16, 16 * 3));
-	else if (id == "hud_arrow")
-		return new Sprite(_spriteSheets["hud"], RectI(625, 25, 8, 8));
-	else if (id == "hud_P")
-		return new Sprite(_spriteSheets["hud"], RectI(653, 25, 16, 8));
-
-	// Wooden moving platform.
-	else if (id == "platform")
-		return new FilledSprite(_spriteSheets["stages"], RectI(104, 199, 16, 16), {1, 0.5f});
-
-	// Mario
-	else if (id == "mario_stand")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][0]);
-	else if (id == "mario_jump")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][2]);
-	else if (id == "mario_jumpP")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][5]);
-	else if (id == "mario_fall")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][2]);
-	else if (id == "mario_skid")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][6]);
-	else if (id == "mario_die")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][0][17]);
-	else if (id == "mario_walk")
-		return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][0].begin(), _autoTiles["mario"][0].begin() + 2 }, 10);
-	else if (id == "mario_run")
-		return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][0].begin(), _autoTiles["mario"][0].begin() + 2 }, 30);
-	else if (id == "mario_pspeed")
-		return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][0].begin() + 3, _autoTiles["mario"][0].begin() + 5 }, 30);
-	else if (id == "mario_small2big")
-	{
-		rects.push_back(_autoTiles["mario"][3][8]);
-		rects.push_back(_autoTiles["mario"][0][0]);
-		rects.push_back(_autoTiles["mario"][2][0]);
-		return new AnimatedSprite(_spriteSheets["mario"], rects, 10, { 0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 2 }, 1);
-	}
-	else if (id == "supermario_big2small")
-	{
-		rects.push_back(_autoTiles["mario"][3][8]);
-		rects.push_back(_autoTiles["mario"][0][0]);
-		rects.push_back(_autoTiles["mario"][2][0]);
-		return new AnimatedSprite(_spriteSheets["mario"], rects, 10, { 2, 0, 2, 0, 2, 0, 1, 0, 1, 0, 1, 0, 1 }, 1);
-	}
-
-	// Super Mario
-	else if (id == "supermario_stand")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][0]);
-	else if (id == "supermario_jump")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][4]);
-	else if (id == "supermario_jumpP")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][8]);
-	else if (id == "supermario_fall")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][2]);
-	else if (id == "supermario_crouch")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][3]);
-	else if (id == "supermario_skid")
-		return new Sprite(_spriteSheets["mario"], _autoTiles["mario"][2][9]);
-	else if (id == "supermario_walk")
-		return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][2].begin(), _autoTiles["mario"][2].begin() + 3 }, 10, { 0, 1, 2, 1 });
-	else if (id == "supermario_run")
-		return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][2].begin(), _autoTiles["mario"][2].begin() + 3 }, 30, { 0, 1, 2, 1 });
-	else if (id == "supermario_pspeed")
-		return new AnimatedSprite(_spriteSheets["mario"], { _autoTiles["mario"][2].begin() + 5, _autoTiles["mario"][2].begin() + 8 }, 30, { 0, 1, 2, 1 });
-
-	// enemies
-	else if (id == "goomba_walk")
-	{
-		RectI anchor(1, 1, 16, 16);
-		rects.push_back(anchor);
-		rects.push_back(moveBy(anchor, 1, 0, 16, 16, 1, 1));
-		return new AnimatedSprite(_spriteSheets["enemies"], rects, 8);
-	}
-	else if (id == "goomba_stomped")
-		return new Sprite(_spriteSheets["enemies"], RectI(35, 1, 16, 16));
-
-	// level objects
-	else if (id == "block_question")
-	{
-		RectI anchor(104, 235, 16, 16);
-		rects.push_back(anchor);
-		rects.push_back(moveBy(anchor, 1, 0, 16, 16, 2, 2));
-		rects.push_back(moveBy(anchor, -1, 1, 16, 16, 2, 2));
-		rects.push_back(moveBy(anchor, 0, 1, 16, 16, 2, 2));
-		return new AnimatedSprite(_spriteSheets["stages"], rects, 8);
-	}
-	else if (id == "block_empty")
-		return new Sprite(_spriteSheets["stages"], RectI(122, 199, 16, 16));
-	else if (id == "brick")
-	{
-		RectI anchor(122, 253, 16, 16);
-		rects.push_back(anchor);
-		rects.push_back(moveBy(anchor, -2, 1, 16, 16, 2, 2));
-		rects.push_back(moveBy(anchor, -1, 1, 16, 16, 2, 2));
-		rects.push_back(moveBy(anchor, 0, 1, 16, 16, 2, 2));
-		return new AnimatedSprite(_spriteSheets["stages"], rects, 8);
-	}
-	else if (id == "brick_debris")
-		return new AnimatedSprite(_spriteSheets["items"], { _autoTiles["items"][4].begin() + 4, _autoTiles["items"][4].begin() + 6 }, 10);
-	else if (id == "coin")
-	{
-		RectI anchor(86, 217, 16, 16);
-		rects.push_back(anchor);
-		rects.push_back(moveBy(anchor, 1, 0, 16, 16, 2, 2));
-		rects.push_back(moveBy(anchor, 2, 0, 16, 16, 2, 2));
-		rects.push_back(moveBy(anchor, 0, 1, 16, 16, 2, 2));
-		return new AnimatedSprite(_spriteSheets["stages"], rects, 8);
-	}
-	else if (id == "wood")
-		return new Sprite(_spriteSheets["stages"], RectI(104, 199, 16, 16));
-	else if (id == "spawnable_coin")
-		return new AnimatedSprite(_spriteSheets["items"], { _autoTiles["items"][0].begin() + 19, _autoTiles["items"][0].begin() + 22 }, 16, { 0, 1, 2, 1 });
-	else if (id == "mushroom_red")
-		return new Sprite(_spriteSheets["items"], _autoTiles["items"][0][4]);
-	else if (id == "leaf")
-		return new Sprite(_spriteSheets["items"], _autoTiles["items"][0][5]);
-	else if (id == "mushroom_green")
-		return new Sprite(_spriteSheets["items"], _autoTiles["items"][0][7]);
-	else
-	{
-		std::cerr << "Cannot find sprite \"" << id << "\"\n";
-		return nullptr;
-	}
+	std::cerr << "Cannot find sprite \"" << id << "\"\n";
+	return nullptr;
 }
 
 Sprite* SpriteFactory::getText(std::string text, const Vec2Df& size, int fillN, char fillChar)

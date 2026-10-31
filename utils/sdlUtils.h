@@ -26,6 +26,14 @@ namespace agp
 {
     static inline void DrawThickRect(SDL_Renderer* renderer, SDL_FRect rect, float thickness) 
     {
+        // border cannot be thicker than half the rect (avoids negative sizes on small rects)
+        thickness = (std::min)(thickness, (std::min)(rect.w, rect.h) / 2.0f);
+        if (thickness <= 0)
+        {
+            SDL_RenderRect(renderer, &rect);
+            return;
+        }
+
         // Top side
         SDL_FRect top = { rect.x, rect.y, rect.w, thickness };
         SDL_RenderFillRect(renderer, &top);
@@ -43,6 +51,30 @@ namespace agp
         SDL_RenderFillRect(renderer, &right);
     }
 
+    // Draw a segment as a filled quad of the given thickness, centered on the segment
+    static inline void DrawThickLine(SDL_Renderer* renderer, const PointF& a, const PointF& b, float thickness, const Color& color)
+    {
+        float dx = b.x - a.x;
+        float dy = b.y - a.y;
+        float length = sqrtf(dx * dx + dy * dy);
+        if (length == 0)
+            return;
+
+        // half-thickness offset along the segment normal
+        float offsetX = -dy / length * thickness / 2.0f;
+        float offsetY = dx / length * thickness / 2.0f;
+
+        SDL_FColor col = { color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f };
+        SDL_Vertex vertices[4] = {
+            { { a.x + offsetX, a.y + offsetY }, col, { 0, 0 } },
+            { { a.x - offsetX, a.y - offsetY }, col, { 0, 0 } },
+            { { b.x - offsetX, b.y - offsetY }, col, { 0, 0 } },
+            { { b.x + offsetX, b.y + offsetY }, col, { 0, 0 } }
+        };
+        int indices[6] = { 0, 1, 2, 2, 3, 0 };
+        SDL_RenderGeometry(renderer, nullptr, vertices, 4, indices, 6);
+    }
+
     static inline void DrawCircle(SDL_Renderer* renderer, const PointF& center, float radius, const Color& color, int nSegments = 100, float angleStart = 0, float angleEnd = 2 * PI)
     {
         float angleStep = (angleEnd - angleStart) / nSegments;
@@ -58,6 +90,39 @@ namespace agp
             SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
             SDL_RenderLine(renderer, a.x, a.y, b.x, b.y);
         }
+    }
+
+    // Draw a circle (or an arc) as a ring of the given thickness, centered on the circumference
+    static inline void DrawThickCircle(SDL_Renderer* renderer, const PointF& center, float radius, float thickness, const Color& color, int nSegments = 100, float angleStart = 0, float angleEnd = 2 * PI)
+    {
+        if (radius <= 0 || nSegments < 1)
+            return;
+
+        float innerRadius = (std::max)(0.0f, radius - thickness / 2.0f);
+        float outerRadius = radius + thickness / 2.0f;
+        float angleStep = (angleEnd - angleStart) / nSegments;
+        SDL_FColor col = { color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f };
+
+        // one outer and one inner vertex per step, two triangles per segment
+        std::vector<SDL_Vertex> vertices(2 * (nSegments + 1));
+        std::vector<int> indices;
+        indices.reserve(6 * nSegments);
+        for (int i = 0; i <= nSegments; ++i)
+        {
+            float angle = angleStart + i * angleStep;
+            float c = cosf(angle);
+            float s = sinf(angle);
+            vertices[2 * i] = { { center.x + outerRadius * c, center.y + outerRadius * s }, col, { 0, 0 } };
+            vertices[2 * i + 1] = { { center.x + innerRadius * c, center.y + innerRadius * s }, col, { 0, 0 } };
+
+            if (i < nSegments)
+            {
+                int k = 2 * i;
+                indices.insert(indices.end(), { k, k + 1, k + 3, k, k + 3, k + 2 });
+            }
+        }
+
+        SDL_RenderGeometry(renderer, nullptr, vertices.data(), int(vertices.size()), indices.data(), int(indices.size()));
     }
 
     static inline void FillCircle(SDL_Renderer* renderer, const PointF& center, float radius, const Color& color, int nSegments = 100)
@@ -203,6 +268,21 @@ namespace agp
         SDL_RenderLine(renderer, bUp.x, bUp.y, bDown.x, bDown.y);
     }
 
+    static inline void DrawThickCapsule(SDL_Renderer* renderer, const PointF& centerDown, const PointF& centerUp, float radius, float thickness, const Color& color, int nSegments = 100)
+    {
+        float angle = std::atan2(centerUp.y - centerDown.y, centerUp.x - centerDown.x) + PI / 2;
+        DrawThickCircle(renderer, centerUp, radius, thickness, color, nSegments, angle - PI, angle);
+        DrawThickCircle(renderer, centerDown, radius, thickness, color, nSegments, angle, PI + angle);
+
+        PointF aUp(centerUp.x + radius * cosf(angle - PI), centerUp.y + radius * sinf(angle - PI));
+        PointF bUp(centerUp.x + radius * cosf(angle), centerUp.y + radius * sinf(angle));
+        PointF bDown(centerDown.x + radius * cosf(angle), centerDown.y + radius * sinf(angle));
+        PointF aDown(centerDown.x + radius * cosf(PI + angle), centerDown.y + radius * sinf(PI + angle));
+
+        DrawThickLine(renderer, aUp, aDown, thickness, color);
+        DrawThickLine(renderer, bUp, bDown, thickness, color);
+    }
+
     static inline void DrawOBB(SDL_Renderer* renderer, const RotatedRectF& obb, const Color& color)
     {
         auto vertices = obb.vertices();
@@ -287,6 +367,66 @@ namespace agp
 
         // Render the geometry
         SDL_RenderGeometry(renderer, nullptr, vertices, vertexCount, indices, indexCount);
+    }
+
+    // Draw the outline of a closed convex polygon as a band of the given thickness, centered on the edges.
+    // Corners are mitered, so there are no gaps and no overlaps (also with semi-transparent colors).
+    static inline void DrawThickPolygon(SDL_Renderer* renderer, const PointF* points, int n, float thickness, const Color& color)
+    {
+        if (n == 2)
+            DrawThickLine(renderer, points[0], points[1], thickness, color);
+        if (n < 3)
+            return;
+
+        SDL_FColor col = { color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f };
+        float halfThickness = thickness / 2.0f;
+
+        // unit normal of edge i (from points[i] to points[i+1]), zero if the edge is degenerate
+        auto edgeNormal = [&](int i)
+        {
+            const PointF& p1 = points[i];
+            const PointF& p2 = points[(i + 1) % n];
+            float dx = p2.x - p1.x;
+            float dy = p2.y - p1.y;
+            float length = sqrtf(dx * dx + dy * dy);
+            return length > 0 ? PointF(-dy / length, dx / length) : PointF(0, 0);
+        };
+
+        // two vertices per corner, offset on both sides along the bisector of the two edge normals
+        std::vector<SDL_Vertex> vertices(2 * n);
+        for (int i = 0; i < n; ++i)
+        {
+            PointF n1 = edgeNormal((i + n - 1) % n);
+            PointF n2 = edgeNormal(i);
+            float mx = n1.x + n2.x;
+            float my = n1.y + n2.y;
+            float mLength = sqrtf(mx * mx + my * my);
+            float miterX = 0, miterY = 0;
+            if (mLength > 1e-6f)
+            {
+                mx /= mLength;
+                my /= mLength;
+
+                // miter length = halfThickness / cos(half corner angle), limited on very sharp corners
+                float cosHalf = (std::max)(mx * n2.x + my * n2.y, 0.25f);
+                miterX = mx * halfThickness / cosHalf;
+                miterY = my * halfThickness / cosHalf;
+            }
+            vertices[2 * i] = { { points[i].x + miterX, points[i].y + miterY }, col, { 0, 0 } };
+            vertices[2 * i + 1] = { { points[i].x - miterX, points[i].y - miterY }, col, { 0, 0 } };
+        }
+
+        // two triangles per edge, between the vertex pairs of its two corners
+        std::vector<int> indices;
+        indices.reserve(6 * n);
+        for (int i = 0; i < n; ++i)
+        {
+            int k = 2 * i;
+            int h = 2 * ((i + 1) % n);
+            indices.insert(indices.end(), { k, k + 1, h + 1, k, h + 1, h });
+        }
+
+        SDL_RenderGeometry(renderer, nullptr, vertices.data(), int(vertices.size()), indices.data(), int(indices.size()));
     }
 
     static inline void FillOBB(SDL_Renderer* renderer, std::array < PointF, 4> obb, const Color& color)

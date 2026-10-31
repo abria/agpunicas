@@ -82,7 +82,7 @@ void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 	if (_scene->rectsVisible())
 	{
 		SDL_SetRenderDrawColor(renderer, _rectColor.r, _rectColor.g, _rectColor.b, _rectColor.a);
-		SDL_RenderRect(renderer, &drawRect);
+		DrawThickRect(renderer, drawRect, _rectPixelThickness);
 	}
 
 	if (_borderColor.a)

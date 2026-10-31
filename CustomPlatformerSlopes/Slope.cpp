@@ -9,6 +9,7 @@
 
 #include "Slope.h"
 #include "GameScene.h"
+#include "sdlUtils.h"
 
 using namespace agp;
 
@@ -102,7 +103,6 @@ void Slope::draw(SDL_Renderer* renderer, Transform camera)
 	GameScene* scene = dynamic_cast<GameScene*>(_scene);
 	if (scene && scene->collidersVisible())
 	{
-		SDL_SetRenderDrawColor(renderer, _colliderColor.r, _colliderColor.g, _colliderColor.b, 255);
-		SDL_RenderLine(renderer, points[0].x, points[0].y, points[1].x, points[1].y);
+		DrawThickLine(renderer, points[0], points[1], _colliderPixelThickness, _colliderColor.adjustAlpha(255));
 	}
 }

@@ -40,6 +40,7 @@ class agp::RenderableObject : public Object
 		float _borderThickness;	// in screen points
 		Color _backgroundColor;
 		const Color _rectColor = { 255, 0, 0, 255 };
+		const float _rectPixelThickness = 3;	// thickness of rect lines (R), in screen pixels
 
 	public:
 

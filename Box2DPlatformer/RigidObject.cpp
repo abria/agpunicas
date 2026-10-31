@@ -51,7 +51,8 @@ void RigidObject::draw(SDL_Renderer* renderer, Transform camera)
 	{
 		// draw body reference frame
 		RotatedRectF body_obb(camera(_obb.center), _scene->view()->magf() * _obb.size, _obb.angle);
-		DrawOBB(renderer, body_obb, _bodyFrameColor);
+		auto body_vertices = body_obb.vertices();
+		DrawThickPolygon(renderer, body_vertices.data(), 4, _colliderPixelThickness, _bodyFrameColor);
 
 		// draw shapes
 		int shapes_count = b2Body_GetShapeCount(_bodyId);
@@ -63,15 +64,13 @@ void RigidObject::draw(SDL_Renderer* renderer, Transform camera)
 			if (shape_type == b2ShapeType::b2_polygonShape)
 			{
 				b2Polygon poly = b2Shape_GetPolygon(shapes_ids[i]);
+				PointF poly_vertices[B2_MAX_POLYGON_VERTICES];
 				for (int k = 0; k < poly.count; k++)
 				{
-					b2Vec2 aw = b2Body_GetWorldPoint(_bodyId, poly.vertices[k]);
-					b2Vec2 bw = b2Body_GetWorldPoint(_bodyId, poly.vertices[(k + 1) % poly.count]);
-					PointF a = camera(Vec2Df(aw.x, aw.y));
-					PointF b = camera(Vec2Df(bw.x, bw.y));
-					SDL_SetRenderDrawColor(renderer, _colliderColor.r, _colliderColor.g, _colliderColor.b, _colliderColor.a);
-					SDL_RenderLine(renderer, a.x, a.y, b.x, b.y);
+					b2Vec2 vw = b2Body_GetWorldPoint(_bodyId, poly.vertices[k]);
+					poly_vertices[k] = camera(Vec2Df(vw.x, vw.y));
 				}
+				DrawThickPolygon(renderer, poly_vertices, poly.count, _colliderPixelThickness, _colliderColor);
 			}
 			else if (shape_type == b2ShapeType::b2_capsuleShape)
 			{
@@ -82,7 +81,7 @@ void RigidObject::draw(SDL_Renderer* renderer, Transform camera)
 				PointF c2 = camera(Vec2Df(c2w.x, c2w.y));
 				float radius = capsule.radius * _scene->view()->magf().x;
 
-				DrawCapsule(renderer, c2, c1, radius, _colliderColor, 100);
+				DrawThickCapsule(renderer, c2, c1, radius, _colliderPixelThickness, _colliderColor, 100);
 			}
 			else if (shape_type == b2ShapeType::b2_circleShape)
 			{
@@ -91,7 +90,7 @@ void RigidObject::draw(SDL_Renderer* renderer, Transform camera)
 				PointF center = camera(Vec2Df(c.x, c.y));
 				float radius = circle.radius * _scene->view()->magf().x;
 
-				DrawCircle(renderer, center, radius, _colliderColor, 100);
+				DrawThickCircle(renderer, center, radius, _colliderPixelThickness, _colliderColor, 100);
 			}
 		}
 	}

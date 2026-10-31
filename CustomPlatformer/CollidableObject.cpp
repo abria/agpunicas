@@ -13,6 +13,7 @@
 #include <algorithm>
 #include "timeUtils.h"
 #include "collisionUtils.h"
+#include "sdlUtils.h"
 #include "GameScene.h"
 #include "DynamicObject.h"
 #include "StaticObject.h"
@@ -295,7 +296,7 @@ void CollidableObject::draw(SDL_Renderer* renderer, Transform camera)
 		auto vertices = sceneCollider().vertices();
 		SDL_FRect drawRect = RectF(camera(vertices[0]), camera(vertices[2])).toSDLf();
 		SDL_SetRenderDrawColor(renderer, _colliderColor.r, _colliderColor.g, _colliderColor.b, _colliderColor.a);
-		SDL_RenderRect(renderer, &drawRect);
+		DrawThickRect(renderer, drawRect, _colliderPixelThickness);
 	}
 }
 

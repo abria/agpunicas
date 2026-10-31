@@ -40,6 +40,7 @@ class agp::RigidObject : public RenderableObject
 		RotatedRectF _obb;		// oriented bounding box
 		const Color _bodyFrameColor = { 255, 0, 0, 255 };
 		const Color _colliderColor = { 255, 255, 0, 255 };
+		const float _colliderPixelThickness = 3;	// thickness of collider lines (C), in screen pixels
 
 	public:
 

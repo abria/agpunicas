@@ -29,6 +29,7 @@ class agp::CollidableObject : public MovableObject
 		bool _collidable;
 		bool _compenetrable;
 		const Color _colliderColor = { 255, 255, 0, 255 };
+		const float _colliderPixelThickness = 3;	// thickness of collider lines (C), in screen pixels
 		bool _CCD;
 		std::set<CollidableObject*> _collisionsCompenetrables;
 		std::vector<CollidableObject*> _collisions;

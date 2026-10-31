@@ -166,7 +166,7 @@ void CollidableObject::draw(SDL_Renderer* renderer, Transform camera)
 		for (int i = 0; i < 4; i++)
 			drawVertices[i] = camera(drawVertices[i]);
 		
-		DrawOBB(renderer, drawVertices, _colliderColor);
+		DrawThickPolygon(renderer, drawVertices.data(), 4, _colliderPixelThickness, _colliderColor);
 	}
 }
 

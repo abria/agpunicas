@@ -183,9 +183,9 @@ void DynamicObject::finishMovement(float dt)
 	const float contactTolerance = 0.01f; // scene units, platform vs. planned slope height
 	const float climbTolerance = 0.0001f; // scene units, upward displacement blocked by a ceiling
 
-	// callbacks may disable physics (death/transformation) or remove the slope
-	// a smaller vy may also mean a bounce or a descent stopped by CCD
-	// discard the contact so slope alignment cannot overwrite that response
+	// Discard invalid support or a descent stopped by CCD.
+	// Contact callbacks run after finishMovement(), so slope alignment cannot
+	// overwrite a bounce, death or transformation triggered by a contact.
 	if (!_collidable || _freezedPhysics || _slope->killed() ||
 		_vel.y < _slope_vel_y - velTolerance)
 	{
@@ -194,8 +194,8 @@ void DynamicObject::finishMovement(float dt)
 	}
 
 	bool ceiling = false;
-	for (const Vec2Df& axis : _collisionAxes)
-		ceiling = ceiling || axis == dir2vec(Direction::UP);
+	for (const auto& contact : _contacts)
+		ceiling = ceiling || (!contact.first->compenetrable() && contact.second == Direction::UP);
 	float bottom = sceneCollider().bottom();
 	if (_slope_vel_y < 0 && (ceiling || bottom > _slope_bottom + climbTolerance))
 	{
@@ -234,13 +234,7 @@ void DynamicObject::finishMovement(float dt)
 
 		// register support for discrete midair() and for contact-end detection
 		// slopes are excluded from both generic shape tests (see Slope)
-		_collisions.push_back(_slope);
-		_collisionAxes.push_back(dir2vec(Direction::DOWN));
-		_collisionDepths.push_back(0);
-
-		// notify logic collisions after position and velocity have been resolved
-		_slope->collision(this, true, Direction::UP);
-		collision(_slope, true, Direction::DOWN);
+		_contacts[_slope] = Direction::DOWN;
 	}
 
 	// contact is computed again next iteration (the body may jump or leave)

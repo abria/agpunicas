@@ -17,14 +17,16 @@ Trigger::Trigger(Scene* scene, const RectF& rect, CollidableObject* watched, std
 	_task = task;
 	_watched = watched;
 	_compenetrable = true;
+	_detectsContacts = false;
 }
 
 // extends logic collision (+trigger behavior)
-bool Trigger::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Trigger::collision(CollidableObject* with, Contact contact, Direction fromDir)
 {
 	if (with == _watched)
 	{
-		_task();
+		if (contact == Contact::BEGIN)
+			_task();
 		return true;
 	}
 	else

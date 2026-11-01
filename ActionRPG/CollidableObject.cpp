@@ -63,30 +63,18 @@ void CollidableObject::forgetObject(Object* objectToRemove)
 	if (!other)
 		return;
 
-	// Remove the contact and its matching axis/depth together.
-	bool contact = false;
-	for (size_t i = _collisions.size(); i-- > 0; )
-		if (_collisions[i] == other)
-		{
-			_collisions.erase(_collisions.begin() + i);
-			_collisionAxes.erase(_collisionAxes.begin() + i);
-			_collisionDepths.erase(_collisionDepths.begin() + i);
-			contact = true;
-		}
-	_collisionsPrev.erase(std::remove(_collisionsPrev.begin(), _collisionsPrev.end(), other), _collisionsPrev.end());
-	if (contact)
-	{
-		collision(other, false, Vec2Df());
-		other->collision(this, false, Vec2Df());
-	}
+	_contactsPrev.erase(other);
+	if (_contacts.erase(other))
+		notifyContact(other, Contact::END, Vec2Df());
 }
 
 void CollidableObject::update(float dt)
 {
 	MovableObject::update(dt);
 
-	detectCollisions();
 	resolveCollisions();
+	if (_detectsContacts)
+		detectContacts();
 }
 
 RotatedRectF CollidableObject::sceneCollider() const
@@ -94,62 +82,47 @@ RotatedRectF CollidableObject::sceneCollider() const
 	return _collider + _rrect.center;
 }
 
-void CollidableObject::detectCollisions()
+void CollidableObject::notifyContact(CollidableObject* with, Contact contact, const Vec2Df& normal)
 {
-	if (!_collidable)
-		return;
-
-	_collisionsPrev = _collisions;
-	_collisions.clear();
-	_collisionAxes.clear();
-	_collisionDepths.clear();
-
-	auto objectsInRect = _scene->objects(sceneCollider().boundingRect());
-	for (auto& obj : objectsInRect)
-	{
-		CollidableObject* collObj = obj->to<CollidableObject*>();
-		if (collObj && collObj != this && collObj->collidable() && collidableWith(collObj))
-		{
-			Vec2Df axis;
-			float depth;
-			if (checkCollisionSAT(sceneCollider().verticesVec(), collObj->sceneCollider().verticesVec(), axis, depth))
-			{
-				_collisions.push_back(collObj);
-				_collisionAxes.push_back(axis);
-				_collisionDepths.push_back(depth);
-				collision(collObj, true, axis);
-				collObj->collision(this, true, -axis);
-			}
-		}
-	}
-
-	// first remove objects marked 'to be killed' from collision list
-	// since they will not be accessible in the next iteration
-	size_t j = 0;
-	for (size_t i = 0; i < _collisions.size(); ++i)
-	{
-		if (!_collisions[i]->_killed)
-		{
-			_collisions[j] = _collisions[i];
-			_collisionAxes[j] = _collisionAxes[i];
-			_collisionDepths[j] = _collisionDepths[i];
-			j++;
-		}
-	}
-	_collisions.resize(j);
-	_collisionAxes.resize(j);
-	_collisionDepths.resize(j);
-
-	// decollisions = previous collisions that are no more
-	for(auto collObj : _collisionsPrev)
-		if (std::find(_collisions.begin(), _collisions.end(), collObj) == _collisions.end())
-		{
-			collision(collObj, false, Vec2Df());
-			collObj->collision(this, false, Vec2Df());
-		}
+	// Share the contact so the other detector cannot announce BEGIN/END twice.
+	if (contact == Contact::END)
+		with->_contacts.erase(this);
+	else
+		with->_contacts[this] = -normal;
+	collision(with, contact, normal);
+	if (contact != Contact::STAY || !with->_detectsContacts)
+		with->collision(this, contact, -normal);
 }
 
-bool CollidableObject::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
+void CollidableObject::detectContacts()
+{
+	_contactsPrev = _contacts;
+	_contacts.clear();
+	// Expand in local coordinates: SAT still tests the rotated shape, not its bounds.
+	RotatedRectF probe = sceneCollider();
+	probe.size += Vec2Df(2 * _contactTolerance, 2 * _contactTolerance);
+	if (_collidable && !_killed)
+		for (auto item : _scene->objects(probe.boundingRect()))
+		{
+			auto other = item->to<CollidableObject*>();
+			Vec2Df normal;
+			float depth;
+			if (other && other != this && !other->_killed && other->collidable()
+				&& collidableWith(other) && other->collidableWith(this)
+				&& checkCollisionSAT(probe.verticesVec(), other->sceneCollider().verticesVec(), normal, depth))
+				_contacts[other] = normal;
+		}
+
+	// Present now: BEGIN if absent before, otherwise STAY.
+	for (const auto& contact : _contacts)
+		notifyContact(contact.first, _contactsPrev.count(contact.first) ? Contact::STAY : Contact::BEGIN, contact.second);
+	// Present before but absent now: END.
+	for (const auto& contact : _contactsPrev)
+		if (!_contacts.count(contact.first))
+			notifyContact(contact.first, Contact::END, Vec2Df());
+}
+
+bool CollidableObject::collision(CollidableObject* with, Contact contact, const Vec2Df& normal)
 {
 	//printf("%s collided with %s from %s\n", name().c_str(), with->name().c_str(), normal.str().c_str());
 	return true; 

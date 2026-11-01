@@ -11,11 +11,11 @@ Enemy::Enemy(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer)
 {
 }
 
-bool Enemy::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
+bool Enemy::collision(CollidableObject* with, Contact contact, const Vec2Df& normal)
 {
-	DynamicObject::collision(with, begin, normal);
+	DynamicObject::collision(with, contact, normal);
 
-	if (with->to<Sword*>())
+	if (contact == Contact::BEGIN && with->to<Sword*>())
 		kill();
 
 	return false;

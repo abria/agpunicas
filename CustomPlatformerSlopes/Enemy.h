@@ -48,7 +48,7 @@ class agp::Enemy : public DynamicObject
 		// +smashed
 		// +hurt mario
 		// +invert direction if hits static or other enemy
-		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, Contact contact, Direction fromDir) override;
 
 		virtual std::string name() override { return strprintf("Enemy[%d]", _id); }
 };

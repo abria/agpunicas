@@ -40,12 +40,12 @@ Mushroom::Mushroom(Scene* scene, const PointF& pos, bool isGreen, int layer) :
 }
 
 // @override: +collision with Mario
-bool Mushroom::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Mushroom::collision(CollidableObject* with, Contact contact, Direction fromDir)
 {
 	Mario* mario = dynamic_cast<Mario*>(with);
 	StaticObject* staticObj = dynamic_cast<StaticObject*>(with);
 
-	if (begin && mario)
+	if (contact == Contact::BEGIN && mario && !killed())
 	{
 		if (_isGreen)
 		{
@@ -58,7 +58,7 @@ bool Mushroom::collision(CollidableObject* with, bool begin, Direction fromDir)
 		_visible = false;
 		kill();
 	}
-	else if (begin && staticObj && (fromDir == Direction::RIGHT || fromDir == Direction::LEFT))
+	else if (contact != Contact::END && staticObj && fromDir == _xDir)
 		_xDir = inverse(_xDir);
 
 	return true;

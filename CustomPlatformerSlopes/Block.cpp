@@ -70,11 +70,11 @@ void Block::update(float dt)
 	updateSprite();
 }
 
-bool Block::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Block::collision(CollidableObject* with, Contact contact, Direction fromDir)
 {
 	// interactions with Mario
 	Mario* mario = dynamic_cast<Mario*>(with);
-	if (mario && fromDir == Direction::DOWN)
+	if (contact == Contact::BEGIN && mario && fromDir == Direction::DOWN)
 	{
 		if(_type == Block::Type::QUESTION || _type == Block::Type::BRICK)
 		{
@@ -97,11 +97,11 @@ bool Block::collision(CollidableObject* with, bool begin, Direction fromDir)
 	}
 
 	// if not moving, behave like a static object
-	if (_prevVel == Vec2Df(0, 0) && _vel == Vec2Df(0, 0))
+	if (contact != Contact::END && _prevVel == Vec2Df(0, 0) && _vel == Vec2Df(0, 0))
 		return true;
 	// otherwise like a kinematic
 	else
-		return KinematicObject::collision(with, begin, fromDir);
+		return KinematicObject::collision(with, contact, fromDir);
 }
 
 void Block::spawnAbove()

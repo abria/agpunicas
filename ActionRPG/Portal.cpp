@@ -36,11 +36,11 @@ void Portal::setDestination(Portal* dest)
 		};
 }
 
-bool Portal::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
+bool Portal::collision(CollidableObject* with, Contact contact, const Vec2Df& normal)
 {
-	if (with == _watched && _playerArrived && begin == false)
+	if (with == _watched && _playerArrived && contact == Contact::END)
 		_playerArrived = false;
-	else if (with == _watched && !_playerArrived && begin)
+	else if (with == _watched && !_playerArrived && contact == Contact::BEGIN)
 	{
 		dynamic_cast<GameScene*>(_scene)->player()->setFreezed(true);
 		dynamic_cast<RPGGameScene*>(_scene)->setTransitionEnter(true);

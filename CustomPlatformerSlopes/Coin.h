@@ -15,7 +15,7 @@ class agp::Coin : public StaticObject
 		Coin(Scene* scene, const PointF& point, int layer = 2);
 
 		// +interaction with Mario
-		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, Contact contact, Direction fromDir) override;
 
 		virtual std::string name() override {
 			return strprintf("Coin[%d]", _id);

@@ -18,7 +18,7 @@ class agp::Mushroom : public Spawnable
 		Mushroom(Scene* scene, const PointF& pos, bool isGreen, int layer = 1);
 
 		// @override: +collision with Mario
-		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, Contact contact, Direction fromDir) override;
 
 
 		virtual std::string name() override {

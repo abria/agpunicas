@@ -27,7 +27,7 @@ class agp::Enemy : public DynamicObject
 		Enemy(Scene* scene, const RotatedRectF& rrect, Sprite* sprite, int layer = 0);
 
 		// extends logic collision (+hurt by sword)
-		virtual bool collision(CollidableObject* with, bool begin, const Vec2Df& normal) override;
+		virtual bool collision(CollidableObject* with, Contact contact, const Vec2Df& normal) override;
 
 		virtual std::string name() override { return strprintf("Enemy[%d]", _id); }
 };

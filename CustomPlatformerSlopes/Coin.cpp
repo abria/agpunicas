@@ -15,10 +15,10 @@ Coin::Coin(Scene* scene, const PointF& pos, int layer) :
 	_compenetrable = true;
 }
 
-bool Coin::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Coin::collision(CollidableObject* with, Contact contact, Direction fromDir)
 {
 	Mario* mario = dynamic_cast<Mario*>(with);
-	if (!mario)
+	if (!mario || contact != Contact::BEGIN || killed())
 		return false;
 
 	dynamic_cast<PlatformerGame*>(Game::instance())->hud()->addCoin();

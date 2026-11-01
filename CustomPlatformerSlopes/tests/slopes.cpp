@@ -60,7 +60,7 @@ void segmentValidation()
 class Body : public DynamicObject
 {
 public:
-	std::map<CollidableObject*, int> exits;
+	std::map<CollidableObject*, int> begins, stays, exits;
 	std::map<CollidableObject*, int> contacts;
 	Body(Scene* scene, RectF rect) : DynamicObject(scene, rect, nullptr)
 	{
@@ -73,10 +73,15 @@ public:
 	bool ccd() const { return _CCD; }
 	void gravity(float value) { _yGravityForce = value; }
 	void defaultForces(float maxSpeed = 6) { defaultPhysics(); _xVelMax = maxSpeed; }
-	bool collision(CollidableObject* with, bool begin, Direction) override
+	bool collision(CollidableObject* with, Contact contact, Direction) override
 	{
-		if (!begin) exits[with]++;
-		else contacts[with]++;
+		if (contact == Contact::END) exits[with]++;
+		else
+		{
+			contacts[with]++;
+			if (contact == Contact::BEGIN) begins[with]++;
+			else stays[with]++;
+		}
 		return true;
 	}
 };
@@ -107,7 +112,7 @@ void objectRemoval()
 	// A frozen platform must forget its passengers even without updating itself.
 	platform = new KinematicObject(&scene, {0,5,4,1}, nullptr);
 	scene.update(0);
-	platform->collision(body, true, Direction::UP);
+	platform->collision(body, Contact::BEGIN, Direction::UP);
 	platform->setFreezed(true);
 	body->kill();
 	scene.update(0);
@@ -147,6 +152,46 @@ void objectRemoval()
 	victim->kill();
 	pending.update(0);
 	require(destroyed == 2 && pending.objects().empty(), "removal: pending/cascaded kill was delayed");
+}
+
+// A slope contact must persist, end on jumping, and begin again on landing.
+void contactPhases(bool ccd)
+{
+	Scene scene({-20,-20,60,50},{16,16});
+	auto* slope = new Slope(&scene, slopeLine({0,-4,20,4}, true));
+	auto* body = new Body(&scene, {10,0,0.6f,1});
+	body->setPos({10,slope->surfaceY(body->sceneCollider())-1});
+	body->setCCD(ccd);
+	scene.update(0);
+	for (int i=0; i<20; ++i) body->update(0.01f);
+	require(body->begins[slope] == 1 && body->stays[slope] == 19 && body->exits[slope] == 0,
+		"contacts: slope must report one BEGIN followed by STAY");
+	body->velocity(0,-10);
+	body->update(0.01f);
+	require(body->exits[slope] == 1, "contacts: jumping must end slope support");
+	for (int i=0; i<60; ++i) body->update(0.01f);
+	require(body->begins[slope] == 2 && body->exits[slope] == 1 && !body->midair(),
+		"contacts: landing must begin a new slope contact");
+	body->setFreezed(true);
+	slope->kill();
+	scene.update(0);
+	require(body->exits[slope] == 2, "contacts: deleting frozen support must emit END once");
+}
+
+void uphillTrigger(bool ccd)
+{
+	Scene scene({-20,-20,60,50},{16,16});
+	new Slope(&scene, LineF(0,0,8,-4));
+	auto* body = new Body(&scene, {1,-2,1,1});
+	body->setCCD(ccd);
+	body->velocity(3);
+	body->move(Direction::RIGHT);
+	int count = 0;
+	new Trigger(&scene, {0,-3,8,0.997f},body,[&count](){++count;});
+	scene.update(0);
+	body->update(0.01f);
+	require(body->pos().x > 1 && !body->midair() && count == 1,
+		"contacts: a trigger above an uphill body must not become a ceiling");
 }
 
 void hill(bool reverse, bool ccd)
@@ -620,7 +665,7 @@ int main(int argc, char** argv)
 			openSlopeSides(ccd,reverse);
 		}
 		valley(false); valley(true);
-		for (bool ccd : {false,true}) { oneWayPlatforms(ccd); idleSliding(ccd); }
+		for (bool ccd : {false,true}) { oneWayPlatforms(ccd); idleSliding(ccd); contactPhases(ccd); uphillTrigger(ccd); }
 		uphillControl(); uphillRelease();
 		speedAndJump(); blockers(); platformAndTrigger(); objectRemoval();
 		std::cout << "Slope physics regression checks passed\n";

@@ -56,7 +56,7 @@ class agp::Block : public KinematicObject
 
 		// +interaction with Mario
 		// +start spawn phase
-		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, Contact contact, Direction fromDir) override;
 
 		virtual std::string name() override {
 			return strprintf("Block[%d]", _id);

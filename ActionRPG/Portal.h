@@ -31,7 +31,7 @@ class agp::Portal : public Trigger
 		void setDestination(Portal *dest);
 
 		// extends logic collision (+portal behavior)
-		virtual bool collision(CollidableObject* with, bool begin, const Vec2Df& normal) override;
+		virtual bool collision(CollidableObject* with, Contact contact, const Vec2Df& normal) override;
 		
 		virtual std::string name() override {
 			return strprintf("Portal[%d]", _id);

@@ -17,6 +17,7 @@ KinematicObject::KinematicObject(Scene* scene, const RectF& rect, Sprite* sprite
 	CollidableObject(scene, rect, sprite, layer)
 {
 	_compenetrable = false;
+	_detectsContacts = false; // passengers report contacts
 }
 
 void KinematicObject::forgetObject(Object* objectToRemove)
@@ -56,16 +57,19 @@ void KinematicObject::update(float dt)
 	_collidingItems.clear();
 }
 
-bool KinematicObject::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool KinematicObject::collision(CollidableObject* with, Contact contact, Direction fromDir)
 {
 	// disable CCD when 'with' is on (fromDir == UP) this kinetic object 
-	if(fromDir == Direction::UP || !begin)
-		with->setCCD(!begin);
+	if (fromDir == Direction::UP || contact == Contact::END)
+		with->setCCD(contact == Contact::END);
 
 	DynamicObject* dobj = with->to<DynamicObject*>();
 	if (dobj)
 	{
-		_collidingItems[dobj] = fromDir;
+		if (contact == Contact::END)
+			_collidingItems.erase(dobj);
+		else
+			_collidingItems[dobj] = fromDir;
 		return true;
 	}
 	else

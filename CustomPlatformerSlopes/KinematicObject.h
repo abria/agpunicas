@@ -35,7 +35,7 @@ class agp::KinematicObject : public CollidableObject
 		virtual void forgetObject(Object* objectToRemove) override;
 
 		// extends logic collision (+capturing colliding dynamic objects)
-		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) override;
+		virtual bool collision(CollidableObject* with, Contact contact, Direction fromDir) override;
 
 		// accepts only collisions with DynamicObject
 		virtual bool collidableWith(CollidableObject* obj) override;

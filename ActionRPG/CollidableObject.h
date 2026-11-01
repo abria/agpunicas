@@ -9,11 +9,12 @@
 
 #pragma once
 #include "MovableObject.h"
-#include <vector>
+#include <map>
 
 namespace agp
 {
 	class CollidableObject;
+	enum class Contact { BEGIN, STAY, END };
 }
 
 // CollidableObject class.
@@ -30,13 +31,13 @@ class agp::CollidableObject : public MovableObject
 		bool _compenetrable;
 		const Color _colliderColor = { 255, 255, 0, 255 };
 		const float _colliderPixelThickness = 3;	// thickness of collider lines (C), in screen pixels
-		std::vector<CollidableObject*> _collisions;
-		std::vector<Vec2Df> _collisionAxes;
-		std::vector<float> _collisionDepths;
-		std::vector<CollidableObject*> _collisionsPrev;
+		std::map<CollidableObject*, Vec2Df> _contacts, _contactsPrev;
+		const float _contactTolerance = 0.01f;
+		bool _detectsContacts = true; // false for static objects and triggers
 
 		// collision detection/resolution
-		virtual void detectCollisions();
+		void detectContacts();
+		void notifyContact(CollidableObject* with, Contact contact, const Vec2Df& normal);
 		virtual void resolveCollisions() = 0;  // see Dynamic and Static objects
 
 		// set collider to default (whole rect)
@@ -72,8 +73,10 @@ class agp::CollidableObject : public MovableObject
 
 		// defines logic collision, i.e. what to do when two objects collide
 		// from a game logic perspective (e.g. player dies if hit by enemy)
-		// returns true if logic collision is resolved, false otherwise
-		virtual bool collision(CollidableObject* with, bool begin, const Vec2Df& normal);
+		// BEGIN/END notify both objects once; STAY runs during each active object
+		// update and is forwarded to passive objects. END has a zero normal.
+		// Returns true if the interaction is handled.
+		virtual bool collision(CollidableObject* with, Contact contact, const Vec2Df& normal);
 
 		// euclidean distance between colliders
 		virtual float distance(CollidableObject* obj) const;

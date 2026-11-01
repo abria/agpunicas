@@ -9,6 +9,8 @@
 
 #include "DynamicObject.h"
 #include "StaticObject.h"
+#include "Scene.h"
+#include "collisionUtils.h"
 
 using namespace agp;
 
@@ -36,16 +38,25 @@ void DynamicObject::move(Direction xDir, Direction yDir)
 
 void DynamicObject::resolveCollisions()
 {
-	for (int i = 0; i < _collisions.size(); i++)
-	{
-		DynamicObject* dynObj = _collisions[i]->to<DynamicObject*>();
-		StaticObject* staticObj = _collisions[i]->to<StaticObject*>();
+	if (!_collidable || _killed)
+		return;
 
-		// Dynamic vs. Static: hard non-compenetration constraint
-		if (staticObj)
-			setPos(pos() - _collisionAxes[i] * _collisionDepths[i]);
-		// Dynamic vs. Dynamic: soft non-compenetration constraint
-		else if (dynObj)
-			setPos(pos() -_collisionAxes[i] * _collisionDepths[i] / 10.0f);
+	Vec2Df correction;
+	for (auto item : _scene->objects(sceneCollider().boundingRect()))
+	{
+		auto other = item->to<CollidableObject*>();
+		Vec2Df normal;
+		float depth;
+		if (other && other != this && !other->killed() && other->collidable()
+			&& collidableWith(other) && other->collidableWith(this)
+			&& checkCollisionSAT(sceneCollider().verticesVec(), other->sceneCollider().verticesVec(), normal, depth))
+		{
+			// Keep the original hard response to walls and soft response to other bodies.
+			if (other->to<StaticObject*>() && !other->compenetrable())
+				correction -= normal * depth;
+			else if (other->to<DynamicObject*>())
+				correction -= normal * depth / 10.0f;
+		}
 	}
+	setPos(pos() + correction);
 }

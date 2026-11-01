@@ -38,29 +38,29 @@ void Enemy::stomp(Mario* mario)
 }
 
 // implements behaviors common to all enemies
-bool Enemy::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Enemy::collision(CollidableObject* with, Contact contact, Direction fromDir)
 {
 	Mario* mario = dynamic_cast<Mario*>(with);
 	Enemy* enemy = dynamic_cast<Enemy*>(with);
 	StaticObject* staticObj = dynamic_cast<StaticObject*>(with);
 	KinematicObject* kinObj = dynamic_cast<KinematicObject*>(with);
 
-	if (begin && _smashable && mario && mario->invincible())
+	if (contact != Contact::END && _smashable && mario && mario->invincible())
 	{
 		smash();
 		return true;
 	}
-	else if (begin && mario && !mario->flashing() && fromDir != Direction::UP)
+	else if (contact != Contact::END && mario && !mario->flashing() && fromDir != Direction::UP)
 	{
 		mario->powerdown();
 		return true;
 	}
-	else if (begin && mario && !mario->flashing() && fromDir == Direction::UP)
+	else if (contact != Contact::END && mario && !mario->flashing() && fromDir == Direction::UP)
 	{
 		stomp(mario);
 		return true;
 	}
-	else if (begin && _xDir != Direction::NONE && (staticObj || enemy || kinObj) && (fromDir == Direction::RIGHT || fromDir == Direction::LEFT))
+	else if (contact != Contact::END && _xDir != Direction::NONE && (staticObj || enemy || kinObj) && fromDir == _xDir)
 	{
 		_xDir = inverse(_xDir);
 		return true;

@@ -14,11 +14,11 @@ using namespace agp;
 
 StaticObject::StaticObject(Scene* scene, const RotatedRectF& rrect, int layer) :
 	CollidableObject(scene, rrect, nullptr, layer)
-{	
-
+{
+	_detectsContacts = false;
 }
 
-bool StaticObject::collision(CollidableObject* with, bool begin, const Vec2Df& normal)
+bool StaticObject::collision(CollidableObject* with, Contact contact, const Vec2Df& normal)
 {
 	//_focused = true;
 	

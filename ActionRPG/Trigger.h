@@ -35,7 +35,7 @@ class agp::Trigger : public CollidableObject
 		virtual void update(float dt) override { RenderableObject::update(dt); }
 
 		// extends logic collision (+trigger behavior)
-		virtual bool collision(CollidableObject* with, bool begin, const Vec2Df& normal) override;
+		virtual bool collision(CollidableObject* with, Contact contact, const Vec2Df& normal) override;
 
 		// implements CollidableObject's abstract method (do nothing)
 		virtual void resolveCollisions() override { }

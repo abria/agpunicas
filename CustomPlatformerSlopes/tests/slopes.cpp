@@ -363,9 +363,16 @@ void platformAndTrigger()
 
 void oneWayPlatforms(bool ccd)
 {
+	// Replacing the slope hook must not disable the platform's start-position check.
+	class BodyWithoutSlopes : public Body
+	{
+	public:
+		using Body::Body;
+		void prepareMovement(float) override {}
+	};
 	Scene scene({-20,-20,60,50},{16,16});
 	auto* platform = new Platform(&scene, LineF(0,0,4,0));
-	auto* body = new Body(&scene, {1,-2,0.6f,1});
+	auto* body = new BodyWithoutSlopes(&scene, {1,-2,0.6f,1});
 	body->setCCD(ccd);
 	scene.update(0);
 	for (int i=0; i<80; ++i) body->update(0.01f);

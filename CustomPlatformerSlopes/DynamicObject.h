@@ -25,7 +25,6 @@ class agp::DynamicObject : public CollidableObject
 	protected:
 
 		Direction _facingDir;
-		PointF _movementStartPos; // also used by one-way platforms
 
 		Slope::Motion _slopeMotion; // per-body plan, recomputed at each movement step
 
@@ -40,9 +39,6 @@ class agp::DynamicObject : public CollidableObject
 
 		// defines acceptable collisions (+slope-to-platform transitions)
 		virtual bool collidableWith(CollidableObject* obj) override;
-
-		// collider before the move (also during CCD broad-phase prediction)
-		RectF movementStartCollider() const { return _collider + _movementStartPos; }
 
 		Direction facingDir() const { return _facingDir; }
 

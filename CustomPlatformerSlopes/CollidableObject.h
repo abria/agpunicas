@@ -23,6 +23,10 @@ namespace agp
 // - defines logic collision (see collision method)
 class agp::CollidableObject : public MovableObject
 {
+	private:
+
+		RectF _movementStartCollider; // scene coordinates, saved before movement hooks
+
 	protected:
 
 		// collisions
@@ -63,6 +67,7 @@ class agp::CollidableObject : public MovableObject
 		// getters/setters
 		const RectF& collider() const { return _collider; }
 		RectF sceneCollider() const;
+		const RectF& movementStartCollider() const { return _movementStartCollider; }
 		bool compenetrable() const { return _compenetrable; }
 		bool collidable() const { return _collidable; }
 		void setCCD(bool active);

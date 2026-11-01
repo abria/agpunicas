@@ -17,7 +17,6 @@ DynamicObject::DynamicObject(Scene* scene, const RectF& rect, Sprite* sprite, in
 	// Dynamic objects handle contacts with each other through game logic.
 	_compenetrable = true;
 	_facingDir = Direction::RIGHT;
-	_movementStartPos = pos();
 }
 
 // overrides MovableObject's move (+facing dir)
@@ -31,7 +30,6 @@ void DynamicObject::move(Direction xDir)
 
 void DynamicObject::prepareMovement(float dt)
 {
-	_movementStartPos = pos();
 	_slopeMotion = Slope::prepareMovement(*this, _vel, _xDir == Direction::NONE, _xVelMin, dt);
 }
 

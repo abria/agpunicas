@@ -96,6 +96,8 @@ non nulla e calcola il relativo ingombro.
 nemici e power-up possono attraversarla dai lati e dal basso, mentre vi
 atterrano dall'alto. Il filtro usa il collider all'inizio del passo fisico:
 un salto che porta sopra la piattaforma soltanto la testa non aggancia il corpo.
+`CollidableObject` salva questo collider prima di `prepareMovement()`: le
+sottoclassi possono ridefinire l'hook senza dover gestire il salvataggio.
 I test della forma rispondono solo verso l'alto, anche alle estremità.
 `Mario` eredita il comportamento comune senza un'eccezione dedicata.
 

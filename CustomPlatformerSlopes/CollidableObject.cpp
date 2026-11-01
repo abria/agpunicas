@@ -25,6 +25,7 @@ CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* spri
 	MovableObject(scene, rect, sprite, layer)
 {
 	defaultCollider();
+	_movementStartCollider = sceneCollider();
 
 	// default collision: non compenetration
 	_compenetrable = false;
@@ -102,6 +103,7 @@ void CollidableObject::update(float dt)
 	// undo the free move before constraining it (e.g. to a slope surface)
 	// prepareMovement() changes the velocity used by BOTH collision methods
 	setPos(pos() - _vel * dt);
+	_movementStartCollider = sceneCollider();
 	prepareMovement(dt);
 	if (_CCD)
 	{

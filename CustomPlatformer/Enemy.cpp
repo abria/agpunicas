@@ -13,11 +13,11 @@ Enemy::Enemy(Scene* scene, const RectF& rect, Sprite* sprite, int layer)
 	_facingDir = Direction::LEFT;
 }
 
-bool Enemy::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Enemy::collision(CollidableObject* with, Contact contact, Direction fromDir)
 {
 	Mario* mario = dynamic_cast<Mario*>(with);
 
-	if (mario)
+	if (mario && contact != Contact::END)
 	{
 		if (_smashable && mario->invincible())
 			smash();

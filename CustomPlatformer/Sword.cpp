@@ -68,10 +68,10 @@ bool Sword::collidableWith(CollidableObject* obj)
 	return dynamic_cast<Enemy*>(obj);
 }
 
-bool Sword::collision(CollidableObject* with, bool begin, Direction fromDir)
+bool Sword::collision(CollidableObject* with, Contact contact, Direction fromDir)
 {
 	Enemy* enemy = dynamic_cast<Enemy*>(with);
-	if (enemy)
+	if (enemy && contact == Contact::BEGIN)
 		enemy->smash();
 
 	return true;

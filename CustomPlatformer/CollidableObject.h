@@ -9,11 +9,12 @@
 
 #pragma once
 #include "MovableObject.h"
-#include <set>
+#include <map>
 
 namespace agp
 {
 	class CollidableObject;
+	enum class Contact { BEGIN, STAY, END };
 }
 
 // CollidableObject class.
@@ -31,22 +32,20 @@ class agp::CollidableObject : public MovableObject
 		const Color _colliderColor = { 255, 255, 0, 255 };
 		const float _colliderPixelThickness = 3;	// thickness of collider lines (C), in screen pixels
 		bool _CCD;
-		std::set<CollidableObject*> _collisionsCompenetrables;
-		std::vector<CollidableObject*> _collisions;
-		std::vector<Vec2Df> _collisionAxes;
-		std::vector<float> _collisionDepths;
-		std::vector<CollidableObject*> _collisionsPrev;
+		std::map<CollidableObject*, Direction> _contacts, _contactsPrev;
+		const float _contactTolerance = 0.01f; // touching counts as contact, in scene units
+		bool _detectsContacts = true; // false when contacts are reported by touching objects
 		bool _fallingPrev;
 
 		// CCD collision detection/resolution
-		virtual void detectResolveCollisionsCCD(float dt);
+		virtual void resolveCollisionsCCD(float dt);
 
 		// AABB intersection-based collision detection and resolution
-		virtual void detectCollisionsAABB();
 		virtual void resolveCollisionsAABB();
 
-		// decollissions
-		virtual void detectDecollisions();
+		// compare current contacts with the previous update
+		void detectContacts();
+		void notifyContact(CollidableObject* with, Contact contact, Direction fromDir);
 
 		// set collider to default (whole rect)
 		void defaultCollider();
@@ -80,8 +79,12 @@ class agp::CollidableObject : public MovableObject
 
 		// defines logic collision, i.e. what to do when two objects collide
 		// from a game logic perspective (e.g. player dies if hit by enemy)
-		// returns true if logic collision is resolved, false otherwise
-		virtual bool collision(CollidableObject* with, bool begin, Direction fromDir) { return true; }
+		// BEGIN once on entry, STAY while touching, END once on exit.
+		// A trigger crossed within one CCD step also counts (END at the next check).
+		// BEGIN/END notify both objects; STAY runs on each active object
+		// during its own update, and is forwarded to passive objects.
+		// fromDir is the side touched (NONE for END); returns whether handled.
+		virtual bool collision(CollidableObject* with, Contact contact, Direction fromDir) { return true; }
 
 		// euclidean distance between colliders
 		virtual float distance(CollidableObject* obj) const;

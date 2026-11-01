@@ -17,8 +17,8 @@ namespace agp
 
 // Slope class.
 // - defines a static inclined segment, drawn as a triangle (positive width and height)
-// - provides surface height and slope-dependent horizontal speed
-// - leaves segment collision resolution to DynamicObject
+// - plans movement along slopes and checks support after ordinary collisions
+// - keeps movement state in each body, never in the shared slope
 class agp::Slope : public StaticObject
 {
 	protected:
@@ -27,7 +27,24 @@ class agp::Slope : public StaticObject
 
 	public:
 
+		// A body's plan for one step; ordinary collisions run between prepare and finish.
+		struct Motion
+		{
+			Slope* support = nullptr;
+			float xFactor = 1;
+			bool sliding = false;
+			float velocityY = 0, bottom = 0; // planned vertical speed and final foot height
+
+			// Adjust scene collider and velocity; return confirmed support, if any.
+			Slope* finishMovement(RectF& body, Vec2Df& velocity, const RectF& start, bool ceiling) const;
+		};
+
 		Slope(Scene* scene, const LineF& line, int layer = 1);
+
+		// Query accepted slopes and constrain this step's velocity, without moving the body.
+		static Motion prepareMovement(CollidableObject& body, Vec2Df& velocity,
+			bool released, float minSpeed, float dt);
+		bool joinsTop(CollidableObject* object) const; // flat continuation at the high endpoint
 
 		// slope queries (scene coordinates, y points downwards)
 		bool overlapsX(const RectF& body) const;
@@ -36,7 +53,7 @@ class agp::Slope : public StaticObject
 		float slideVelocity() const; // horizontal component of passive downhill motion
 
 		// disable generic shape tests: the bounding rect is not a solid block
-		// DynamicObject resolves contact with the inclined segment instead
+		// prepareMovement/finishMovement resolve contact with the segment instead
 		virtual bool sweep(const RectF&, const Vec2Df&, Vec2Df&, Vec2Df&, float&) const override { return false; }
 		virtual bool overlap(const RectF&, Direction&, float&) const override { return false; }
 

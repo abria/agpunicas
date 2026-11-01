@@ -10,8 +10,8 @@ quelli della relazione; i font usano fallback di sistema. Nessuno script o
 collegamento a risorse esterne è necessario per visualizzarli.
 
 Le sigle P, R, U nelle figure rimandano ai blocchi del prototipo didattico del
-Drive. La guida nella wiki spiega la corrispondenza con `prepareMovement`,
-`resolveSlopeCollisions` e `finishMovement` in CustomPlatformerSlopes.
+Drive. La guida nella wiki spiega la corrispondenza con `Slope::prepareMovement`
+e `Slope::Motion::finishMovement`, coordinati da `DynamicObject` in CustomPlatformerSlopes.
 In particolare `restore-y.svg` mostra la simulazione didattica con g = 24,
 dt = 0.01 e accelerazione orizzontale 12: non è una misura del prototipo SMB3,
 che usa altri parametri. `speed-factor.svg` riporta gli esempi del livello Drive.

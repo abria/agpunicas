@@ -274,6 +274,35 @@ void speedAndJump()
 	require(body->pos() == oldPos, "zero step moved body");
 }
 
+// Bodies sharing a slope retain independent movement and contact state.
+void sharedSlope(bool ccd)
+{
+	Scene scene({-20,-20,60,50},{16,16});
+	auto* slope = new Slope(&scene, LineF(0,0,20,-10));
+	auto* walking = new Body(&scene, {4,0,0.6f,1});
+	auto* sliding = new Body(&scene, {12,0,0.6f,1});
+	for (auto* body : {walking, sliding})
+	{
+		body->setPos({body->pos().x, slope->surfaceY(body->sceneCollider())-1});
+		body->setCCD(ccd);
+	}
+	walking->velocity(3);
+	walking->move(Direction::RIGHT);
+	scene.update(0);
+	for (int i=0; i<100; ++i)
+	{
+		(i % 2 ? walking : sliding)->update(0.01f);
+		(i % 2 ? sliding : walking)->update(0.01f);
+	}
+	require(std::abs(walking->pos().x-6) < 0.001f && walking->vel().x == 3,
+		"shared slope: uphill movement changed");
+	require(std::abs(sliding->pos().x-(12+slope->slideVelocity())) < 0.001f && sliding->vel().x == 0,
+		"shared slope: passive sliding changed");
+	for (auto* body : {walking, sliding})
+		require(!body->midair() && body->begins[slope] == 1 && body->stays[slope] == 99,
+			"shared slope: lost independent support or contact lifecycle");
+}
+
 void blockers()
 {
 	Scene scene({-20,-20,60,50},{16,16});
@@ -665,7 +694,7 @@ int main(int argc, char** argv)
 			openSlopeSides(ccd,reverse);
 		}
 		valley(false); valley(true);
-		for (bool ccd : {false,true}) { oneWayPlatforms(ccd); idleSliding(ccd); contactPhases(ccd); uphillTrigger(ccd); }
+		for (bool ccd : {false,true}) { oneWayPlatforms(ccd); idleSliding(ccd); contactPhases(ccd); uphillTrigger(ccd); sharedSlope(ccd); }
 		uphillControl(); uphillRelease();
 		speedAndJump(); blockers(); platformAndTrigger(); objectRemoval();
 		std::cout << "Slope physics regression checks passed\n";

@@ -8,12 +8,11 @@
 // ----------------------------------------------------------------
 
 #pragma once
-#include "CollidableObject.h"
+#include "Slope.h"
 
 namespace agp
 {
 	class DynamicObject;
-	class Slope;
 }
 
 // DynamicObject class.
@@ -28,16 +27,10 @@ class agp::DynamicObject : public CollidableObject
 		Direction _facingDir;
 		PointF _movementStartPos; // also used by one-way platforms
 
-		// slope attributes (recomputed at each movement step)
-		Slope* _slope;            // contact selected before the move, cleared after it
-		float _x_vel_factor;      // horizontal movement factor (1 = no change)
-		bool _slope_sliding;      // passive sliding, removed from stored velocity
-		float _slope_vel_y;       // planned vertical velocity before other collisions
-		float _slope_bottom;      // planned bottom coordinate before other collisions
+		Slope::Motion _slopeMotion; // per-body plan, recomputed at each movement step
 
-		// collision detection/resolution (shared by CCD and discrete movement)
+		// Plan the slope motion, then apply its result after ordinary collisions.
 		virtual void prepareMovement(float dt) override;
-		void resolveSlopeCollisions(float dt);
 		virtual void finishMovement(float dt) override;
 
 	public:

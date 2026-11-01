@@ -56,26 +56,28 @@ oscillazioni.
 costruttore. Il JSON non contiene colori.
 Base e lato verticale non esistono per le collisioni: gli oggetti li attraversano,
 sia in CCD sia nel modo discreto. La vista dei collider mostra solo il segmento.
-`DynamicObject`
-adatta lo spostamento prima della collisione e registra il contatto dopo la
-risoluzione, anche nel modo discreto usato sulle piattaforme cinematiche.
+`DynamicObject` chiede a `Slope` il movimento sulla superficie e registra
+il contatto dopo la risoluzione delle altre collisioni, anche nel modo
+discreto usato sulle piattaforme cinematiche.
 Mario, nemici e power-up ereditano questo comportamento. I salti staccano
 l'oggetto dalla pendenza; pareti e soffitti restano solidi.
 
 ### Ordine del passo e stato della rampa
 
-`prepareMovement()` azzera lo stato temporaneo e delega a
-`resolveSlopeCollisions()`: supporto iniziale, fattore orizzontale, previsione
-sulla rampa corrente, scelta della superficie all'arrivo e conversione del
-dislivello in una velocità verticale temporanea. `CollidableObject` risolve poi
-le altre collisioni, con CCD oppure in modo discreto.
+Il passo si legge in tre fasi:
 
-`finishMovement()` rimuove il fattore orizzontale dalla velocità risolta,
-verifica che rimbalzi, soffitti o piattaforme non abbiano invalidato il supporto,
-e riallinea i piedi alla x realmente raggiunta. Su ogni contatto confermato
-azzera `_vel.y`: la componente usata per seguire la superficie non deve diventare
-un salto o una caduta nel passo successivo. Infine registra il supporto prima
-della rilevazione dei contatti terminati.
+1. `Slope::prepareMovement()` cerca l'appoggio iniziale e quello di arrivo,
+   adatta la velocità e restituisce un piano `Slope::Motion`.
+2. `CollidableObject` risolve le collisioni con muri, soffitti e piattaforme,
+   con CCD oppure in modo discreto.
+3. `Motion::finishMovement()` verifica l'appoggio, rimuove il fattore orizzontale
+   e riallinea i piedi alla x raggiunta. `DynamicObject` applica la posizione
+   con `setPos()` e registra il supporto prima delle notifiche BEGIN/STAY/END.
+
+Ogni corpo conserva il proprio `_slopeMotion`: la rampa è condivisa, il piano
+di movimento no. `Slope` calcola le correzioni senza accedere agli attributi
+protetti del corpo. Su ogni appoggio confermato azzera la velocità verticale:
+seguire la superficie non deve diventare un salto o una caduta al passo seguente.
 
 La [guida illustrata nella wiki](https://github.com/abria/agpunicas/wiki/CustomPlatformerSlopes-Movimento-e-Collisioni)
 spiega la motivazione di ogni passaggio, con esempi, formule e limiti del modello.
@@ -127,7 +129,7 @@ cmake --build ../build-CustomPlatformerSlopes
 I test opzionali verificano salite e discese in entrambi i versi, raccordi,
 valli, velocità, salti, atterraggi, soffitti, pareti, trigger e piattaforme.
 Verificano inoltre passaggi laterali e dal basso, salti parziali, scivolamento
-a riposo con limite di velocità e ripartenza in salita su pendenze diverse.
+a riposo, ripartenza in salita e due corpi con movimenti indipendenti sulla stessa rampa.
 Una seconda verifica carica il livello e gli asset, muove il vero Mario e
 salva/ricarica le geometrie tramite la serializzazione dell'editor.
 

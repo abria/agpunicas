@@ -9,6 +9,7 @@
 
 #include "Slope.h"
 #include "GameScene.h"
+#include "Platform.h"
 #include "sdlUtils.h"
 
 using namespace agp;
@@ -75,6 +76,127 @@ float Slope::slideVelocity() const
 	float gradient = rect().size.y / rect().size.x;
 	float speed = 5 * std::min(gradient, 2.0f) / std::sqrt(1.0f + gradient * gradient);
 	return _risesRight ? -speed : speed;
+}
+
+Slope::Motion Slope::prepareMovement(CollidableObject& body, Vec2Df& velocity,
+	bool released, float minSpeed, float dt)
+{
+	Motion motion;
+	if (!body.collidable() || velocity.y < 0 || dt <= 0)
+		return motion; // jumping must detach from the surface
+
+	const float contactTolerance = 0.01f; // scene units
+	RectF curRect = body.sceneCollider();
+	std::vector<Slope*> slopes;
+	Slope* curSlope = nullptr;
+	for (auto object : body.scene()->objects())
+	{
+		Slope* slope = object->to<Slope*>();
+		if (!slope || slope->killed() || !slope->collidable() ||
+			!slope->collidableWith(&body) || !body.collidableWith(slope))
+			continue;
+		slopes.push_back(slope);
+		if (!curSlope && slope->overlapsX(curRect) &&
+			std::abs(curRect.bottom() - slope->surfaceY(curRect)) <= contactTolerance)
+			curSlope = slope;
+	}
+
+	if (curSlope)
+	{
+		// On release, brake uphill inertia before allowing passive sliding.
+		if (released && curSlope->speedFactor(velocity.x) < 1)
+		{
+			float gradient = curSlope->rect().size.y / curSlope->rect().size.x;
+			float speed = std::max(0.0f, std::abs(velocity.x) - 60 * (1 + gradient) * dt);
+			velocity.x = speed < minSpeed ? 0 : std::copysign(speed, velocity.x);
+		}
+		motion.xFactor = curSlope->speedFactor(velocity.x);
+	}
+	velocity.x *= motion.xFactor;
+	motion.sliding = curSlope && released && velocity.x == 0;
+	if (motion.sliding)
+		velocity.x = curSlope->slideVelocity();
+
+	RectF nextRect = curRect + velocity * dt;
+	// Follow the descent before testing the opposite slope of a valley.
+	if (curSlope)
+		nextRect.pos.y += curSlope->surfaceY(nextRect) - nextRect.bottom();
+
+	float contactY = INFINITY;
+	for (auto slope : slopes)
+	{
+		if (!slope->overlapsX(nextRect))
+			continue;
+		float curSurfaceY = slope->surfaceY(curRect);
+		float nextSurfaceY = slope->surfaceY(nextRect);
+		bool onSurface = std::abs(curRect.bottom() - curSurfaceY) <= contactTolerance;
+		// Accept support from above, keeping the highest reachable surface.
+		if (curRect.bottom() <= curSurfaceY + contactTolerance &&
+			(nextRect.bottom() >= nextSurfaceY || onSurface) && nextSurfaceY < contactY)
+		{
+			contactY = nextSurfaceY;
+			motion.support = slope;
+		}
+	}
+	// Leave at the endpoint height; finish confirms contact only with x overlap.
+	if (!motion.support && curSlope)
+	{
+		motion.support = curSlope;
+		contactY = curSlope->surfaceY(nextRect);
+	}
+	// Passive sliding stops at a valley bottom instead of climbing the other side.
+	if (motion.sliding && motion.support && contactY < curRect.bottom())
+	{
+		velocity.x = 0;
+		motion.support = curSlope;
+		contactY = curRect.bottom();
+	}
+	if (motion.support)
+		velocity.y = (contactY - curRect.bottom()) / dt;
+	motion.velocityY = velocity.y;
+	motion.bottom = curRect.bottom() + velocity.y * dt;
+	return motion;
+}
+
+Slope* Slope::Motion::finishMovement(RectF& body, Vec2Df& velocity, const RectF& start, bool ceiling) const
+{
+	// Remove temporary slope speed, preserving any reduction caused by a wall.
+	velocity.x = sliding ? 0 : velocity.x / xFactor;
+	const float velTolerance = 0.01f;     // scene units/s, for CCD corrections
+	const float contactTolerance = 0.01f; // scene units, for discrete corrections
+	const float climbTolerance = 0.0001f;
+	if (!support || support->killed() || velocity.y < velocityY - velTolerance)
+		return nullptr;
+	if (velocityY < 0 && (ceiling || body.bottom() > bottom + climbTolerance))
+	{
+		// A blocked climb must cancel BOTH axes, or the body enters the ramp.
+		body = start;
+		velocity = {0, 0};
+		return nullptr;
+	}
+	if (velocityY > 0 && body.bottom() < bottom - contactTolerance)
+		return nullptr; // a flat or moving platform intercepted the descent
+	if (!support->overlapsX(body))
+		return nullptr;
+
+	// A wall may have shortened the move: align at the actual final x.
+	body.pos.y += support->surfaceY(body) - body.bottom();
+	velocity.y = 0; // grounded, including uphill: the next jump must remain possible
+	return support;
+}
+
+bool Slope::joinsTop(CollidableObject* object) const
+{
+	if (!object->to<StaticObject*>() || object->compenetrable() ||
+		object->to<Platform*>() || object->to<Slope*>())
+		return false;
+	RectF slopeRect = sceneCollider(), block = object->sceneCollider();
+	const float tolerance = 0.001f;
+	bool sameTop = std::abs(block.top() - slopeRect.top()) < tolerance;
+	bool atHighEnd = std::abs(surfaceY(block) - slopeRect.top()) < tolerance;
+	bool adjacent = std::abs(block.left() - slopeRect.right()) < tolerance ||
+		std::abs(block.right() - slopeRect.left()) < tolerance;
+	return sameTop && atHighEnd && adjacent; // the shared side is an internal seam
 }
 
 void Slope::draw(SDL_Renderer* renderer, Transform camera)

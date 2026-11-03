@@ -29,6 +29,8 @@ HammerBrother::HammerBrother(Scene* scene, const PointF& pos)
 	_xDir = Direction::LEFT;
 	_halfRangeX = 0.7f;
 
+	// Previous alternative: nested schedules.
+	/*
 	// scripting (hammer spawn loop)
 	schedule("spawnHammer", 0.7f + (rand()%100)/1000.0f, [this]
 		{
@@ -38,6 +40,24 @@ HammerBrother::HammerBrother(Scene* scene, const PointF& pos)
 				_throwing = true;
 				schedule("throwing_off", 0.5f, [this]() {_throwing = false; });
 			}
+		}, -1);
+	*/
+
+	// scripting (hammer spawn loop): the two throw steps form a sequence.
+	schedule("spawnHammer", 0.7f + (rand()%100)/1000.0f, [this]
+		{
+			if (rand() % 5 > 0 && !_dying)
+				sequence("throwHammer", {
+					{0.0f, [this]()
+						{
+							// The first step runs next update; death may have occurred meanwhile.
+							if (_dying)
+								return;
+							new Hammer(_scene, rect().tl(), this);
+							_throwing = true;
+						}},
+					{0.5f, [this]() { _throwing = false; }}
+				});
 		}, -1);
 
 	// scripting (jump loop)

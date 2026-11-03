@@ -24,6 +24,7 @@ class agp::Scheduler
 		std::function<void()> _task;
 		float _delaySeconds;
 		float _reverseTimer;
+		bool _active;
 		int _loop;		// -1 = infinite loop
 
 	public:
@@ -34,6 +35,7 @@ class agp::Scheduler
 			_reverseTimer = 0;
 			_delaySeconds = 0;
 			_loop = 0;
+			_active = false;
 		}
 
 		Scheduler(float delaySeconds, std::function<void()> task, int loop = 0)
@@ -42,6 +44,7 @@ class agp::Scheduler
 			_delaySeconds = delaySeconds;
 			_reverseTimer = delaySeconds;
 			_loop = loop;
+			_active = delaySeconds >= 0;
 		}
 
 		void update(float dt)
@@ -51,15 +54,23 @@ class agp::Scheduler
 				_reverseTimer -= dt;
 				if (_reverseTimer <= 0)
 				{
-					_task();
 					if (_loop != 0)
 					{
 						_reverseTimer = _delaySeconds;
-						_loop--;
+						if (_loop > 0)
+							_loop--;
 					}
+					else
+						_active = false;
+					// A callback may replace this scheduler. Finish state changes first.
+					std::function<void()> task;
+					task.swap(_task);
+					task();
+					if (!_task)
+						_task.swap(task);
 				}
 			}
 		}
 
-		bool on() { return _reverseTimer > 0; }
+		bool on() const { return _active; }
 };

@@ -9,6 +9,9 @@
 
 #include "Object.h"
 #include "Scene.h"
+#include <cmath>
+#include <limits>
+#include <stdexcept>
 
 using namespace agp;
 
@@ -50,29 +53,70 @@ void Object::update(float dt)
 {
 	_timeElapsed += dt;
 
-	auto iter = _schedulers.begin();
-	for (; iter != _schedulers.end(); )
+	// Execute a copy: callbacks may cancel or replace their own scheduler.
+	// New tasks start next update; cancelled/replaced tasks in this snapshot are skipped.
+	auto pending = _schedulers;
+	for (auto& entry : pending)
 	{
-		if (iter->second.on())
+		if (_killed)
+			break;
+		auto current = _schedulers.find(entry.first);
+		if (current == _schedulers.end() || current->second.revision != entry.second.revision)
+			continue;
+		entry.second.scheduler.update(dt);
+		current = _schedulers.find(entry.first);
+		if (current != _schedulers.end() && current->second.revision == entry.second.revision)
 		{
-			iter->second.update(dt);
-			++iter;
+			if (entry.second.scheduler.on())
+				current->second.scheduler = entry.second.scheduler;
+			else
+				_schedulers.erase(current);
 		}
-		else
-			iter = _schedulers.erase(iter);
 	}
 }
 
 void Object::schedule(const std::string& id, float delaySeconds, std::function<void()> action, int loop, bool overwrite)
 {
 	if (overwrite || _schedulers.find(id) == _schedulers.end())
-		_schedulers[id] = Scheduler(delaySeconds, action, loop);
+		_schedulers[id] = { Scheduler(delaySeconds, action, loop), ++_schedulerRevision };
 }
 
 void Object::unschedule(const std::string& id)
 {
 	if (_schedulers.find(id) != _schedulers.end())
 		_schedulers.erase(id);
+}
+
+void Object::sequence(const std::string& id,
+	const std::vector<std::pair<float, std::function<void()>>>& steps)
+{
+	// Validate before replacing an existing sequence.
+	float delay = 0;
+	for (const auto& step : steps)
+	{
+		delay += step.first;
+		if (!std::isfinite(step.first) || step.first < 0 || !std::isfinite(delay) || !step.second)
+			throw std::invalid_argument("sequence requires finite non-negative delays and callable actions");
+	}
+
+	unscheduleSequence(id);
+	delay = 0;
+	for (size_t i = 0; i < steps.size(); ++i)
+	{
+		delay += steps[i].first;
+		// Fixed-width indices preserve step order even when several timers expire together.
+		std::string index = std::to_string(i);
+		index.insert(0, std::numeric_limits<size_t>::digits10 + 1 - index.size(), '0');
+		schedule(id + "/" + index, delay, steps[i].second);
+	}
+}
+
+void Object::unscheduleSequence(const std::string& id)
+{
+	const std::string prefix = id + "/";
+	auto it = _schedulers.lower_bound(prefix);
+	while (it != _schedulers.end() && it->first.compare(0, prefix.size(), prefix) == 0)
+		it = _schedulers.erase(it);
 }
 
 void Object::kill()

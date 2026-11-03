@@ -9,6 +9,8 @@
 
 #pragma once
 #include <map>
+#include <vector>
+#include <utility>
 #include "Scheduler.h"
 #include "stringUtils.h"
 #include "geometryUtils.h"
@@ -41,7 +43,13 @@ class agp::Object
 		bool _freezed;	// if false, does not update
 		bool _killed;
 		float _timeElapsed;		// internal usage to keep track of elapsed time
-		std::map<std::string, Scheduler> _schedulers;
+		struct ScheduledAction
+		{
+			Scheduler scheduler;
+			size_t revision;
+		};
+		std::map<std::string, ScheduledAction> _schedulers;
+		size_t _schedulerRevision = 0;
 
 		friend class Scene;
 
@@ -77,6 +85,12 @@ class agp::Object
 		// scheduling
 		virtual void schedule(const std::string& id, float delaySeconds, std::function<void()> action, int loop = 0, bool overwrite = true);
 		virtual void unschedule(const std::string& id);
+
+		// Each delay is relative to the preceding step; zero runs on the next update.
+		// Reusing id replaces the entire sequence. Its id + "/" prefix is reserved.
+		virtual void sequence(const std::string& id,
+			const std::vector<std::pair<float, std::function<void()>>>& steps);
+		virtual void unscheduleSequence(const std::string& id);
 
 		// type conversion
 		template <class T>

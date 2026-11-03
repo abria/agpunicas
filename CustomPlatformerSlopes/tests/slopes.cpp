@@ -12,6 +12,8 @@
 #include "PlatformerGameScene.h"
 #include "SpriteFactory.h"
 #include "Mario.h"
+#include "Mushroom.h"
+#include "Block.h"
 #include "Game.h"
 #include "Window.h"
 #include "EditableObject.h"
@@ -566,6 +568,47 @@ void shutdownIntegration()
 	std::cout << "Normal and failed startup cleanup checks passed\n";
 }
 
+void mushroomSpawn(bool ccd, bool green)
+{
+	GameScene scene({-20,-20,60,50}, {16,16}, 0.01f, {0,0,0,255});
+	auto* mario = new Mario(&scene, {0,1.05f});
+	scene.setPlayer(mario);
+	new Block(&scene, {0,0}, Block::Type::QUESTION, green ? "life" : "powerup");
+	scene.Scene::update(0);
+	mario->setCCD(ccd);
+	mario->velAdd({0,-5});
+	mario->update(0.02f); // hit the block from below
+	scene.Scene::update(0);
+	Mushroom* mushroom = nullptr;
+	for (auto* object : scene.objects())
+		if (auto* item = object->to<Mushroom*>()) mushroom = item;
+	require(mushroom != nullptr, "mushroom: hitting the block did not spawn an item");
+	mushroom->setCCD(ccd);
+	mushroom->update(0.01f);
+	require(!mushroom->killed(), "mushroom: collected while still hidden inside the block");
+
+	// Mario can overlap the item during emergence without collecting it.
+	for (int i = 0; i < 120; ++i)
+	{
+		mario->setPos(mushroom->pos());
+		mario->update(0.001f);
+		mushroom->update(0.01f);
+		require(!mushroom->killed(), "mushroom: collected before emergence completed");
+	}
+	mario->setPos({5,5});
+	for (int i = 0; i < 25; ++i) mushroom->update(0.01f);
+	require(mushroom->sceneCollider().bottom() <= 0.02f && mushroom->vel().x < 0,
+		"mushroom: did not emerge above the block and start moving");
+	mario->setPos(mushroom->pos());
+	mario->update(0.001f);
+	require(mushroom->killed(), "mushroom: cannot be collected after emergence");
+	if (!green)
+	{
+		require(mario->rect().size.y == 2, "mushroom: red item did not start Mario's powerup");
+		mario->powerup(false); // finish transformation and unfreeze the game
+	}
+}
+
 void levelIntegration()
 {
 	auto* game = new TestGame();
@@ -585,6 +628,9 @@ void levelIntegration()
 	require(ramps == 6, "level did not instantiate six slopes");
 	require(world->backgroundImages().size() == 1, "missing editor background image");
 	Audio::instance()->playMusic("overworld");
+
+	for (bool ccd : {false, true})
+		for (bool green : {false, true}) mushroomSpawn(ccd, green);
 
 	// Exercise the actual Mario collider on the first hill.
 	auto* mario = world->player()->to<Mario*>();

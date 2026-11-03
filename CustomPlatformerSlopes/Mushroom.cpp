@@ -22,6 +22,9 @@ Mushroom::Mushroom(Scene* scene, const PointF& pos, bool isGreen, int layer) :
 
 	_yGravityForce = 0;
 	_visible = false;
+	// Ignore contacts and block bumps until emergence is complete.
+	_collidable = false;
+	_bounceable = false;
 
 	Audio::instance()->playSound("Item Box");
 
@@ -30,6 +33,8 @@ Mushroom::Mushroom(Scene* scene, const PointF& pos, bool isGreen, int layer) :
 		_visible = true;
 
 		schedule("startmove", 1.01f, [this]() {
+			_collidable = true;
+			_bounceable = true;
 			defaultPhysics();
 			_xVelMax = 3;
 			_xMoveForce = 1000;

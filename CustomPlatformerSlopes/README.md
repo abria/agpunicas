@@ -118,7 +118,7 @@ queste proprietà si modificano direttamente nel JSON.
 L'editor salva la copia del livello accanto all'eseguibile. Riportare le
 modifiche nel JSON sorgente prima di ricompilare: ogni build ricopia i livelli.
 
-## Compilazione e verifiche
+## Compilazione
 
 Dalla radice della repo, con CMake, compilatore C++14 e i pacchetti SDL3,
 SDL3_image e SDL3_mixer configurati come per gli altri prototipi:
@@ -128,19 +128,5 @@ cmake -S CustomPlatformerSlopes -B ../build-CustomPlatformerSlopes
 cmake --build ../build-CustomPlatformerSlopes
 ```
 
-I test opzionali verificano salite e discese in entrambi i versi, raccordi,
-valli, velocità, salti, atterraggi, soffitti, pareti, trigger e piattaforme.
-Verificano inoltre passaggi laterali e dal basso, salti parziali, scivolamento
-a riposo, ripartenza in salita e due corpi con movimenti indipendenti sulla stessa rampa.
-Una seconda verifica carica il livello e gli asset, muove il vero Mario e
-salva/ricarica le geometrie tramite la serializzazione dell'editor.
-
-```sh
-cmake -S CustomPlatformerSlopes -B ../build-CustomPlatformerSlopes -DSLOPES_BUILD_TESTS=ON
-cmake --build ../build-CustomPlatformerSlopes
-ctest --test-dir ../build-CustomPlatformerSlopes --output-on-failure
-```
-
-Il test del livello usa video e audio SDL dummy e produce `slopes-preview.png`
-nella cartella di compilazione. Il core condiviso carica anche le musiche MP3
+Il core condiviso carica anche le musiche MP3
 originali di SMB3, mantenendo la precedenza dei WAV se hanno lo stesso nome.

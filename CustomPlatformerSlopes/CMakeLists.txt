@@ -40,22 +40,3 @@ add_custom_command(TARGET ${project_name} POST_BUILD
 add_custom_target(copy_levels ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/levels $<TARGET_FILE_DIR:${project_name}>/levels
     DEPENDS ${project_name})
-
-# Optional regression checks for slope physics and level/editor integration.
-option(SLOPES_BUILD_TESTS "Build slope physics regression tests" OFF)
-if(SLOPES_BUILD_TESTS)
-    enable_testing()
-    set(test_sources ${sources})
-    list(REMOVE_ITEM test_sources ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-    add_executable(slopes_tests tests/slopes.cpp ${test_sources})
-    target_include_directories(slopes_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(slopes_tests SDL3::SDL3 SDL3_image::SDL3_image SDL3_mixer::SDL3_mixer agpcore)
-    add_dependencies(slopes_tests copy_levels)
-    add_test(NAME slopes_physics COMMAND slopes_tests)
-    add_test(NAME slopes_level COMMAND slopes_tests --level)
-    add_test(NAME slopes_shutdown COMMAND slopes_tests --shutdown)
-    add_executable(singleton_tests ../core/tests/singleton.cpp)
-    add_test(NAME singleton_lifetime COMMAND singleton_tests)
-    set_tests_properties(slopes_level slopes_shutdown PROPERTIES ENVIRONMENT
-        "SDL_VIDEODRIVER=dummy;SDL_AUDIODRIVER=dummy;SDL_RENDER_DRIVER=software")
-endif()

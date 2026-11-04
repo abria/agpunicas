@@ -41,28 +41,29 @@ Mario::Mario(Scene* scene, const PointF& pos)
 
 	_xLastNonZeroVel = 0;
 
-	_sprites[0]["stand"] = SpriteFactory::instance()->get("mario_stand");
-	_sprites[0]["walk"] = SpriteFactory::instance()->get("mario_walk");
-	_sprites[0]["run"] = SpriteFactory::instance()->get("mario_run");
-	_sprites[0]["pspeed"] = SpriteFactory::instance()->get("mario_pspeed");
-	_sprites[0]["skid"] = SpriteFactory::instance()->get("mario_skid");
-	_sprites[0]["jump"] = SpriteFactory::instance()->get("mario_jump");
-	_sprites[0]["jumpP"] = SpriteFactory::instance()->get("mario_jumpP");
-	_sprites[0]["fall"] = SpriteFactory::instance()->get("mario_fall");
-	_sprites[0]["die"] = SpriteFactory::instance()->get("mario_die");
-	_sprites[0]["small2big"] = SpriteFactory::instance()->get("mario_small2big");
+	SpriteFactory* sf = SpriteFactory::instance();
+	_sprites[0]["stand"] = sf->get("mario_stand");
+	_sprites[0]["walk"] = sf->get("mario_walk");
+	_sprites[0]["run"] = sf->get("mario_run");
+	_sprites[0]["pspeed"] = sf->get("mario_pspeed");
+	_sprites[0]["skid"] = sf->get("mario_skid");
+	_sprites[0]["jump"] = sf->get("mario_jump");
+	_sprites[0]["jumpP"] = sf->get("mario_jumpP");
+	_sprites[0]["fall"] = sf->get("mario_fall");
+	_sprites[0]["die"] = sf->get("mario_die");
+	_sprites[0]["small2big"] = sf->get("mario_small2big");
 
-	_sprites[1]["stand"] = SpriteFactory::instance()->get("supermario_stand");
-	_sprites[1]["walk"] = SpriteFactory::instance()->get("supermario_walk");
-	_sprites[1]["crouch"] = SpriteFactory::instance()->get("supermario_crouch");
-	_sprites[1]["run"] = SpriteFactory::instance()->get("supermario_run");
-	_sprites[1]["pspeed"] = SpriteFactory::instance()->get("supermario_pspeed");
-	_sprites[1]["skid"] = SpriteFactory::instance()->get("supermario_skid");
-	_sprites[1]["jump"] = SpriteFactory::instance()->get("supermario_jump");
-	_sprites[1]["jumpP"] = SpriteFactory::instance()->get("supermario_jumpP");
-	_sprites[1]["fall"] = SpriteFactory::instance()->get("supermario_fall");
+	_sprites[1]["stand"] = sf->get("supermario_stand");
+	_sprites[1]["walk"] = sf->get("supermario_walk");
+	_sprites[1]["crouch"] = sf->get("supermario_crouch");
+	_sprites[1]["run"] = sf->get("supermario_run");
+	_sprites[1]["pspeed"] = sf->get("supermario_pspeed");
+	_sprites[1]["skid"] = sf->get("supermario_skid");
+	_sprites[1]["jump"] = sf->get("supermario_jump");
+	_sprites[1]["jumpP"] = sf->get("supermario_jumpP");
+	_sprites[1]["fall"] = sf->get("supermario_fall");
 	_sprites[1]["die"] = _sprites[0]["die"];
-	_sprites[1]["big2small"] = SpriteFactory::instance()->get("supermario_big2small");
+	_sprites[1]["big2small"] = sf->get("supermario_big2small");
 
 	_sprite = _sprites[0]["stand"];
 }
@@ -81,9 +82,12 @@ void Mario::update(float dt)
 	// Passive sliding moves Mario while leaving his stored horizontal velocity at zero.
 	_walking = _vel.x != 0 || (_slopeMotion.sliding && std::abs(pos().x - previousX) > 0.00001f);
 	_running = std::abs(_vel.x) > 6;
-	if (_transformSmall2Super && dynamic_cast<AnimatedSprite*>(_sprites[0]["small2big"])->ended())
+	// a missing transformation animation (e.g. sprites not available yet) ends the transformation at once
+	AnimatedSprite* small2big = dynamic_cast<AnimatedSprite*>(_sprites[0]["small2big"]);
+	AnimatedSprite* big2small = dynamic_cast<AnimatedSprite*>(_sprites[1]["big2small"]);
+	if (_transformSmall2Super && (!small2big || small2big->ended()))
 		powerup(false);
-	if (_transformSuper2Small && dynamic_cast<AnimatedSprite*>(_sprites[1]["big2small"])->ended())
+	if (_transformSuper2Small && (!big2small || big2small->ended()))
 		powerdown(false);
 
 	bool _pSpeedHUD = dynamic_cast<PlatformerGame*>(Game::instance())->hud()->pSpeed();
@@ -254,7 +258,9 @@ void Mario::powerup(bool start)
 	}
 	else
 	{
-		dynamic_cast<AnimatedSprite*>(_sprites[0]["small2big"])->reset();
+		AnimatedSprite* small2big = dynamic_cast<AnimatedSprite*>(_sprites[0]["small2big"]);
+		if (small2big)
+			small2big->reset();
 		_transformSmall2Super = false;
 		_super = true;
 		_freezedPhysics = false;
@@ -294,7 +300,9 @@ void Mario::powerdown(bool start)
 	}
 	else
 	{
-		dynamic_cast<AnimatedSprite*>(_sprites[1]["big2small"])->reset();
+		AnimatedSprite* big2small = dynamic_cast<AnimatedSprite*>(_sprites[1]["big2small"]);
+		if (big2small)
+			big2small->reset();
 		_transformSuper2Small = false;
 		_super = false;
 		_freezedPhysics = false;

@@ -12,9 +12,10 @@ HammerBrother::HammerBrother(Scene* scene, const PointF& pos)
 {
 	_collider.adjust(0.1f, 0.4f, -0.1f, -1 / 16.0f);
 
-	_sprites["walk"] = SpriteFactory::instance()->get("hammer_brother_walk");
-	_sprites["throw"] = SpriteFactory::instance()->get("hammer_brother_throw");
-	_sprites["jump"] = SpriteFactory::instance()->get("hammer_brother_jump");
+	SpriteFactory* sf = SpriteFactory::instance();
+	_sprites["walk"] = sf->get("hammer_brother_walk");
+	_sprites["throw"] = sf->get("hammer_brother_throw");
+	_sprites["jump"] = sf->get("hammer_brother_jump");
 	_sprite = _sprites["throw"];
 	_pivot = pos;
 	_throwing = false;

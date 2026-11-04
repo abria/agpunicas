@@ -34,10 +34,11 @@ Block::Block(
 	_posOriginal = pos;
 	_yGravityForce = 0;
 
-	_questionSprite = SpriteFactory::instance()->get("block_question");
-	_emptySprite = SpriteFactory::instance()->get("block_empty");
-	_brickSprite = SpriteFactory::instance()->get("brick");
-	_woodSprite = SpriteFactory::instance()->get("wood");
+	SpriteFactory* sf = SpriteFactory::instance();
+	_questionSprite = sf->get("block_question");
+	_emptySprite = sf->get("block_empty");
+	_brickSprite = sf->get("brick");
+	_woodSprite = sf->get("wood");
 
 	// hide level background
 	new RenderableObject(scene, rect(), scene->backgroundColor(), 1);

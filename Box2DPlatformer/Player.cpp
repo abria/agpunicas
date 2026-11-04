@@ -39,10 +39,11 @@ Player::Player(GameScene* scene, PointF pos)
 	_running = false;
 	_dashing = false;
 
-	_sprites["idle"] = SpriteFactory::instance()->get("player_idle");
-	_sprites["jump"] = SpriteFactory::instance()->get("player_jump");
-	_sprites["walk"] = SpriteFactory::instance()->get("player_walk");
-	_sprites["dash"] = SpriteFactory::instance()->get("player_dash");
+	SpriteFactory* sf = SpriteFactory::instance();
+	_sprites["idle"] = sf->get("player_idle");
+	_sprites["jump"] = sf->get("player_jump");
+	_sprites["walk"] = sf->get("player_walk");
+	_sprites["dash"] = sf->get("player_dash");
 	_sprite = _sprites["idle"];
 	_lastNonZeroXDir = _xDir;
 
@@ -135,7 +136,9 @@ void Player::update(float dt)
 	else if (_running || (std::fabsf(vel().x) > 0.5f) && dynamic_cast<StaticObject*>(terrain))
 	{
 		_sprite = _sprites["walk"];
-		dynamic_cast<AnimatedSprite*>(_sprite)->setFPS(std::abs(vel().x) * 5);
+		AnimatedSprite* walk = dynamic_cast<AnimatedSprite*>(_sprite);
+		if (walk)
+			walk->setFPS(std::abs(vel().x) * 5);
 	}
 	else
 		_sprite = _sprites["idle"];

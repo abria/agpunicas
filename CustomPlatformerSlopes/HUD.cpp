@@ -33,18 +33,19 @@ HUD::HUD()
 	_comboCount = -1;
 	_comboTimer = 0.0f;
 
-	new RenderableObject(this, RectF(0, 12, 16, 3), SpriteFactory::instance()->get("hud"), 0);
-	new RenderableObject(this, RectF(12, 14.4f, 1.5f, 0.5f), SpriteFactory::instance()->getText("FPS", {0.5f, 0.5f}), 1);
-	_fpsObj = new RenderableObject(this, RectF(14, 14.45f, 1.5f, 0.5f), SpriteFactory::instance()->getText(std::to_string(_fps), { 0.5f, 0.5f }, 3, ' '), 1);
-	_scoreObj = new RenderableObject(this, RectF(4, 13, 3.5f, 0.5f), SpriteFactory::instance()->getNumber(_score, { 0.5f, 0.5f }, 7), 1);
-	_coinsObj = new RenderableObject(this, RectF(9, 12.5f, 1, 0.5f), SpriteFactory::instance()->getNumber(_coins, { 0.5f, 0.5f }, 2, ' '), 1);
-	_worldObj = new RenderableObject(this, RectF(3, 12.5f, 0.5f, 0.5f), SpriteFactory::instance()->getNumber(_world, { 0.5f, 0.5f }), 1);
-	_livesObj = new RenderableObject(this, RectF(2.5f, 13, 1.0f, 0.5f), SpriteFactory::instance()->getNumber(_lives, { 0.5f, 0.5f }, 2, ' '), 2);
-	_timeObj = new RenderableObject(this, RectF(8.5f, 13, 1.5f, 0.5f), SpriteFactory::instance()->getNumber(int(round(_time)), { 0.5f, 0.5f }, 3), 1);
+	SpriteFactory* sf = SpriteFactory::instance();
+	new RenderableObject(this, RectF(0, 12, 16, 3), sf->get("hud"), 0);
+	new RenderableObject(this, RectF(12, 14.4f, 1.5f, 0.5f), sf->getText("FPS", {0.5f, 0.5f}), 1);
+	_fpsObj = new RenderableObject(this, RectF(14, 14.45f, 1.5f, 0.5f), sf->getText(std::to_string(_fps), { 0.5f, 0.5f }, 3, ' '), 1);
+	_scoreObj = new RenderableObject(this, RectF(4, 13, 3.5f, 0.5f), sf->getNumber(_score, { 0.5f, 0.5f }, 7), 1);
+	_coinsObj = new RenderableObject(this, RectF(9, 12.5f, 1, 0.5f), sf->getNumber(_coins, { 0.5f, 0.5f }, 2, ' '), 1);
+	_worldObj = new RenderableObject(this, RectF(3, 12.5f, 0.5f, 0.5f), sf->getNumber(_world, { 0.5f, 0.5f }), 1);
+	_livesObj = new RenderableObject(this, RectF(2.5f, 13, 1.0f, 0.5f), sf->getNumber(_lives, { 0.5f, 0.5f }, 2, ' '), 2);
+	_timeObj = new RenderableObject(this, RectF(8.5f, 13, 1.5f, 0.5f), sf->getNumber(int(round(_time)), { 0.5f, 0.5f }, 3), 1);
 
 	for (int i = 0; i < 7; i++)
 	{
-		_pMeterObjects[i] = new RenderableObject(this, RectF(4 + 0.5f * i, 12.5f, i == 6 ? 1 : 0.5f, 0.5f), SpriteFactory::instance()->get(i == 6 ? "hud_P" : "hud_arrow"), 1);
+		_pMeterObjects[i] = new RenderableObject(this, RectF(4 + 0.5f * i, 12.5f, i == 6 ? 1 : 0.5f, 0.5f), sf->get(i == 6 ? "hud_P" : "hud_arrow"), 1);
 		_pMeterObjects[i]->setVisible(false);
 	}
 

@@ -31,9 +31,10 @@ HUD::HUD()
 
 	setBackgroundColor(Color(0, 0, 0, 0));
 
+	SpriteFactory* sf = SpriteFactory::instance();
 	// backgrounds
-	new RenderableObject(this, RectF(0, 0, 256, 224), SpriteFactory::instance()->get("hud"));
-	new RenderableObject(this, RectF(0, -224, 256, 224), SpriteFactory::instance()->get("inventory"));
+	new RenderableObject(this, RectF(0, 0, 256, 224), sf->get("hud"));
+	new RenderableObject(this, RectF(0, -224, 256, 224), sf->get("inventory"));
 	
 	// HUD graphics
 	_coinsText = new RenderableObject(this, RectI(65, 24, 3 * 7 + 2, 7), nullptr, 1);
@@ -63,7 +64,7 @@ HUD::HUD()
 	_currentItemIcon = new RenderableObject(this, RectI(200, -244 + 41, 16, 16), Color(0, 0, 255), 1);
 	_currentItemLabel = new RenderableObject(this, RectI(176, -244+57, 64, 16), Color(0, 0, 255), 1);
 	_currentHUDItemIcon = new RenderableObject(this, RectI(40, 23, 16, 16), Color(0, 0, 255), 1);
-	_selectionIcon = new RenderableObject(this, RectI(0, 0, 32, 32), SpriteFactory::instance()->get("inventory_selected"), 1);
+	_selectionIcon = new RenderableObject(this, RectI(0, 0, 32, 32), sf->get("inventory_selected"), 1);
 	_currentItemIndex = { 0,0 }; 
 	moveItemSelection(0, 0);
 
@@ -145,14 +146,15 @@ void HUD::refreshHearts()
 {
 	int fullHearts = _halfHearts / 2;
 	int halfHearts = _halfHearts % 2;
+	SpriteFactory* sf = SpriteFactory::instance();
 	for (int i = 0; i < 10; i++)
 	{
 		if (i < fullHearts)
-			_heartIcons[i]->setSprite(SpriteFactory::instance()->get("hud_heart"), true);
+			_heartIcons[i]->setSprite(sf->get("hud_heart"), true);
 		else if (halfHearts && i == fullHearts)
-			_heartIcons[i]->setSprite(SpriteFactory::instance()->get("hud_heart_half"), true);
+			_heartIcons[i]->setSprite(sf->get("hud_heart_half"), true);
 		else if (i < _heartsCapacity)
-			_heartIcons[i]->setSprite(SpriteFactory::instance()->get("hud_heart_empty"), true);
+			_heartIcons[i]->setSprite(sf->get("hud_heart_empty"), true);
 		else
 			_heartIcons[i]->setSprite(nullptr);
 	}

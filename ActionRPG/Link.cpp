@@ -32,17 +32,18 @@ Link::Link(Scene* scene, const PointF& pos)
 	_attacking = false;
 	_sword = nullptr;
 
+	SpriteFactory* sf = SpriteFactory::instance();
 	// animations
 	for (int i = 0; i < 4; i++)
 	{
-		_sprites[i]["stand"] = SpriteFactory::instance()->get(std::string("link_stand_" + dir2str(Direction(i))));
-		_sprites[i]["walk"] = SpriteFactory::instance()->get(std::string("link_walk_" + dir2str(Direction(i))));
-		_sprites[i]["attack"] = SpriteFactory::instance()->get(std::string("link_attack_" + dir2str(Direction(i))));
+		_sprites[i]["stand"] = sf->get(std::string("link_stand_" + dir2str(Direction(i))));
+		_sprites[i]["walk"] = sf->get(std::string("link_walk_" + dir2str(Direction(i))));
+		_sprites[i]["attack"] = sf->get(std::string("link_attack_" + dir2str(Direction(i))));
 	}
 	setSprite(_sprites[int(_facingDir)]["stand"]);
 
 	// decorations
-	_shadow = new RenderableObject(scene, rect(), SpriteFactory::instance()->get(std::string("link_shadow")), _layer - 1, false);
+	_shadow = new RenderableObject(scene, rect(), sf->get(std::string("link_shadow")), _layer - 1, false);
 }
 
 void Link::forgetObject(Object* objectToRemove)
@@ -87,14 +88,16 @@ void Link::attack()
 
 	if (_attacking)
 	{
-		_sprite->reset();
+		if (_sprite)
+			_sprite->reset();
 		if (_sword)
 			_sword->kill();
 	}
 
 	_sword = new Sword(this);
 	_attacking = true;
-	schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sprites[int(_facingDir)]["attack"])->duration(), [this]() 
+	AnimatedSprite* attackSprite = dynamic_cast<AnimatedSprite*>(_sprites[int(_facingDir)]["attack"]);
+	schedule("attack_off", attackSprite ? attackSprite->duration() : 0.0f, [this]() 
 		{
 			_attacking = false; 
 			if (_sword)

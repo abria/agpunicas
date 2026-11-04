@@ -128,7 +128,9 @@ void Soldier::update(float dt)
 	else
 		_sprite = _sprites[int(_facingDir)]["walk"];
 
-	dynamic_cast<AnimatedSprite*>(_sprite)->setPaused(_state == State::SLEEP);
+	AnimatedSprite* animated = dynamic_cast<AnimatedSprite*>(_sprite);
+	if (animated)
+		animated->setPaused(_state == State::SLEEP);
 
 	_flip = _facingDir == Direction::RIGHT ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
 }

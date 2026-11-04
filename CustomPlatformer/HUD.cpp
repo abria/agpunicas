@@ -26,20 +26,21 @@ HUD::HUD()
 	_time = 400;
 	_fps = 0;
 
-	new RenderableObject(this, RectF(1.5, 0.5, 2.5, 0.5), SpriteFactory::instance()->getText("MARIO", {0.5f, 0.5f}));
-	new RenderableObject(this, RectF(5.5, 0.5, 2, 0.5), SpriteFactory::instance()->getText("F-", { 0.5f, 0.5f }));
-	new RenderableObject(this, RectF(9.0, 0.5, 2.5, 0.5), SpriteFactory::instance()->getText("WORLD", { 0.5f, 0.5f }));
-	new RenderableObject(this, RectF(12.5, 0.5, 2, 0.5), SpriteFactory::instance()->getText("TIME", { 0.5f, 0.5f }));
-	new RenderableObject(this, RectF(6.0, 1, 0.5, 0.5), SpriteFactory::instance()->getText("*", { 0.5f, 0.5f }));
-	new RenderableObject(this, RectF(10, 1, 0.5, 0.5), SpriteFactory::instance()->getText("-", { 0.5f, 0.5f }));
+	SpriteFactory* sf = SpriteFactory::instance();
+	new RenderableObject(this, RectF(1.5, 0.5, 2.5, 0.5), sf->getText("MARIO", {0.5f, 0.5f}));
+	new RenderableObject(this, RectF(5.5, 0.5, 2, 0.5), sf->getText("F-", { 0.5f, 0.5f }));
+	new RenderableObject(this, RectF(9.0, 0.5, 2.5, 0.5), sf->getText("WORLD", { 0.5f, 0.5f }));
+	new RenderableObject(this, RectF(12.5, 0.5, 2, 0.5), sf->getText("TIME", { 0.5f, 0.5f }));
+	new RenderableObject(this, RectF(6.0, 1, 0.5, 0.5), sf->getText("*", { 0.5f, 0.5f }));
+	new RenderableObject(this, RectF(10, 1, 0.5, 0.5), sf->getText("-", { 0.5f, 0.5f }));
 
-	_fpsObj = new RenderableObject(this, RectF(6.5, 0.5, 2, 0.5), SpriteFactory::instance()->getText(std::to_string(_fps), { 0.5f, 0.5f }));
-	_scoreObj = new RenderableObject(this, RectF(1.5, 1, 3, 0.5), SpriteFactory::instance()->getText(std::to_string(_score), { 0.5f, 0.5f }, 6, '0'));
-	_flashingCoinObj = new RenderableObject(this, RectF(5.5, 1, 0.5, 0.5), SpriteFactory::instance()->get("hud_coin"));
-	_coinsObj = new RenderableObject(this, RectF(6.5, 1, 1, 0.5), SpriteFactory::instance()->getText(std::to_string(_coins), { 0.5f, 0.5f }, 2, '0'));
-	_worldObj = new RenderableObject(this, RectF(9.5, 1, 0.5, 0.5), SpriteFactory::instance()->getText(std::to_string(_world), { 0.5f, 0.5f }));
-	_levelObj = new RenderableObject(this, RectF(10.5, 1, 0.5, 0.5), SpriteFactory::instance()->getText(std::to_string(_level), { 0.5f, 0.5f }));
-	_timeObj = new RenderableObject(this, RectF(13, 1, 1.5, 0.5), SpriteFactory::instance()->getText(std::to_string(int(round(_time))), { 0.5f, 0.5f }, 3, '0'));
+	_fpsObj = new RenderableObject(this, RectF(6.5, 0.5, 2, 0.5), sf->getText(std::to_string(_fps), { 0.5f, 0.5f }));
+	_scoreObj = new RenderableObject(this, RectF(1.5, 1, 3, 0.5), sf->getText(std::to_string(_score), { 0.5f, 0.5f }, 6, '0'));
+	_flashingCoinObj = new RenderableObject(this, RectF(5.5, 1, 0.5, 0.5), sf->get("hud_coin"));
+	_coinsObj = new RenderableObject(this, RectF(6.5, 1, 1, 0.5), sf->getText(std::to_string(_coins), { 0.5f, 0.5f }, 2, '0'));
+	_worldObj = new RenderableObject(this, RectF(9.5, 1, 0.5, 0.5), sf->getText(std::to_string(_world), { 0.5f, 0.5f }));
+	_levelObj = new RenderableObject(this, RectF(10.5, 1, 0.5, 0.5), sf->getText(std::to_string(_level), { 0.5f, 0.5f }));
+	_timeObj = new RenderableObject(this, RectF(13, 1, 1.5, 0.5), sf->getText(std::to_string(int(round(_time))), { 0.5f, 0.5f }, 3, '0'));
 
 	// setup view (specific for super mario bros)
 	_view = new View(this, _rect);

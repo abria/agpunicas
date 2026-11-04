@@ -45,25 +45,26 @@ Mario::Mario(Scene* scene, const PointF& pos)
 
 	_xLastNonZeroVel = 0;
 
+	SpriteFactory* sf = SpriteFactory::instance();
 	if (_metalslugdemo)
 	{
-		_sprites["stand"] = SpriteFactory::instance()->get("marco_stand");
-		_sprites["walk"] = SpriteFactory::instance()->get("marco_walk");
-		_sprites["run"] = SpriteFactory::instance()->get("marco_walk");
-		_sprites["skid"] = SpriteFactory::instance()->get("marco_stand");
-		_sprites["jump"] = SpriteFactory::instance()->get("marco_jump");
-		_sprites["die"] = SpriteFactory::instance()->get("mario_die");
-		_sprites["attack"] = SpriteFactory::instance()->get("marco_attack");
+		_sprites["stand"] = sf->get("marco_stand");
+		_sprites["walk"] = sf->get("marco_walk");
+		_sprites["run"] = sf->get("marco_walk");
+		_sprites["skid"] = sf->get("marco_stand");
+		_sprites["jump"] = sf->get("marco_jump");
+		_sprites["die"] = sf->get("mario_die");
+		_sprites["attack"] = sf->get("marco_attack");
 	}
 	else
 	{
-		_sprites["stand"] = SpriteFactory::instance()->get("mario_stand");
-		_sprites["walk"] = SpriteFactory::instance()->get("mario_walk");
-		_sprites["run"] = SpriteFactory::instance()->get("mario_run");
-		_sprites["skid"] = SpriteFactory::instance()->get("mario_skid");
-		_sprites["jump"] = SpriteFactory::instance()->get("mario_jump");
-		_sprites["die"] = SpriteFactory::instance()->get("mario_die");
-		_sprites["attack"] = SpriteFactory::instance()->get("mario_attack");
+		_sprites["stand"] = sf->get("mario_stand");
+		_sprites["walk"] = sf->get("mario_walk");
+		_sprites["run"] = sf->get("mario_run");
+		_sprites["skid"] = sf->get("mario_skid");
+		_sprites["jump"] = sf->get("mario_jump");
+		_sprites["die"] = sf->get("mario_die");
+		_sprites["attack"] = sf->get("mario_attack");
 	}
 
 	_sprite = _sprites["stand"];
@@ -169,7 +170,8 @@ void Mario::attack()
 	{
 		_attacking = true;
 		_sprite = _sprites["attack"];
-		schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sprite)->duration(), [this]()
+		AnimatedSprite* attackSprite = dynamic_cast<AnimatedSprite*>(_sprite);
+		schedule("attack_off", attackSprite ? attackSprite->duration() : 0.0f, [this]()
 			{
 				_attacking = false;
 			});
@@ -178,14 +180,16 @@ void Mario::attack()
 
 	if (_attacking)
 	{
-		_sprite->reset();
+		if (_sprite)
+			_sprite->reset();
 		if (_sword)
 			_scene->killObject(_sword);
 	}
 
 	_sword = new Sword(this);
 	_attacking = true;
-	schedule("attack_off", dynamic_cast<AnimatedSprite*>(_sword->sprite())->duration(), [this]()
+	AnimatedSprite* swordSprite = dynamic_cast<AnimatedSprite*>(_sword->sprite());
+	schedule("attack_off", swordSprite ? swordSprite->duration() : 0.0f, [this]()
 		{
 			_attacking = false;
 			if (_sword)

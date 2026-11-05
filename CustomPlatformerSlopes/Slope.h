@@ -27,6 +27,15 @@ class agp::Slope : public StaticObject
 
 	public:
 
+		// Gameplay tuning; speeds are horizontal, relative to movement on flat ground.
+		static constexpr float VerticalPenetration = 0.25f; // maximum, in scene units
+		static constexpr float IdleDownhillMultiplier = 1.0f; // uses the body's flat speed limit
+		static constexpr float DownhillMultiplier = 1.3f;
+		static constexpr float UphillMultiplier = 0.8f;
+		static_assert(VerticalPenetration >= 0 && IdleDownhillMultiplier >= 0 &&
+			DownhillMultiplier > 0 && UphillMultiplier > 0,
+			"Slope requires nonnegative penetration/idle speed and positive active multipliers");
+
 		// A body's plan for one step; ordinary collisions run between prepare and finish.
 		struct Motion
 		{
@@ -49,8 +58,9 @@ class agp::Slope : public StaticObject
 		// slope queries (scene coordinates, y points downwards)
 		bool overlapsX(const RectF& body) const;
 		float surfaceY(const RectF& body) const; // height at the uphill foot, clamped to the segment
+		float supportY(const RectF& body) const; // foot height including allowed penetration
 		float speedFactor(float vx) const;     // horizontal displacement multiplier, always positive
-		float slideVelocity() const; // horizontal component of passive downhill motion
+		float slideVelocity(float flatSpeed) const; // passive downhill speed, relative to the body's flat speed limit
 
 		// disable generic shape tests: the bounding rect is not a solid block
 		// prepareMovement/finishMovement resolve contact with the segment instead

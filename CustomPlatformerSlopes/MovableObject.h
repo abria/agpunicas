@@ -50,6 +50,7 @@ class agp::MovableObject : public RenderableObject
 
 		// getters / setters
 		Vec2Df vel() const { return _vel; }
+		float maxSpeedX() const { return _xVelMax; }
 		void velAdd(Vec2Df amount);
 		void velClip(float vx, float vy);
 		void setVelY(float vy) { _vel.y = vy; }

@@ -120,7 +120,7 @@ void Mario::update(float dt)
 		_sprite = _sprites[_super]["skid"];
 	else if (_pSpeed && _running)
 		_sprite = _sprites[_super]["pspeed"];
-	else if (_running)
+	else if (_running || (_walking && _xDir != Direction::NONE && _slopeMotion.velocityY < 0 && !midair()))
 		_sprite = _sprites[_super]["run"];
 	else if(_walking)
 		_sprite = _sprites[_super]["walk"];

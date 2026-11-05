@@ -27,6 +27,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../core)
 
 # create exe and link
 add_executable(${project_name} ${sources})
+# levels are read and saved in the source folder when reachable (see core/levels.md)
+target_compile_definitions(${project_name} PRIVATE AGP_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/")
 target_link_libraries(${project_name} SDL3::SDL3 SDL3_image::SDL3_image SDL3_mixer::SDL3_mixer agpcore)
 
 add_custom_command(TARGET ${project_name} POST_BUILD

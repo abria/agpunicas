@@ -101,7 +101,7 @@ void LevelLoader::loadJson(
 
 Scene* LevelLoader::load(const std::string& name)
 {
-	std::string path = std::string(SDL_GetBasePath()) + "levels/" + name + ".json";
+	std::string path = LevelData::path("levels/" + name + ".json", AGP_SOURCE_DIR);
 	LevelData level(path);
 	RPGGameScene* world = new RPGGameScene(RectF(0, 0, 256, 256), {16, 16}, 0.01f, {128, 128, 128, 255});
 	try

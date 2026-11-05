@@ -16,6 +16,12 @@ namespace agp
 	class LevelData;
 }
 
+// game source folder, defined in the game's CMakeLists.txt
+// (empty: levels are read and saved only next to the executable)
+#ifndef AGP_SOURCE_DIR
+#define AGP_SOURCE_DIR ""
+#endif
+
 // LevelData class
 // - reads and validates level editor json files
 // - shares geometry conversion between games and editor
@@ -44,4 +50,10 @@ class agp::LevelData
 		static std::vector<PointF> multiline(const nlohmann::ordered_json& json);
 
 		static void save(const std::string& path, const nlohmann::ordered_json& json);
+
+		// level file shared by game and editor; relativePath is the same in the source
+		// folder and next to the executable, where CMake copies it at every build
+		// - source copy when reachable: editor saves survive the next build
+		// - otherwise the copy next to the executable (e.g. game moved elsewhere)
+		static std::string path(const std::string& relativePath, const std::string& sourceDir);
 };

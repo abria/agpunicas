@@ -9,6 +9,7 @@
 
 #include "LevelData.h"
 #include "mathUtils.h"
+#include <SDL3/SDL.h>
 #include <fstream>
 #include <string>
 
@@ -116,4 +117,11 @@ void LevelData::save(const std::string& path, const nlohmann::ordered_json& json
 	file.close();
 	if (!file)
 		throw "Cannot finish saving level file";
+}
+
+std::string LevelData::path(const std::string& relativePath, const std::string& sourceDir)
+{
+	if (!sourceDir.empty() && std::ifstream(sourceDir + relativePath).is_open())
+		return sourceDir + relativePath;
+	return std::string(SDL_GetBasePath()) + relativePath;
 }

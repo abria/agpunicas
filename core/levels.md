@@ -9,7 +9,7 @@ I livelli inclusi sono:
 - `Box2DPlatformer/levels/level0.json`
 - `ActionRPG/levels/overworld.json`
 
-Tutti e quattro i prototipi caricano `levels/<name>.json` dalla cartella dell'eseguibile e usano lo stesso formato: `categories` e `objects`, con `core_version` come metadato. Nuovi file possono essere caricati passando il loro nome a `LevelLoader::load()`. Cambiano le categorie e le proprietà specifiche del gioco, non la struttura del documento.
+Tutti e quattro i prototipi caricano `levels/<name>.json` tramite `LevelData::path()`, che preferisce il file nei sorgenti (vedi [Modifica e salvataggio](#modifica-e-salvataggio)), e usano lo stesso formato: `categories` e `objects`, con `core_version` come metadato. Nuovi file possono essere caricati passando il loro nome a `LevelLoader::load()`. Cambiano le categorie e le proprietà specifiche del gioco, non la struttura del documento.
 
 ## Documento e geometrie
 
@@ -38,6 +38,7 @@ della scena specifica. Questi parametri non fanno parte del JSON.
 Per esempio, in CustomPlatformerSlopes il loader crea la scena con:
 
 ```cpp
+std::string path = LevelData::path("levels/" + name + ".json", AGP_SOURCE_DIR);
 auto* world = new PlatformerGameScene(
     RectF(0, -20, 176, 50), {16, 16}, 0.01f, {156, 252, 240, 255});
 world->setJsonPath(path); // file che sarà aperto e salvato dall'editor
@@ -119,6 +120,8 @@ linea di morte rimane nel loader C++.
 
 Il tasto `E` apre il JSON effettivamente caricato dal livello. L'editor modifica geometrie, categorie ed etichette e conserva le proprietà specifiche degli oggetti. Il documento salvato contiene soltanto `core_version`, `categories` e `objects`; l'editor usa dimensioni e unità della scena di gioco già creata dal loader. Le proprietà specifiche del gioco si impostano direttamente nel JSON; non è stato aggiunto un pannello delle proprietà.
 
-CMake copia i JSON accanto all'eseguibile a ogni build, anche senza modifiche C++. L'editor salva quella **copia di esecuzione**: riportare le modifiche nel file sorgente del progetto prima della build successiva, che ricopia i livelli distribuiti. Per applicare un livello modificato occorre ricaricarlo o riavviare il gioco.
+Gioco ed editor usano lo stesso file, scelto da `LevelData::path()`. Il `CMakeLists.txt` di ogni gioco definisce `AGP_SOURCE_DIR`, la cartella dei sorgenti del gioco: se il livello è raggiungibile lì, l'editor salva **direttamente nel JSON sorgente**, che compare tra le modifiche di Git e non viene sovrascritto dalla build successiva. Il messaggio `Saved to ...` mostra il percorso usato.
+
+CMake continua a copiare i livelli accanto all'eseguibile a ogni build, con lo stesso percorso relativo. Quella copia si usa solo se i sorgenti non sono raggiungibili, per esempio con l'eseguibile spostato su un altro computer: in quel caso l'editor salva la copia di esecuzione, che la build successiva sovrascrive. Per applicare un livello modificato occorre ricaricarlo o riavviare il gioco; non serve ricompilare.
 
 File mancanti, documenti malformati, categorie fuori intervallo e geometrie non valide producono un errore esplicito.

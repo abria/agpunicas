@@ -115,8 +115,8 @@ Il verso è visibile direttamente nella linea; non serve `risesRight`.
 L'editor conserva `content` e le altre proprietà di gioco nel salvataggio;
 queste proprietà si modificano direttamente nel JSON.
 
-L'editor salva la copia del livello accanto all'eseguibile. Riportare le
-modifiche nel JSON sorgente prima di ricompilare: ogni build ricopia i livelli.
+L'editor salva direttamente il JSON in `levels/` dei sorgenti; solo se non è
+raggiungibile salva la copia accanto all'eseguibile. Vedi `core/levels.md`.
 
 ## Compilazione
 

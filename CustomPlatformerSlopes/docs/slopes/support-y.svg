@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="350" viewBox="0 0 680 350" role="img">
+<!-- Figure for CustomPlatformerSlopes (style of Slope in SimplePlatformer). See README.md. -->
+<style>
+text { font-family: Arial, Helvetica, sans-serif; }
+.t { font-size: 13px; font-weight: 500; fill: #1A1F22; }
+.ts { font-size: 12px; fill: #5E676D; }
+.tm { font-family: Menlo, Consolas, monospace; font-size: 12px; fill: #1A1F22; }
+.tmb { font-family: Menlo, Consolas, monospace; font-size: 13px; font-weight: 500; fill: #1A1F22; }
+.halo { paint-order: stroke; stroke: #FFFFFF; stroke-width: 4px; stroke-linejoin: round; }
+.slope { fill: #B9481A; fill-opacity: .16; }
+.sline { stroke: #B9481A; stroke-width: 2; fill: none; stroke-linecap: round; }
+.ext { stroke: #B9481A; stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.band { stroke: #DD9216; stroke-width: 10; stroke-opacity: .28; stroke-linecap: round; }
+.body { fill: #DCE7FA; stroke: #2E64C2; stroke-width: 1.2; }
+.next { fill: none; stroke: #2E64C2; stroke-width: 1.4; stroke-dasharray: 4 3; }
+.bad { fill: none; stroke: #CC3333; stroke-width: 1.4; stroke-dasharray: 4 3; }
+.plan { fill: none; stroke: #5E676D; stroke-width: 1.3; stroke-dasharray: 4 3; }
+.solid { fill: #E3E7E8; stroke: #8B9498; stroke-width: .8; }
+.foot { fill: #DD9216; }
+.dot-mute { fill: #5E676D; } .dot-bad { fill: #CC3333; } .dot-body { fill: #2E64C2; } .dot-brick { fill: #B9481A; }
+.ring { fill: none; stroke: #CC3333; stroke-width: 1.5; }
+.lead { stroke: #5E676D; stroke-width: .8; stroke-dasharray: 2 3; fill: none; }
+.guide { stroke: #5E676D; stroke-width: .9; stroke-dasharray: 3 3; fill: none; }
+.sep { stroke: #D9DEDD; stroke-width: 1; stroke-dasharray: 2 4; }
+.gridl { stroke: #E8ECEC; stroke-width: 1; }
+.a-mute { stroke: #5E676D; stroke-width: 1.5; fill: none; }
+.a-body { stroke: #2E64C2; stroke-width: 1.6; fill: none; }
+.a-bad { stroke: #CC3333; stroke-width: 1.5; fill: none; }
+.a-foot { stroke: #DD9216; stroke-width: 1.8; fill: none; }
+.a-brick { stroke: #B9481A; stroke-width: 1.5; fill: none; }
+.dash { stroke-dasharray: 4 3; }
+.mk-mute { fill: none; stroke: #5E676D; } .mk-body { fill: none; stroke: #2E64C2; } .mk-bad { fill: none; stroke: #CC3333; }
+.mk-foot { fill: none; stroke: #DD9216; } .mk-brick { fill: none; stroke: #B9481A; }
+.mk { stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.bx-eng { fill: #F1F3F2; stroke: #A9B1B3; stroke-width: .8; }
+.bx-slope { fill: #F8E4D9; stroke: #B9481A; stroke-width: .8; }
+.cont { fill: none; stroke: #B9481A; stroke-width: 1; stroke-dasharray: 5 4; }
+.bar-mute { fill: #8B9498; } .bar-body { fill: #2E64C2; } .bar-ok { fill: #1F8A68; } .bar-bad { fill: #CC3333; fill-opacity: .8; }
+.cell-ok { fill: #1F8A68; fill-opacity: .85; } .cell-bad { fill: #CC3333; fill-opacity: .85; }
+
+</style>
+<defs>
+<marker id="m-mute" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-mute" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-body" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-body" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-bad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-bad" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-foot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-foot" d="M2 1L8 5L2 9"></path></marker>
+<marker id="m-brick" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk mk-brick" d="M2 1L8 5L2 9"></path></marker>
+</defs>
+<rect width="680" height="350" fill="#FFFFFF"/>
+<title>supportY</title><desc>Rampa che sale a destra: la quota di appoggio scende di 0.25 sotto il segmento e si raccorda con continuità al pavimento in basso e al blocco in cima.</desc><polygon class="slope" points="150.0,250.0 430.0,110.0 430.0,250.0"/><rect class="solid" x="38.0" y="250.0" width="112.0" height="42.0" rx="2"/><rect class="solid" x="430.0" y="110.0" width="98.0" height="182.0" rx="2"/><text class="ts" x="94.0" y="271.0" text-anchor="middle" dominant-baseline="central">pavimento</text><text class="ts" x="479.0" y="145.0" text-anchor="middle" dominant-baseline="central">blocco</text><line class="sline" x1="150.0" y1="250.0" x2="430.0" y2="110.0"/><polyline class="a-foot" points="150.0,250.0 185.0,250.0 395.0,145.0 430.0,110.0"/><line class="sep" x1="185.0" y1="302.5" x2="185.0" y2="99.5"/><line class="sep" x1="395.0" y1="302.5" x2="395.0" y2="99.5"/><text class="t" x="167.5" y="176.5" text-anchor="end" dominant-baseline="central">tratto piano</text><text class="tm" x="167.5" y="194.0" text-anchor="end" dominant-baseline="central">supportY = bottom</text><text class="t" x="290.0" y="71.5" text-anchor="middle" dominant-baseline="central">tratto parallelo</text><text class="tm" x="290.0" y="89.0" text-anchor="middle" dominant-baseline="central">surfaceY + 0.25</text><text class="t" x="479.0" y="71.5" text-anchor="middle" dominant-baseline="central">raccordo in cima</text><text class="tm" x="479.0" y="89.0" text-anchor="middle" dominant-baseline="central">2·surfaceY − top</text><rect class="body" x="276.0" y="113.5" width="42.0" height="70.0" rx="2"/><circle class="dot-mute" cx="318.0" cy="166.0" r="3"/><circle class="foot" cx="318.0" cy="183.5" r="5"/><line class="a-foot" x1="332.0" y1="166.0" x2="332.0" y2="183.5" marker-start="url(#m-foot)" marker-end="url(#m-foot)"/><text class="tmb" x="340.0" y="174.8" text-anchor="start" dominant-baseline="central">0.25</text><text class="tmb" x="340.0" y="24.0" text-anchor="middle" dominant-baseline="central">supportY(body) = surfaceY + min(0.25, surfaceY − top, bottom − surfaceY)</text><line class="sline" x1="60.0" y1="316.5" x2="90.0" y2="316.5"/><text class="ts" x="98.0" y="316.5" text-anchor="start" dominant-baseline="central">segmento: surfaceY</text><line class="a-foot" x1="250.0" y1="316.5" x2="280.0" y2="316.5"/><text class="ts" x="288.0" y="316.5" text-anchor="start" dominant-baseline="central">quota di appoggio: supportY</text><circle class="foot" cx="500.0" cy="316.5" r="5"/><text class="ts" x="512.0" y="316.5" text-anchor="start" dominant-baseline="central">piede a monte</text><text class="ts" x="340.0" y="340.5" text-anchor="middle" dominant-baseline="central">VerticalPenetration = 0.25 · scala reale: rampa 4 × 2, corpo largo 0.6 come Mario piccolo</text></svg>

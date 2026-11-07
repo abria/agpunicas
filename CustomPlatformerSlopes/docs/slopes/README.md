@@ -17,6 +17,12 @@ prima delle altre collisioni. La guida nella wiki spiega la corrispondenza con
 il prototipo del Drive.
 In particolare `restore-y.svg` mostra la simulazione didattica con g = 24,
 dt = 0.01 e accelerazione orizzontale 12: non è una misura del prototipo SMB3,
-che usa altri parametri. `speed-factor.svg` riporta gli esempi del livello Drive.
+che usa altri parametri.
+
+`support-y.svg`, `valley-rest.svg` e `speed-factor.svg` sono state disegnate per
+CustomPlatformerSlopes, nello stesso stile, dopo la rifinitura del 5 novembre 2026:
+penetrazione affusolata (`Slope::supportY`), arresto nel tratto piano delle valli
+e moltiplicatori orizzontali costanti. Le altre figure omettono la penetrazione
+(al massimo 0.25 unità) e mostrano i piedi sul segmento.
 
 Guida: https://github.com/abria/agpunicas/wiki/CustomPlatformerSlopes-Movimento-e-Collisioni

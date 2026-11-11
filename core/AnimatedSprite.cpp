@@ -68,4 +68,5 @@ void AnimatedSprite::reset()
 	_ended = false;
 	_frameIterator = 0;
 	_loops = _loopsStored;
+	_rect = _frames[0];
 }

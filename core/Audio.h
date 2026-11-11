@@ -35,7 +35,6 @@ class agp::Audio : public Singleton<Audio>
 		std::map< std::string, MIX_Audio*> _sounds;
 		std::map< std::string, MIX_Audio*> _musics;
 		std::map< std::string, std::vector<MIX_Track*> > _soundTracks;
-		std::map< std::string, float > _soundGains;
 
 		// constructor accessible only to Singleton (thanks to friend declaration)
 		Audio();

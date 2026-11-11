@@ -66,12 +66,6 @@ Audio::Audio()
 			else
 				_musics[name] = audio;
 		}
-
-		_soundGains["Mario Jump"] = 1.0f;
-		_soundGains["Skid"] = 96.0f / 128.0f;
-
-		//regolo il volume del thwomp
-		_soundGains["Thwomp"] = 96.0f / 128.0f;
 	}
 	catch (...)
 	{
@@ -134,7 +128,6 @@ void Audio::playSound(const std::string& id, int loops, bool forceReplay)
 		return;
 
 	MIX_SetTrackAudio(track, sound->second);
-	MIX_SetTrackGain(track, _soundGains.count(id) ? _soundGains[id] : 1.0f);
 
 	SDL_PropertiesID props = SDL_CreateProperties();
 	SDL_SetNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, loops);

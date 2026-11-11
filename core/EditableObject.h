@@ -45,19 +45,21 @@ class agp::EditableObject : public RenderableObject
 		static constexpr float NAME_MAX_HEIGHT = 1;
 		static constexpr float NAME_MARGIN_X = 0.1f;
 		static constexpr float RESIZING_HOOK_DISTANCE = 0.25f;
-		static constexpr float LINE_THICKNESS = 0.1f;
 		static constexpr float LINE_HOOK_DISTANCE = 0.3f;
 
 		// in screen points
+		static constexpr float NORMAL_BORDER_THICKNESS = 2.0f;
+		static constexpr float FOCUSED_BORDER_THICKNESS = 4.0f;
 		static constexpr float SELECTED_BORDER_THICKNESS = 5.0f;
 
 		// in alpha [0, 255] values
-		static constexpr int ALPHA_NORMAL = 160;
+		static constexpr int ALPHA_NORMAL = 72;
 		static constexpr int ALPHA_SELECTED = 100;
-		static constexpr int ALPHA_FOCUSED = 200;
+		static constexpr int ALPHA_FOCUSED = 112;
 
 		void init();
 		void updateLineRect();
+		void updateLabelLayout();
 
 	public:
 

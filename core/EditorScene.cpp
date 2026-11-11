@@ -11,6 +11,17 @@
 
 using namespace agp;
 
+namespace
+{
+#ifdef SDL_PLATFORM_MACOS
+    constexpr SDL_Keymod ZOOM_MODIFIER = SDL_KMOD_GUI;
+    const char* ZOOM_KEY = "CMD";
+#else
+    constexpr SDL_Keymod ZOOM_MODIFIER = SDL_KMOD_ALT;
+    const char* ZOOM_KEY = "ALT";
+#endif
+}
+
 EditorScene::EditorScene(GameScene* gameScene, EditorUI* ui, const std::string& jsonPath)
 	: UIScene(gameScene->rect(), gameScene->pixelUnitSize())
 {
@@ -74,6 +85,9 @@ void EditorScene::fromJson()
 
 	LevelData level(_jsonPath);
 	_categories = level.json().at("categories").get<std::vector<std::string>>();
+	// Extend older documents without changing any existing category ID or name.
+	for (int i = int(_categories.size()); i < MAX_CATEGORIES; ++i)
+		_categories.push_back(strprintf("Category %d", i));
 	for (const auto& json : level.objects())
 		_editObjects.push_back(new EditableObject(this, json, _categories));
 }
@@ -95,6 +109,7 @@ void EditorScene::toJson()
 void EditorScene::updateState(State newState)
 {
 	_ui->clearHelpboxText();
+	const std::string navigation = strprintf("Scroll pan | %s+scroll / +/- zoom", ZOOM_KEY);
 	_ui->setCursor((newState == State::DRAW_RECT || newState == State::DRAW_LINE)? SDL_SYSTEM_CURSOR_CROSSHAIR : SDL_SYSTEM_CURSOR_DEFAULT);
 	_ui->setEditing(newState == State::RENAME_CATEGORY || newState == State::RENAME_OBJECT);
 	_currentCell->setVisible((newState == State::RENAME_CATEGORY && _prevState == State::DRAW_RECT) || (newState == State::DRAW_RECT && !_currentObject));
@@ -106,8 +121,8 @@ void EditorScene::updateState(State newState)
 
 	if (newState == State::DEFAULT)
 	{
-		_ui->setHelpboxText(1, "Mouse: [L] select, [R] delete, [M] pan/zoom");
-		_ui->setHelpboxText(0, "Keys: [R]ect, [L]ine, [G]rid, [Q]uit/save");
+		_ui->setHelpboxText(1, "Click select | Right-click delete | R rectangle | L line | Q save & exit");
+		_ui->setHelpboxText(0, navigation + " | G grid | H auto-hide");
 		
 		if (_currentObject)
 			_currentObject->setSelected(false);
@@ -123,29 +138,29 @@ void EditorScene::updateState(State newState)
 	}
 	else if (newState == State::DRAW_RECT)
 	{
-		_ui->setHelpboxText(1, "Mouse: [L] start/end drawing");
-		_ui->setHelpboxText(0, "Keys: [SPACE] change, [R]ename, [ESC]ape");
+		_ui->setHelpboxText(1, "Click start / finish | " + navigation);
+		_ui->setHelpboxText(0, "Space / Shift+Space category | R rename | Esc cancel");
 	}
 	else if (newState == State::DRAW_LINE)
 	{
-		_ui->setHelpboxText(1, "Mouse: [L] draw, [R] undo");
-		_ui->setHelpboxText(0, "Keys: [SPACE] change, [ESC]ape");
+		_ui->setHelpboxText(1, "Click add point | Right-click undo | " + navigation);
+		_ui->setHelpboxText(0, "Space / Shift+Space category | R rename | Esc finish");
 	}
 	else if (newState == State::RENAME_CATEGORY)
 	{
 		_ui->setHelpboxText(1, strprintf("Rename to \"%s|\"", _textInput.c_str()));
-		_ui->setHelpboxText(0, "Keys: [ENTER] accept, [ESC]ape");
+		_ui->setHelpboxText(0, "Enter confirm | Esc cancel");
 	}
 	else if (newState == State::RENAME_OBJECT)
 	{
 		_ui->setHelpboxText(1, strprintf("Rename to \"%s|\"", _textInput.c_str()));
-		_ui->setHelpboxText(0, "Keys: [ENTER] accept, [ESC]ape");
+		_ui->setHelpboxText(0, "Enter confirm | Esc cancel");
 	}
 	else if (newState == State::SELECT)
 	{
-		if(!_currentObject->isLine())
-			_ui->setHelpboxText(1, "Mouse: [L] drag/drop, [SCROLL] rotate");
-		_ui->setHelpboxText(0, "Keys: [R]ename, [ESC]ape");
+		_ui->setHelpboxText(1, _currentObject->isLine() ?
+			"R rename | Esc deselect" : "Drag move | Shift+scroll rotate | R rename | Esc deselect");
+		_ui->setHelpboxText(0, navigation + " | Ctrl+scroll grid");
 		_currentObject->setSelected(true);
 	}
 	else if (newState == State::SAVING)
@@ -159,9 +174,20 @@ void EditorScene::updateState(State newState)
 
 	if (_state != newState)
 	{
+		_scrollRemainder = 0;
 		_prevState = _state;
 		_state = newState;
 	}
+	updateCategoryHelp();
+}
+
+void EditorScene::updateCategoryHelp()
+{
+	if (_state != State::DRAW_RECT && _state != State::DRAW_LINE && _state != State::SELECT)
+		return;
+	int category = _state == State::SELECT && _currentObject ? _currentObject->category() : _currentCategory;
+	_ui->setHelpboxText(2, strprintf("#%02d  %s  |  %d categories", category,
+		_categories[category].c_str(), int(_categories.size())), editorStyle::categoryColor(category));
 }
 
 void EditorScene::update(float timeToSimulate)
@@ -196,10 +222,11 @@ void EditorScene::event(SDL_Event& evt)
 {
 	UIScene::event(evt);
 
-	// detect CTRL and SHIFT modifiers
-	const bool* keyboardState = SDL_GetKeyboardState(0);
-	bool ctrlPressed = keyboardState[SDL_SCANCODE_LCTRL] || keyboardState[SDL_SCANCODE_RCTRL];
-	bool shiftPressed = keyboardState[SDL_SCANCODE_LSHIFT] || keyboardState[SDL_SCANCODE_RSHIFT];
+	SDL_Keymod modifiers = evt.type == SDL_EVENT_KEY_DOWN || evt.type == SDL_EVENT_KEY_UP
+		? evt.key.mod : SDL_GetModState();
+	bool ctrlPressed = (modifiers & SDL_KMOD_CTRL) != 0;
+	bool shiftPressed = (modifiers & SDL_KMOD_SHIFT) != 0;
+	bool zoomPressed = (modifiers & ZOOM_MODIFIER) != 0;
 
 	// reset focused states
 	for (auto& editable : _editObjects)
@@ -237,6 +264,24 @@ void EditorScene::event(SDL_Event& evt)
 		return;
 	}
 
+	// Unmodified +/- also work when accessibility reserves a scroll modifier.
+	// Use keycodes so '+' works on Italian and other non-US keyboard layouts.
+	if (evt.type == SDL_EVENT_KEY_DOWN && !(modifiers & (SDL_KMOD_CTRL | SDL_KMOD_ALT | SDL_KMOD_GUI)))
+	{
+		int zoomSteps = (evt.key.key == SDLK_PLUS || evt.key.key == SDLK_EQUALS || evt.key.key == SDLK_KP_PLUS) ? 1 :
+			((evt.key.key == SDLK_MINUS || evt.key.key == SDLK_KP_MINUS) ? -1 : 0);
+		if (zoomSteps)
+		{
+			_view->scale(std::pow(1 - _cameraZoomVel, float(zoomSteps)));
+			float mouseX, mouseY;
+			SDL_GetMouseState(&mouseX, &mouseY);
+			updateMousePosition(mouseX, mouseY);
+			checkResizing();
+			updateDrawingPreview();
+			return;
+		}
+	}
+
 	// key events
 	if (evt.type == SDL_EVENT_KEY_DOWN && !evt.key.repeat)
 	{
@@ -264,10 +309,12 @@ void EditorScene::event(SDL_Event& evt)
 		}
 		else if ((_state == State::DRAW_RECT || _state == State::DRAW_LINE) && evt.key.scancode == SDL_SCANCODE_SPACE)
 		{
-			_currentCategory = (_currentCategory + 1) % _categories.size();
+			int direction = (evt.key.mod & SDL_KMOD_SHIFT) ? -1 : 1;
+			_currentCategory = (_currentCategory + direction + int(_categories.size())) % int(_categories.size());
 			if (_currentObject)
 				_currentObject->setCategory(_currentCategory);
 			_currentCell->setCategory(_currentCategory);
+			updateCategoryHelp();
 		}
 		else if ((_state == State::DRAW_RECT || _state == State::DRAW_LINE) && evt.key.scancode == SDL_SCANCODE_R)
 		{
@@ -295,11 +342,7 @@ void EditorScene::event(SDL_Event& evt)
 	if (evt.type == SDL_EVENT_MOUSE_MOTION)
 	{
 		// mouse tracking
-		_mouseCoordsF = PointF(float(evt.button.x), float(evt.button.y));
-		_mouseCoordsF = _view->mapToScene(_mouseCoordsF);
-		_mouseCoordsSnap.x = floor(_mouseCoordsF.x / _gridCellSize) * _gridCellSize;
-		_mouseCoordsSnap.y = floor(_mouseCoordsF.y / _gridCellSize) * _gridCellSize;
-		_mousePointCurr = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
+		updateMousePosition(evt.motion.x, evt.motion.y);
 
 		// resizing
 		checkResizing();
@@ -344,24 +387,10 @@ void EditorScene::event(SDL_Event& evt)
 				_draggedObject->setPos(newPos);
 		}
 
-		// object resizing
-		if (_state == State::DRAW_RECT)
-		{
-			_currentCell->setPos(_mousePointCurr);
-
-			if (_currentObject)
-				_currentObject->setSize(_mousePointCurr - _currentObject->rect().pos + (_snapGrid ? PointF(_gridCellSize, _gridCellSize) : PointF(0, 0)));
-		}
-
-		// multiline drawing
-		else if (_state == State::DRAW_LINE)
-		{
-			if (_currentObject)
-				_currentObject->replaceLastPoint(_mousePointCurr);
-		}
+		updateDrawingPreview();
 
 		// object focus
-		else if (_state == State::DEFAULT)
+		if (_state == State::DEFAULT)
 		{
 			EditableObject* underMouse = editableUnderMouse();
 			if (underMouse)
@@ -369,34 +398,46 @@ void EditorScene::event(SDL_Event& evt)
 		}
 	}
 
-	// mouse scroll
+	// SDL reports both touchpad gestures and mouse wheels as scroll events.
+	// Plain two-axis scrolling always pans, including with an object selected.
 	if (evt.type == SDL_EVENT_MOUSE_WHEEL)
 	{
-		if (_state == State::SELECT)
+		ScrollAction action = zoomPressed ? ScrollAction::ZOOM :
+			(_state == State::SELECT && shiftPressed ?
+				(ctrlPressed ? ScrollAction::ROTATE_FINE : ScrollAction::ROTATE) :
+				(ctrlPressed ? ScrollAction::GRID : ScrollAction::PAN));
+		if (action != _scrollAction)
 		{
-			if (evt.wheel.y > 0)
-				_currentObject->rotate(ctrlPressed ? 1 : 10);
-			else if (evt.wheel.y < 0)
-				_currentObject->rotate(ctrlPressed ? -1 : -10);
+			_scrollRemainder = 0;
+			_scrollAction = action;
 		}
-		// grid
-		else if (ctrlPressed)
+		if (action == ScrollAction::PAN)
 		{
-			if (evt.wheel.y > 0)
-				_gridCellSize *= 2;
-			else if (evt.wheel.y < 0)
-				_gridCellSize /= 2;
-			generateGrid();
-			_currentCell->setSize(PointF(_gridCellSize, _gridCellSize));
+			// Keep fractional deltas and the OS scroll direction (including natural scrolling).
+			PointF delta{ evt.wheel.x, _rect.yUp ? evt.wheel.y : -evt.wheel.y };
+			_view->move(delta * SCROLL_PAN_PIXELS / _view->magf());
 		}
-		// zoom
+		else if (action == ScrollAction::ZOOM)
+			_view->scale(std::pow(1 - _cameraZoomVel, evt.wheel.y));
 		else
 		{
-			if (evt.wheel.y > 0)
-				_view->scale(1 - _cameraZoomVel);
-			else if (evt.wheel.y < 0)
-				_view->scale(1 + _cameraZoomVel);
+			// Discrete grid/angle steps must not fire once per tiny touchpad delta.
+			_scrollRemainder += evt.wheel.y;
+			int steps = int(_scrollRemainder);
+			_scrollRemainder -= steps;
+			if (steps && action == ScrollAction::GRID)
+			{
+				_gridCellSize = std::max(1.0f / 16, std::min(64.0f, _gridCellSize * std::pow(2.0f, float(steps))));
+				generateGrid();
+				_currentCell->setSize(PointF(_gridCellSize, _gridCellSize));
+			}
+			else if (steps && _currentObject)
+				_currentObject->rotate(steps * (action == ScrollAction::ROTATE_FINE ? 1 : 10));
 		}
+		// A touchpad can scroll without mouse motion: keep hit testing/placement current.
+		updateMousePosition(evt.wheel.mouse_x, evt.wheel.mouse_y);
+		checkResizing();
+		updateDrawingPreview();
 	}
 
 	// mouse buttons
@@ -490,6 +531,27 @@ void EditorScene::event(SDL_Event& evt)
 		}
 		
 	}
+}
+
+void EditorScene::updateDrawingPreview()
+{
+	if (_state == State::DRAW_RECT)
+	{
+		_currentCell->setPos(_mousePointCurr);
+		if (_currentObject)
+			_currentObject->setSize(_mousePointCurr - _currentObject->rect().pos +
+				(_snapGrid ? PointF(_gridCellSize, _gridCellSize) : PointF(0, 0)));
+	}
+	else if (_state == State::DRAW_LINE && _currentObject)
+		_currentObject->replaceLastPoint(_mousePointCurr);
+}
+
+void EditorScene::updateMousePosition(float x, float y)
+{
+	_mouseCoordsF = _view->mapToScene(x, y);
+	_mouseCoordsSnap.x = floor(_mouseCoordsF.x / _gridCellSize) * _gridCellSize;
+	_mouseCoordsSnap.y = floor(_mouseCoordsF.y / _gridCellSize) * _gridCellSize;
+	_mousePointCurr = _snapGrid ? _mouseCoordsSnap : _mouseCoordsF;
 }
 
 EditableObject* EditorScene::editableUnderMouse()

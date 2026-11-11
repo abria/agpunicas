@@ -10,6 +10,7 @@
 #pragma once
 #include "UIScene.h"
 #include "graphicsUtils.h"
+#include "EditorStyle.h"
 #include "json.hpp"
 
 namespace agp
@@ -47,6 +48,10 @@ class agp::EditorScene : public UIScene
 		PointF _mouseCoordsSnap;
 		PointF _mousePointCurr;
 
+		enum class ScrollAction { PAN, ZOOM, GRID, ROTATE, ROTATE_FINE };
+		ScrollAction _scrollAction = ScrollAction::PAN;
+		float _scrollRemainder = 0;
+
 		// pan & zoom
 		bool _isPanning;
 		PointF _panningDelta;
@@ -80,7 +85,8 @@ class agp::EditorScene : public UIScene
 		std::string _jsonPath;
 
 		// constants
-		static constexpr int MAX_CATEGORIES = 15;
+		static constexpr int MAX_CATEGORIES = editorStyle::CATEGORY_COUNT;
+		static constexpr float SCROLL_PAN_PIXELS = 32.0f;
 		const Color GRID_COLOR = { 100,100,100 };
 
 		// helper functions
@@ -88,6 +94,9 @@ class agp::EditorScene : public UIScene
 		void toJson();
 		void updateState(State newState);
 		void generateGrid();
+		void updateCategoryHelp();
+		void updateMousePosition(float x, float y);
+		void updateDrawingPreview();
 		EditableObject* editableUnderMouse();
 		void checkResizing();
 

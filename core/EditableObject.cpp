@@ -16,6 +16,7 @@
 #include "Window.h"
 #include "Sprite.h"
 #include "TextSprite.h"
+#include "EditorStyle.h"
 
 using namespace agp;
 
@@ -129,24 +130,41 @@ nlohmann::ordered_json EditableObject::toJson()
 
 void EditableObject::init()
 {
-	Color col = distinctColor(_category);
-	setColor(col.adjustAlpha(160));
+	Color col = editorStyle::categoryColor(_category);
+	setColor(col.adjustAlpha(ALPHA_NORMAL));
+	setBorderThickness(NORMAL_BORDER_THICKNESS);
 	setBorderColor(col);
 
 	_renderedName = new RenderableObject(
 		_scene,
 		rect(),
-		new TextSprite(_name, "Lucida", col.brighter(), { NAME_MARGIN_X, 0.0f }, { 0, NAME_MAX_HEIGHT },
-			isLine() ? TextSprite::VAlign::BOTTOM : TextSprite::VAlign::CENTER, TextSprite::HAlign::CENTER), 2);
+		new TextSprite(_name, editorStyle::FONT, editorStyle::TEXT, { NAME_MARGIN_X, 0.0f }, { 0, NAME_MAX_HEIGHT },
+			TextSprite::VAlign::BOTTOM, TextSprite::HAlign::CENTER, TextSprite::Style::NORMAL), 2);
 	_renderedName->setAngle(-_rotRect.angle);
 	_renderedName->setVisible(!_name.empty());
 
 	_renderedCategory = new RenderableObject(
 		_scene,
 		rect(),
-		new TextSprite(_categories[_category], "Lucida", col.brighter(), {0.0f, CATEGORY_MARGIN_Y}, { 0, CATEGORY_MAX_HEIGHT },
-			TextSprite::VAlign::TOP, TextSprite::HAlign::CENTER, TextSprite::Style::ITALIC), 2);
+		new TextSprite(_categories[_category], editorStyle::FONT, col, {NAME_MARGIN_X, CATEGORY_MARGIN_Y}, { 0, CATEGORY_MAX_HEIGHT },
+			TextSprite::VAlign::TOP, TextSprite::HAlign::CENTER, TextSprite::Style::NORMAL), 2);
 	_renderedCategory->setAngle(-_rotRect.angle);
+	dynamic_cast<TextSprite*>(_renderedName->sprite())->setBackgroundColor(editorStyle::PANEL);
+	dynamic_cast<TextSprite*>(_renderedCategory->sprite())->setBackgroundColor(editorStyle::PANEL);
+	updateLabelLayout();
+}
+
+void EditableObject::updateLabelLayout()
+{
+	// Reserve separate top/bottom bands, including on small one-cell objects.
+	auto category = dynamic_cast<TextSprite*>(_renderedCategory->sprite());
+	auto name = dynamic_cast<TextSprite*>(_renderedName->sprite());
+	PointF margin{ std::min(float(NAME_MARGIN_X), rect().size.x * 0.05f),
+		std::min(float(CATEGORY_MARGIN_Y), rect().size.y * 0.08f) };
+	category->setMargin(margin);
+	name->setMargin(margin);
+	category->setMaxSize({ 0, std::min(float(CATEGORY_MAX_HEIGHT), rect().size.y * 0.28f) });
+	name->setMaxSize({ 0, std::min(float(NAME_MAX_HEIGHT), rect().size.y * 0.38f) });
 }
 
 void EditableObject::kill()
@@ -164,13 +182,13 @@ void EditableObject::setCategory(int newCategory)
 { 
 	_category = newCategory; 
 
-	Color col = distinctColor(_category);
-	setColor(col.adjustAlpha(ALPHA_NORMAL));
+	Color col = editorStyle::categoryColor(_category);
+	setColor(col.adjustAlpha(_selected ? ALPHA_SELECTED : (_focused ? ALPHA_FOCUSED : ALPHA_NORMAL)));
 	setBorderColor(col);
 
 	dynamic_cast<TextSprite*>(_renderedCategory->sprite())->setText(_categories[_category]);
-	dynamic_cast<TextSprite*>(_renderedCategory->sprite())->setColor(col.brighter());
-	dynamic_cast<TextSprite*>(_renderedName->sprite())->setColor(col.brighter());
+	dynamic_cast<TextSprite*>(_renderedCategory->sprite())->setColor(col);
+	dynamic_cast<TextSprite*>(_renderedName->sprite())->setColor(editorStyle::TEXT);
 }
 
 void EditableObject::setName(const std::string& name)
@@ -182,27 +200,19 @@ void EditableObject::setName(const std::string& name)
 
 void EditableObject::setFocused(bool on)
 {
+	_focused = on;
 	if (_selected)
 		return;
-
-	if (on)
-		_color.a = ALPHA_FOCUSED;
-	else
-		_color.a = ALPHA_NORMAL;
-
-	setBorderThickness(on ? SELECTED_BORDER_THICKNESS : 0);
+	_color.a = on ? ALPHA_FOCUSED : ALPHA_NORMAL;
+	setBorderThickness(on ? FOCUSED_BORDER_THICKNESS : NORMAL_BORDER_THICKNESS);
 }
 
 void EditableObject::setSelected(bool on)
 {
-	if (on)
-		_color.a = ALPHA_SELECTED;
-	else
-		_color.a = ALPHA_NORMAL;
-
-	setBorderThickness(on ? SELECTED_BORDER_THICKNESS : 0);
-
 	_selected = on;
+	_color.a = on ? ALPHA_SELECTED : (_focused ? ALPHA_FOCUSED : ALPHA_NORMAL);
+	setBorderThickness(on ? SELECTED_BORDER_THICKNESS :
+		(_focused ? FOCUSED_BORDER_THICKNESS : NORMAL_BORDER_THICKNESS));
 }
 
 bool EditableObject::contains(const Vec2Df& p)
@@ -269,6 +279,7 @@ void EditableObject::setSize(const PointF& newSize)
 	RenderableObject::setSize(newSize);
 	_renderedName->setRect(rect());
 	_renderedCategory->setRect(rect());
+	updateLabelLayout();
 
 	_rotRect.center = rect().center();
 	_rotRect.size = rect().size;
@@ -387,39 +398,44 @@ void EditableObject::draw(SDL_Renderer* renderer, Transform camera)
 	if (!_visible)
 		return;
 
-	if (_rotRect.angle == 0 && _multiline.empty())
-	{
-		RenderableObject::draw(renderer, camera);
-		return;
-	}
-
 	if (_multiline.empty())
 	{
-		RotatedRectF rotRectRadians = _rotRect;
-		rotRectRadians.angle = deg2rad(_rotRect.angle);
-		std::array < PointF, 4> drawVertices = rotRectRadians.vertices();
-		for (int i = 0; i < 4; i++)
-			drawVertices[i] = camera(drawVertices[i]);
+		RotatedRectF rotated = _rotRect;
+		rotated.angle = deg2rad(rotated.angle);
+		auto vertices = rotated.vertices();
+		for (auto& vertex : vertices)
+			vertex = camera(vertex);
+		if ((vertices[1] - vertices[0]).mag() == 0 || (vertices[2] - vertices[1]).mag() == 0)
+			return;
 
-		FillOBB(renderer, drawVertices, _color);
+		FillOBB(renderer, vertices, _color);
+		// Opaque dark keyline + bright category stroke work on light and dark scenes.
+		DrawThickOBB(renderer, vertices, _borderThickness + (_selected ? 8 : 4), editorStyle::PANEL);
+		if (_selected)
+			DrawThickOBB(renderer, vertices, _borderThickness + 4, editorStyle::TEXT);
+		DrawThickOBB(renderer, vertices, _borderThickness, _borderColor);
 
-		if (_borderThickness)
-			DrawThickOBB(renderer, drawVertices, _borderThickness, _borderColor);
-		else
-			DrawOBB(renderer, drawVertices, _borderColor);
+		if (_selected)
+			for (const auto& vertex : vertices)
+			{
+				FillOBB(renderer, RectF(vertex.x - 4, vertex.y - 4, 8, 8).vertices(), editorStyle::PANEL);
+				FillOBB(renderer, RectF(vertex.x - 2, vertex.y - 2, 4, 4).vertices(), editorStyle::TEXT);
+			}
 	}
-	else if(_multiline.size() > 1)
+	else
 	{
-		for (int i = 0; i < _multiline.size() - 1; i++)
+		for (size_t i = 1; i < _multiline.size(); ++i)
 		{
-			LineF line = LineF(_multiline[i], _multiline[i + 1]);
-			RotatedRectF obb(line, LINE_THICKNESS, _scene->rect().yUp);
-
-			std::array < PointF, 4> drawVertices = obb.vertices();
-			for (int i = 0; i < 4; i++)
-				drawVertices[i] = camera(drawVertices[i]);
-
-			FillOBB(renderer, drawVertices, _borderThickness ? _color.adjustAlpha(255) : _color);
+			PointF start = camera(_multiline[i - 1]), end = camera(_multiline[i]);
+			PointF delta = end - start;
+			float length = delta.mag();
+			if (length <= 0)
+				continue;
+			float width = _borderThickness + 1;
+			DrawThickLine(renderer, start, end, width + (_selected ? 8 : 4), editorStyle::PANEL);
+			if (_selected)
+				DrawThickLine(renderer, start, end, width + 4, editorStyle::TEXT);
+			DrawThickLine(renderer, start, end, width, _borderColor);
 		}
 	}
 }

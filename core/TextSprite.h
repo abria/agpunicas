@@ -30,6 +30,7 @@ class agp::TextSprite : public Sprite
 
 		std::string _text;
 		Color _fontColor;
+		Color _backgroundColor = { 0,0,0,0 }; // optional plate fitted to the text
 		std::string _fontName;
 		Style _fontStyle;
 		VAlign _vertAlign;
@@ -59,6 +60,8 @@ class agp::TextSprite : public Sprite
 		void setText(const std::string& newText);
 		void setColor(const Color& newColor);
 		void setMargin(const PointF& newMargin);
+		void setMaxSize(const PointF& size) { _maxSize = size; }
+		void setBackgroundColor(const Color& color) { _backgroundColor = color; }
 
 		// extends render method (+regenerate texture if needed, +align)
 		virtual void render(

@@ -31,33 +31,39 @@ class agp::EditorUI : public UIScene
 		static constexpr float CURSOR_TEXT_HEIGHT = 0.04f;
 		static constexpr float CURSOR_TEXT_MARGIN_X = 0.02f;
 		static constexpr float CURSOR_TEXT_MARGIN_Y = 0.02f;
-		static constexpr float HELPBOX_TEXT_HEIGHT = 0.06f;
-		static constexpr float HELPBOX_MARGIN_X = 0.01f;
-		static constexpr float HELPBOX_MARGIN_Y = 0.01f;
-
 		static constexpr int HELPBOX_MAX_ROWS = 3;
-		static constexpr int HELPBOX_ALPHA = 128;
 
 		RenderableObject* _cursorCoords;
-		RenderableObject* _helpboxRows[HELPBOX_MAX_ROWS];	// displayed on bottom
+		RenderableObject* _helpboxPanel;
+		RenderableObject* _helpboxAccent;
+		std::vector<RenderableObject*> _helpboxLines;
+		std::vector<Color> _helpboxLineColors;
+		std::string _helpboxText[HELPBOX_MAX_ROWS];
+		Color _helpboxColors[HELPBOX_MAX_ROWS];
 		SDL_Cursor* _cursor;
-		bool _showing;
-		bool _hiding;
 		bool _editing;
 		bool _autohide;
+		bool _helpboxDirty;
+		bool _helpboxHovered;
+		float _helpboxOpacity;
+		float _helpboxHideDelay;
+
+		void layoutHelpbox();
+		void applyHelpboxOpacity();
 
 	public:
 
 		EditorUI();
 		virtual ~EditorUI();
 
-		void setEditing(bool active) { _editing = active; }
+		void setEditing(bool active) { _editing = active; if (active) _helpboxHideDelay = 2; }
 		void setCursor(SDL_SystemCursor cursor);
 		void setCursorText(const std::string& text, const Color& textColor = { 0,0,0,0 });
 		void setHelpboxText(int row, const std::string& text, const Color& textColor = { 0,0,0,0 });
 		void clearHelpboxText();
 		void toggleAutohide();
 
+		virtual void render() override;
 		virtual void update(float timeToSimulate) override;
 
 		virtual void event(SDL_Event& evt) override;

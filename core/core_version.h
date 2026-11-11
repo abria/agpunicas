@@ -15,7 +15,7 @@ namespace agp
 	{
 		// Version components
 		constexpr int VERSION_MAJOR = 3;
-		constexpr int VERSION_MINOR = 8;
+		constexpr int VERSION_MINOR = 9;
 		constexpr int VERSION_PATCH = 0;
 
 		// Function to retrieve the version string

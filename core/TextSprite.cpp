@@ -72,6 +72,9 @@ void TextSprite::render(
 {
 #ifdef WITH_TTF
 
+    if (_text.empty())
+        return;
+
     // re-generate texture only when needed (text/color change)
     // since it is an expensive operation
     if (_regenerateTexture)
@@ -79,6 +82,8 @@ void TextSprite::render(
         if (_spritesheet)
             SDL_DestroyTexture(_spritesheet);
         _spritesheet = generateText(_text, renderer, Fonts::instance()->font(_fontName), _fontColor, int(_fontStyle));
+        if (!_spritesheet)
+            return;
         float w, h;
 		SDL_GetTextureSize(_spritesheet, &w, &h);
 		_rect.size.x = int(w);
@@ -148,6 +153,9 @@ void TextSprite::render(
     SDL_FRect srcRect = _rect.toSDLf();
     SDL_FRect drawRect_sdl = RectF(camera(correctedDrawRectAR.tl()), camera(correctedDrawRectAR.br())).toSDLf();
 
+    if (drawRect_sdl.w <= 0 || drawRect_sdl.h <= 0)
+        return;
+
     // calculate the rotation center relative to transformed drawRect
     PointF drawRectCenter = correctedDrawRect.center();
     PointF drawRectCenterScreen = camera(drawRectCenter);
@@ -155,6 +163,25 @@ void TextSprite::render(
     rotationCenter.x = drawRectCenterScreen.x - drawRect_sdl.x;
     rotationCenter.y = drawRectCenterScreen.y - drawRect_sdl.y;
 
+    if (_backgroundColor.a)
+    {
+        // Keep the plate inside the assigned rectangle, even at very small zooms.
+        SDL_FRect bounds = RectF(camera(drawRect.tl()), camera(drawRect.br())).toSDLf();
+        float paddingX = std::max(0.0f, std::min(3.0f, std::min(drawRect_sdl.x - bounds.x,
+            bounds.x + bounds.w - drawRect_sdl.x - drawRect_sdl.w)));
+        float paddingY = std::max(0.0f, std::min(3.0f, std::min(drawRect_sdl.y - bounds.y,
+            bounds.y + bounds.h - drawRect_sdl.y - drawRect_sdl.h)));
+        auto corners = RectF(drawRect_sdl.x - paddingX, drawRect_sdl.y - paddingY,
+            drawRect_sdl.w + 2 * paddingX, drawRect_sdl.h + 2 * paddingY).vertices();
+        const float radians = deg2rad(angle);
+        const float c = std::cos(radians), s = std::sin(radians);
+        for (auto& point : corners)
+        {
+            PointF offset = point - drawRectCenterScreen;
+            point = drawRectCenterScreen + PointF{ c * offset.x - s * offset.y, s * offset.x + c * offset.y };
+        }
+        FillOBB(renderer, corners, _backgroundColor);
+    }
     SDL_RenderTextureRotated(renderer, _spritesheet, &srcRect, &drawRect_sdl, angle, &rotationCenter, SDL_FLIP_NONE);
 #else
     if (_regenerateTexture)

@@ -77,6 +77,9 @@ class agp::CollidableObject : public MovableObject
 			Vec2Df& point, Vec2Df& normal, float& time) const;
 		virtual bool overlap(const RectF& body, Direction& axis, float& depth) const;
 
+		// Reuse shape-specific overlap tests; tolerance bridges faces, not corners.
+		bool touches(const RectF& body, float tolerance, Direction& side) const;
+
 		// extends state queries (+CCD off)
 		virtual bool grounded() const override;
 		virtual bool falling() const override;

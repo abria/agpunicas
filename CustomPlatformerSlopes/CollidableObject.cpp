@@ -133,6 +133,28 @@ bool CollidableObject::overlap(const RectF& body, Direction& axis, float& depth)
 	return checkCollisionAABB(body, sceneCollider(), axis, depth);
 }
 
+bool CollidableObject::touches(const RectF& body, float tolerance, Direction& side) const
+{
+	float depth;
+	if (overlap(body, side, depth))
+		return true;
+
+	// Find a candidate side without biasing the minimum-overlap axis.
+	RectF probe = body;
+	probe.adjust(-tolerance, -tolerance, tolerance, tolerance);
+	if (!overlap(probe, side, depth))
+		return false;
+
+	// Validate that face alone: the other axis must really overlap.
+	probe = body;
+	if (side == Direction::LEFT || side == Direction::RIGHT)
+		probe.adjust(-tolerance, 0, tolerance, 0);
+	else if (side == Direction::UP || side == Direction::DOWN)
+		probe.adjust(0, -tolerance, 0, tolerance);
+	Direction ignored;
+	return overlap(probe, ignored, depth);
+}
+
 RectF CollidableObject::sceneCollider() const
 {
 	return _collider + rect().pos;
@@ -152,7 +174,7 @@ void CollidableObject::notifyContact(CollidableObject* with, Contact contact, Di
 
 void CollidableObject::detectContacts()
 {
-	// CCD already recorded crossed triggers; also find contacts at the final position.
+	// The expanded probe only finds candidates; touches() checks the actual faces.
 	RectF probe = sceneCollider();
 	probe.adjust(-_contactTolerance, -_contactTolerance, _contactTolerance, _contactTolerance);
 	if (_collidable && !_killed)
@@ -160,10 +182,9 @@ void CollidableObject::detectContacts()
 		{
 			auto other = item->to<CollidableObject*>();
 			Direction side;
-			float depth;
 			if (other && other != this && !other->_killed && other->collidable() && collidableWith(other) && other->collidableWith(this)
-				&& other->overlap(probe, side, depth))
-				_contacts[other] = side;
+				&& other->touches(sceneCollider(), _contactTolerance, side))
+				_contacts.emplace(other, side); // preserve contacts already resolved this step
 		}
 
 	// Present now: BEGIN if absent before, otherwise STAY.

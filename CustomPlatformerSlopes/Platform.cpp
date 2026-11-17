@@ -27,7 +27,7 @@ bool Platform::collidableWith(CollidableObject* obj)
 	// The CCD broad phase temporarily moves the body forward. Use its position
 	// at the start of the step so a downward crossing is still accepted.
 	return body && body->vel().y >= 0 &&
-		body->movementStartCollider().bottom() <= sceneCollider().top() + 0.001f;
+		body->motion().start.bottom() <= sceneCollider().top() + 0.001f;
 }
 
 bool Platform::sweep(const RectF& body, const Vec2Df& movement,

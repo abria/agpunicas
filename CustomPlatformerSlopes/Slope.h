@@ -39,13 +39,14 @@ class agp::Slope : public StaticObject
 		// A body's plan for one step; ordinary collisions run between prepare and finish.
 		struct Motion
 		{
+			RectF start; // initial scene collider, also used by one-way platforms
 			Slope* support = nullptr;
 			float xFactor = 1;
 			bool sliding = false;
 			float velocityY = 0, bottom = 0; // planned vertical speed and final foot height
 
 			// Adjust scene collider and velocity; return confirmed support, if any.
-			Slope* finishMovement(RectF& body, Vec2Df& velocity, const RectF& start, bool ceiling) const;
+			Slope* finishMovement(RectF& body, Vec2Df& velocity, bool ceiling) const;
 		};
 
 		Slope(Scene* scene, const LineF& line, int layer = 1);

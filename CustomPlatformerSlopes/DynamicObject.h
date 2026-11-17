@@ -28,9 +28,10 @@ class agp::DynamicObject : public CollidableObject
 
 		Slope::Motion _slopeMotion; // per-body plan, recomputed at each movement step
 
-		// Plan the slope motion, then apply its result after ordinary collisions.
-		virtual void prepareMovement(float dt) override;
-		virtual void finishMovement(float dt) override;
+		// Extend ordinary collision movement with slope planning and finalization.
+		virtual void resolveMovement(float dt) override;
+		void prepareMovement(float dt);
+		void finishMovement(float dt);
 
 	public:
 
@@ -41,6 +42,7 @@ class agp::DynamicObject : public CollidableObject
 		virtual bool collidableWith(CollidableObject* obj) override;
 
 		Direction facingDir() const { return _facingDir; }
+		const Slope::Motion& motion() const { return _slopeMotion; }
 
 		// overrides MovableObject's move (+facing dir)
 		void move(Direction xDir) override;

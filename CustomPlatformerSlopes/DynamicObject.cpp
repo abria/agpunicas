@@ -12,7 +12,8 @@
 using namespace agp;
 
 DynamicObject::DynamicObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer) :
-	CollidableObject(scene, rect, sprite, layer)
+	CollidableObject(scene, rect, sprite, layer),
+	_slopeMotion{sceneCollider()}
 {
 	// Dynamic objects handle contacts with each other through game logic.
 	_compenetrable = true;
@@ -26,6 +27,13 @@ void DynamicObject::move(Direction xDir)
 		_facingDir = xDir;
 
 	CollidableObject::move(xDir);
+}
+
+void DynamicObject::resolveMovement(float dt)
+{
+	prepareMovement(dt);
+	CollidableObject::resolveMovement(dt);
+	finishMovement(dt);
 }
 
 void DynamicObject::prepareMovement(float dt)
@@ -43,7 +51,7 @@ void DynamicObject::finishMovement(float dt)
 
 	// Let the slope finalize the collider after walls, ceilings and platforms.
 	RectF body = sceneCollider();
-	Slope* support = _slopeMotion.finishMovement(body, _vel, movementStartCollider(), ceiling);
+	Slope* support = _slopeMotion.finishMovement(body, _vel, ceiling);
 	if (body.pos != sceneCollider().pos)
 		setPos(pos() + (body.pos - sceneCollider().pos));
 	if (support)

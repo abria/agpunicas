@@ -25,7 +25,6 @@ CollidableObject::CollidableObject(Scene* scene, const RectF& rect, Sprite* spri
 	MovableObject(scene, rect, sprite, layer)
 {
 	defaultCollider();
-	_movementStartCollider = sceneCollider();
 
 	// default collision: non compenetration
 	_compenetrable = false;
@@ -100,11 +99,16 @@ void CollidableObject::update(float dt)
 		_contactsPrev = _contacts;
 		_contacts.clear();
 	}
-	// undo the free move before constraining it (e.g. to a slope surface)
-	// prepareMovement() changes the velocity used by BOTH collision methods
+	// undo the free move before resolving movement with collisions
 	setPos(pos() - _vel * dt);
-	_movementStartCollider = sceneCollider();
-	prepareMovement(dt);
+	resolveMovement(dt);
+	// notify contacts after movement and all contact corrections are complete
+	if (_detectsContacts)
+		detectContacts();
+}
+
+void CollidableObject::resolveMovement(float dt)
+{
 	if (_CCD)
 	{
 		resolveCollisionsCCD(dt);
@@ -115,11 +119,6 @@ void CollidableObject::update(float dt)
 		setPos(pos() + _vel * dt);
 		resolveCollisionsAABB();
 	}
-	// finalize position, restore stored velocity and record any slope support
-	finishMovement(dt);
-	// notify contacts only after finishMovement() has registered support
-	if (_detectsContacts)
-		detectContacts();
 }
 
 bool CollidableObject::sweep(const RectF& body, const Vec2Df& movement,
@@ -234,7 +233,7 @@ void CollidableObject::resolveCollisionsCCD(float dt)
 	for (auto& obj : sortedByContactTime)
 		if (!obj.first->compenetrable() && obj.first->sweep(sceneCollider(), vel() * dt, cp, cn, ct))
 		{
-			// Do not clamp slope-scaled velocity before finishMovement() restores it.
+			// Apply the collision response without clipping the planned velocity.
 			_vel -= cn * cn.dot(_vel * (1 - std::max(0.0f, std::min(ct, 1.0f))));
 			if (std::abs(_vel.y) < _yVelMin) _vel.y = 0;
 			if (_detectsContacts) _contacts[obj.first] = inverse(normal2dir(cn));

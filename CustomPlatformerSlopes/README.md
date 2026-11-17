@@ -66,13 +66,20 @@ l'oggetto dalla pendenza; pareti e soffitti restano solidi.
 
 Il passo si legge in tre fasi:
 
-1. `Slope::prepareMovement()` cerca l'appoggio iniziale e quello di arrivo,
-   adatta la velocità e restituisce un piano `Slope::Motion`.
-2. `CollidableObject` risolve le collisioni con muri, soffitti e piattaforme,
-   con CCD oppure in modo discreto.
+1. `Slope::prepareMovement()` salva il collider iniziale, cerca l'appoggio
+   iniziale e quello di arrivo, adatta la velocità e restituisce un piano
+   `Slope::Motion`.
+2. `CollidableObject::resolveMovement()` risolve il movimento con collisioni
+   contro muri, soffitti e piattaforme, con CCD oppure in modo discreto.
 3. `Motion::finishMovement()` verifica l'appoggio, rimuove il fattore orizzontale
    e riallinea i piedi alla x raggiunta. `DynamicObject` applica la posizione
    con `setPos()` e registra il supporto prima delle notifiche BEGIN/STAY/END.
+
+`DynamicObject::resolveMovement()` coordina queste tre fasi tramite i propri
+metodi non virtuali `prepareMovement()` e `finishMovement()`, chiamando tra
+i due l'implementazione di `CollidableObject::resolveMovement()`.
+`CollidableObject::update()` notifica i contatti solo dopo il ritorno da
+`resolveMovement()`, quando anche l'appoggio sulla rampa è stato registrato.
 
 Ogni corpo conserva il proprio `_slopeMotion`: la rampa è condivisa, il piano
 di movimento no. `Slope` calcola le correzioni senza accedere agli attributi
@@ -96,8 +103,12 @@ non nulla e calcola il relativo ingombro.
 nemici e power-up possono attraversarla dai lati e dal basso, mentre vi
 atterrano dall'alto. Il filtro usa il collider all'inizio del passo fisico:
 un salto che porta sopra la piattaforma soltanto la testa non aggancia il corpo.
-`CollidableObject` salva questo collider prima di `prepareMovement()`: le
-sottoclassi possono ridefinire l'hook senza dover gestire il salvataggio.
+`Slope::prepareMovement()` salva questo collider in `Motion::start`, anche
+durante un salto o in assenza di rampe. `Platform` lo legge tramite il getter
+di sola lettura `DynamicObject::motion()`. Lo stesso dato permette a
+`Motion::finishMovement()` di annullare una salita bloccata da un soffitto.
+Ogni dinamico conserva il proprio piano; le sottoclassi che ridefiniscono
+`resolveMovement()` devono richiamare l'implementazione di `DynamicObject`.
 I test della forma rispondono solo verso l'alto, anche alle estremità.
 `Mario` eredita il comportamento comune senza un'eccezione dedicata.
 

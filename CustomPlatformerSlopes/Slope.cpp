@@ -86,12 +86,12 @@ float Slope::slideVelocity(float flatSpeed) const
 Slope::Motion Slope::prepareMovement(CollidableObject& body, Vec2Df& velocity,
 	bool released, float minSpeed, float dt)
 {
-	Motion motion;
+	Motion motion{body.sceneCollider()}; // keep the starting collider even without slope support
 	if (!body.collidable() || velocity.y < 0 || dt <= 0)
 		return motion; // jumping must detach from the surface
 
 	const float contactTolerance = 0.01f; // scene units
-	RectF curRect = body.sceneCollider();
+	const RectF& curRect = motion.start;
 	std::vector<Slope*> slopes;
 	Slope* curSlope = nullptr;
 	bool restingInValley = false;
@@ -176,7 +176,7 @@ Slope::Motion Slope::prepareMovement(CollidableObject& body, Vec2Df& velocity,
 	return motion;
 }
 
-Slope* Slope::Motion::finishMovement(RectF& body, Vec2Df& velocity, const RectF& start, bool ceiling) const
+Slope* Slope::Motion::finishMovement(RectF& body, Vec2Df& velocity, bool ceiling) const
 {
 	// Remove temporary slope speed, preserving any reduction caused by a wall.
 	velocity.x = sliding ? 0 : velocity.x / xFactor;

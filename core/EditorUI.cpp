@@ -104,9 +104,6 @@ EditorUI::EditorUI()
 EditorUI::~EditorUI()
 {
     SDL_DestroyCursor(_cursor);
-    _cursorCoords->setSprite(nullptr, true);
-    for (auto line : _helpboxLines)
-        line->setSprite(nullptr, true);
 }
 
 void EditorUI::setCursor(SDL_SystemCursor cursor)

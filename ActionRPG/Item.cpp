@@ -17,6 +17,14 @@ using namespace agp;
 Item::Item(Type category)
 {
 	_category = category;
-	_icon = SpriteFactory::instance()->get(strprintf("inventory_icon_%d", int(_category)));
-	_label = SpriteFactory::instance()->get(strprintf("inventory_label_%d", int(_category)));
+}
+
+Sprite* Item::createIcon() const
+{
+	return SpriteFactory::instance()->get(strprintf("inventory_icon_%d", int(_category)));
+}
+
+Sprite* Item::createLabel() const
+{
+	return SpriteFactory::instance()->get(strprintf("inventory_label_%d", int(_category)));
 }

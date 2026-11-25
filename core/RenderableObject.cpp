@@ -49,6 +49,11 @@ RenderableObject::RenderableObject(Scene* scene, const RectF& rect, Sprite* spri
 	_flashingFreq = 0;
 }
 
+RenderableObject::~RenderableObject()
+{
+	delete _sprite;
+}
+
 void RenderableObject::draw(SDL_Renderer* renderer, Transform camera)
 {
 	if (!_visible)
@@ -117,9 +122,11 @@ void RenderableObject::update(float dt)
 
 void RenderableObject::setSprite(Sprite* sprite, bool deallocateSprite, bool resetOnChange)
 { 
+	if (sprite == _sprite)
+		return;
 	if (_sprite)
 	{
-		if (resetOnChange && sprite != _sprite)
+		if (resetOnChange)
 			_sprite->reset();
 		if(deallocateSprite)
 			delete _sprite;

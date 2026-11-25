@@ -59,7 +59,7 @@ HUD::HUD()
 		for (int j = 0; j < 5; j++)
 		{
 			_inventoryIcons[i][j] = new RenderableObject(this, RectI(29 + j * 24, -244 + 50 + i * 24, 16, 16), nullptr, 2);
-			_inventoryIcons[i][j]->setSprite(_inventoryItems[i][j]->icon());
+			_inventoryIcons[i][j]->setSprite(_inventoryItems[i][j]->createIcon());
 		}
 	_currentItemIcon = new RenderableObject(this, RectI(200, -244 + 41, 16, 16), Color(0, 0, 255), 1);
 	_currentItemLabel = new RenderableObject(this, RectI(176, -244+57, 64, 16), Color(0, 0, 255), 1);
@@ -196,9 +196,10 @@ void HUD::moveItemSelection(int dx, int dy)
 	_currentItemIndex.y = std::min(_currentItemIndex.y, 3);
 	_currentItemIndex.y = std::max(_currentItemIndex.y, 0);
 	_selectionIcon->setPos(_inventoryIcons[_currentItemIndex.y][_currentItemIndex.x]->rect().pos - PointF{ 8, 8 });
-	_currentItemIcon->setSprite(_inventoryItems[_currentItemIndex.y][_currentItemIndex.x]->icon());
-	_currentItemLabel->setSprite(_inventoryItems[_currentItemIndex.y][_currentItemIndex.x]->label());
-	_currentHUDItemIcon->setSprite(_inventoryItems[_currentItemIndex.y][_currentItemIndex.x]->icon());
+	Item* item = _inventoryItems[_currentItemIndex.y][_currentItemIndex.x];
+	_currentItemIcon->setSprite(item->createIcon(), true);
+	_currentItemLabel->setSprite(item->createLabel(), true);
+	_currentHUDItemIcon->setSprite(item->createIcon(), true);
 }
 
 void HUD::event(SDL_Event& evt)

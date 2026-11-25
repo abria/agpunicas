@@ -32,14 +32,12 @@ class agp::Item
 	protected:
 
 		Type _category;
-		Sprite* _icon;
-		Sprite* _label;
 
 	public:
 
 		Item(Type category);
 		virtual ~Item() {};	
 
-		Sprite* icon() const { return _icon; }
-		Sprite* label() const { return _label; }
+		Sprite* createIcon() const;
+		Sprite* createLabel() const;
 };

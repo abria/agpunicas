@@ -27,7 +27,7 @@ class agp::RenderableObject : public Object
 	protected:
 
 		Color _color;
-		Sprite* _sprite;
+		Sprite* _sprite; // the object owns its current sprite
 		bool _fit;				// whether the sprite has to fit draw rect or draw rect has to expand to contain the sprite
 		bool _visible;			// if false, does not draw
 		bool _focused;			// if true, fills with _focusColor color
@@ -46,7 +46,9 @@ class agp::RenderableObject : public Object
 
 		RenderableObject(Scene* scene, const RectF& rect, const Color& color, int layer = 0);
 		RenderableObject(Scene* scene, const RectF& rect, Sprite* sprite, int layer = 0, bool fit = true);
-		virtual ~RenderableObject() {}
+		virtual ~RenderableObject();
+		RenderableObject(const RenderableObject&) = delete;
+		RenderableObject& operator=(const RenderableObject&) = delete;
 
 		// getters/setters
 		const Color& color() const { return _color; }
